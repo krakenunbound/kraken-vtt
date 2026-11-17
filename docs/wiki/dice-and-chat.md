@@ -173,5 +173,5 @@ These change only your own screen.
 | `/scaledice` | `[60-160]` | The tray's dice size, in %. | |
 | `/scaleroll` | `[50-250]` | The rolled dice's size on the table, in %. | |
 | `/scaleui`, `/resizeui`, `/zoom` | `[50-200]` | Make everything on this screen bigger or smaller, in % (100 is normal). Kept in this browser. | |
-| `/info`, `/version` | | About Kraken VTT and this table. | |
+| `/info`, `/version` | | About Maelstrom VTT and this table. | |
 | `/reload` | | Reload this screen. | |

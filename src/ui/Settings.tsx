@@ -75,11 +75,11 @@ export function SettingsWindow({ session }: { session: Session }) {
             </button>
             {window.kraken?.openKrakenFolder ? (
               <button type="button" className="settings-button" data-setting="kraken-folder" title="Documents/Kraken VTT: a folder for each kind of thing you add (books, dice packs, dice towers, GM icons, decals, wallpapers), each with a README on what goes in it and how to make one" onClick={() => void window.kraken?.openKrakenFolder?.("")}>
-                Kraken VTT Folder
+                Your Maelstrom folder
               </button>
             ) : null}
             {window.kraken?.openLogs ? (
-              <button type="button" className="settings-button" data-setting="open-logs" title="Kraken's logs: what went wrong in the table server and in this window (the newest three files of each), for a bug report" onClick={() => void window.kraken?.openLogs?.()}>
+              <button type="button" className="settings-button" data-setting="open-logs" title="Maelstrom's logs: what went wrong in the table server and in this window (the newest three files of each), for a bug report" onClick={() => void window.kraken?.openLogs?.()}>
                 Open logs
               </button>
             ) : null}
@@ -181,7 +181,7 @@ export function SettingsWindow({ session }: { session: Session }) {
 
 // The table's theme (the GM's, every screen, live): Kraken's brass, or the sea, the ember, the violet, steel.
 const THEMES = [
-  { id: "", label: "Kraken", accent: "#d2a15a", panel: "#171a20" },
+  { id: "", label: "Maelstrom", accent: "#d2a15a", panel: "#171a20" },
   { id: "abyss", label: "Abyss", accent: "#4fd1c5", panel: "#0f1c23" },
   { id: "ember", label: "Ember", accent: "#f08a3a", panel: "#1c1310" },
   { id: "arcane", label: "Arcane", accent: "#b58cf5", panel: "#17121f" },
@@ -361,7 +361,7 @@ export function TableDecal({ session }: { session: Session }) {
   return url ? <img key={id} className="emblem decal" src={url} alt="" draggable={false} /> : <Emblem />;
 }
 
-const KRAKEN: DecalItem = { id: "kraken", name: "Kraken", group: "Kraken" };
+const KRAKEN: DecalItem = { id: "kraken", name: "Kraken", group: "Maelstrom" };
 const cleanError = (error: unknown) => (error instanceof Error ? error.message.replace(/^Error invoking remote method '[^']+': (Error: )?/, "") : "Could not add that picture.");
 
 // The game this campaign is played with (Kraken's own pictures come in a set for each).
@@ -413,13 +413,13 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
   }, [session.decalList, kind]);
 
   const all = useMemo(
-    () => [...(tower ? TOWER_LOOKS.map((look): DecalItem => ({ id: look.id, name: look.name, group: "Kraken" })) : wallpaper || gmIcon ? [] : [KRAKEN]), ...(items ?? [])],
+    () => [...(tower ? TOWER_LOOKS.map((look): DecalItem => ({ id: look.id, name: look.name, group: "Maelstrom" })) : wallpaper || gmIcon ? [] : [KRAKEN]), ...(items ?? [])],
     [items, wallpaper, gmIcon, tower],
   );
   // A chip for each set: this campaign's game first, then Kraken's, then the rest.
   const sets = useMemo(() => {
     const names = [...new Set(all.map((item) => item.ruleset ?? item.group))];
-    return names.sort((a, b) => Number(b === ruleset) - Number(a === ruleset) || Number(b === "Kraken") - Number(a === "Kraken"));
+    return names.sort((a, b) => Number(b === ruleset) - Number(a === ruleset) || Number(b === "Maelstrom") - Number(a === "Maelstrom"));
   }, [all, ruleset]);
   const shown = useMemo(() => {
     const wanted = search.trim().toLowerCase();
@@ -512,7 +512,7 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
               </span>
             )}
             <span className="decal-name">{item.name}</span>
-            {group === "" && item.group !== "Kraken" && item.group !== item.name ? <span className="decal-group">{item.group}</span> : null}
+            {group === "" && item.group !== "Maelstrom" && item.group !== item.name ? <span className="decal-group">{item.group}</span> : null}
           </button>
         ))}
         {items === null ? <p className="hint">Gathering pictures…</p> : null}
@@ -521,7 +521,7 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
       <div className="decal-search">
         <input type="search" placeholder={wallpaper ? "Search wallpapers" : gmIcon ? "Search icons" : tower ? "Search towers" : "Search decals"} aria-label="Search" value={search} onChange={(event) => setSearch(event.target.value)} />
         {kraken ? (
-          <button type="button" className="ghost" title="Open the folder Kraken keeps these in" onClick={() => void kraken.openDecalFolder(kind)}>
+          <button type="button" className="ghost" title="Open the folder Maelstrom keeps these in" onClick={() => void kraken.openDecalFolder(kind)}>
             Assets folder
           </button>
         ) : null}

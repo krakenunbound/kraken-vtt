@@ -1,4 +1,5 @@
 import { ShipsWindow } from "../ships/ShipsWindow";
+import { BRAND } from "../../shared/brand.mjs";
 import { SessionLogWindow } from "../notes/SessionLog";
 import { DelveWindow, OraclesWindow } from "../ironsworn/IronswornWindows";
 import { Fragment, lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
@@ -632,7 +633,7 @@ export function Desktop({
     <div className="shell desktop-shell" data-session={session.role}>
       <header className="menubar">
         <div className="brand">
-          <Mark /> Kraken <span className="brand-version" title="Alpha test version">{__KRAKEN_VERSION__}</span>
+          <Mark /> {BRAND.short} <span className="brand-version" title="Alpha test version">{__KRAKEN_VERSION__}</span>
         </div>
         <div ref={stripRef} className={portraits.length > 3 ? "portrait-strip compact" : "portrait-strip"} aria-label={gm ? "The party" : "Your characters"}>
           {portraits.map((entry) => {

@@ -65,7 +65,7 @@ A token's menu shows its senses, read from its character's senses line, or from 
 
 ## Fog of war
 
-What each player has seen of a map stays dimly shown after their tokens move on. Kraken's host keeps it, per player and map, saved with the campaign, so it is there on any browser they join from.
+What each player has seen of a map stays dimly shown after their tokens move on. Maelstrom's host keeps it, per player and map, saved with the campaign, so it is there on any browser they join from.
 
 - **Scene > Reset explored** forgets it for one player or everyone.
 - The **eye** in the image window's corner (player vision preview) shows it.

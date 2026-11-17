@@ -61,7 +61,7 @@ export function AssistantWindow() {
     end.current?.scrollIntoView({ block: "end" });
   }, [log, busy]);
 
-  if (!api) return <p className="assistant-empty">The assistant runs in the GM's Kraken app.</p>;
+  if (!api) return <p className="assistant-empty">The assistant runs in the GM's Maelstrom app.</p>;
 
   const send = async (said = text) => {
     if (!said.trim() || busy) return;

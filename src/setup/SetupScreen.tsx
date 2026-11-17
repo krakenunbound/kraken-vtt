@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { BRAND } from "../../shared/brand.mjs";
 import { emblemKey, RulesetEmblem } from "./RulesetEmblem";
 import { UpdateNotice } from "./UpdateNotice";
 import { CampaignMenu } from "./CampaignMenu";
@@ -122,8 +123,8 @@ const REPO = "https://github.com/krakenunbound/kraken-vtt";
 const HELP_LINKS = [
   { label: "Quickstart guide", href: `${WIKI}quickstart.html`, title: "From a new campaign to the first fight, in ten steps", icon: "play", tone: "sea" },
   { label: "Tutorials", href: `${WIKI}tutorials.html`, title: "Short walkthroughs: revealing monsters, running a fight, range, languages, treasure, group saves", icon: "levelup", tone: "violet" },
-  { label: "Wiki", href: WIKI, title: "Every part of Kraken, for GMs and players", icon: "book", tone: "ember" },
-  { label: "Game guides", href: `${WIKI}games.html`, title: "The games Kraken plays, and their sheets and rules", icon: "d20", tone: "sea" },
+  { label: "Wiki", href: WIKI, title: "Every part of Maelstrom, for GMs and players", icon: "book", tone: "ember" },
+  { label: "Game guides", href: `${WIKI}games.html`, title: "The games Maelstrom plays, and their sheets and rules", icon: "d20", tone: "sea" },
   { label: "Release notes", href: `${REPO}/releases`, title: "What each version brought, read here", icon: "bell", tone: "violet", notes: true },
   { label: "Report a bug", href: `${REPO}/issues/new`, title: "Tell us what went wrong (a GitHub account is needed)", icon: "warning", tone: "ember" },
   { label: "Community", href: `${REPO}/discussions`, title: "Questions, ideas and tables looking for players", icon: "players", tone: "sea" },
@@ -316,7 +317,7 @@ export function SetupScreen({
     const name = String(data.get("new-campaign") || "");
     setLocalError(null);
     try {
-      if (!window.kraken) throw new Error("Campaigns are stored in the Kraken VTT app.");
+      if (!window.kraken) throw new Error("Campaigns are stored in the Maelstrom VTT app.");
       const campaign = await window.kraken.saveCampaign({ name, ruleset: String(data.get("new-ruleset") || ruleset) });
       setRows((current) => [campaign, ...current.filter((item) => item.id !== campaign.id)]);
       setSelectedId(campaign.id);
@@ -428,7 +429,7 @@ export function SetupScreen({
       <BackdropDots theme={theme} onPick={setTheme} />
       <header className="setup-bar">
         <div className="brand">
-          <Mark /> Kraken <span className="brand-sub">VTT</span> <span className="brand-version" title="Alpha test version">{__KRAKEN_VERSION__}</span>
+          <Mark /> {BRAND.short} <span className="brand-sub">{BRAND.sub}</span> <span className="brand-version" title="Alpha test version">{__KRAKEN_VERSION__}</span>
         </div>
         {inBrowser || mode === "home" ? null : (
           <button type="button" className="join-toggle" data-action="home" onClick={() => setMode("home")}>
@@ -445,7 +446,7 @@ export function SetupScreen({
             <LivingEmblem size={170} />
             <div>
               <p className="hero-kicker">Virtual tabletop</p>
-              <h1 className="hero-title">Kraken</h1>
+              <h1 className="hero-title">{BRAND.short}</h1>
               <p className="hero-tag">Gather your party. The tide is turning.</p>
             </div>
           </div>
@@ -549,7 +550,7 @@ export function SetupScreen({
               <LivingEmblem size={150} />
               <div className="hero-words">
                 <p className="hero-kicker">Virtual tabletop</p>
-                <p className="hero-title">Kraken</p>
+                <p className="hero-title">{BRAND.short}</p>
                 <p className="hero-line">Gather your party. The tide is turning.</p>
               </div>
             </div>
@@ -703,7 +704,7 @@ export function SetupScreen({
                   <p className="hint">On this computer: 127.0.0.1. Players add the port, as http://address:port.</p>
                 </details>
                 <div className="play-row">
-                  {!canHost ? <p className="hint">Hosting runs in the Kraken VTT app.</p> : null}
+                  {!canHost ? <p className="hint">Hosting runs in the Maelstrom VTT app.</p> : null}
                   <button type="submit" className="play-button grand" data-action="play" disabled={busy || !canHost || (!lanOn && !cloudOn)}>
                     {busy ? "Raising the table…" : "Play"}
                   </button>

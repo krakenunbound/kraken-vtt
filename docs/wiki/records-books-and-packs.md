@@ -1,6 +1,6 @@
 # Records, books and packs
 
-Kraken reads books: rulebooks, bestiaries and adventures, with their pictures, maps and links. Its own games' books come with it; your Fantasy Grounds modules are read where they are; and Kraken packs (`.kpack`) make each of your books one file that opens anywhere. This page covers the sidebar, books and modules, packs, sharing with players, and editing records.
+Maelstrom reads books: rulebooks, bestiaries and adventures, with their pictures, maps and links. Its own games' books come with it; your Fantasy Grounds modules are read where they are; and Maelstrom packs (`.kpack`) make each of your books one file that opens anywhere. This page covers the sidebar, books and modules, packs, sharing with players, and editing records.
 
 ![The Player's Handbook open on Dread, beside the Warden's record](../screenshots/books.jpg)
 
@@ -23,8 +23,8 @@ The categories fold away, and the arrow at the bottom collapses the sidebar to i
 
 ## Books and modules
 
-- **Kraken's own games' books** are always on the shelf for their campaigns, and the SRD 5.2.1 books for a D&D 5E campaign.
-- **Your Fantasy Grounds modules:** Kraken reads them in place from your Fantasy Grounds data folder's `modules` folder. Nothing is copied. (Set the `KRAKEN_BOOKS` environment variable to read another folder.) A campaign's game decides which modules fit it.
+- **Maelstrom's own games' books** are always on the shelf for their campaigns, and the SRD 5.2.1 books for a D&D 5E campaign.
+- **Your Fantasy Grounds modules:** Maelstrom reads them in place from your Fantasy Grounds data folder's `modules` folder. Nothing is copied. (Set the `KRAKEN_BOOKS` environment variable to read another folder.) A campaign's game decides which modules fit it.
 - **Make a book active** in **Modules** to bring its records (NPCs, items, encounters, maps, story) into the campaign. A book that is not active is off limits: its pages, pictures, maps and records open only once it is.
 - **Books** lists only the active books, to read. A player sees only the ones you open to them; a players' book can be shared with the players.
 - Every list (Items, NPCs, Spells and the rest) shows every active book's records under the book's name.
@@ -33,15 +33,15 @@ The categories fold away, and the arrow at the bottom collapses the sidebar to i
 
 Links work as in Fantasy Grounds: a page, a picture, or a record the book holds (a creature, spell, item, class, race, feat, table, encounter) opens in its own window. A table shows as a table, an equipment list as its sections, and a web link opens in your browser. Dice a page names are chips you click to roll.
 
-## Kraken packs
+## Maelstrom packs
 
-A Kraken pack (`.kpack`) is one book in one file: a rulebook, a bestiary, an adventure, a map or token pack. It is Kraken's equivalent of a Fantasy Grounds `.mod` or a Foundry compendium pack.
+A Maelstrom pack (`.kpack`) is one book in one file: a rulebook, a bestiary, an adventure, a map or token pack. It is Maelstrom's equivalent of a Fantasy Grounds `.mod` or a Foundry compendium pack.
 
 - **Make packs** in **Modules**, on the **Packs** tab: **Make pack** for one book, or **Make N packs** for all of them. Each pack holds the book's pages, records, maps with walls and doors, and pictures.
 - **Where they go:** `Documents/Kraken VTT/Packs` (on Linux, `~/Documents/Kraken VTT/Packs`). Set `KRAKEN_PACKS` for another folder. **Open folder** on the Packs tab opens it.
-- **On another computer:** install Kraken, create that folder, and copy the `.kpack` files into it. The books open there with no Fantasy Grounds at all.
-- **Pack or module:** Kraken reads the pack in place of the module, unless the module is newer. Choose **Make again** after you change a module.
-- **Kraken's own games' books** are packs too, and come with Kraken. A pack of your own with the same name is read instead.
+- **On another computer:** install Maelstrom, create that folder, and copy the `.kpack` files into it. The books open there with no Fantasy Grounds at all.
+- **Pack or module:** Maelstrom reads the pack in place of the module, unless the module is newer. Choose **Make again** after you change a module.
+- **Maelstrom's own games' books** are packs too, and come with Maelstrom. A pack of your own with the same name is read instead.
 
 **Packs made from your books are yours alone.** Keep them to yourself; never share them.
 
@@ -84,4 +84,4 @@ An item's window has **Identified**, and the name and notes the players see unti
 
 ## Importing from Fantasy Grounds
 
-Kraken reads Fantasy Grounds modules (`.mod`) in place and can import their content into a campaign. Maps from them bring their walls, doors and lights. Kraken also reads Foundry scene bundles' regions (see [Maps and scenes](maps-and-scenes.md#traps-and-regions)).
+Maelstrom reads Fantasy Grounds modules (`.mod`) in place and can import their content into a campaign. Maps from them bring their walls, doors and lights. Maelstrom also reads Foundry scene bundles' regions (see [Maps and scenes](maps-and-scenes.md#traps-and-regions)).

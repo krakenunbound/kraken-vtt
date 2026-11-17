@@ -346,7 +346,7 @@ function Triggers({ session, library }: { session: Session; library: SoundLibrar
       <div className="sound-add">
         <input type="search" placeholder="Search triggers" aria-label="Search triggers" value={search} onChange={(event) => setSearch(event.target.value)} />
         <button type="button" onClick={() => session.soundCommand({ type: "sound-triggers", triggers: "default" })}>
-          Kraken's triggers
+          Maelstrom's triggers
         </button>
       </div>
       {note ? <p className="hint sound-note">{note}</p> : null}
@@ -439,7 +439,7 @@ export function SoundWindow({ session }: { session: Session }) {
         <div className="sound-empty">
           <b>No sounds yet</b>
           <p>
-            Kraken's own set (about 500 sounds: weapons, spells, creatures, monsters, one-shots and ambience loops, in the folders the chat triggers use) is made with your ElevenLabs account: run <code>node scripts/generate-sounds.mjs</code> with your key set as <code>ELEVENLABS_API_KEY</code>. Or add your own sounds below; any folder works.
+            Maelstrom's own set (about 500 sounds: weapons, spells, creatures, monsters, one-shots and ambience loops, in the folders the chat triggers use) is made with your ElevenLabs account: run <code>node scripts/generate-sounds.mjs</code> with your key set as <code>ELEVENLABS_API_KEY</code>. Or add your own sounds below; any folder works.
           </p>
         </div>
       ) : null}

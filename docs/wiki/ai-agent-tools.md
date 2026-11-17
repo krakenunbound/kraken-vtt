@@ -1,6 +1,6 @@
 # AI agent tools
 
-Kraken is built for AI agents from the ground up. Every action a GM can take in the app is also a tool an agent can use, through the MCP server built into the GM's app or the sidebar's Assistant. The agent acts as the GM, through the same checks and the same chat output as your own clicks, so it can do nothing you couldn't, and the table can't tell the difference.
+Maelstrom is built for AI agents from the ground up. Every action a GM can take in the app is also a tool an agent can use, through the MCP server built into the GM's app or the sidebar's Assistant. The agent acts as the GM, through the same checks and the same chat output as your own clicks, so it can do nothing you couldn't, and the table can't tell the difference.
 
 ## Two ways in
 
@@ -10,7 +10,7 @@ The **Assistant** is in the tools along the top of the sidebar (GM only). Ask it
 
 ### An outside agent over MCP
 
-The app starts its MCP server when it opens. An MCP client (such as Claude Code) connects through Kraken's stdio bridge, `electron/agent/mcp-stdio.cjs`; the project's `.mcp.json` registers it for Claude Code when you work from the source. The agent should start with `kraken_status`.
+The app starts its MCP server when it opens. An MCP client (such as Claude Code) connects through Maelstrom's stdio bridge, `electron/agent/mcp-stdio.cjs`; the project's `.mcp.json` registers it for Claude Code when you work from the source. The agent should start with `kraken_status`.
 
 ## What an agent can do
 
@@ -43,7 +43,7 @@ Each game has its own tools too: `kraken_ironsworn`, `kraken_cairn`, `kraken_fat
 
 ## Code mode
 
-`kraken_code` takes one piece of JavaScript that calls several Kraken tools at once (in parallel, or one result feeding the next) and sends back only what the code returns. An agent can read the tracker, the party and a map in one step instead of three. The code runs in a sandbox of its own, with no files or network, and the same checks on every tool it calls. The in-app Assistant does not get it.
+`kraken_code` takes one piece of JavaScript that calls several Maelstrom tools at once (in parallel, or one result feeding the next) and sends back only what the code returns. An agent can read the tracker, the party and a map in one step instead of three. The code runs in a sandbox of its own, with no files or network, and the same checks on every tool it calls. The in-app Assistant does not get it.
 
 ## Not yet a tool
 

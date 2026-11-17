@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { BRAND } from "../../shared/brand.mjs";
 import type { UpdaterState } from "../kraken";
 
 // A new Kraken, on the start screen only (the GM's rule: nothing about
@@ -22,7 +23,7 @@ export function UpdateNotice() {
   return (
     <aside className="update-notice" data-update={state.status} aria-live="polite">
       <div className="update-line">
-        <b>Kraken {state.version} is ready to install</b>
+        <b>{BRAND.short} {state.version} is ready to install</b>
         <span className="update-current">You have {state.current}.</span>
       </div>
       {state.status === "available" ? (
@@ -42,12 +43,12 @@ export function UpdateNotice() {
         </div>
       ) : state.status === "ready" ? (
         <div className="update-actions">
-          <button type="button" className="play-button" data-action="update-install" onClick={() => act(updater.install)} title="Kraken closes, the installer runs (Windows asks to allow it), and the new version opens">
+          <button type="button" className="play-button" data-action="update-install" onClick={() => act(updater.install)} title="Maelstrom closes, the installer runs (Windows asks to allow it), and the new version opens">
             Restart and install
           </button>
         </div>
       ) : (
-        <p className="hint">Installing: Kraken closes and opens again.</p>
+        <p className="hint">Installing: Maelstrom closes and opens again.</p>
       )}
       {notes && state.notes ? <pre className="update-notes">{state.notes}</pre> : null}
       {error ? (

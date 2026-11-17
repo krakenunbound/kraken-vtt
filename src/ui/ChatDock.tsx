@@ -1,4 +1,5 @@
 import { createPortal } from "react-dom";
+import { BRAND } from "../../shared/brand.mjs";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ChatLine, DamageCard, RollResult, Session } from "../session/useSession";
 import { characterDice, diceStore, FATE_SIDES, fateFace, rolling, setThrow, tower as towerDrops, type DiceLook } from "../dice/diceStore";
@@ -1265,7 +1266,7 @@ export function ChatDock({ session }: { session: Session }) {
   return (
     <PopOutWindow
       child={out}
-      title="Chat · Kraken"
+      title={`Chat · ${BRAND.short}`}
       onClosed={() => {
         rememberChat(null);
         setOut(null);

@@ -136,15 +136,15 @@ function pageHtml(page, body, at) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>${escape(page.title)}${page.name === "index.md" ? "" : " · Kraken VTT Wiki"}</title>
+<title>${escape(page.title)}${page.name === "index.md" ? "" : " · Maelstrom VTT Wiki"}</title>
 <meta name="description" content="${escape(plain.slice(page.title.length, page.title.length + 160).trim())}">
 <link rel="stylesheet" href="wiki.css">
 </head>
 <body>
 <a class="skip" href="#content">Skip to the page</a>
 <header class="top">
-  <a class="brand" href="index.html">Kraken <small>VTT wiki · ${escape(version)}</small></a>
-  <nav aria-label="Kraken">
+  <a class="brand" href="index.html">Maelstrom <small>VTT wiki · ${escape(version)}</small></a>
+  <nav aria-label="Maelstrom">
     <a href="quickstart.html">Quickstart</a>
     <a href="${REPO}/releases" rel="noopener">Download</a>
     <a href="${REPO}/issues/new" rel="noopener">Report a bug</a>
@@ -167,7 +167,7 @@ ${body}
     </nav>
   </main>
 </div>
-<footer class="foot">Kraken VTT · <a href="${REPO}" rel="noopener">source on GitHub</a> · PolyForm Shield licence</footer>
+<footer class="foot">Maelstrom VTT · <a href="${REPO}" rel="noopener">source on GitHub</a> · PolyForm Shield licence</footer>
 </body>
 </html>
 `;

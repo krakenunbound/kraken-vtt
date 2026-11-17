@@ -82,20 +82,20 @@ const fileName = (name) => `${String(name).replace(/[<>:"/\\|?*\x00-\x1f]/g, "_"
 function readManifest(file) {
   const found = unzipSync(new Uint8Array(fs.readFileSync(file)), { filter: (entry) => entry.name === MANIFEST });
   const bytes = found[MANIFEST];
-  if (!bytes) throw new Error("That is not a Kraken pack (no kraken-pack.json).");
+  if (!bytes) throw new Error("That is not a Maelstrom pack (no kraken-pack.json).");
   const manifest = JSON.parse(strFromU8(bytes));
-  if (manifest?.format !== FORMAT) throw new Error("That is not a Kraken pack.");
-  if (Number(manifest.version) > VERSION) throw new Error("That pack was made by a newer Kraken: update Kraken to open it.");
+  if (manifest?.format !== FORMAT) throw new Error("That is not a Maelstrom pack.");
+  if (Number(manifest.version) > VERSION) throw new Error("That pack was made by a newer Maelstrom: update Maelstrom to open it.");
   return manifest;
 }
 
 // A pack read whole (its description and records; pictures stay packed).
 function readPack(file) {
   const found = unzipSync(new Uint8Array(fs.readFileSync(file)), { filter: (entry) => entry.name === MANIFEST || entry.name === RECORDS });
-  if (!found[MANIFEST]) throw new Error("That is not a Kraken pack (no kraken-pack.json).");
+  if (!found[MANIFEST]) throw new Error("That is not a Maelstrom pack (no kraken-pack.json).");
   const manifest = JSON.parse(strFromU8(found[MANIFEST]));
-  if (manifest?.format !== FORMAT) throw new Error("That is not a Kraken pack.");
-  if (Number(manifest.version) > VERSION) throw new Error("That pack was made by a newer Kraken: update Kraken to open it.");
+  if (manifest?.format !== FORMAT) throw new Error("That is not a Maelstrom pack.");
+  if (Number(manifest.version) > VERSION) throw new Error("That pack was made by a newer Maelstrom: update Maelstrom to open it.");
   const records = found[RECORDS] ? JSON.parse(strFromU8(found[RECORDS])) : [];
   return {
     info: { name: manifest.name, displayName: manifest.title || manifest.name, ruleset: manifest.from?.ruleset ?? "", kraken: manifest.ruleset, author: manifest.author ?? "", file },

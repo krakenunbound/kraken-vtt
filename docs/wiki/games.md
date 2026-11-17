@@ -1,12 +1,12 @@
 # Games
 
-Ten games come with Kraken, so a table can play with nothing else installed: Kraken's own *Descending Darkness* and *Apeira Astra*, and eight from open licences. Each has its rules, a character wizard, a sheet, its books, and a first adventure or starter with story, encounters and maps (with walls and doors). Kraken also plays five more games from your own books. This page has a section for each.
+Ten games come with Maelstrom, so a table can play with nothing else installed: Maelstrom's own *Descending Darkness* and *Apeira Astra*, and eight from open licences. Each has its rules, a character wizard, a sheet, its books, and a first adventure or starter with story, encounters and maps (with walls and doors). Maelstrom also plays five more games from your own books. This page has a section for each.
 
 To play one: make a campaign with the game as its ruleset (see [Campaigns and backups](campaigns-and-backups.md)), then make its books active in **Modules**.
 
-Every included book has a cover, and every creature, NPC and pregenerated character has a portrait and a round map token, each game in its own painted style. That art is Kraken's own, made for these books; none of it comes from the games' publishers.
+Every included book has a cover, and every creature, NPC and pregenerated character has a portrait and a round map token, each game in its own painted style. That art is Maelstrom's own, made for these books; none of it comes from the games' publishers.
 
-## Descending Darkness (Kraken's own, dark fantasy)
+## Descending Darkness (Maelstrom's own, dark fantasy)
 
 The d20 family: roll a d20, add a modifier, beat a number.
 
@@ -19,7 +19,7 @@ The d20 family: roll a d20, add a modifier, beat a number.
 
 **Adventure: *The Empty Watchtower*** (levels 1 to 2, one or two sessions). The beacon on the ridge above Hollowmere has gone dark, and the dogs will not stop howling. Ten story entries, six encounters, three maps and three handouts. The way through is not only a fight.
 
-## Apeira Astra (Kraken's own, science fiction)
+## Apeira Astra (Maelstrom's own, science fiction)
 
 Its own 2d6 engine.
 
@@ -55,7 +55,7 @@ Classic old-school play, free and open.
 
 **Books:** *Basic Fantasy Player's Handbook* and *Basic Fantasy Game Master's Guide* (245 monsters, 135 magic items, treasure).
 
-**Adventure: *The Mill at Hob's Ford*** (1st level, one or two sessions, written for Kraken). Goblins have moved into the cellars under the village's mill, and they have woken something older below.
+**Adventure: *The Mill at Hob's Ford*** (1st level, one or two sessions, written for Maelstrom). Goblins have moved into the cellars under the village's mill, and they have woken something older below.
 
 ## Cairn, Second Edition (dark fairy-tale fantasy)
 
@@ -63,17 +63,17 @@ An adventure game about exploring a dark and mysterious Wood.
 
 - **Three attributes and Hit Protection.** STR, DEX and WIL; HP 1d6. A **save** is a d20 at or under the attribute. Roll them from the sheet.
 - **Attacks always hit.** The weapon's die, less the target's **Armor**, comes off HP; damage past HP comes off STR, with a save against **Critical Damage**. A PC who takes critical damage can only crawl until someone gives aid (**Stabilize**). Damage that takes a PC's HP to exactly 0 rolls on the **Scars** table.
-- **The tracker:** **Sides (DEX saves)** starts a fight; the GM's **Morale** asks the foes' WIL saves (Kraken asks by itself at a side's first casualty and when half have fallen). Creatures marked ⚑ are **detachments**.
+- **The tracker:** **Sides (DEX saves)** starts a fight; the GM's **Morale** asks the foes' WIL saves (Maelstrom asks by itself at a side's first casualty and when half have fallen). Creatures marked ⚑ are **detachments**.
 - **Ten slots** of inventory; bulky items take two, each Fatigue one.
 - **No levels, no experience:** the sheet's and the party sheet's **Growth** tab keeps Scars, changes and milestones.
 
 **Books:** *Cairn Player's Guide* and *Cairn Warden's Guide* (84 creatures, 100 spellbooks, 46 relics, and tables).
 
-**Adventure: *Trouble in Twin Lakes*** (CAS-1). The butcher of Isthmus Town has vanished. Story entries for every place and person, encounters, relics and treasure, and two battle maps Kraken drew from its text.
+**Adventure: *Trouble in Twin Lakes*** (CAS-1). The butcher of Isthmus Town has vanished. Story entries for every place and person, encounters, relics and treasure, and two battle maps Maelstrom drew from its text.
 
 ## Ironsworn and Starforged (vows, with or without a GM)
 
-Two rulesets on one engine: **Ironsworn** (with *Delve*: perilous sites) and **Starforged** (a spacefarer in the Forge). Kraken plays them from their CC BY 4.0 material: the moves, assets and oracle tables. The full rulebooks are not included; the books' rules chapters are Kraken's own short explanation.
+Two rulesets on one engine: **Ironsworn** (with *Delve*: perilous sites) and **Starforged** (a spacefarer in the Forge). Maelstrom plays them from their CC BY 4.0 material: the moves, assets and oracle tables. The full rulebooks are not included; the books' rules chapters are Maelstrom's own short explanation.
 
 - **The action roll:** an action die (d6) + a stat + adds, at most 10, against two challenge dice (d10): a strong hit, a weak hit or a miss.
 - **Momentum**, burned when it beats more dice than your score (the sheet offers it before the outcome is resolved).
@@ -99,11 +99,11 @@ Fate in its two versions: **Fate Core** (skills) and **Fate Accelerated** (appro
 
 **Books:** *Fate Core System*, *Fate Accelerated Edition*, and *Fate Toolkit and Adversaries* (the GM's).
 
-**Starter scenario: *The Lighthouse at Gull's End*** (Kraken's own, for either game). The light on the point has gone dark, and ships are breaking on the rocks. Two conflicts, two battle maps with their zones outlined, and three pregenerated characters in both games.
+**Starter scenario: *The Lighthouse at Gull's End*** (Maelstrom's own, for either game). The light on the point has gone dark, and ships are breaking on the rocks. Two conflicts, two battle maps with their zones outlined, and three pregenerated characters in both games.
 
 ## Forged in the Dark (a crew of scoundrels)
 
-Based on the Blades in the Dark SRD. The SRD has the rules but no setting or finished playbooks, so Kraken adds its own city of **Brackwater** (a canal port of salt fog and gaslight), seven playbooks, six crew types, the standard items and a starter score.
+Based on the Blades in the Dark SRD. The SRD has the rules but no setting or finished playbooks, so Maelstrom adds its own city of **Brackwater** (a canal port of salt fog and gaslight), seven playbooks, six crew types, the standard items and a starter score.
 
 - **Actions and attributes:** twelve actions; an attribute's rating is how many of its actions have a dot.
 - **Action rolls** from the sheet: d6s, the highest read. The GM's **position** and **effect** are on the roll and its card. Assist, push yourself, or take a **Devil's Bargain**.
@@ -118,7 +118,7 @@ Based on the Blades in the Dark SRD. The SRD has the rules but no setting or fin
 
 ## Games played from your own books
 
-These rulesets are Kraken's own code (the games' mechanics). Their content comes from your own books: Fantasy Grounds modules, or Kraken packs made from them (see [Records, books and packs](records-books-and-packs.md)).
+These rulesets are Maelstrom's own code (the games' mechanics). Their content comes from your own books: Fantasy Grounds modules, or Maelstrom packs made from them (see [Records, books and packs](records-books-and-packs.md)).
 
 ### Castles & Crusades
 
@@ -142,7 +142,7 @@ The wizard is the lifepath, term by term with the table's dice. The sheet rolls 
 
 ### Worldbuilding
 
-No rules: maps, tokens, chat and dice for any game. It reads the books of games Kraken has no rules for yet (Pathfinder, say): their pages, story and maps with walls.
+No rules: maps, tokens, chat and dice for any game. It reads the books of games Maelstrom has no rules for yet (Pathfinder, say): their pages, story and maps with walls.
 
 ## Licences and credits
 
@@ -157,6 +157,6 @@ Each open game's text stays under its own licence, in its own folder under `game
 | Fate Core, Fate Accelerated | Based on Fate Core System and Fate Accelerated Edition, products of Evil Hat Productions, LLC, under CC BY 3.0. Fate™ is a trademark of Evil Hat Productions, LLC. |
 | Forged in the Dark | Based on Blades in the Dark, product of One Seven Design, developed and authored by John Harper, under CC BY 3.0. |
 
-The share-alike licences (Basic Fantasy, Cairn) cover only those games' folders and the books built from them, not Kraken's code. Kraken is not affiliated with or endorsed by any of these publishers, nor by SmiteWorks (Fantasy Grounds), Foundry Gaming (Foundry VTT) or Troll Lord Games (Castles & Crusades).
+The share-alike licences (Basic Fantasy, Cairn) cover only those games' folders and the books built from them, not Maelstrom's code. Maelstrom is not affiliated with or endorsed by any of these publishers, nor by SmiteWorks (Fantasy Grounds), Foundry Gaming (Foundry VTT) or Troll Lord Games (Castles & Crusades).
 
-*Descending Darkness* and *Apeira Astra*, their text, names, settings, maps and art are original to Kraken. Some of Descending Darkness's mechanics are based on the System Reference Document 5.1 by Wizards of the Coast LLC (CC BY 4.0); no SRD text is reproduced.
+*Descending Darkness* and *Apeira Astra*, their text, names, settings, maps and art are original to Maelstrom. Some of Descending Darkness's mechanics are based on the System Reference Document 5.1 by Wizards of the Coast LLC (CC BY 4.0); no SRD text is reproduced.

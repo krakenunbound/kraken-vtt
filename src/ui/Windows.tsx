@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { BRAND } from "../../shared/brand.mjs";
 import { Icon } from "./icons";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
 
@@ -401,7 +402,7 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
   }
   if (item.popped && child) {
     return (
-      <PopOutWindow child={child} title={`${item.title} · Kraken`} onClosed={() => close(item.key)} onPlaced={(out) => move(item.key, { out })}>
+      <PopOutWindow child={child} title={`${item.title} · ${BRAND.short}`} onClosed={() => close(item.key)} onPlaced={(out) => move(item.key, { out })}>
         <section className="window popped" data-window={item.kind} aria-label={item.title}>
           <header className="popout-bar">
             <span>{item.title}</span>

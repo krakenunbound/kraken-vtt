@@ -1,11 +1,11 @@
-# Kraken VTT
+# Maelstrom VTT
 
-A free virtual tabletop, with its source open to read. The game master runs Kraken on
+A free virtual tabletop, with its source open to read. The game master runs Maelstrom on
 their Windows or Linux PC and hosts the table; players join from Chrome and install
 nothing. It aims for Foundry-level presentation with Fantasy Grounds-level ease
 of use, and a built-in AI agent that can do anything the GM can.
 
-> **Alpha test.** Kraken is in alpha (see the version in the app's title bar).
+> **Alpha test.** Maelstrom is in alpha (see the version in the app's title bar).
 > Expect rough edges, and please report what you find (see
 > [Reporting problems](#reporting-problems)).
 
@@ -13,7 +13,7 @@ of use, and a built-in AI agent that can do anything the GM can.
 
 ## Screenshots
 
-Full-screen captures from Kraken's own games, *Descending Darkness* and *Apeira Astra*. Shots marked "in Chrome" are what a player sees in a browser.
+Full-screen captures from Maelstrom's own games, *Descending Darkness* and *Apeira Astra*. Shots marked "in Chrome" are what a player sees in a browser.
 
 ### The GM's table
 ![The GM's table: the crypt of The Empty Watchtower in torchlight](docs/screenshots/gm-crypt.jpg)
@@ -70,7 +70,7 @@ Dozens of 3D dice sets in glass, metal, stone and enchanted finishes, plus each 
 
 ### The Calendar
 ![The Calendar: the Waning Count, with notes on the days ahead](docs/screenshots/calendar.jpg)
-Each game has its own calendar: Greyhawk, Harptos, Golarion, Traveller's Imperial date, and Kraken's own.
+Each game has its own calendar: Greyhawk, Harptos, Golarion, Traveller's Imperial date, and Maelstrom's own.
 - The GM moves the day on, adds eight hours for a rest, and posts the date in chat.
 - Anyone writes notes on a day. A player's note is signed in their colour; a GM's note is shown to the players or kept private.
 
@@ -84,7 +84,7 @@ An adventure's boxed text has a button for the GM. The words go to chat and appe
 
 ### Books
 ![The Player's Handbook open on Dread, beside the Warden's record](docs/screenshots/books.jpg)
-Every book is read in Kraken: rulebooks, bestiaries and adventures, with their pictures, maps and links. The Player's Handbook is open here on Dread, beside the Warden's record from the Bestiary.
+Every book is read in Maelstrom: rulebooks, bestiaries and adventures, with their pictures, maps and links. The Player's Handbook is open here on Dread, beside the Warden's record from the Bestiary.
 
 ### Character sheets
 ![A Descending Darkness character sheet](docs/screenshots/sheet-descending.jpg)
@@ -98,12 +98,12 @@ A character's spells and weapons as painted cards. Click one to turn it over and
 A player's hand. Spent cards tip over and go grey, and a long rest stands them up again.
 
 ### The desktop: a hex grid on black
-![The hex grid wallpaper, the Kraken decal and the dice tower](docs/screenshots/desktop-hex.jpg)
+![The hex grid wallpaper, the Maelstrom decal and the dice tower](docs/screenshots/desktop-hex.jpg)
 Game-table wallpapers: hex grids, a battle mat, a dungeon map, an old world map, and a sci-fi set. They're big and seamless, so the repeat hardly shows. Your own go in `Documents/Kraken VTT`, beside your dice packs, dice towers, GM icons and decals. Each folder has a guide for you, and one for an AI agent.
 
 ### Map Studio
-![Map Studio, Kraken's map maker](docs/screenshots/map-studio.jpg)
-Kraken's own map maker.
+![Map Studio, Maelstrom's map maker](docs/screenshots/map-studio.jpg)
+Maelstrom's own map maker.
 - **Painting:** paint from art packs, generate a dungeon.
 - **Walls and doors:** drawn with art along them.
 - **Lighting and weather:** add lights and weather.
@@ -133,12 +133,12 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
   and give your players the address, port and password. They see only what you
   let them see: hidden tokens, GM notes and secret doors never reach them.
 - **Games you can play today, with nothing else installed.** Ten games come
-  with Kraken, each with its rules, a character wizard, its sheet, its books
+  with Maelstrom, each with its rules, a character wizard, its sheet, its books
   and a first adventure with maps:
-  - **Descending Darkness** (Kraken's own): dark fantasy on the d20, with
+  - **Descending Darkness** (Maelstrom's own): dark fantasy on the d20, with
     fragile heroes, light that runs out and dread that builds. Adventure:
     *The Empty Watchtower*.
-  - **Apeira Astra** (Kraken's own): science fiction on 2d6 and skills, with
+  - **Apeira Astra** (Maelstrom's own): science fiction on 2d6 and skills, with
     crews made in minutes and armour that soaks. Adventure: *Salvage Rights*.
   - **D&D 5E** from the **SRD 5.2.1** (Wizards of the Coast, CC BY 4.0): the
     12 classes to level 20, species, backgrounds, feats, equipment, 339
@@ -161,7 +161,7 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
     CC BY 3.0): d6 pools, position and effect, stress, clocks everyone sees,
     a crew and its scores. Starter: *The Brine Street Job*.
 
-  With your own books, Kraken also plays **Castles & Crusades**, **D&D 5E**, **D&D 3.5E**
+  With your own books, Maelstrom also plays **Castles & Crusades**, **D&D 5E**, **D&D 3.5E**
   (base attack and iterative attacks, criticals by threat and confirmation,
   Fortitude, Reflex and Will, skills by ranks), **AD&D 2E** (THAC0 and
   descending Armor Class, the five saving throws, thief skills,
@@ -169,21 +169,21 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
   the UPP, skills and specialities, 2d6 tasks with Effect, careers and terms,
   damage to Endurance, Strength and Dexterity, armour and AP) and a
   rules-free **Worldbuilding** mode for any system.
-- **Your Fantasy Grounds library.** If you own Fantasy Grounds modules, Kraken
+- **Your Fantasy Grounds library.** If you own Fantasy Grounds modules, Maelstrom
   reads them in place: books to read, story, encounters, NPCs, items, and maps
   with their walls, doors and lights.
-- **Kraken packs.** Make each of your books into Kraken's own file (`.kpack`)
+- **Maelstrom packs.** Make each of your books into Maelstrom's own file (`.kpack`)
   once, in Books > Packs. Copy the packs folder to any computer and your books
-  open there in Kraken, with no Fantasy Grounds installed. Kraken's own books
+  open there in Maelstrom, with no Fantasy Grounds installed. Maelstrom's own books
   ship as packs too ([the format](docs/kraken-pack-format.md)).
-- **Map Studio, Kraken's map maker.** Paint maps from art packs, walls and
+- **Map Studio, Maelstrom's map maker.** Paint maps from art packs, walls and
   doors with art along them, lights, weather with masks, traps and regions,
-  a dungeon generator and play testing, saved straight into Kraken's images.
+  a dungeon generator and play testing, saved straight into Maelstrom's images.
 - **Maps.** Image maps and animated tokens, square and hex grids, walls and doors,
   line of sight and fog, lights and darkness, weather, drawing, and a full map
   editor.
 - **Character sheets and wizards** for each game (with your own Fantasy
-  Grounds character wizard extensions, Kraken runs or follows them page for
+  Grounds character wizard extensions, Maelstrom runs or follows them page for
   page), a combat tracker that rolls
   attacks, damage, saves and initiative and applies the results, 3D dice,
   effects, a party sheet and treasure parcels.
@@ -217,7 +217,7 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
    Or run from the source (see [Development](#development)).
 2. **Make a campaign.** On the start screen choose **My Campaigns**, name it,
    and pick its game. Choose *Descending Darkness* or *Apeira Astra* to try
-   Kraken with no other content.
+   Maelstrom with no other content.
 3. **Host.** Choose LAN, Internet or both, set a password if you like, and press
    **Play**. *Addresses to give your players* lists the addresses.
 4. **Players join.** They open the address in Chrome, type their name and a
@@ -230,7 +230,7 @@ The full guides:
 |---|---|
 | [docs/gm-guide.md](docs/gm-guide.md) | Running a game: campaigns, hosting, books, maps, combat, sound |
 | [docs/players.md](docs/players.md) | Joining a table, making a character, rolling |
-| [docs/included-games.md](docs/included-games.md) | The ten games that come with Kraken, and running their adventures |
+| [docs/included-games.md](docs/included-games.md) | The ten games that come with Maelstrom, and running their adventures |
 | [docs/development.md](docs/development.md) | Building from source, tests, how the code is laid out |
 | [AGENT.md](AGENT.md) | The AI agent and its tools |
 | [CHANGELOG.md](CHANGELOG.md) | What changed in each release |
@@ -261,20 +261,20 @@ browser they used.
 
 ## Licence and credits
 
-Kraken VTT is free to use and its source is public, under the
+Maelstrom VTT is free to use and its source is public, under the
 [PolyForm Shield License 1.0.0](LICENSE). In short (the licence's own text
 decides):
 
-- **You may** use Kraken for anything, including running paid games,
+- **You may** use Maelstrom for anything, including running paid games,
   streaming, and teaching; change it; and share it, with the licence and its
   copyright notice.
-- **You may not** use Kraken, or a changed copy of it, to make a product that
+- **You may not** use Maelstrom, or a changed copy of it, to make a product that
   competes with it, such as selling it, repackaging it as your own virtual
   tabletop, or offering it as a hosted service.
 
 For permission beyond the licence, open an issue on GitHub.
 
-Map Studio's art pack (Kraken Map Art) is original to Kraken; Battle Map
+Map Studio's art pack (Kraken Map Art) is original to Maelstrom; Battle Map
 Forge's generator and pack are included with its author's permission.
 
 ### The open games' credits
@@ -282,7 +282,7 @@ Forge's generator and pack are included with its author's permission.
 Each open game's text stays under its own licence, in its own folder with a
 `LICENSE.md` that says what was taken and what was changed. The share-alike
 licences (Basic Fantasy, Cairn) cover only those folders and the books built
-from them, not Kraken's code. No art from any of these games is included.
+from them, not Maelstrom's code. No art from any of these games is included.
 
 - **SRD 5.2.1** ([games/srd-5e/LICENSE.md](games/srd-5e/LICENSE.md)): This
   work includes material from the System Reference Document 5.2.1 ("SRD
@@ -319,21 +319,21 @@ from them, not Kraken's code. No art from any of these games is included.
   Commons Attribution 3.0 Unported license
   (http://creativecommons.org/licenses/by/3.0/).
 
-Kraken is not affiliated with or endorsed by Wizards of the Coast, Chris
+Maelstrom is not affiliated with or endorsed by Wizards of the Coast, Chris
 Gonnerman, Yochai Gal or Cairn Press, Shawn Tomkin or Tomkin Press, Evil Hat
 Productions or One Seven Design.
 
 The included games (Descending Darkness and Apeira Astra), their books, maps
-and art are original to Kraken. Some of Descending Darkness's mechanics are
+and art are original to Maelstrom. Some of Descending Darkness's mechanics are
 based on the System Reference Document 5.1 by Wizards of the Coast LLC,
 available under the Creative Commons Attribution 4.0 International licence;
-no SRD text is reproduced. Kraken's D&D 5E and D&D 3.5E rules are its own
+no SRD text is reproduced. Maelstrom's D&D 5E and D&D 3.5E rules are its own
 code (the games' mechanics, no book text); the 5E and 3.5E content is the
-GM's own books, played from the rulebooks they own (or an SRD module). Kraken's
+GM's own books, played from the rulebooks they own (or an SRD module). Maelstrom's
 AD&D 2E rules are its own code (the game's mechanics, no book text); the 2E
 content is the GM's own books.
 
-Kraken is not affiliated with SmiteWorks (Fantasy Grounds), Foundry Gaming
+Maelstrom is not affiliated with SmiteWorks (Fantasy Grounds), Foundry Gaming
 (Foundry VTT), Troll Lord Games (Castles & Crusades) or Wizards of the Coast.
-No licensed content is included: Kraken reads the modules you own, where they
+No licensed content is included: Maelstrom reads the modules you own, where they
 are on your computer.

@@ -47,7 +47,7 @@ export function PacksPanel({ ruleset }: { ruleset: string }) {
   return (
     <div className="packs-panel" data-packs>
       <p className="hint">
-        Your Fantasy Grounds books as <b>Kraken packs</b>: one file per book, with its pages, records, maps (walls and doors too) and pictures. Copy the packs folder to any computer with Kraken and the books open there, with no Fantasy Grounds and no .mod files. A pack is yours: keep it to yourself.
+        Your Fantasy Grounds books as <b>Maelstrom packs</b>: one file per book, with its pages, records, maps (walls and doors too) and pictures. Copy the packs folder to any computer with Maelstrom and the books open there, with no Fantasy Grounds and no .mod files. A pack is yours: keep it to yourself.
       </p>
       <div className="packs-bar">
         <button type="button" className="ghost" data-action="packs-folder" title={view?.folder ?? ""} onClick={() => void api.openFolder()}>

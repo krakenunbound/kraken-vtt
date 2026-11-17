@@ -106,7 +106,7 @@ export function ExportButton({ record }: { record: TableRecord }) {
               save(`${record.name}.kraken.json`, toKrakenFile(record), "application/json");
             }}
           >
-            Kraken file (.json)
+            Maelstrom file (.json)
           </button>
           <button
             type="button"

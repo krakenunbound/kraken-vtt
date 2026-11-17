@@ -1533,7 +1533,7 @@ const TOOLS = [
       const action = args.action ?? "view";
       if (action === "list") {
         const wanted = String(args.search ?? "").toLowerCase();
-        const all = [...(wallpaper || gmIcon ? [] : [{ id: "kraken", name: "Kraken", group: "Kraken" }]), ...(library ? library.list() : [])];
+        const all = [...(wallpaper || gmIcon ? [] : [{ id: "kraken", name: "Kraken", group: "Maelstrom" }]), ...(library ? library.list() : [])];
         return out({ [`${key}s`]: all.filter((item) => !wanted || `${item.group} ${item.name} ${item.ruleset ?? ""}`.toLowerCase().includes(wanted)), folder: library?.folder ?? null });
       }
       if (action === "set") return out({ [key]: agent.setOptions({ [key]: String(args.id ?? "") })[key] });

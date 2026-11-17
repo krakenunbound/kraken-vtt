@@ -1,6 +1,6 @@
 # Character sheets and wizards
 
-Every game in Kraken has its own character wizard and its own sheet, built on one shared frame so they all work the same way. This page covers Character Selection, making a character, the sheet, levelling up, the party sheet, and how loot reaches the characters.
+Every game in Maelstrom has its own character wizard and its own sheet, built on one shared frame so they all work the same way. This page covers Character Selection, making a character, the sheet, levelling up, the party sheet, and how loot reaches the characters.
 
 ![A Descending Darkness character sheet](../screenshots/sheet-descending.jpg)
 
@@ -34,7 +34,7 @@ Players make their own characters in the wizard, or the GM makes one for them. E
 | Fate Core / Fate Accelerated | High concept, trouble, the phase trio, the skill pyramid or approaches, and stunts; or a pregenerated character. |
 | Forged in the Dark | A scoundrel from a playbook; the crew has its own wizard. |
 
-The 2E, 3.5E, 5E and C&C wizards follow Fantasy Grounds' wizard extensions and FG's 5E wizard, art and words included. Traveller's wizard is the KrakenCharWizardMGT2 extension itself, run inside Kraken: it needs the extension in Fantasy Grounds' extensions folder once, and Kraken keeps a copy beside the packs.
+The 2E, 3.5E, 5E and C&C wizards follow Fantasy Grounds' wizard extensions and FG's 5E wizard, art and words included. Traveller's wizard is the KrakenCharWizardMGT2 extension itself, run inside Maelstrom: it needs the extension in Fantasy Grounds' extensions folder once, and Maelstrom keeps a copy beside the packs.
 
 ## The sheet
 

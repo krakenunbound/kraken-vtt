@@ -1,6 +1,6 @@
 # Hosting and inviting
 
-The GM's copy of Kraken is the table: it serves every player's browser. This page covers starting a table on your home network or over the internet, inviting players, the firewall, and the GM's controls for the people at the table (pause, bell, kick and ban).
+The GM's copy of Maelstrom is the table: it serves every player's browser. This page covers starting a table on your home network or over the internet, inviting players, the firewall, and the GM's controls for the people at the table (pause, bell, kick and ban).
 
 ## Starting the table
 
@@ -15,7 +15,7 @@ Press **Play**. *Addresses to give your players* lists the addresses to share, w
 
 ## Players on the internet
 
-With **Internet** on, leave *Open the port on my router by itself (UPnP)* ticked. Kraken asks your router to open the port while you host (UPnP, or NAT-PMP) and closes it again when you stop. The Players window says whether it worked.
+With **Internet** on, leave *Open the port on my router by itself (UPnP)* ticked. Maelstrom asks your router to open the port while you host (UPnP, or NAT-PMP) and closes it again when you stop. The Players window says whether it worked.
 
 If your router has UPnP turned off, forward the port yourself in the router's settings: 47300 by default, TCP, to this PC.
 

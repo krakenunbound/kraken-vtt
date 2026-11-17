@@ -36,7 +36,7 @@ Boxed text in an adventure (Fantasy Grounds' frames) has a speech button for the
 
 ## The Calendar
 
-**Calendar** (sidebar) is your game's calendar: Greyhawk, Harptos, Golarion, Traveller's Imperial date, and Kraken's own, depending on the game.
+**Calendar** (sidebar) is your game's calendar: Greyhawk, Harptos, Golarion, Traveller's Imperial date, and Maelstrom's own, depending on the game.
 
 - Move the day on, add 8 hours for a rest, set the time, say the date in chat.
 - Click a day for its page and write a note there. Players see it, unless you tick **GM only**.

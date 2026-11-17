@@ -581,7 +581,7 @@ export function useSession() {
           if (settled) return;
           settled = true;
           socket.close();
-          reject(new Error(`No table answered at ${label} in time. Check that the GM has pressed Play and that the address and port match. From another computer, the GM's firewall must allow Kraken VTT.`));
+          reject(new Error(`No table answered at ${label} in time. Check that the GM has pressed Play and that the address and port match. From another computer, the GM's firewall must allow Maelstrom VTT.`));
         }, 8000);
 
         // refused: the table said no (a wrong password, a ban): trying again would not help.
@@ -789,7 +789,7 @@ export function useSession() {
             fail(
               opened
                 ? "The table closed the connection before you were seated. Try again."
-                : `No table answered at ${label}. Check that the GM has pressed Play and that the address and port match. From another computer, the GM's firewall must allow Kraken VTT.`,
+                : `No table answered at ${label}. Check that the GM has pressed Play and that the address and port match. From another computer, the GM's firewall must allow Maelstrom VTT.`,
             );
             return;
           }
@@ -899,7 +899,7 @@ export function useSession() {
       setError(null);
       let started = false;
       try {
-        if (!window.kraken) throw new Error("Hosting runs in the Kraken VTT app.");
+        if (!window.kraken) throw new Error("Hosting runs in the Maelstrom VTT app.");
         checkPort(input.port);
         if (!input.lan && !input.cloud) throw new Error("Turn on LAN or Internet.");
         const password = input.password.trim();
@@ -1260,7 +1260,7 @@ export function useSession() {
     if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(body));
   }, []);
   // A line on this screen only (/help, /info), and /clear.
-  const note = useCallback((text: string, from = "Kraken") => setChat((current) => [...current, { id: "local", from, text, at: Date.now(), local: true }].slice(-100)), []);
+  const note = useCallback((text: string, from = "Maelstrom") => setChat((current) => [...current, { id: "local", from, text, at: Date.now(), local: true }].slice(-100)), []);
   // Sound, the GM's: the library, playing for the table, ambience, music, the chat's triggers.
   const soundList = useCallback(async (): Promise<SoundLibrary> => {
     const response = await fetch(`${originRef.current}/sound/list?token=${assetRef.current}`);

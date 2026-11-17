@@ -1,6 +1,6 @@
 # Changelog
 
-What changed in each release of Kraken VTT. Downloads are on the
+What changed in each release of Maelstrom VTT (called Kraken VTT until alpha.92). Downloads are on the
 [Releases](https://github.com/krakenunbound/kraken-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 

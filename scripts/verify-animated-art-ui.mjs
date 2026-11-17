@@ -68,7 +68,7 @@ try {
   const tokens = (await tool("kraken_art", { kind: "token", search: "Illusionist" })).art;
   const portrait = portraits.find((item) => item.id.endsWith(".webm"));
   const token = tokens.find((item) => item.id.endsWith(".webm"));
-  assert(portrait?.video && token?.video && portrait.group === "Kraken · Elf", `the animated pair is in the art library, Kraken's Elf folder: ${JSON.stringify({ portrait, token })}`);
+  assert(portrait?.video && token?.video && portrait.group === "Maelstrom · Elf", `the animated pair is in the art library, Kraken's Elf folder: ${JSON.stringify({ portrait, token })}`);
   const picture = path.join(profile, "Great Hall.webp");
   writeFileSync(picture, readFileSync(path.join(process.cwd(), "src", "assets", "great-hall.webp")));
   await tool("kraken_open_adventure", { path: picture });

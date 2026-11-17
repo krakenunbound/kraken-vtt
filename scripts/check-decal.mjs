@@ -58,7 +58,7 @@ try {
   // The Kraken emblem to begin with; Kraken's own decals to choose from; FG's locked packs are not read.
   assert(ann.options().decal === "kraken", "the Kraken emblem is the table's first decal");
   const list = await tool({ action: "list" });
-  const own = list.decals.filter((item) => item.group === "Kraken");
+  const own = list.decals.filter((item) => item.group === "Maelstrom");
   assert(own.length >= 7 && own[0].id === "kraken", `Kraken's own decals: ${own.map((item) => item.name).join(", ")}`);
   assert(!list.decals.some((item) => item.id.startsWith("pack/")), "nothing read out of FG's encrypted vault packs");
   assert((await tool({ action: "list", search: "dragon" })).decals.every((item) => /dragon/i.test(item.name + item.group)), "search");
@@ -91,7 +91,7 @@ try {
   assert(ann.options().decal === "lib/My Banner.png", "the imported picture is up for everyone");
   const again = await tool({ action: "import", path: mine });
   assert(again.decal === "lib/My Banner.png" && readdirSync(folder).length === 1, "the same picture twice is kept once");
-  assert((await tool({ action: "list" })).decals.some((item) => item.id === "lib/My Banner.png" && item.group === "Kraken assets"), "and offered from then on");
+  assert((await tool({ action: "list" })).decals.some((item) => item.id === "lib/My Banner.png" && item.group === "Maelstrom assets"), "and offered from then on");
   assert(server.persisted().options.decal === "lib/My Banner.png", "saved with the campaign");
   // The GM's own for a game, in a folder named for it: under that game's filter.
   {
@@ -100,7 +100,7 @@ try {
     copyFileSync(mine, path.join(folder, "D&D 3.5e", "Kraken 3.5E.png"));
     const fresh = createDecalLibrary({ folder, builtin: path.join(process.cwd(), "public", "decals") });
     const own = fresh.list().find((item) => item.id === "lib/D&D 3.5e/Kraken 3.5E.png");
-    assert(own?.ruleset === "D&D 3.5e" && own.group === "Kraken assets" && own.name === "Kraken 3.5E", `a game's own decal: ${JSON.stringify(own)}`);
+    assert(own?.ruleset === "D&D 3.5e" && own.group === "Maelstrom assets" && own.name === "Kraken 3.5E", `a game's own decal: ${JSON.stringify(own)}`);
   }
   let refused = "";
   try {

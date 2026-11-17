@@ -78,7 +78,7 @@ export function AssetsWindow({ session }: { session: Session }) {
   const asDecal = (item: Picked) =>
     act("Setting the background", async () => {
       const kraken = window.kraken;
-      if (!kraken?.addDecal) throw new Error("Backgrounds are set in the Kraken VTT app.");
+      if (!kraken?.addDecal) throw new Error("Backgrounds are set in the Maelstrom VTT app.");
       const response = await fetch(session.bookUrl("picture", item.book.id, item.file));
       if (!response.ok) throw new Error("That picture could not be read.");
       const made = await kraken.addDecal(item.file.split("/").pop() || "decal.webp", new Uint8Array(await response.arrayBuffer()), "decal");

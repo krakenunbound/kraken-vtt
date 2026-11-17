@@ -1,6 +1,6 @@
 # Bookkeeping and rest
 
-Kraken counts what the characters carry and spend, by each game's rules: arrows, potions, rations and water, torches and oil, and the weight of the pack. It also runs short and long rests. Every part has its own switch in **Settings > Bookkeeping**, so a relaxed table can hand-wave any of it.
+Maelstrom counts what the characters carry and spend, by each game's rules: arrows, potions, rations and water, torches and oil, and the weight of the pack. It also runs short and long rests. Every part has its own switch in **Settings > Bookkeeping**, so a relaxed table can hand-wave any of it.
 
 ## Settings > Bookkeeping
 

@@ -1,17 +1,17 @@
-# Kraken VTT Wiki
+# Maelstrom VTT Wiki
 
-Kraken VTT is a free virtual tabletop. The game master (GM) runs Kraken on a Windows or Linux PC and hosts the table. Players join from Chrome and install nothing. Kraken keeps the campaign, decides what each player may see, and serves every player's browser. This wiki explains how to use it, from your first campaign to the tools for experienced GMs.
+Maelstrom VTT is a free virtual tabletop. The game master (GM) runs Maelstrom on a Windows or Linux PC and hosts the table. Players join from Chrome and install nothing. Maelstrom keeps the campaign, decides what each player may see, and serves every player's browser. This wiki explains how to use it, from your first campaign to the tools for experienced GMs.
 
 ![The GM's table: the crypt of The Empty Watchtower in torchlight](../screenshots/gm-crypt.jpg)
 
-> **Kraken is in alpha.** The version is in the app's title bar. Expect rough edges, and please report what you find (see [Troubleshooting and FAQ](troubleshooting-and-faq.md)).
+> **Maelstrom is in alpha.** The version is in the app's title bar. Expect rough edges, and please report what you find (see [Troubleshooting and FAQ](troubleshooting-and-faq.md)).
 
-## What Kraken does
+## What Maelstrom does
 
 - **You host, players use a browser.** Make a campaign, press Play, and give your players the address. They see only what you let them see. Hidden tokens, GM notes and secret doors never reach their browsers.
 - **Ten games come in the box**, each with its rules, a character wizard, a sheet, books and a first adventure or starter with maps.
-- **Your Fantasy Grounds library.** If you own Fantasy Grounds modules, Kraken reads them where they are: books, story, encounters, NPCs, items, and maps with walls, doors and lights.
-- **Maps that play.** Walls and doors, line of sight, light and darkness, fog of war, weather, a shared ruler, and Map Studio, Kraken's own map maker.
+- **Your Fantasy Grounds library.** If you own Fantasy Grounds modules, Maelstrom reads them where they are: books, story, encounters, NPCs, items, and maps with walls, doors and lights.
+- **Maps that play.** Walls and doors, line of sight, light and darkness, fog of war, weather, a shared ruler, and Map Studio, Maelstrom's own map maker.
 - **A combat tracker that does the work.** It rolls attacks, damage, saves and initiative by each game's rules and applies the results.
 - **3D dice, sound and music**, a calendar, a party sheet, treasure parcels and the bookkeeping of arrows, rations and torches.
 - **A multi-monitor GM.** Every window can pop out to another screen.
@@ -19,10 +19,10 @@ Kraken VTT is a free virtual tabletop. The game master (GM) runs Kraken on a Win
 
 ## The games it plays
 
-| Comes with Kraken | Plays from your own books |
+| Comes with Maelstrom | Plays from your own books |
 |---|---|
-| Descending Darkness (Kraken's own, dark fantasy) | Castles & Crusades |
-| Apeira Astra (Kraken's own, science fiction) | D&D 3.5E |
+| Descending Darkness (Maelstrom's own, dark fantasy) | Castles & Crusades |
+| Apeira Astra (Maelstrom's own, science fiction) | D&D 3.5E |
 | D&D 5E, from the SRD 5.2.1 | AD&D 2E |
 | Basic Fantasy RPG, 4th Edition | Traveller (Mongoose 2E) |
 | Cairn, Second Edition | Worldbuilding (no rules, any game) |
@@ -37,7 +37,7 @@ D&D 5E is in both columns: it plays from the SRD with nothing else installed, an
 - **New GM?** Read the [Quickstart](quickstart.md). It takes you from install to your first fight in ten steps.
 - **Learning the ropes?** The [Tutorials](tutorials.md) walk through revealing monsters, running a fight, range, languages, treasure and group saves.
 - **A player?** Read [Joining a table](players-joining.md). All you need is Chrome and the address your GM sends you.
-- **Coming from Fantasy Grounds?** Kraken uses FG's words wherever it can: the sidebar, the lock on record windows, the modifier box, quick slots, `/rollon`. Start with [Records, books and packs](records-books-and-packs.md).
+- **Coming from Fantasy Grounds?** Maelstrom uses FG's words wherever it can: the sidebar, the lock on record windows, the modifier box, quick slots, `/rollon`. Start with [Records, books and packs](records-books-and-packs.md).
 
 ## Every page
 
@@ -55,4 +55,4 @@ D&D 5E is in both columns: it plays from the SRD with nothing else installed, an
 
 ## Licence
 
-Kraken VTT is free to use, and its source is public under the PolyForm Shield License 1.0.0. You may use it for anything, including paid games, streaming and teaching. You may not use it to make a product that competes with it. The licence's own text decides. Each open game's text keeps its own licence; see [Games](games.md).
+Maelstrom VTT is free to use, and its source is public under the PolyForm Shield License 1.0.0. You may use it for anything, including paid games, streaming and teaching. You may not use it to make a product that competes with it. The licence's own text decides. Each open game's text keeps its own licence; see [Games](games.md).

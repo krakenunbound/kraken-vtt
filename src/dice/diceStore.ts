@@ -111,7 +111,7 @@ export const SET_GROUPS: { name: string; sets: string[] }[] = [
   { name: "Wilds", sets: ["Dragonhide", "Wyrmscale", "Behemoth", "Ancient Bone", "Gravewrought", "Leviathan", "Magma Vein"] },
   { name: "Classes", sets: ["Arcane Seal", "Wizard", "Bard", "Necromancer", "Goblin Scrap"] },
   { name: "Worlds", sets: ["Starfall", "Imperial", "Mythos"] },
-  { name: "Kraken", sets: ["Frost Glass", "Molten Gold", "Arcane Pearl", "Obsidian", "Carrara", "Oak and Iron", "Rune Steel", "Kraken Deep"] },
+  { name: "Maelstrom", sets: ["Frost Glass", "Molten Gold", "Arcane Pearl", "Obsidian", "Carrara", "Oak and Iron", "Rune Steel", "Kraken Deep"] },
 ];
 export const PRESETS: ({ name: string } & DiceLook)[] = [
   set("Aether Core", { theme: "aether", body: "#1c6dff", ink: "#e8944a", material: "design", effect: "aura", font: "metal" }),

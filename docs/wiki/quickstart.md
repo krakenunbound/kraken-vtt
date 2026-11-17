@@ -1,10 +1,10 @@
 # Quickstart
 
-This page gets a GM from a fresh install to the first fight in ten steps, and a player from a link to a seat in four. It uses *Descending Darkness*, one of Kraken's own games, because it needs nothing else installed: its books, its adventure *The Empty Watchtower* and its maps all come with Kraken.
+This page gets a GM from a fresh install to the first fight in ten steps, and a player from a link to a seat in four. It uses *Descending Darkness*, one of Maelstrom's own games, because it needs nothing else installed: its books, its adventure *The Empty Watchtower* and its maps all come with Maelstrom.
 
 ## For the GM, in 10 steps
 
-1. **Install Kraken.** Download it from [the Releases page](https://github.com/krakenunbound/kraken-vtt/releases): `Kraken.VTT.Setup.exe` on Windows, the `.AppImage` or `.deb` on Linux. Details are in [Installing and updates](installing-and-updates.md).
+1. **Install Maelstrom.** Download it from [the Releases page](https://github.com/krakenunbound/kraken-vtt/releases): `Kraken.VTT.Setup.exe` on Windows, the `.AppImage` or `.deb` on Linux. Details are in [Installing and updates](installing-and-updates.md).
 2. **Make a campaign.** On the start screen choose **My Campaigns**, then **New campaign**. Give it a name and choose **Descending Darkness** as its game (ruleset).
 3. **Host it.** Select the campaign. Type **Your name** (what players see you called). Leave **Port** at 47300. Set a **Password** if you want one, or leave it blank for an open table. Under **Players connect over**, choose **LAN** for players on your home network or **Internet** for players elsewhere. Press **Play**.
 4. **Make the books active.** In the sidebar on the right, open **Library > Modules** and make the game's books and its adventure active. This brings their records (NPCs, items, encounters, maps, story) into the campaign. A book that is not active stays off limits.

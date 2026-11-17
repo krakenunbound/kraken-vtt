@@ -41,7 +41,7 @@ async function shellOp({ action, paths, path: target }) {
   };
   if (action === "trash") {
     const list = (Array.isArray(paths) ? paths : []).map(String);
-    if (!list.every(inside)) throw new Error("Only Kraken's own folders go to the recycle bin.");
+    if (!list.every(inside)) throw new Error("Only Maelstrom's own folders go to the recycle bin.");
     for (const file of list) if (fs.existsSync(file)) await shell.trashItem(file);
     return { trashed: list.length };
   }
@@ -280,7 +280,7 @@ ipcMain.handle("campaign-manage", async (_event, input) => {
     const picked = await dialog.showSaveDialog(mainWindow, {
       title: "Export the campaign",
       defaultPath: path.join(app.getPath("documents"), `${String(found?.name ?? "campaign").replace(/[^\w .()-]/g, "_")}.zip`),
-      filters: [{ name: "Kraken campaign", extensions: ["zip"] }],
+      filters: [{ name: "Maelstrom campaign", extensions: ["zip"] }],
     });
     if (picked.canceled || !picked.filePath) return null;
     return call("campaign-manage", { ...input, path: picked.filePath });
@@ -347,7 +347,7 @@ function createWindow() {
     minHeight: 700,
     show: false,
     backgroundColor: "#121418",
-    title: "Kraken VTT",
+    title: require("../shared/brand.mjs").BRAND.name,
     icon: path.join(__dirname, "..", "build", "icon.png"),
     autoHideMenuBar: true,
     webPreferences: {

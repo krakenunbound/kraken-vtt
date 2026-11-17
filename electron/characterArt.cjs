@@ -9,7 +9,7 @@ function pick(items, race, cls) {
   const c = String(cls ?? "").trim().toLowerCase();
   if (!r) return null;
   const inRace = items.filter((item) => item.group.toLowerCase().endsWith(`· ${r}`));
-  const kraken = inRace.filter((item) => item.group.startsWith("Kraken"));
+  const kraken = inRace.filter((item) => item.group.startsWith("Maelstrom"));
   return (
     kraken.find((item) => item.name.toLowerCase() === `${r} ${c}`) ??
     inRace.find((item) => c && item.name.toLowerCase().includes(c)) ??

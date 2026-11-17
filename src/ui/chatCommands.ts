@@ -419,7 +419,7 @@ export const COMMANDS: Command[] = [
   {
     names: ["info", "version"],
     args: "",
-    help: "About Kraken VTT and this table",
+    help: "About Maelstrom VTT and this table",
     group: "Screen",
     run: (_rest, context) => {
       const at = context.session.role === "dm" ? `hosting, ${context.session.players.length} at the table` : `at ${context.session.remoteLabel}`;

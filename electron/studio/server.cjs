@@ -107,7 +107,7 @@ let kraken = null;
 
 async function handleGet(req, res, url, webRoot) {
   if (url.pathname === "/api/kraken/open") {
-    if (!kraken) return json(res, { error: "Map Studio is not running inside Kraken." }, 400);
+    if (!kraken) return json(res, { error: "Map Studio is not running inside Maelstrom." }, 400);
     await assets.whenReady();
     return json(res, await kraken.open(url.searchParams.get("token") || ""));
   }
@@ -156,7 +156,7 @@ async function handlePost(req, res, url, raw) {
   if (pathname === "/api/upload") return json(res, { asset: await assets.imageImport(raw, url.searchParams.get("name") || "Artwork") });
   // Saved to Kraken: the image's master (walls, lights, weather) and, when it paints art, its picture.
   if (pathname === "/api/kraken/save") {
-    if (!kraken) return json(res, { error: "Map Studio is not running inside Kraken." }, 400);
+    if (!kraken) return json(res, { error: "Map Studio is not running inside Maelstrom." }, 400);
     const data = parseJson(raw);
     const project = assets.validateProject(field(data, "project"));
     return json(res, await kraken.save(String(data.token ?? ""), project, typeof data.image === "string" ? data.image : ""));

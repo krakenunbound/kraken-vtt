@@ -19,7 +19,7 @@ const { inflateSync } = require("fflate");
 const IMAGE = { ".png": "image/png", ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif" };
 const MAX_BYTES = 30 * 1024 * 1024;
 
-const rank = (group) => (group === "Kraken assets" ? 0 : group === "Kraken" ? 1 : group === "Fantasy Grounds" ? 3 : 2);
+const rank = (group) => (group === "Maelstrom assets" ? 0 : group === "Maelstrom" ? 1 : group === "Fantasy Grounds" ? 3 : 2);
 
 function mimeOf(name) {
   return IMAGE[path.extname(name).toLowerCase()] ?? null;
@@ -130,7 +130,7 @@ function createDecalLibrary({ folder, builtin = "", fgData = "", own = ["kraken"
     if (builtin) {
       for (const name of filesIn(builtin)) {
         const ruleset = named ? path.basename(name, path.extname(name)) : undefined;
-        items.set(`kraken/${name}`, { id: `kraken/${name}`, name: prettyName(name), group: "Kraken", ruleset, file: path.join(builtin, name), mime: mimeOf(name) });
+        items.set(`kraken/${name}`, { id: `kraken/${name}`, name: prettyName(name), group: "Maelstrom", ruleset, file: path.join(builtin, name), mime: mimeOf(name) });
       }
       // A game's own, in a folder named for it.
       for (const game of foldersIn(builtin)) {
@@ -139,10 +139,10 @@ function createDecalLibrary({ folder, builtin = "", fgData = "", own = ["kraken"
         }
       }
     }
-    for (const name of filesIn(folder)) items.set(`lib/${name}`, { id: `lib/${name}`, name: prettyName(hashNames ? name.replace(/^[0-9a-f]{12}-/, "") : name), group: "Kraken assets", file: path.join(folder, name), mime: mimeOf(name) });
+    for (const name of filesIn(folder)) items.set(`lib/${name}`, { id: `lib/${name}`, name: prettyName(hashNames ? name.replace(/^[0-9a-f]{12}-/, "") : name), group: "Maelstrom assets", file: path.join(folder, name), mime: mimeOf(name) });
     // The GM's own for a game, in a folder named for it ("D&D 3.5e/"): under that game's filter too.
     for (const game of foldersIn(folder)) {
-      for (const name of filesIn(path.join(folder, game))) items.set(`lib/${game}/${name}`, { id: `lib/${game}/${name}`, name: prettyName(name), group: "Kraken assets", ruleset: game, file: path.join(folder, game, name), mime: mimeOf(name) });
+      for (const name of filesIn(path.join(folder, game))) items.set(`lib/${game}/${name}`, { id: `lib/${game}/${name}`, name: prettyName(name), group: "Maelstrom assets", ruleset: game, file: path.join(folder, game, name), mime: mimeOf(name) });
     }
     if (fgData) {
       const fgDecals = path.join(fgData, "decals");
@@ -216,7 +216,7 @@ function createDecalLibrary({ folder, builtin = "", fgData = "", own = ["kraken"
           fs.writeFileSync(path.join(folder, target), data);
           index = null;
         }
-        return { id: `lib/${target}`, name: prettyName(target.slice(13)), group: "Kraken assets" };
+        return { id: `lib/${target}`, name: prettyName(target.slice(13)), group: "Maelstrom assets" };
       }
       const existing = filesIn(folder).find((file) => {
         try {
@@ -230,7 +230,7 @@ function createDecalLibrary({ folder, builtin = "", fgData = "", own = ["kraken"
       for (let n = 2; !existing && fs.existsSync(path.join(folder, target)); n++) target = `${path.basename(base, path.extname(base))} (${n})${path.extname(base)}`;
       if (!existing) fs.writeFileSync(path.join(folder, target), data);
       index = null;
-      return { id: `lib/${target}`, name: prettyName(target), group: "Kraken assets" };
+      return { id: `lib/${target}`, name: prettyName(target), group: "Maelstrom assets" };
     },
     addFile(file) {
       const stat = fs.statSync(file);

@@ -92,7 +92,7 @@ export function CharacterSelect({ session, onSheet, onWizard, onClose }: { sessi
             Create
           </button>
         ) : null}
-        <button type="button" className="ghost" data-action="import-character" onClick={files.open} title="Import a character (Kraken, Fantasy Grounds, Foundry or Roll20 file)">
+        <button type="button" className="ghost" data-action="import-character" onClick={files.open} title="Import a character (Maelstrom or Kraken, Fantasy Grounds, Foundry or Roll20 file)">
           <Icon name="import" size={15} /> Import
         </button>
         {files.picker}

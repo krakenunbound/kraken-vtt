@@ -1,6 +1,6 @@
 # Settings
 
-Settings (the cog, or `/settings`) holds everyone's own preferences and the GM's table options. Players see only the parts that are theirs. This page goes through each part, and describes the `Documents/Kraken VTT` folder where everything you add to Kraken lives.
+Settings (the cog, or `/settings`) holds everyone's own preferences and the GM's table options. Players see only the parts that are theirs. This page goes through each part, and describes the `Documents/Kraken VTT` folder where everything you add to Maelstrom lives.
 
 ## For everyone
 
@@ -30,19 +30,19 @@ Opens the **Dice** window: your dice sets, colours, design, material, lettering,
 | **GM Icon** | Your picture beside what you say in chat. |
 | **Critical Hits & Fumbles** | The critical hit and fumble tables' window. |
 | **Death Markers** | The set each creature type leaves where it dies. |
-| **Kraken VTT Folder** | Opens `Documents/Kraken VTT`. |
-| **Open logs** | Kraken's logs, for a bug report. |
+| **Maelstrom VTT Folder** | Opens `Documents/Kraken VTT`. |
+| **Open logs** | Maelstrom's logs, for a bug report. |
 
 ### Look, chat languages, currency and modifiers
 
-- **Look**: the table's theme on every screen, changed at once: Kraken (brass), Abyss (sea), Ember, Arcane (violet), Iron (steel).
+- **Look**: the table's theme on every screen, changed at once: Maelstrom (brass), Abyss (sea), Ember, Arcane (violet), Iron (steel).
 - **Chat languages**: your setting's own languages, beside the game's and those the characters know.
 - **Currency**: your world's coins, most valuable first, for the party sheet and treasure parcels. Empty: the game's own.
 - **Modifiers**: named numbers beside every player's modifier box, one a line (*Higher ground +1*).
 
-Decals, wallpapers and GM icons each offer Kraken's own, a set for each game, **Browse…** to import a picture of your own, or none.
+Decals, wallpapers and GM icons each offer Maelstrom's own, a set for each game, **Browse…** to import a picture of your own, or none.
 
-![The hex grid wallpaper, the Kraken decal and the dice tower](../screenshots/desktop-hex.jpg)
+![The hex grid wallpaper, the Maelstrom decal and the dice tower](../screenshots/desktop-hex.jpg)
 
 ### Dice and the dice tower
 
@@ -75,9 +75,9 @@ Some games add their own rows here, shown only in that game.
 
 The folders of your Dungeondraft packs and your art packs (`.mod`). See [Map Studio](map-studio.md#the-art-it-uses).
 
-## Your Kraken VTT folder
+## Your Maelstrom VTT folder
 
-Everything you add to Kraken lives in `Documents/Kraken VTT` (Settings > **Kraken VTT Folder** opens it), one folder for each kind of thing:
+Everything you add to Maelstrom lives in `Documents/Kraken VTT` (Settings > **Your Maelstrom folder** opens it), one folder for each kind of thing. (Maelstrom VTT was called Kraken VTT while it was young; the folder keeps that name for now, so nothing of yours moves.)
 
 | Folder | What goes in it |
 |---|---|

@@ -1,6 +1,6 @@
 # Joining a table (players)
 
-This page is for players. You need only a web browser: Chrome, or another Chromium browser such as Edge, on a desktop or laptop computer. Phones are not supported. You install nothing; your GM's copy of Kraken serves the whole table.
+This page is for players. You need only a web browser: Chrome, or another Chromium browser such as Edge, on a desktop or laptop computer. Phones are not supported. You install nothing; your GM's copy of Maelstrom serves the whole table.
 
 ![A player's view in Chrome](../screenshots/player-crypt.jpg)
 
@@ -11,7 +11,7 @@ This page is for players. You need only a web browser: Chrome, or another Chromi
 3. If the GM set a **table password** and sent you a plain address, type it too. An invite link already carries it.
 4. Press **Take your seat**.
 
-If you lose your connection, Kraken shows *Reconnecting…* and puts you back in the same seat by itself. If you closed the tab, open the address again: you come back to the same seat.
+If you lose your connection, Maelstrom shows *Reconnecting…* and puts you back in the same seat by itself. If you closed the tab, open the address again: you come back to the same seat.
 
 ## Your character
 

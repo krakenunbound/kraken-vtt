@@ -247,13 +247,13 @@ function accounts() {
 function krakenArtRoots() {
   const assets = path.join(USER_DATA, "assets");
   return [
-    { dir: path.join(assets, "portraits"), kind: "portrait", group: "Kraken", prefix: "kraken/portraits/" },
-    { dir: path.join(assets, "tokens"), kind: "token", group: "Kraken", prefix: "kraken/tokens/" },
+    { dir: path.join(assets, "portraits"), kind: "portrait", group: "Maelstrom", prefix: "kraken/portraits/" },
+    { dir: path.join(assets, "tokens"), kind: "token", group: "Maelstrom", prefix: "kraken/tokens/" },
     // Kraken's own games' heroes, shipped with the app: a portrait and token
     // for each kin and class (Descending Darkness) and Origin and Path (Apeira
     // Astra), so a tester's new character has one with nothing else installed.
-    { dir: path.join(APP_DIR, "games", "portraits"), kind: "portrait", group: "Kraken", prefix: "kraken-games/portraits/" },
-    { dir: path.join(APP_DIR, "games", "tokens"), kind: "token", group: "Kraken", prefix: "kraken-games/tokens/" },
+    { dir: path.join(APP_DIR, "games", "portraits"), kind: "portrait", group: "Maelstrom", prefix: "kraken-games/portraits/" },
+    { dir: path.join(APP_DIR, "games", "tokens"), kind: "token", group: "Maelstrom", prefix: "kraken-games/tokens/" },
   ];
 }
 // Image layers' pictures (map tiles): the GM's assets folder, shared by every
@@ -472,7 +472,7 @@ const studioAssets = () => require("./studio/assets.cjs");
 function openMaster(sceneId) {
   if (!table || !hosted) throw new Error("Host the campaign first: Map Studio saves into its images.");
   const view = table.agent.map.studioView();
-  if (!view || (sceneId && view.scene.id !== sceneId)) throw new Error("That image is no longer open in Kraken: open it again, then Map Studio.");
+  if (!view || (sceneId && view.scene.id !== sceneId)) throw new Error("That image is no longer open in Maelstrom: open it again, then Map Studio.");
   return view;
 }
 async function studioOpenImage({ sceneId, name, picture }) {
@@ -486,7 +486,7 @@ async function studioOpenImage({ sceneId, name, picture }) {
 }
 async function studioOpen(token) {
   const found = bridge().session(token);
-  if (!found) throw new Error("Open the image in Map Studio from Kraken again.");
+  if (!found) throw new Error("Open the image in Map Studio from Maelstrom again.");
   const view = openMaster(found.sceneId);
   return { project: bridge().projectFor({ view, pictureId: found.pictureId, size: found.size, name: found.name }), kraken: { scene: view.scene.name } };
 }
@@ -494,7 +494,7 @@ async function studioOpen(token) {
 const studioPictureFile = (campaignId, picture) => path.join(USER_DATA, "studio", "pictures", String(campaignId).replace(/[^\w.-]/g, "_"), String(picture?.file ?? "").replace(/[^\w.-]/g, "_"));
 async function studioSave(token, project, image) {
   const found = bridge().session(token);
-  if (!found) throw new Error("Open the image in Map Studio from Kraken again.");
+  if (!found) throw new Error("Open the image in Map Studio from Maelstrom again.");
   const view = openMaster(found.sceneId);
   const master = bridge().masterFrom(project, view.scene);
   let picture = null;

@@ -1,6 +1,6 @@
 # Release notes
 
-Kraken's releases, with their downloads, are on [GitHub Releases](https://github.com/krakenunbound/kraken-vtt/releases), and the full list of changes is in the [changelog](../../CHANGELOG.md). New builds reach the GM through the start screen's update (see [Installing and updates](installing-and-updates.md)). This page sums up what is coming in the next release.
+Maelstrom's releases, with their downloads, are on [GitHub Releases](https://github.com/krakenunbound/kraken-vtt/releases), and the full list of changes is in the [changelog](../../CHANGELOG.md). New builds reach the GM through the start screen's update (see [Installing and updates](installing-and-updates.md)). This page sums up what is coming in the next release.
 
 ## Coming next (unreleased)
 
@@ -11,7 +11,7 @@ Kraken's releases, with their downloads, are on [GitHub Releases](https://github
 - Drag a result from a random table's window into the chat's entry.
 - In 5E, ADV and DIS from the modifier box tag a roll **[ADVANTAGE]** or **[DISADVANTAGE]**.
 - Pause also holds a player finishing the character wizard or improving a character.
-- A region switched off at the table stays off after Map Studio's Save to Kraken.
+- A region switched off at the table stays off after Map Studio's Save to Maelstrom.
 - Clicking a roll chip while typing in a note places the cursor instead of rolling.
 - Smaller fixes to Fate dice, the Scene Aspects strip, the Forged Harm panel, Character Selection's Export menu and template labels.
 

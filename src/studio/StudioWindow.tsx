@@ -15,7 +15,7 @@ export function StudioWindow({ project: page }: { project?: string }) {
     }
     const kraken = window.kraken;
     if (!kraken?.studioUrl) {
-      setError("Map Studio runs in the Kraken VTT app.");
+      setError("Map Studio runs in the Maelstrom VTT app.");
       return;
     }
     kraken

@@ -1,6 +1,6 @@
 # Keyboard and mouse
 
-Kraken is mostly driven by the mouse: click to use, drag to move or share, right-click for a menu. This page lists the keys and mouse moves on the map, the quick slots, and other shortcuts. The map's keys work while the map has the focus, not while you type in chat or a note.
+Maelstrom is mostly driven by the mouse: click to use, drag to move or share, right-click for a menu. This page lists the keys and mouse moves on the map, the quick slots, and other shortcuts. The map's keys work while the map has the focus, not while you type in chat or a note.
 
 ## The map
 

@@ -299,7 +299,7 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
               Activation
             </button>
             {canPack ? (
-              <button type="button" role="tab" aria-selected={tab === "packs"} className={tab === "packs" ? "dice-chip on" : "dice-chip"} data-books-tab="packs" title="Your FG books in Kraken's own files, to use on any computer without Fantasy Grounds" onClick={() => setTab("packs")}>
+              <button type="button" role="tab" aria-selected={tab === "packs"} className={tab === "packs" ? "dice-chip on" : "dice-chip"} data-books-tab="packs" title="Your FG books in Maelstrom's own files, to use on any computer without Fantasy Grounds" onClick={() => setTab("packs")}>
                 Packs
               </button>
             ) : null}
@@ -341,7 +341,7 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
                       <b>{item.title}</b>
                       <small>
                         {item.ruleset || "Any game"}
-                        {item.pack ? " · Kraken pack" : ""}
+                        {item.pack ? " · Maelstrom pack" : ""}
                         {item.hasBook ? "" : " · no book (pictures, tokens)"}
                       </small>
                     </span>

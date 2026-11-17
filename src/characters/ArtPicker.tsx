@@ -57,8 +57,8 @@ export function ArtPicker({
         if (!live) return;
         setItems(list);
         const wanted = race.trim().toLowerCase();
-        const byRace = wanted ? list.find((item) => item.group === `Kraken · ${race.trim()}`)?.group ?? list.find((item) => item.group.toLowerCase().endsWith(`· ${wanted}`))?.group : undefined;
-        const preferred = list.find((item) => item.id === current)?.group ?? byRace ?? list.find((item) => item.group.startsWith("Kraken"))?.group ?? "";
+        const byRace = wanted ? list.find((item) => item.group === `Maelstrom · ${race.trim()}`)?.group ?? list.find((item) => item.group.toLowerCase().endsWith(`· ${wanted}`))?.group : undefined;
+        const preferred = list.find((item) => item.id === current)?.group ?? byRace ?? list.find((item) => item.group.startsWith("Maelstrom"))?.group ?? "";
         setGroup(preferred);
       })
       .catch(() => live && setFailed(true));
@@ -136,7 +136,7 @@ export function defaultArt(items: ArtItem[], race: string, cls: string) {
   const c = cls.trim().toLowerCase();
   if (!r) return null;
   const inRace = items.filter((item) => item.group.toLowerCase().endsWith(`· ${r}`));
-  const kraken = inRace.filter((item) => item.group.startsWith("Kraken"));
+  const kraken = inRace.filter((item) => item.group.startsWith("Maelstrom"));
   return kraken.find((item) => item.name.toLowerCase() === `${r} ${c}`) ?? inRace.find((item) => c && item.name.toLowerCase().includes(c)) ?? kraken[0] ?? inRace.find((item) => !item.video) ?? null;
 }
 

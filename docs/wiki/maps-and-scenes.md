@@ -1,6 +1,6 @@
 # Maps and scenes
 
-Maps in Kraken work like Fantasy Grounds' images: every picture you see opens in the image window, and each picture has one master copy that keeps its walls, doors, lights, paint, effects and tokens. This page covers opening and sharing maps, the image window and its tools, the map editor, and what happens on a map during play. Tokens, sight and light have their own page: [Tokens, vision and lighting](tokens-vision-and-lighting.md).
+Maps in Maelstrom work like Fantasy Grounds' images: every picture you see opens in the image window, and each picture has one master copy that keeps its walls, doors, lights, paint, effects and tokens. This page covers opening and sharing maps, the image window and its tools, the map editor, and what happens on a map during play. Tokens, sight and light have their own page: [Tokens, vision and lighting](tokens-vision-and-lighting.md).
 
 ## Opening a map
 
@@ -35,7 +35,7 @@ The players button in the map's tools glides every player's map to what you see 
 
 **The tool strip:** zoom, fit, the **navigation pad** (buttons to pan and zoom), find a token, pan, ping, draw, erase, area target, and for the GM: share, pins (the map's shortcuts shown or hidden), scene settings, a light, line of sight, and token movement lock.
 
-**Open in Map Studio** (on the image window's bar) opens the image in Kraken's map maker with its walls, doors, lights and weather. See [Map Studio](map-studio.md).
+**Open in Map Studio** (on the image window's bar) opens the image in Maelstrom's map maker with its walls, doors, lights and weather. See [Map Studio](map-studio.md).
 
 ## Assets
 
@@ -51,7 +51,7 @@ Unlock a map to edit it.
 
 ![The map editor: walls, doors and lights](../screenshots/map-editor.jpg)
 
-- **Walls, doors and windows:** drawn where your hand puts them, snapping to the grid and to wall ends. Maps from your Fantasy Grounds modules and Kraken's own adventures bring their walls and doors with them.
+- **Walls, doors and windows:** drawn where your hand puts them, snapping to the grid and to wall ends. Maps from your Fantasy Grounds modules and Maelstrom's own adventures bring their walls and doors with them.
 - **Grid:** square or hex, its size and offset.
 - **Lights:** placed on the map, with colour and animation. A light's right-click menu can turn it into **magical darkness**.
 - **Masks:** hide parts of the map from players.

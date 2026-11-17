@@ -1,6 +1,6 @@
 # Tutorials
 
-Short walkthroughs for the things a GM does every session. Each one takes a few minutes. Start with the [Quickstart](quickstart.md) if you have not run a game in Kraken yet.
+Short walkthroughs for the things a GM does every session. Each one takes a few minutes. Start with the [Quickstart](quickstart.md) if you have not run a game in Maelstrom yet.
 
 ## 1. Reveal the monsters when the party walks in
 

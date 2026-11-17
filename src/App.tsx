@@ -438,7 +438,7 @@ export function App() {
   // Map Studio on this image: its picture (as this window has it) and its master.
   async function openInStudio(shown: MapScene) {
     const kraken = window.kraken;
-    if (!kraken?.studioOpenImage) throw new Error("Map Studio runs in the Kraken VTT app.");
+    if (!kraken?.studioOpenImage) throw new Error("Map Studio runs in the Maelstrom VTT app.");
     if (!shown.imageUrl) throw new Error("This map has no picture to paint on.");
     const picture = new Uint8Array(await (await fetch(shown.imageUrl)).arrayBuffer());
     const { url } = await kraken.studioOpenImage({ sceneId: shown.id, name: shown.name, picture });
@@ -525,7 +525,7 @@ export function App() {
         >
           {testing ? "End play test" : "Play test"}
         </button>
-        <button type="button" data-action="image-studio" title="Open it in Map Studio: paint art, walls, doors, lights and weather; Save to Kraken writes them into this image" onClick={() => void openInStudio(prep.scene).catch((caught: Error) => setError(caught.message))}>
+        <button type="button" data-action="image-studio" title="Open it in Map Studio: paint art, walls, doors, lights and weather; Save to Maelstrom writes them into this image" onClick={() => void openInStudio(prep.scene).catch((caught: Error) => setError(caught.message))}>
           Open in Map Studio
         </button>
         <button type="button" className="ghost" data-action="image-close" title="Close the image (back to the table's map)" onClick={closeImage}>
