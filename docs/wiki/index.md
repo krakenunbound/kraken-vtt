@@ -1,6 +1,6 @@
 # Maelstrom VTT Wiki
 
-Maelstrom VTT is a free virtual tabletop. The game master (GM) runs Maelstrom on a Windows or Linux PC and hosts the table. Players join from Chrome and install nothing. Maelstrom keeps the campaign, decides what each player may see, and serves every player's browser. This wiki explains how to use it, from your first campaign to the tools for experienced GMs.
+Maelstrom VTT is a free virtual tabletop. The game master (GM) runs Maelstrom on a Windows or Linux PC and hosts the table. Players join from their browser (Chrome, Edge, Brave or Firefox) with nothing to install, or from the Maelstrom app. Maelstrom keeps the campaign, decides what each player may see, and serves every player's browser. This wiki explains how to use it, from your first campaign to the tools for experienced GMs.
 
 ![The GM's table: the crypt of The Empty Watchtower in torchlight](../screenshots/gm-crypt.jpg)
 
@@ -36,7 +36,7 @@ D&D 5E is in both columns: it plays from the SRD with nothing else installed, an
 
 - **New GM?** Read the [Quickstart](quickstart.md). It takes you from install to your first fight in ten steps.
 - **Learning the ropes?** The [Tutorials](tutorials.md) walk through revealing monsters, running a fight, range, languages, treasure and group saves.
-- **A player?** Read [Joining a table](players-joining.md). All you need is Chrome and the address your GM sends you.
+- **A player?** Read [Joining a table](players-joining.md). All you need is a browser (Chrome, Edge, Brave or Firefox) and the address your GM sends you.
 - **Coming from Fantasy Grounds?** Maelstrom uses FG's words wherever it can: the sidebar, the lock on record windows, the modifier box, quick slots, `/rollon`. Start with [Records, books and packs](records-books-and-packs.md).
 
 ## Every page

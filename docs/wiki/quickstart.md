@@ -30,4 +30,4 @@ More in [Joining a table](players-joining.md).
 
 ## Try it alone first
 
-You can open Chrome on the same PC, go to your table's network address from *Addresses to give your players*, and join your own table as a test player. It is a good way to see exactly what your players will see. The **eye** in a map window's corner (player vision preview) shows the same thing without a second window.
+You can open a browser on the same PC, go to your table's network address from *Addresses to give your players*, and join your own table as a test player. It is a good way to see exactly what your players will see. The **eye** in a map window's corner (player vision preview) shows the same thing without a second window.

@@ -3,8 +3,8 @@
 **[maelstromvtt.com](https://maelstromvtt.com)**
 
 A free virtual tabletop, with its source open to read. The game master runs Maelstrom on
-their Windows or Linux PC and hosts the table; players join from Chrome and install
-nothing. It aims for Foundry-level presentation with Fantasy Grounds-level ease
+their Windows or Linux PC and hosts the table; players join from their browser (Chrome,
+Edge, Brave or Firefox) with nothing to install, or from the Maelstrom app. It aims for Foundry-level presentation with Fantasy Grounds-level ease
 of use, and a built-in AI agent that can do anything the GM can.
 
 > **Alpha test.** Maelstrom is in alpha (see the version in the app's title bar).
@@ -223,7 +223,7 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
    Maelstrom with no other content.
 3. **Host.** Choose LAN, Internet or both, set a password if you like, and press
    **Play**. *Addresses to give your players* lists the addresses.
-4. **Players join.** They open the address in Chrome, or join from the
+4. **Players join.** They open the address in Chrome, Edge, Brave or Firefox, or join from the
    Maelstrom app, type their name and a password of their own, plus the table's
    password if you set one, and make a character.
 
