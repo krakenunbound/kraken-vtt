@@ -20,6 +20,9 @@ jobs:
           TAG: ${{ github.event.release.tag_name }}
         run: |
           if [ -z "$WEBHOOK" ]; then echo "No DISCORD_RELEASE_WEBHOOK secret: nothing posted."; exit 0; fi
+          # A pasted secret may carry spaces, a line break or quotes.
+          WEBHOOK=$(printf '%s' "$WEBHOOK" | tr -d "[:space:]\"'")
+          case "$WEBHOOK" in https://discord.com/api/webhooks/*|https://discordapp.com/api/webhooks/*) ;; *) echo "DISCORD_RELEASE_WEBHOOK is not a Discord webhook address (it should start with https://discord.com/api/webhooks/)."; exit 1;; esac
           if [ -n "$TAG" ]; then release=$(gh api "repos/$REPO/releases/tags/$TAG"); else release=$(gh api "repos/$REPO/releases?per_page=1" --jq '.[0]'); fi
           echo "$release" | jq '{
             username: "Maelstrom VTT",
