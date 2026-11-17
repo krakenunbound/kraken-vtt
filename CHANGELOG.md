@@ -4,7 +4,7 @@ What changed in each release of Maelstrom VTT (called Kraken VTT until alpha.92)
 [Releases](https://github.com/krakenunbound/maelstrom-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## Next
+## 0.1.0-alpha.95: New maps and a home on the web
 
 - **New maps for every included adventure.** The Empty Watchtower, Salvage Rights, A Lamp in the Rock, The Mill at Hob's Ford, Trouble in Twin Lakes, The Lighthouse at Gull's End, The Brine Street Job, The Cinder Barrow and The Silent Hulk now open Map Studio's maps, made from Maelstrom's own art with their walls and doors.
 - **Numbers on the d6.** Classic Ruby, Gilded and Ancient Bone roll numbered d6s like every other set; a dice pack that asks for pips gets large ones.
