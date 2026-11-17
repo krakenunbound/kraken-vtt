@@ -4,7 +4,7 @@ What changed in each release of Maelstrom VTT (called Kraken VTT until alpha.92)
 [Releases](https://github.com/krakenunbound/maelstrom-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## Next
+## 0.1.0-alpha.94: A new emblem
 
 - **A new emblem on the start screens:** a clockwork die in a ring of brass gears and blue light, inside the same turning rune rings, with a glowing heart in place of the kraken's eyes. The same die is the menu bar's mark, the logo on an empty table, the browser tab's icon and the app's icon.
 - **Map Studio opens big Dungeondraft packs in seconds.** A Forgotten Adventures pack of 9,000 pictures used to stall the editor; it now opens in a few seconds (each picture's size is read from its first bytes, the library is drawn once per pack, and the art list shows its first 600 matches: search or pick a kind to narrow it).
