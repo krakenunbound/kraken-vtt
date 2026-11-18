@@ -8,7 +8,8 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
-- **Windows can be minimized.** A minimize button in every window's title bar tucks it away to a tray just above the quick slots (still open: a map's walls, a sheet's tab, all as you left them). Click its chip in the tray, or its sidebar button, or open the same image again, to bring it back in front.
+- **Windows can be minimized.** A minimize button in every window's title bar tucks it away to a tray just above the quick slots (still open: a map's walls, a sheet's tab, all as you left them), a chip for each with its icon. Click its chip, or its sidebar button, or open the same image again, to bring it back in front. Drag the tray by its grip to put it anywhere (double-click the grip to send it back).
+- **A window of its own, minimized, comes back.** Minimizing a popped-out window with Windows' own button no longer loses it: its place is never saved as the spot Windows parks minimized windows (off every screen), one already saved that way opens in the main window, and opening it again or its sidebar button restores it.
 
 - **The start screen's MAELSTROM fits its panel**, its size taken from the room it has (it ran past the panel's edge with the New campaign form open).
 

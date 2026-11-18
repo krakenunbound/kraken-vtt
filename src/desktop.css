@@ -410,8 +410,11 @@ li.empty-state { list-style: none; }
 .window-close { padding: 2px 4px; background: transparent; border-color: transparent; color: var(--muted); }
 .window-close:hover { color: var(--text); border-color: var(--panel-edge); }
 /* Minimized windows: chips in a row just above the quick slots, each bringing its window back. */
-.window-tray { position: absolute; left: 50%; bottom: 74px; transform: translateX(-50%); z-index: 520; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: min(900px, 70vw); pointer-events: auto; }
-.window-tray-chip { max-width: 220px; padding: 4px 12px; border: 1px solid var(--panel-edge); border-radius: 999px; background: var(--panel); color: var(--text); font-size: 0.8rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45); }
+.window-tray { position: absolute; left: 50%; bottom: 74px; transform: translateX(-50%); z-index: 520; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 999px; background: rgba(12, 16, 22, 0.6); max-width: min(900px, 70vw); pointer-events: auto; }
+.window-tray.moved { bottom: auto; transform: none; }
+.window-tray-grip { align-self: center; padding: 2px 4px; color: var(--muted); cursor: grab; user-select: none; touch-action: none; letter-spacing: -2px; }
+.window-tray-grip:active { cursor: grabbing; }
+.window-tray-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 220px; padding: 4px 12px; border: 1px solid var(--panel-edge); border-radius: 999px; background: var(--panel); color: var(--text); font-size: 0.8rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45); }
 .window-tray-chip span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .window-tray-chip:hover { border-color: var(--brass); color: var(--brass); }
 .window-body { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }

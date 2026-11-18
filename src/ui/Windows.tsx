@@ -490,16 +490,64 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
   );
 }
 
-// The tray of minimized windows (along the bottom of the table): one chip for
-// each, a click brings it back where it was, in front.
+// Each kind's icon on its chip in the tray.
+const TRAY_ICON: Partial<Record<WindowKind, Parameters<typeof Icon>[0]["name"]>> = {
+  map: "map", studio: "pen", book: "book", books: "book", bookrecord: "book", story: "book", adventure: "book", record: "book", records: "book",
+  sheet: "character", characters: "character", charselect: "character", party: "party", players: "players", combat: "combat",
+  settings: "settings", sound: "music", assistant: "sparkle", calendar: "calendar", notes: "chat", note: "chat", effects: "flask",
+  clocks: "hourglass", dice: "d20", towers: "tower", library: "map", imagelist: "map", images: "map", picture: "map", sessionlog: "book",
+};
+// Where the GM left the tray (null: just above the quick slots).
+function readTrayPlace(): { x: number; y: number } | null {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem("kraken-window-tray") ?? "null");
+    return saved && Number.isFinite(saved.x) && Number.isFinite(saved.y) ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
+// The tray of minimized windows: a chip for each (its icon and name), a click
+// brings it back where it was, in front. More chips, a wider tray (it wraps);
+// dragged by its grip, it stays where it is put.
 export function WindowTray() {
   const { windows, restore } = useWindows();
   const tucked = windows.filter((item) => item.minimized);
+  const [place, setPlace] = useState(readTrayPlace);
+  const tray = useRef<HTMLElement | null>(null);
   if (!tucked.length) return null;
+  const grab = (event: React.PointerEvent) => {
+    if (event.button !== 0 || !tray.current) return;
+    event.preventDefault();
+    const box = tray.current.getBoundingClientRect();
+    const parent = tray.current.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+    const grip = { x: event.clientX - box.left, y: event.clientY - box.top };
+    const at = (x: number, y: number) => ({ x: Math.round(Math.min(Math.max(0, x - parent.left - grip.x), parent.width - 60)), y: Math.round(Math.min(Math.max(0, y - parent.top - grip.y), parent.height - 30)) });
+    let last = at(event.clientX, event.clientY);
+    const move = (moveEvent: PointerEvent) => {
+      last = at(moveEvent.clientX, moveEvent.clientY);
+      setPlace(last);
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      try {
+        window.localStorage.setItem("kraken-window-tray", JSON.stringify(last));
+      } catch {
+        /* kept for this sitting only */
+      }
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
   return (
-    <nav className="window-tray" aria-label="Minimized windows">
+    <nav ref={tray} className={place ? "window-tray moved" : "window-tray"} aria-label="Minimized windows" style={place ? { left: place.x, top: place.y } : undefined}>
+      <span className="window-tray-grip" title="Drag to move the tray (double-click: back above the quick slots)" aria-hidden="true" onPointerDown={grab} onDoubleClick={() => (setPlace(null), window.localStorage.removeItem("kraken-window-tray"))}>
+        ⋮⋮
+      </span>
       {tucked.map((item) => (
         <button key={item.key} type="button" className="window-tray-chip" data-window-chip={item.key} title={`Bring back ${item.title}`} onClick={() => restore(item.key)}>
+          <Icon name={TRAY_ICON[item.kind] ?? "popout"} size={14} />
           <span>{item.title}</span>
         </button>
       ))}

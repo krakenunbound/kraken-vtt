@@ -162,6 +162,27 @@ try {
   await page.locator(mapWindow).waitFor({ state: "visible" });
   report.push("minimize: the map window goes to the tray (the agent sees it), comes back from its chip as it was left, and when the image is opened again");
 
+  // Two minimized: a chip each with its icon, side by side; the tray dragged by its grip stays where it is put.
+  await tool("kraken_windows", { action: "open", kind: "players" });
+  await tool("kraken_windows", { action: "minimize", kind: "map" });
+  await tool("kraken_windows", { action: "minimize", kind: "players" });
+  await page.waitForFunction(() => document.querySelectorAll(".window-tray-chip").length === 2);
+  assert((await page.$$eval(".window-tray-chip", (all) => all.filter((chip) => chip.querySelector("svg")).length)) === 2, "each chip has its window's icon");
+  const grip = await page.locator(".window-tray-grip").boundingBox();
+  const trayFrom = await page.locator(".window-tray").boundingBox();
+  await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(grip.x - 300, grip.y - 200, { steps: 10 });
+  await page.mouse.up();
+  const trayTo = await page.locator(".window-tray").boundingBox();
+  assert(Math.abs(trayTo.x - (trayFrom.x - 300 - grip.width / 2 + (grip.x - trayFrom.x) + grip.width / 2 - (grip.x - trayFrom.x))) < 40 && trayTo.y < trayFrom.y - 150, `the tray moves with its grip (${JSON.stringify(trayFrom)} -> ${JSON.stringify(trayTo)})`);
+  assert(await page.evaluate(() => Boolean(window.localStorage.getItem("kraken-window-tray"))), "where the tray was put is remembered");
+  if (process.env.SHOT) await page.screenshot({ path: process.env.SHOT.replace(".png", "-tray2.png") });
+  for (const key of ["map", "players"]) await page.click(`.window-tray [data-window-chip="${key}"]`);
+  await page.locator(mapWindow).waitFor({ state: "visible" });
+  await tool("kraken_windows", { action: "close", kind: "players" });
+  report.push("two windows minimized: a chip each with its icon; the tray dragged by its grip stays where it is put; both brought back");
+
   // A window of its own minimized with the system's button: its place is not remembered as
   // Windows' parking spot (-32000), and opening it again brings it back (restored, in front).
   await tool("kraken_windows", { action: "open", kind: "settings" });
