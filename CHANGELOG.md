@@ -8,6 +8,7 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **Write your own adventure pages**: a story entry's pages can now be text, two columns, a heading, a picture alone or on the left or right of text, or a separator (scrollwork, knot, double rule, stars). Each page has a frame (parchment, read-aloud boxes, sidebar, note, warning, stone, gilded) and any background colour; read-aloud frames send their words to chat and over the map. Books' own framed boxes are drawn in their frames too.
 - **Windows have frames in the table's theme**: a dark band edged in the theme's colour with a flourish in each corner, a patterned interior apart from the wallpaper, and the panels inside ruled in gold. The chat has it too; the map and Map Studio stay edge to edge.
 - **UI scale in Settings** (You at the table): make everything on your screen smaller to fit more on it, or bigger, from 50% to 200% (90% until you choose). In the GM app it zooms every window, popped-out ones and Map Studio too; each screen keeps its own. `/scaleui` does the same.
 - **Story entries step on with arrows**: the window an adventure's story entry opens in has ‹ previous and next › at its foot, in the Story list's order, and its title follows the entry (in a popped-out window too).

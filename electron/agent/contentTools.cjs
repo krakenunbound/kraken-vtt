@@ -12,7 +12,8 @@ function needTable(ctx) {
   return table.agent;
 }
 const LINK = { type: "object", description: "A Kraken link (as a quick slot holds one): { kind: picture, book, file, label } or { kind: book, book, page, label }, or any other link" };
-const BLOCKS = { type: "array", description: "The pages in order: { kind: text, text (FG's formatted text) } | { kind: image, link } | { kind: page, link }", items: { type: "object" } };
+const FRAME_IDS = ["parchment", "boxed", "sea", "sidebar", "note", "warning", "stone", "picture"];
+const BLOCKS = { type: "array", description: "The pages in order: { kind: text, text } | { kind: columns, text, text2 } | { kind: header, text (plain) } | { kind: image, link } | { kind: imageleft or imageright, link, text } | { kind: page, link } | { kind: separator, style: scroll|knot|rule|stars }. Any but a separator may have frame (" + FRAME_IDS.join("|") + "; boxed and sea are read-aloud boxes) and color (#rrggbb background).", items: { type: "object" } };
 
 const TOOLS = [
   {
@@ -25,19 +26,23 @@ const TOOLS = [
   {
     name: "kraken_story",
     description:
-      "The campaign's story (FG's story records, with the Story Template's pages): its chapters are the list's categories. action create (name, chapter, order, blocks or text, visibility); copy (path: an adventure's story entry, as kraken_library list kind story gives it, copied into the campaign); set (id: name, chapter, order, blocks: the whole list of pages); add-block (id, kind text|image|page, text (FG's formatted text: <p>, <h>, <b>, <i>, <u>, <list><li>, <table><tr><td>, <frame> for boxed read-aloud text, <link class recordname>) or link, at); remove-block (id, at). Share it with kraken_record_update visibility (all, or a list of players' names).",
+      "The campaign's story (FG's story records, with the Story Template's pages): its chapters are the list's categories. action create (name, chapter, order, blocks or text, visibility); copy (path: an adventure's story entry, as kraken_library list kind story gives it, copied into the campaign); set (id: name, chapter, order, blocks: the whole list of pages); add-block (id, kind, text (formatted text: <p>, <h>, <b>, <i>, <u>, <list><li>, <table><tr><td>, <frame> for boxed read-aloud text, <link class recordname>), text2 (columns), link, frame, color, style, at); set-block (id, at, and any of text, text2, link, frame, color, style; frame or color \"\" clears it); remove-block (id, at). Share it with kraken_record_update visibility (all, or a list of players' names).",
     inputSchema: object(
       {
-        action: { type: "string", enum: ["create", "copy", "set", "add-block", "remove-block"] },
+        action: { type: "string", enum: ["create", "copy", "set", "add-block", "set-block", "remove-block"] },
         id: string("The story record (set, add-block, remove-block)"),
         name: string("Its name"),
         chapter: string("Its chapter (the story list's category)"),
         order: number("Its place in the chapter"),
         text: string("FG's formatted text (create: the first page; add-block)"),
         blocks: BLOCKS,
-        kind: { type: "string", enum: ["text", "image", "page"] },
+        kind: { type: "string", enum: ["text", "columns", "header", "image", "imageleft", "imageright", "page", "separator"] },
+        text2: string("columns: the right-hand column's formatted text"),
+        frame: { type: "string", description: "The page's frame: " + FRAME_IDS.join(", ") + " (\"\" none)" },
+        color: string("The page's background colour, #rrggbb (\"\" none)"),
+        style: { type: "string", enum: ["scroll", "knot", "rule", "stars"], description: "A separator's look" },
         link: LINK,
-        at: number("A page's index (add-block: where; remove-block: which)"),
+        at: number("A page's index (add-block: where; set-block and remove-block: which)"),
         path: string("copy: the story entry's FG path"),
         visibility: { description: "gm, all, or a list of players' names", anyOf: [{ type: "string", enum: ["gm", "all"] }, { type: "array", items: { type: "string" } }] },
       },

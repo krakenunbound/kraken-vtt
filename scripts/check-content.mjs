@@ -155,6 +155,27 @@ try {
   await tool("kraken_story", { action: "remove-block", id: story.id, at: 1 });
   blocks = agent.records.get(story.id).data.blocks;
   assert(blocks.length === 2 && blocks[0].text.includes("<frame>"), "a page removed, the boxed text kept");
+  // Pages of every kind, in frames and colours; what the host will not keep is dropped.
+  const laid = await tool("kraken_story", { action: "create", name: "Laid out", blocks: [
+    { kind: "header", text: "<b>The Hall</b>" },
+    { kind: "columns", text: "<p>Left</p>", text2: "<p>Right</p>", frame: "parchment", color: "#2A1F14" },
+    { kind: "imageleft", text: "<p>Beside</p>", link: { kind: "picture", book: "b", file: "f.png", label: "Map" }, frame: "boxed" },
+    { kind: "separator", style: "knot", frame: "boxed" },
+    { kind: "separator", style: "zigzag" },
+    { kind: "text", text: "<p>x</p>", frame: "javascript:alert(1)", color: "red; background:url(x)" },
+    { kind: "script", text: "no" },
+  ] });
+  blocks = agent.records.get(laid.id).data.blocks;
+  assert(blocks.length === 6, `an unknown kind is dropped (${blocks.length})`);
+  assert(blocks[0].text === "The Hall", `a heading is plain words (${blocks[0].text})`);
+  assert(blocks[1].text2 === "<p>Right</p>" && blocks[1].frame === "parchment" && blocks[1].color === "#2a1f14", `two columns in a frame and colour: ${JSON.stringify(blocks[1])}`);
+  assert(blocks[2].link?.file === "f.png" && blocks[2].text === "<p>Beside</p>" && blocks[2].frame === "boxed", `a picture beside text: ${JSON.stringify(blocks[2])}`);
+  assert(blocks[3].style === "knot" && !("frame" in blocks[3]) && blocks[4].style === "scroll", `separators: a style of the list, no frame (${JSON.stringify(blocks.slice(3, 5))})`);
+  assert(!("frame" in blocks[5]) && !("color" in blocks[5]), `an unknown frame and a colour that is not #rrggbb are dropped: ${JSON.stringify(blocks[5])}`);
+  await tool("kraken_story", { action: "set-block", id: laid.id, at: 1, frame: "sea", color: "" });
+  await tool("kraken_story", { action: "add-block", id: laid.id, kind: "header", text: "Below", at: 0 });
+  blocks = agent.records.get(laid.id).data.blocks;
+  assert(blocks[0].text === "Below" && blocks[2].frame === "sea" && !("color" in blocks[2]) && blocks[2].text === "<p>Left</p>", `set-block changes a frame and clears a colour: ${JSON.stringify(blocks.slice(0, 3))}`);
 
   // --- Tables on the host's dice: a campaign table made, imported, rolled; a player's /rollon.
   const made = await tool("kraken_table", { action: "import", name: "Rumours", text: "1  The well is cursed\n2  The miller lies\n3  [1d4+10] goblins in the hills" });

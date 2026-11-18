@@ -12,7 +12,8 @@ Drag anything into it (a book page, a picture, a character, a sound, a note, a r
 
 **World > Story** lists the campaign's own story entries above the adventures' entries, by chapter.
 
-- **New** makes one of the campaign's own. It has a chapter, an order, and pages: text, a picture, or a book page (drag a picture or page onto it).
+- **New** makes one of the campaign's own. It has a chapter, an order, and pages. Unlock it with the pen in its window to write: the buttons at the foot add a page of text, two columns, a heading, a picture, a picture on the left or right with text beside it, or a separator line (scrollwork, knot, double rule, stars). Drag a picture or a book page onto it for a page of its own.
+- Each page has a **frame and colour** button: parchment, two read-aloud boxes, sidebar, note, warning, stone or gilded, and any background colour. The arrows move a page, the bin removes it. Lock it again to read it as a book.
 - An adventure's entry has **Copy to campaign**, so you can change it without touching the book.
 - **Share** an entry and the players find it under their own **Story**, its pictures included.
 
@@ -32,7 +33,7 @@ See [Records, books and packs](records-books-and-packs.md#sharing-with-the-playe
 
 ## Read aloud
 
-Boxed text in an adventure (Fantasy Grounds' frames) has a speech button for the GM. Its words go to chat and appear over everyone's map as a speech bubble. `/story text` in chat posts story text without a name.
+Boxed text in an adventure, and story pages in a read-aloud frame, have a speech button for the GM. Its words go to chat and appear over everyone's map as a speech bubble. `/story text` in chat posts story text without a name.
 
 ## The Calendar
 

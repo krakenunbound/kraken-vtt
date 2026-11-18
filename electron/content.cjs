@@ -37,12 +37,29 @@ async function copyRecord(table, { id, name, book, path }, readBook = table.read
 // (the list's category), its order in it, and its pages in order: text (FG's
 // formatted text), a picture (a link), or a book page (a link).
 
-const BLOCK_KINDS = new Set(["text", "image", "page"]);
+// Kinds: text; columns (two texts side by side); header (a title line); image, imageleft and
+// imageright (a picture alone, or beside text); page (a book page); separator (a divider).
+// A block may have a frame (one of FRAMES; books' own frame names too) and a background colour.
+const BLOCK_KINDS = new Set(["text", "columns", "header", "image", "imageleft", "imageright", "page", "separator"]);
+const FRAMES = new Set(["parchment", "boxed", "sea", "sidebar", "note", "warning", "stone", "picture", "text1", "text2", "text3", "text4", "text5", "book", "page", "pink", "blue", "brown", "green", "yellow"]);
+const SEPARATORS = new Set(["scroll", "knot", "rule", "stars"]);
+const LINKED = new Set(["image", "imageleft", "imageright", "page"]);
+const WORDS = new Set(["text", "columns", "imageleft", "imageright"]);
 function cleanBlocks(blocks) {
   return (Array.isArray(blocks) ? blocks : [])
     .slice(0, 200)
     .filter((block) => block && BLOCK_KINDS.has(block.kind))
-    .map((block) => ({ kind: block.kind, ...(block.kind === "text" ? { text: String(block.text ?? "") } : { link: block.link && typeof block.link === "object" ? block.link : null }) }));
+    .map((block) => {
+      const out = { kind: block.kind };
+      if (block.kind === "separator") out.style = SEPARATORS.has(block.style) ? block.style : "scroll";
+      else if (block.kind === "header") out.text = String(block.text ?? "").replace(/<[^>]*>/g, "").slice(0, 200);
+      else if (WORDS.has(block.kind)) out.text = String(block.text ?? "");
+      if (block.kind === "columns") out.text2 = String(block.text2 ?? "");
+      if (LINKED.has(block.kind)) out.link = block.link && typeof block.link === "object" ? block.link : null;
+      if (block.kind !== "separator" && FRAMES.has(block.frame)) out.frame = block.frame;
+      if (block.kind !== "separator" && /^#[0-9a-f]{6}$/i.test(String(block.color ?? ""))) out.color = String(block.color).toLowerCase();
+      return out;
+    });
 }
 function storyAction(table, args) {
   const action = String(args.action ?? "");
@@ -67,8 +84,8 @@ function storyAction(table, args) {
   }
   if (action === "add-block") {
     const blocks = cleanBlocks(record.data.blocks);
-    const block = cleanBlocks([{ kind: args.kind ?? "text", text: args.text, link: args.link }])[0];
-    if (!block) throw new Error("A page is text, image or page.");
+    const block = cleanBlocks([{ kind: args.kind ?? "text", text: args.text, text2: args.text2, link: args.link, frame: args.frame, color: args.color, style: args.style }])[0];
+    if (!block) throw new Error("A page is text, columns, header, image, imageleft, imageright, page or separator.");
     const at = Number.isInteger(args.at) ? Math.max(0, Math.min(blocks.length, args.at)) : blocks.length;
     blocks.splice(at, 0, block);
     return table.records.update(record.id, { data: { blocks } }, table.seat);
@@ -77,7 +94,19 @@ function storyAction(table, args) {
     const blocks = cleanBlocks(record.data.blocks).filter((_, index) => index !== Number(args.at));
     return table.records.update(record.id, { data: { blocks } }, table.seat);
   }
-  throw new Error("kraken_story does create, copy, set, add-block or remove-block.");
+  if (action === "set-block") {
+    // One page changed: its words, its frame, its colour (null clears it), its separator style.
+    const blocks = cleanBlocks(record.data.blocks);
+    const at = Number(args.at);
+    if (!blocks[at]) throw new Error(`No page ${at}.`);
+    const next = { ...blocks[at] };
+    for (const key of ["text", "text2", "link", "frame", "color", "style"]) if (args[key] !== undefined) next[key] = args[key];
+    if (args.frame === "" || args.frame === null) delete next.frame;
+    if (args.color === "" || args.color === null) delete next.color;
+    blocks[at] = cleanBlocks([next])[0];
+    return table.records.update(record.id, { data: { blocks } }, table.seat);
+  }
+  throw new Error("kraken_story does create, copy, set, add-block, set-block or remove-block.");
 }
 
 // --- Random tables ------------------------------------------------------------

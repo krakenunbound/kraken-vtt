@@ -103,14 +103,14 @@ const dropLink = (where, selector, link) =>
   );
 const topRecord = () => page.locator(".window").filter({ has: page.locator(".record-window") }).last();
 const closeRecords = async () => {
-  for (const button of await page.$$('.window[data-window="record"] button[aria-label^="Close"]')) await button.click({ timeout: 2000 }).catch(() => undefined);
+  for (const button of await page.$$('.window[data-window="record"] button[aria-label^="Close"]')) await button.evaluate((element) => element.click()).catch(() => undefined); // pressed, even under another window
   await settle(150);
 };
 const closeAll = async () => {
   for (let pass = 0; pass < 3; pass++) {
     const buttons = await page.$$('.window:not([data-window="map"]) button[aria-label^="Close"]');
     if (!buttons.length) return;
-    for (const button of buttons) await button.click({ timeout: 2000 }).catch(() => undefined);
+    for (const button of buttons) await button.evaluate((element) => element.click()).catch(() => undefined);
     await settle(150);
   }
 };
@@ -255,6 +255,22 @@ try {
     await dropLink(page, `.story-view [data-record-drop="story"]`, { kind: "picture", book: picture.book ?? contents.id ?? "", file: picture.file, label: picture.name ?? "Map" });
     await until(async () => (await get(story.id)).data.blocks.some((block) => block.kind === "image"), "a picture page");
   }
+  // Pages laid out with the add buttons: two columns, a heading, a separator; the first page framed to read aloud, coloured.
+  const pageCount = async () => (await get(story.id)).data.blocks.length;
+  const before = await pageCount();
+  for (const kind of ["columns", "header", "separator"]) {
+    await page.click(`.record-window[data-record="${story.id}"] [data-action="story-add-${kind}"]`);
+    await until(async () => (await pageCount()) === before + ["columns", "header", "separator"].indexOf(kind) + 1, `a ${kind} page added`);
+  }
+  await page.locator(`.record-window[data-record="${story.id}"] [data-story-block="0"] [data-action="story-style"]`).click();
+  await page.click(`.record-window[data-record="${story.id}"] [data-story-style="0"] [data-frame="boxed"]`);
+  await until(async () => (await get(story.id)).data.blocks[0].frame === "boxed", "the first page framed to read aloud");
+  await page.click(`.record-window[data-record="${story.id}"] [data-story-style="0"] [data-colour="#14202a"]`);
+  await until(async () => (await get(story.id)).data.blocks[0].color === "#14202a", "and coloured");
+  await page.selectOption(`.record-window[data-record="${story.id}"] [data-story-kind="separator"] [data-action="story-separator"]`, "stars");
+  await until(async () => (await get(story.id)).data.blocks.some((block) => block.kind === "separator" && block.style === "stars"), "the separator's stars");
+  const laid = (await get(story.id)).data.blocks.slice(before).map((block) => block.kind);
+  assert(laid.join() === "columns,header,separator", `the pages added: ${laid}`);
   const blocks = (await get(story.id)).data.blocks;
   assert(/<h>The Lakes<\/h>/.test(blocks[0].text) && /<frame>Fog lies on the water like wool\.<\/frame>/.test(blocks[0].text), `the story's page in FG's tags: ${blocks[0].text}`);
   await page.screenshot({ path: path.join(shots, "4-story-editing.png") });
@@ -265,6 +281,9 @@ try {
   await seat.waitForSelector(`.record-window[data-record="${story.id}"] .story-view h4`);
   assert((await seat.textContent(`.record-window[data-record="${story.id}"] .story-view`)).includes("Fog lies on the water"), "the player reads the story");
   if (picture) await seat.waitForFunction((id) => { const image = document.querySelector(`.record-window[data-record="${id}"] .story-block img`); return image && image.complete && image.naturalWidth > 0; }, story.id, { timeout: 15000 });
+  // The player sees the frame, its colour and the separator, and none of the editing tools.
+  const shown = await seat.evaluate((id) => { const view = document.querySelector(`.record-window[data-record="${id}"] .story-view`); const framed = view.querySelector(".story-block.framed.boxed"); return { framed: Boolean(framed), colour: framed ? getComputedStyle(framed).backgroundColor : "", stars: Boolean(view.querySelector(".story-separator.stars")), tools: view.querySelectorAll(".story-block-tools, .story-add").length }; }, story.id);
+  assert(shown.framed && shown.colour === "rgb(20, 32, 42)" && shown.stars && shown.tools === 0, `the player's story: framed, coloured, a separator, no tools (${JSON.stringify(shown)})`);
   await seat.screenshot({ path: path.join(shots, "4-story-player.png") });
 
   // 5. Tables: Import pasted, the window's Roll, the rows edited; the player's /rollon.

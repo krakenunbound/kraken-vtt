@@ -7,6 +7,7 @@ import { hasLink, LINK_ICON, linkFrom, slotDrag, useOpenLink } from "../ui/Quick
 import { useWindows } from "../ui/Windows";
 import { manifestOf } from "../rulesets/index";
 import { FormattedText } from "./Records";
+import { READ_FRAMES, ReadAloudButton } from "./readAloud";
 import { useContextMenu, type MenuItem } from "./Books";
 
 // Editing the campaign's records, as FG's record windows do once their lock
@@ -560,21 +561,106 @@ const linkRecord = (link: QuickSlot) => (link.kind === "record" || link.kind ===
 
 // --- The story -----------------------------------------------------------------------
 
-type Block = { kind: "text" | "image" | "page"; text?: string; link?: QuickSlot | null };
+type BlockKind = "text" | "columns" | "header" | "image" | "imageleft" | "imageright" | "page" | "separator";
+type Block = { kind: BlockKind; text?: string; text2?: string; link?: QuickSlot | null; frame?: string; color?: string; style?: string };
 const blocksOf = (record: TableRecord): Block[] => (Array.isArray(record.data.blocks) ? (record.data.blocks as Block[]) : typeof record.data.text === "string" ? [{ kind: "text", text: record.data.text }] : []);
 
-// A story record (FG's story, with the Story Template's pages): text pages in
-// the editor, pictures, book pages; its chapter and its place in it.
+// The frames a page can have (the host keeps only these, and books' own names); boxed and sea are read aloud.
+const STORY_FRAMES: { id: string; label: string }[] = [
+  { id: "", label: "No frame" },
+  { id: "parchment", label: "Parchment" },
+  { id: "boxed", label: "Read aloud" },
+  { id: "sea", label: "Read aloud (sea)" },
+  { id: "sidebar", label: "Sidebar" },
+  { id: "note", label: "Note" },
+  { id: "warning", label: "Warning" },
+  { id: "stone", label: "Stone" },
+  { id: "picture", label: "Gilded" },
+];
+const STORY_COLOURS = ["", "#2a1f14", "#14202a", "#1d2a17", "#2a1420", "#2b2716", "#1c1c22"];
+const SEPARATOR_STYLES = [
+  { id: "scroll", label: "Scrollwork" },
+  { id: "knot", label: "Knot" },
+  { id: "rule", label: "Double rule" },
+  { id: "stars", label: "Stars" },
+];
+const readAloudFrame = (frame?: string) => Boolean(frame) && (frame === "boxed" || frame === "sea" || READ_FRAMES.has(frame ?? ""));
+const plainOf = (html: string) => new DOMParser().parseFromString(html, "text/html").body.textContent ?? "";
+
+// A small drawing of each kind of page, for the buttons that add one.
+function BlockGlyph({ kind }: { kind: BlockKind }) {
+  const line = (y: number, x1 = 3, x2 = 21) => <path key={`${y}-${x1}`} d={`M${x1} ${y}H${x2}`} />;
+  const picture = (x: number, w: number) => <rect key={`pic-${x}`} x={x} y={5} width={w} height={10} rx={1} />;
+  const parts: Record<BlockKind, ReactNode> = {
+    text: [line(6), line(10), line(14), line(18, 3, 15)],
+    columns: [line(6, 3, 11), line(10, 3, 11), line(14, 3, 11), line(6, 13, 21), line(10, 13, 21), line(14, 13, 21)],
+    header: [<rect key="h" x={3} y={7} width={18} height={6} rx={1} fill="currentColor" />, line(17, 3, 15)],
+    image: [picture(3, 18), line(19, 7, 17)],
+    imageleft: [picture(3, 8), line(6, 13, 21), line(10, 13, 21), line(14, 13, 21)],
+    imageright: [picture(13, 8), line(6, 3, 11), line(10, 3, 11), line(14, 3, 11)],
+    page: [<path key="p" d="M6 3h9l4 4v14H6Z" />, line(11, 9, 16), line(15, 9, 16)],
+    separator: [line(12, 2, 9), line(12, 15, 22), <path key="d" d="M12 9l3 3-3 3-3-3Z" fill="currentColor" />],
+  };
+  return (
+    <svg viewBox="0 0 24 24" width={20} height={20} fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" aria-hidden="true">
+      {parts[kind]}
+    </svg>
+  );
+}
+const ADD_KINDS: { kind: BlockKind; title: string }[] = [
+  { kind: "text", title: "A page of text" },
+  { kind: "columns", title: "Two columns of text" },
+  { kind: "header", title: "A heading" },
+  { kind: "image", title: "A picture (drop one on it)" },
+  { kind: "imageleft", title: "A picture on the left, text beside it" },
+  { kind: "imageright", title: "Text with a picture on the right" },
+  { kind: "separator", title: "A separator line" },
+];
+const newBlock = (kind: BlockKind): Block =>
+  kind === "separator"
+    ? { kind, style: "scroll" }
+    : kind === "header"
+      ? { kind, text: "Heading" }
+      : kind === "columns"
+        ? { kind, text: "", text2: "" }
+        : kind === "image" || kind === "page"
+          ? { kind, link: null }
+          : kind === "text"
+            ? { kind, text: "" }
+            : { kind, text: "", link: null };
+
+// A story record (with pages, as a book's): text, two columns, headings, pictures alone or beside text,
+// book pages and separators, each in a frame and colour of the GM's choosing. Locked, it reads as a book.
 export function StoryView({ session, record, editable }: { session: Session; record: TableRecord; editable: boolean }) {
   const openLink = useOpenLink(session);
   const blocks = blocksOf(record);
+  const [styling, setStyling] = useState<number | null>(null);
   const setBlocks = (next: Block[]) => void session.content("story", { action: "set", id: record.id, blocks: next });
+  const change = (index: number, patch: Partial<Block>) => setBlocks(blocks.map((item, at) => (at === index ? { ...item, ...patch } : item)));
   const move = (index: number, by: number) => {
     const next = [...blocks];
     const [block] = next.splice(index, 1);
     next.splice(Math.max(0, Math.min(next.length, index + by)), 0, block);
     setBlocks(next);
   };
+  const words = (block: Block, index: number, key: "text" | "text2", label: string) => (
+    <RichText value={block[key] ?? ""} editable={editable} label={`Page ${index + 1} ${label}`} onSave={(text) => change(index, { [key]: text })} onOpen={openLink} read={<FormattedText text={block[key] ?? ""} onOpen={openLink} />} />
+  );
+  const picture = (block: Block, index: number) =>
+    block.link ? (
+      <figure {...slotDrag(block.link)}>
+        {block.link.kind === "picture" ? <img src={session.bookUrl("picture", block.link.book, block.link.file)} alt={block.link.label} loading="lazy" onClick={() => openLink(block.link!)} /> : null}
+        <figcaption>
+          <button type="button" className="note-chip-open" onClick={() => openLink(block.link!)} title={`Open ${block.link.label}`}>
+            <Icon name={LINK_ICON[block.link.kind] ?? "book"} size={13} /> {block.link.label}
+          </button>
+        </figcaption>
+      </figure>
+    ) : editable ? (
+      <DropZone label={`page ${index + 1} picture`} accepts={(link) => link.kind === "picture" || (block.kind === "page" && link.kind === "book")} onLink={(link) => change(index, { link })}>
+        <span className="hint">Drop a picture here{block.kind === "page" ? " (or a book page)" : ""}</span>
+      </DropZone>
+    ) : null;
   return (
     <div className="story-view" data-story-view={record.id}>
       {editable ? (
@@ -590,21 +676,56 @@ export function StoryView({ session, record, editable }: { session: Session; rec
         <p className="hint">{String(record.data.chapter)}</p>
       ) : null}
       {blocks.map((block, index) => (
-        <section key={index} className={`story-block ${block.kind}`} data-story-block={index}>
-          {block.kind === "text" ? (
-            <RichText value={block.text ?? ""} editable={editable} label={`Page ${index + 1} text`} onSave={(text) => setBlocks(blocks.map((item, at) => (at === index ? { ...item, text } : item)))} onOpen={openLink} read={<FormattedText text={block.text ?? ""} onOpen={openLink} />} />
-          ) : block.link ? (
-            <figure {...slotDrag(block.link)}>
-              {block.link.kind === "picture" ? <img src={session.bookUrl("picture", block.link.book, block.link.file)} alt={block.link.label} loading="lazy" onClick={() => openLink(block.link!)} /> : null}
-              <figcaption>
-                <button type="button" className="note-chip-open" onClick={() => openLink(block.link!)} title={`Open ${block.link.label}`}>
-                  <Icon name={LINK_ICON[block.link.kind] ?? "book"} size={13} /> {block.link.label}
-                </button>
-              </figcaption>
-            </figure>
+        <section
+          key={index}
+          className={`story-block ${block.kind}${block.frame ? ` framed ${block.frame}` : ""}${editable ? " editing" : ""}`}
+          data-story-block={index}
+          data-story-kind={block.kind}
+          style={block.color ? { backgroundColor: block.color } : undefined}
+        >
+          {readAloudFrame(block.frame) && block.kind !== "separator" ? (
+            <ReadAloudButton text={() => [block.kind === "header" ? (block.text ?? "") : plainOf(block.text ?? ""), plainOf(block.text2 ?? "")].filter(Boolean).join("\n\n")} title={record.name} />
           ) : null}
+          {block.kind === "separator" ? (
+            <div className={`story-separator ${block.style ?? "scroll"}`} role="separator" />
+          ) : block.kind === "header" ? (
+            editable ? (
+              <h3 className="story-header">
+                <Field value={block.text ?? ""} editable wide label={`Page ${index + 1} heading`} onSave={(text) => change(index, { text: String(text) })} />
+              </h3>
+            ) : (
+              <h3 className="story-header">{block.text}</h3>
+            )
+          ) : block.kind === "text" ? (
+            words(block, index, "text", "text")
+          ) : block.kind === "columns" ? (
+            <div className="story-columns">
+              {words(block, index, "text", "left column")}
+              {words(block, index, "text2", "right column")}
+            </div>
+          ) : block.kind === "imageleft" || block.kind === "imageright" ? (
+            <div className="story-beside">
+              {picture(block, index)}
+              {words(block, index, "text", "text")}
+            </div>
+          ) : (
+            picture(block, index)
+          )}
           {editable ? (
             <div className="story-block-tools">
+              {block.kind === "separator" ? (
+                <select aria-label={`Page ${index + 1} separator`} data-action="story-separator" value={block.style ?? "scroll"} onChange={(event) => change(index, { style: event.target.value })}>
+                  {SEPARATOR_STYLES.map((style) => (
+                    <option key={style.id} value={style.id}>
+                      {style.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <button type="button" className={styling === index ? "ghost on" : "ghost"} data-action="story-style" aria-label={`Page ${index + 1} frame and colour`} title="Frame and colour" aria-expanded={styling === index} onClick={() => setStyling(styling === index ? null : index)}>
+                  <Icon name="template" size={13} />
+                </button>
+              )}
               <button type="button" className="ghost" aria-label={`Move page ${index + 1} up`} title="Up" disabled={index === 0} onClick={() => move(index, -1)}>
                 ↑
               </button>
@@ -616,13 +737,62 @@ export function StoryView({ session, record, editable }: { session: Session; rec
               </button>
             </div>
           ) : null}
+          {editable && styling === index && block.kind !== "separator" ? (
+            <div className="story-style" data-story-style={index}>
+              <div className="story-frames" role="radiogroup" aria-label="Frame">
+                {STORY_FRAMES.map((frame) => (
+                  <button
+                    key={frame.id || "none"}
+                    type="button"
+                    role="radio"
+                    aria-checked={(block.frame ?? "") === frame.id}
+                    className={`story-frame-pick${frame.id ? ` framed ${frame.id}` : ""}${(block.frame ?? "") === frame.id ? " on" : ""}`}
+                    data-frame={frame.id || "none"}
+                    onClick={() => change(index, { frame: frame.id || undefined })}
+                  >
+                    {frame.label}
+                  </button>
+                ))}
+              </div>
+              <div className="story-colours" role="radiogroup" aria-label="Colour">
+                {STORY_COLOURS.map((colour) => (
+                  <button
+                    key={colour || "none"}
+                    type="button"
+                    role="radio"
+                    aria-checked={(block.color ?? "") === colour}
+                    aria-label={colour ? `Colour ${colour}` : "No colour"}
+                    className={`swatch${(block.color ?? "") === colour ? " on" : ""}`}
+                    data-colour={colour || "none"}
+                    style={colour ? { background: colour } : undefined}
+                    onClick={() => change(index, { color: colour || undefined })}
+                  >
+                    {colour ? "" : "∅"}
+                  </button>
+                ))}
+                <label className="you-other" title="Any colour">
+                  <input type="color" aria-label="Pick a colour" value={block.color ?? "#2a1f14"} onChange={(event) => change(index, { color: event.target.value })} />
+                </label>
+              </div>
+            </div>
+          ) : null}
         </section>
       ))}
       {editable ? (
-        <DropZone label="story" accepts={() => true} onLink={(link) => setBlocks([...blocks, link.kind === "picture" ? { kind: "image", link } : link.kind === "book" ? { kind: "page", link } : { kind: "text", text: `<p><link class="kraken" recordname="kraken:${encodeURIComponent(JSON.stringify(link))}">${link.label.replace(/[<>&]/g, "")}</link></p>` }])}>
-          <button type="button" data-action="story-add-text" onClick={() => setBlocks([...blocks, { kind: "text", text: "" }])}>
-            <Icon name="plus" size={14} /> Text
-          </button>
+        <DropZone
+          label="story"
+          accepts={() => true}
+          onLink={(link) =>
+            setBlocks([...blocks, link.kind === "picture" ? { kind: "image", link } : link.kind === "book" ? { kind: "page", link } : { kind: "text", text: `<p><link class="kraken" recordname="kraken:${encodeURIComponent(JSON.stringify(link))}">${link.label.replace(/[<>&]/g, "")}</link></p>` }])
+          }
+        >
+          <div className="story-add" role="group" aria-label="Add a page">
+            {ADD_KINDS.map((item) => (
+              <button key={item.kind} type="button" className="story-add-kind" data-action={item.kind === "text" ? "story-add-text" : `story-add-${item.kind}`} title={item.title} aria-label={item.title} onClick={() => setBlocks([...blocks, newBlock(item.kind)])}>
+                <BlockGlyph kind={item.kind} />
+              </button>
+            ))}
+          </div>
           <span className="hint">or drop a picture, a book page or any link here for a page of its own</span>
         </DropZone>
       ) : null}
