@@ -207,7 +207,7 @@
     const ids=new Map(items.map(o=>[o.id,uid('assembly')])),group=uid('group');S.snapshot();selection.clear();
     for(const key of ['objects','walls','lights','effects'])for(const o of data[key]){o.id=ids.get(o.id);if(o.wallId)o.wallId=ids.get(o.wallId)||o.wallId;o.groupId=group;o.locked=false;translate(o,dx,dy);S.project[key].push(o);selection.add(o.id)}S.selected=data.objects[0]?.id||[...selection][0];changed();
   }
-  function thumb(){const canvas=document.createElement('canvas');canvas.width=240;canvas.height=150;canvas.getContext('2d').drawImage($('#mapCanvas'),0,0,240,150);return canvas.toDataURL('image/png')}
+  function thumb(){const canvas=document.createElement('canvas');canvas.width=240;canvas.height=150;const g=canvas.getContext('2d'),p=S.project;g.drawImage($('#mapCanvas'),0,0,240,150);g.scale(240/p.width,150/p.height);window.KrakenWeatherGL?.drawStill(g,p.effects||[],p,performance.now()/1000,()=>1,240/p.width);return canvas.toDataURL('image/png')}
   function saveProject(manual=false){
     const target=S.project,payload=clone(target),thumbnail=thumb();
     saveChain=saveChain.catch(()=>{}).then(async()=>{

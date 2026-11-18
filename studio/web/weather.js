@@ -141,6 +141,7 @@ window.KrakenWeather = (() => {
   function remove(id) {
     S().snapshot();
     S().project.effects = list().filter(e => e.id !== id);
+    window.KrakenWeatherGL.forget(id);
     if (S().selected === id) S().selected = null;
     S().save(); S().draw(); render();
   }
@@ -374,145 +375,37 @@ window.KrakenWeather = (() => {
   }
 
   // ---- drawing on the map -----------------------------------------------------
-  // Patterns, drawn once: a tile per effect (rain: eight frames of ripples spreading).
-  const patterns = {}, TILE = {clouds: 512, myst: 512, water: 128, ocean: 128};
-  const RAIN_FRAMES = 8;
-  function tile(type, frame = 0) {
-    const n = TILE[type] || 96, c = document.createElement('canvas'); c.width = c.height = n;
-    const g = c.getContext('2d'), col = TYPES[type][1];
-    let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    g.strokeStyle = g.fillStyle = col;
-    // draw a shape at x, y and wrapped round the tile's edges, so the tile repeats without seams
-    const wrap = (x, y, r, fn) => { for (const dx of [-n, 0, n]) for (const dy of [-n, 0, n]) if (x + dx > -r && x + dx < n + r && y + dy > -r && y + dy < n + r) fn(x + dx, y + dy); };
-    if (type === 'water' || type === 'ocean') {
-      g.lineWidth = type === 'ocean' ? 3 : 2;
-      for (let y = 8; y < n; y += type === 'ocean' ? 26 : 16) { g.globalAlpha = 0.5 + rnd() * 0.5; g.beginPath(); for (let x = 0; x <= n; x += 4) g.lineTo(x, y + Math.sin(x / n * Math.PI * 4 + y) * 4); g.stroke(); }
-    } else if (type === 'rain') {
-      g.lineWidth = 1.5;
-      for (let i = 0; i < 14; i++) {
-        const x = rnd() * n, y = rnd() * n, phase = (rnd() + frame / RAIN_FRAMES) % 1, r = 1 + phase * 11;
-        g.globalAlpha = Math.max(0, 0.95 * (1 - phase));
-        wrap(x, y, r + 2, (px, py) => { g.beginPath(); g.ellipse(px, py, r, r * 0.8, 0, 0, 7); g.stroke(); if (phase < 0.15) { g.beginPath(); g.arc(px, py, 1.6, 0, 7); g.fill(); } });
-      }
-    } else if (type === 'snow' || type === 'blizzard') {
-      for (let i = 0; i < (type === 'blizzard' ? 40 : 22); i++) { g.globalAlpha = 0.5 + rnd() * 0.5; const x = rnd() * n, y = rnd() * n, r = 1 + rnd() * 2.2; wrap(x, y, r, (px, py) => { g.beginPath(); g.arc(px, py, r, 0, 7); g.fill(); }); }
-      if (type === 'blizzard') { g.lineWidth = 1; g.globalAlpha = 0.6; for (let i = 0; i < 8; i++) { const x = rnd() * n, y = rnd() * n; wrap(x, y, 20, (px, py) => { g.beginPath(); g.moveTo(px, py); g.lineTo(px + 18, py + 6); g.stroke(); }); } }
-    } else {
-      // clouds and fog: soft noise that repeats seamlessly (see noiseTile)
-      const img = g.createImageData(n, n), d = img.data, cloud = type === 'clouds';
-      const field = smooth(noiseTile(n, cloud ? 3 : 2, cloud ? 6 : 3, cloud ? 7 : 19), n, cloud ? 1 : 14);
-      const dens = Math.max(0, Math.min(1, frame)); // clouds: CloudDensity; fog: its Amount
-      for (let i = 0; i < n * n; i++) {
-        const v = field[i];
-        let alpha, rgb;
-        if (cloud) {
-          // scattered wisps: only the high parts of the noise, edges feathered
-          const t = 0.73 - dens * 0.2;
-          alpha = Math.max(0, Math.min(1, (v - t) / 0.25)) ** 1.4 * 0.75;
-          rgb = [255, 255, 255];
-        } else {
-          // fog: a haze everywhere, thicker in slow banks, no shapes
-          alpha = (0.2 + 0.6 * v) * (0.3 + 0.7 * dens);
-          rgb = [214, 221, 224];
-        }
-        d.set([rgb[0], rgb[1], rgb[2], Math.round(alpha * 255)], i * 4);
-      }
-      g.putImageData(img, 0, 0);
-    }
-    return c;
+  // The effects move on the GPU (weatherGL.js), on their own canvas over the map: the
+  // map itself is never redrawn for them. While Weather effects or Play is open they
+  // move every frame; otherwise they are drawn once each time the map is.
+  let animate = true, timer = 0, lastCost = 0;
+  const clock = () => performance.now() / 1000;
+  const moving = () => (active() || S().mode === "play") && animate && !document.hidden && !window.KrakenLayers?.groupHidden?.("effects") && list().some(e => e.visible !== false);
+  // How strong each effect is drawn: as players see it in Play and in stills; the preview opacity while editing.
+  function alphaOf(e, full) {
+    const sel = selected(), dim = active() && sel && e.id !== sel.id;
+    return (dim ? 0.35 : 1) * (full || S().mode === "play" ? 1 : Math.min(1, (e.previewOpacity ?? 0.45) * 2.2));
   }
-  // Blur a wrapping field (three box passes each way, near enough a Gaussian), then stretch it to 0..1.
-  function smooth(f, n, r) {
-    let a = f, b = new Float32Array(n * n);
-    for (let pass = 0; pass < 3; pass++) for (const horizontal of [true, false]) {
-      for (let line = 0; line < n; line++) {
-        let sum = 0;
-        const at = k => horizontal ? line * n + ((k % n) + n) % n : (((k % n) + n) % n) * n + line;
-        for (let k = -r; k <= r; k++) sum += a[at(k)];
-        for (let k = 0; k < n; k++) { b[at(k)] = sum / (2 * r + 1); sum += a[at(k + r + 1)] - a[at(k - r)]; }
-      }
-      [a, b] = [b, a];
-    }
-    let lo = Infinity, hi = -Infinity;
-    for (const v of a) { if (v < lo) lo = v; if (v > hi) hi = v; }
-    for (let i = 0; i < a.length; i++) a[i] = (a[i] - lo) / (hi - lo || 1);
-    return a;
+  function shown() { return window.KrakenLayers?.groupHidden?.("effects") ? [] : list(); }
+  function drawLive() {
+    const t0 = performance.now(), d = S().getDocument();
+    const fx = shown();
+    if (!fx.some(e => e.visible !== false)) window.KrakenWeatherGL.clearLive();
+    else window.KrakenWeatherGL.drawLive(fx, S().project, d.view, clock(), e => alphaOf(e, false));
+    lastCost = performance.now() - t0;
   }
-  // Fractal value noise on an n x n tile that wraps at its edges (0..1).
-  function noiseTile(n, base, octaves, seed) {
-    const out = new Float32Array(n * n);
-    let s0 = seed; const rnd = () => (s0 = (s0 * 16807) % 2147483647) / 2147483647;
-    let amp = 1, total = 0;
-    for (let o = 0, cells = base; o < octaves; o++, cells *= 2, amp *= 0.5) {
-      // gradient (Perlin) noise: a random direction at each lattice point, so no grid crosses show
-      const gx_ = new Float32Array(cells * cells), gy_ = new Float32Array(cells * cells);
-      for (let i = 0; i < cells * cells; i++) { const a = rnd() * Math.PI * 2; gx_[i] = Math.cos(a); gy_[i] = Math.sin(a); }
-      const step = n / cells, f = t => t * t * t * (t * (t * 6 - 15) + 10), shift = Math.floor(rnd() * n);
-      const dot = (cx, cy, dx, dy) => { const i = (cy % cells) * cells + (cx % cells); return gx_[i] * dx + gy_[i] * dy; };
-      for (let y = 0; y < n; y++) {
-        const py = ((y + shift) % n) / step, y0 = Math.floor(py), fy = py - y0, ty = f(fy);
-        for (let x = 0; x < n; x++) {
-          const px = ((x + shift * 3) % n) / step, x0 = Math.floor(px), fx = px - x0, tx = f(fx);
-          const a = dot(x0, y0, fx, fy), b = dot(x0 + 1, y0, fx - 1, fy), c = dot(x0, y0 + 1, fx, fy - 1), d = dot(x0 + 1, y0 + 1, fx - 1, fy - 1);
-          out[y * n + x] += amp * (0.5 + 0.7 * ((a + (b - a) * tx) * (1 - ty) + (c + (d - c) * tx) * ty));
-        }
-      }
-      total += amp;
-    }
-    for (let i = 0; i < out.length; i++) out[i] /= total;
-    return out;
-  }
-  // Cloud shadows: the same wisps, dark grey-blue.
-  function shadowPattern(ctx, dens) {
-    const key = 'shadow' + dens;
-    if (patterns[key]) return patterns[key];
-    const src = tile('clouds', dens), g = src.getContext('2d'), img = g.getImageData(0, 0, src.width, src.height), d = img.data;
-    for (let i = 0; i < d.length; i += 4) { const a = d[i + 3]; d[i] = 255 - a * 0.55; d[i + 1] = 255 - a * 0.5; d[i + 2] = 255 - a * 0.4; d[i + 3] = 255; }
-    g.putImageData(img, 0, 0);
-    return (patterns[key] = ctx.createPattern(src, 'repeat'));
-  }
-  function pattern(ctx, type, frame = 0) {
-    const key = type + frame;
-    return patterns[key] ||= ctx.createPattern(tile(type, frame), 'repeat');
-  }
-  // Movement: FG's own Speed setting, along the effect's drift (degrees: 0 east, 90 south; rain has no drift).
-  const SPEED = {water: 'WaterSpeed', ocean: 'OceanSpeed', clouds: 'CloudSpeed', myst: 'MystSpeed', snow: 'SnowSpeed', rain: 'RainSpeed', blizzard: 'BlizzardSpeed'};
-  function speedOf(e) {
-    const key = SPEED[e.type], def = (K().FX_SETTINGS[e.type].find(s => s[0] === key) || [])[2] ?? 0.5;
-    return Number(e.settings?.[key] ?? def);
-  }
-  let clock = 0, animate = true, timer = null, lastCost = 0;
-  function paintFor(ctx, e, part) {
-    const v = speedOf(e);
-    if (e.type === 'rain') {
-      const pat = pattern(ctx, 'rain', Math.floor(clock * (1 + v * 4) * RAIN_FRAMES) % RAIN_FRAMES), k = Number(e.dropSize) || 1;
-      pat.setTransform(new DOMMatrix().scaleSelf(k, k));
-      return pat;
-    }
-    const soft = e.type === 'clouds' || e.type === 'myst';
-    const dens = e.type === 'clouds' ? Number(e.settings?.CloudDensity ?? 0.75) : Number(e.settings?.MystFade ?? 0.75);
-    const pat = part === 'shadow' ? shadowPattern(ctx, Math.round(dens * 10) / 10) : pattern(ctx, e.type, soft ? Math.round(dens * 10) / 10 : 0), a = (Number(e.drift) || 0) * Math.PI / 180;
-    const zoom = soft ? Math.max(1, S().project.grid / 50) * 1.6 : 1, n = (TILE[e.type] || 96) * zoom;
-    const pace = {clouds: 60, myst: 25, water: 20, ocean: 30, snow: 50, blizzard: 140}[e.type] || 40, d = clock * pace * (0.15 + v * 1.7);
-    pat.setTransform(new DOMMatrix().translateSelf(((Math.cos(a) * d) % n + n) % n, ((Math.sin(a) * d) % n + n) % n).scaleSelf(zoom, zoom));
-    return pat;
-  }
-  // While Weather effects is open, the effects move. The map is redrawn a few times a
-  // second, less often when a big map takes long to draw.
-  function tick() {
-    timer = null;
-    if (!(active() || S().mode === 'play') || !animate || document.hidden || !list().some(e => e.visible !== false)) return;
-    clock = performance.now() / 1000;
-    const t = performance.now(); S().draw(); lastCost = performance.now() - t;
-    timer = setTimeout(() => requestAnimationFrame(tick), Math.max(40, lastCost * 3));
-  }
-  function startAnimation() { if (!timer && animate) timer = setTimeout(() => requestAnimationFrame(tick), 40); }
+  function tick() { timer = 0; drawLive(); if (moving()) timer = requestAnimationFrame(tick); }
+  function startAnimation() { if (!timer && moving()) timer = requestAnimationFrame(tick); }
   // Back from another window or tab: moving again.
-  document.addEventListener?.('visibilitychange', () => { if (!document.hidden) startAnimation(); });
+  document.addEventListener?.("visibilitychange", () => { if (!document.hidden) startAnimation(); });
   function trace(ctx, polys) { ctx.beginPath(); for (const q of polys) { for (let i = 0; i < q.length; i += 2) ctx[i ? 'lineTo' : 'moveTo'](q[i], q[i + 1]); ctx.closePath(); } }
-  function draw(ctx, zoom) {
+  // still: a capture (the map as a picture), so the effects are drawn into it; else they
+  // are drawn on their own canvas over the map, and only the outlines and labels here.
+  function draw(ctx, zoom, still = false) {
     const p = S().project;
-    if (window.KrakenLayers?.groupHidden?.('effects')) return;
+    if (window.KrakenLayers?.groupHidden?.('effects')) { if (!still) window.KrakenWeatherGL.clearLive(); return; }
+    if (still) window.KrakenWeatherGL.drawStill(ctx, list(), p, clock(), e => alphaOf(e, true));
+    else { drawLive(); startAnimation(); }
     // Play test shows the weather as players see it: no outlines, labels or shading.
     const playing = S().mode === 'play';
     const whole = [[0, 0, p.width, 0, p.width, p.height, 0, p.height]], sel = selected();
@@ -520,17 +413,9 @@ window.KrakenWeather = (() => {
     for (const e of list()) {
       if (e.visible === false) continue;
       const on = active() && sel && e.id === sel.id, dim = active() && sel && !on;
-      const polys = e.polygons || whole, col = TYPES[e.type]?.[1] || '#ccc', alpha = e.previewOpacity ?? 0.45;
-      if (!polys.length) continue;
+      const polys = e.polygons || whole, col = TYPES[e.type]?.[1] || '#ccc';
+      if (!polys.length || still) continue;
       trace(ctx, polys);
-      if (e.type === 'clouds') {
-        const sh = Number(e.settings?.CloudShadowDensity ?? 0.5), off = Number(e.settings?.CloudOffset ?? 0.25) * S().project.grid * 3;
-        ctx.save(); ctx.clip('evenodd'); ctx.translate(off, off);
-        ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = (dim ? 0.3 : 1) * Math.min(1, sh * 0.9);
-        ctx.fillStyle = paintFor(ctx, e, 'shadow'); ctx.fillRect(-off, -off, S().project.width, S().project.height);
-        ctx.restore(); trace(ctx, polys);
-      } else if (e.type !== 'myst') { ctx.globalAlpha = (dim ? 0.35 : 1) * alpha * 0.45; ctx.fillStyle = col; ctx.fill('evenodd'); }
-      ctx.globalAlpha = (dim ? 0.35 : 1) * Math.min(1, alpha * (e.type === 'clouds' || e.type === 'myst' ? 2.2 : 1.6)); ctx.fillStyle = paintFor(ctx, e); ctx.fill('evenodd');
       ctx.globalAlpha = dim ? 0.4 : 1; ctx.strokeStyle = col; ctx.lineWidth = (on ? 2.5 : 1.5) / zoom; ctx.setLineDash(on ? [] : [8 / zoom, 5 / zoom]);
       if (e.polygons && !playing) ctx.stroke();
       ctx.setLineDash([]);
@@ -541,6 +426,7 @@ window.KrakenWeather = (() => {
         ctx.strokeText(label, x, y); ctx.fillText(label, x, y);
       }
     }
+    if (still) { ctx.restore(); return; }
     // the selected effect: shade where it is hidden, so both sides of the mask are clear
     if (active() && sel && sel.visible !== false) {
       trace(ctx, [...whole, ...(sel.polygons || whole)]);
@@ -585,7 +471,9 @@ window.KrakenWeather = (() => {
     }
     if (mode === 'play') startAnimation();
   }
-  return {TYPES, normalize, get animating() { return !!timer; }, get drawCost() { return lastCost; }, pointerDown, pointerMove, pointerUp, keyDown, draw, modeChanged, render, add,
+  // The map moved in the view (a pan): the weather over it follows, unless it is moving anyway.
+  const place = () => { if (!timer) drawLive(); };
+  return {TYPES, normalize, get animating() { return !!timer; }, get drawCost() { return lastCost; }, pointerDown, pointerMove, pointerUp, keyDown, draw, place, modeChanged, render, add,
     get paint() { return paint; }, set paint(v) { paint = v; }, get tool() { return tool; }, set tool(v) { tool = v; },
     get radius() { return radius; }, set radius(v) { radius = v; }, stroke, reset};
 })();

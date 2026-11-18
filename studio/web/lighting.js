@@ -248,11 +248,11 @@ window.KrakenLighting = (() => {
     for (const [pos, v] of profile(l, bright, dim)) g.addColorStop(Math.min(1, Math.max(0, pos)), l.inverse ? rgba('#000000', 0.85 * v * k) : rgba(l.color, 0.67 * v * k));
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(l.x, l.y, dim, 0, 7); ctx.fill();
   }
-  // Animated lights redraw the map on their own (unless the weather is already animating it).
+  // Animated lights redraw the map on their own (the weather moves on its own canvas).
   let timer = 0, cost = 0;
   function animated() {
     const s = S(), p = s?.project;
-    if (!p || document.hidden || window.KrakenWeather?.animating) return false;
+    if (!p || document.hidden) return false;
     const shown = s.mode === 'play' || ($('#previewLighting')?.checked && !window.KrakenLayers?.groupHidden?.('lights'));
     return !!shown && p.lights.some(l => l.animation && l.on !== false);
   }

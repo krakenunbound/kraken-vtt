@@ -270,13 +270,25 @@ try {
   await again.evaluate(() => window.KrakenStudio.switchMode("fx"));
   await settle(300);
   await again.click('[data-fx-add="clouds"]');
-  const frameAt = () => again.evaluate(() => document.querySelector("#mapCanvas").toDataURL("image/png").slice(-2000));
+  // They move on the GPU, on their own canvas over the map: smoothly (many frames a second),
+  // each frame cheap, and the map itself is not repainted for them.
   await settle(400);
-  const cloudsBefore = await frameAt();
-  await settle(1500);
-  const cloudsAfter = await frameAt();
-  assert((await again.evaluate(() => window.KrakenWeather.animating)) && cloudsBefore !== cloudsAfter, "clouds added after Weather effects opened empty drift across the map");
-  report.push("clouds added in Weather effects drift at once");
+  const fxBefore = await again.evaluate(() => ({ frames: window.KrakenWeatherGL.frames }));
+  await settle(2000);
+  const fxAfter = await again.evaluate(() => ({ frames: window.KrakenWeatherGL.frames, cost: window.KrakenWeather.drawCost, animating: window.KrakenWeather.animating, gl: Boolean(window.KrakenWeatherGL.canvas) }));
+  const fps = (fxAfter.frames - fxBefore.frames) / 2;
+  assert(fxAfter.animating && fxAfter.gl && fps >= 20, `clouds added after Weather effects opened empty drift smoothly over the map (${fps} frames a second, ${JSON.stringify(fxAfter)})`);
+  // A capture (the agent's render) has the clouds in it, and they are not one tile repeated.
+  const shots = await again.evaluate(async () => {
+    const S = window.KrakenStudio, fx = S.project.effects.at(-1);
+    const pixels = async () => { const img = new Image(); img.src = await S.capture({ grid: false, walls: false }); await img.decode(); const c = document.createElement("canvas"); c.width = img.width; c.height = img.height; const g = c.getContext("2d"); g.drawImage(img, 0, 0); return g.getImageData(0, 0, c.width, c.height).data; };
+    const withClouds = await pixels();
+    fx.visible = false; const plain = await pixels(); fx.visible = true; S.draw();
+    let changed = 0; for (let i = 0; i < plain.length; i += 4 * 97) if (Math.abs(plain[i] - withClouds[i]) + Math.abs(plain[i + 1] - withClouds[i + 1]) > 24) changed++;
+    return { changed, sampled: Math.floor(plain.length / (4 * 97)) };
+  });
+  assert(shots.changed > shots.sampled * 0.08, `a capture has the clouds in it (${shots.changed} of ${shots.sampled} sampled pixels changed)`);
+  report.push(`clouds added in Weather effects drift at once, on the GPU: ${fps} frames a second, ${fxAfter.cost.toFixed(1)} ms a frame; a capture has them`);
 
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok studio ui:\n  ${report.join("\n  ")}`);

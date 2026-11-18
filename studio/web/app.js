@@ -108,9 +108,23 @@
             ? "Drag to draw " + t
             : "Drag an approximate " + t + " preview";
   }
+  // Where the map sits in the view: moving it (a pan) repaints nothing, the weather over it follows.
+  function place() {
+    c.style.transform = `translate(${pan.x}px,${pan.y}px) scale(${z})`;
+    window.KrakenWeather?.place?.();
+  }
   function draw() {
-    c.width = p.width;
-    c.height = p.height;
+    // A new size only when it changes: setting it clears and reallocates the whole map (hundreds of MB on a big one).
+    if (c.width !== p.width || c.height !== p.height) {
+      c.width = p.width;
+      c.height = p.height;
+    } else {
+      x.setTransform(1, 0, 0, 1, 0, 0);
+      x.globalAlpha = 1;
+      x.globalCompositeOperation = "source-over";
+      x.filter = "none";
+      x.setLineDash([]);
+    }
     c.style.transform = `translate(${pan.x}px,${pan.y}px) scale(${z})`;
     $("#zoomReadout").textContent = Math.round(z * 100) + "%";
     $("#mapReadout").textContent = `${p.width} x ${p.height} | Grid ${p.grid}`;
@@ -159,7 +173,7 @@
       x.stroke();
     }
     x.restore();
-    window.KrakenWeather?.draw(x, z);
+    window.KrakenWeather?.draw(x, z, !!look);
     window.KrakenLighting?.drawAmbient(x);
     [...p.lights].sort((a, b) => !!a.inverse - !!b.inverse) // darkness last: it takes light away
       .filter(() => (look ? look.lighting : $("#previewLighting").checked) && !window.KrakenLayers?.groupHidden("lights") && mode !== "play")
@@ -405,7 +419,7 @@
     // Panning (the middle button, or Space) comes before every tool, so the tools keep what they hold.
     if (drag?.k === "pan") {
       pan = { x: e.clientX - drag.x, y: e.clientY - drag.y };
-      draw();
+      place();
       window.KrakenLOS?.pointerMove?.(e);
       return;
     }
@@ -423,7 +437,7 @@
     if (!drag) return;
     if (drag.k === "pan") {
       pan = { x: e.clientX - drag.x, y: e.clientY - drag.y };
-      draw();
+      place();
     }
     if (drag.k === "move") {
       drag.o.x = grid(a.x - drag.dx, "x");
@@ -533,7 +547,7 @@
       const r = $("#viewport").getBoundingClientRect();
       const step = e.shiftKey ? 0.3 : 0.1;
       pan = { x: pan.x + way[0] * r.width * step, y: pan.y + way[1] * r.height * step };
-      draw();
+      place();
       return;
     }
     if (e.code === "Space") {
