@@ -12,14 +12,17 @@
 // Run: node scripts/readme-shots.mjs (KRAKEN_WINDOW_AT places the window).
 import "./loopback.mjs";
 import { spawn } from "node:child_process";
-import { mkdirSync, mkdtempSync } from "node:fs";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import { _electron as electron, chromium } from "playwright-core";
 import { CHROME } from "./lib/chrome.mjs";
 
-const OUT = path.join(process.cwd(), "docs", "screenshots");
+// VIDEO_DIR=<folder>: record a video instead (the GM's screen through FFmpeg, each player's browser through
+// Playwright), with markers.json giving each scene's time; the stills then go to VIDEO_DIR/stills.
+const VIDEO = process.env.VIDEO_DIR ? path.resolve(process.env.VIDEO_DIR) : "";
+const OUT = VIDEO ? path.join(VIDEO, "stills") : path.join(process.cwd(), "docs", "screenshots");
 mkdirSync(OUT, { recursive: true });
 const profile = mkdtempSync(path.join(tmpdir(), "kraken-shots-"));
 const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0", KRAKEN_BOOKS: path.join(profile, "no-fg-modules"), KRAKEN_PACKS: path.join(profile, "Kraken VTT", "Packs") };
@@ -33,7 +36,7 @@ const SCREEN = await app.evaluate(async ({ BrowserWindow, screen }) => {
   const display = screen.getDisplayMatching(win.getBounds());
   win.setFullScreen(true);
   await new Promise((resolve) => setTimeout(resolve, 1500));
-  return { width: display.size.width, height: display.size.height };
+  return { width: display.size.width, height: display.size.height, x: display.bounds.x, y: display.bounds.y };
 });
 console.log("screen", SCREEN);
 await page.waitForSelector("text=My Campaigns");
@@ -82,7 +85,20 @@ async function scene(name, run) {
     console.log("scene failed:", name, String(error?.message ?? error).split("\n")[0]);
   }
 }
+const markers = { shots: [], seats: [] };
+let videoStart = 0;
+let recorder = null;
+if (VIDEO) {
+  recorder = spawn("ffmpeg", ["-y", "-f", "gdigrab", "-framerate", "30", "-offset_x", String(SCREEN.x), "-offset_y", String(SCREEN.y), "-video_size", `${SCREEN.width}x${SCREEN.height}`, "-draw_mouse", "0", "-i", "desktop", "-c:v", "h264_nvenc", "-preset", "p5", "-cq", "19", "-pix_fmt", "yuv420p", path.join(VIDEO, "gm.mp4")], { stdio: ["pipe", "ignore", "ignore"] });
+  videoStart = Date.now() + 400;
+}
+const seatContext = async () => {
+  const context = await browser.newContext({ viewport: SCREEN, ...(VIDEO ? { recordVideo: { dir: VIDEO, size: SCREEN } } : {}) });
+  if (VIDEO) markers.seats.push({ at: (Date.now() - videoStart) / 1000, context });
+  return context;
+};
 const shot = async (target, name) => {
+  if (VIDEO) markers.shots.push({ name, seat: target === page ? -1 : markers.seats.findIndex((item) => item.context === target.context()), at: (Date.now() - videoStart) / 1000 });
   await target.screenshot({ path: path.join(OUT, `${name}.jpg`), type: "jpeg", quality: 86 });
   console.log("shot", name);
 };
@@ -118,7 +134,7 @@ try {
 
   // A test player joins and makes a character in the wizard.
   browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
-  const seat = await (await browser.newContext({ viewport: SCREEN })).newPage();
+  const seat = await (await seatContext()).newPage();
   await seat.goto("http://127.0.0.1:47461/");
   await seat.fill('input[name="name"]', "Ann");
   await seat.fill('input[name="account-password"]', "test-pass");
@@ -325,7 +341,7 @@ try {
   // The Message of the Day: what a second player sees as they join.
   await scene("motd", async () => {
     await tool("kraken_table_options", { motd: { text: "Welcome back to Hollowmere.\n\nLast time: you broke the seal on the Watchtower's crypt and the Warden woke. Brenna is hurt; Tomas has two Mend Wounds left.\n\nTonight: the crypt, and whatever is still moving down there. Bring torches.", links: [{ kind: "picture", book: adventure, file: "images/watchtower-crypt.webp", label: "The crypt" }, { kind: "picture", book: adventure, file: "images/handout-journal.webp", label: "Aldous's journal" }, { kind: "book", book: handbook, page: globalThis.dreadPage?.page, label: "Dread" }] } });
-    const second = await (await browser.newContext({ viewport: SCREEN })).newPage();
+    const second = await (await seatContext()).newPage();
     await second.goto("http://127.0.0.1:47461/");
     await second.fill('input[name="name"]', "Cal");
     await second.fill('input[name="account-password"]', "test-pass");
@@ -463,6 +479,17 @@ try {
   });
   console.log("done");
 } finally {
+  if (VIDEO) {
+    recorder?.stdin.write("q");
+    await new Promise((resolve) => recorder.on("close", resolve));
+    const seats = [];
+    for (const item of markers.seats) {
+      const video = item.context.pages()[0]?.video();
+      await item.context.close();
+      seats.push({ at: item.at, file: video ? path.basename(await video.path()) : null });
+    }
+    writeFileSync(path.join(VIDEO, "markers.json"), JSON.stringify({ shots: markers.shots, seats }, null, 1));
+  }
   await browser?.close();
   child.kill();
   await app.close();
