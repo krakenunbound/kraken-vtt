@@ -483,6 +483,8 @@ export function useSession() {
   const [calendar, setCalendar] = useState<CalendarView | null>(null);
   const [clocks, setClocks] = useState<ClocksView>({ clocks: [], score: { phase: "free", position: "risky", effect: "standard", target: "", targetTier: 0, plan: "", detail: "", engagement: null } });
   const [readAloudNow, setReadAloudNow] = useState<ReadAloud | null>(null);
+  // The read-alouds of this sitting, oldest first (the Read aloud window lists them).
+  const [readAloudLog, setReadAloudLog] = useState<ReadAloud[]>([]);
   const [soundscape, setSoundscape] = useState<Soundscape>({ ambience: [], music: null });
   // The campaign's ruleset ("Castles & Crusades", "D&D 5E", "Worldbuilding"): it picks the sheet.
   const [ruleset, setRuleset] = useState("");
@@ -685,7 +687,11 @@ export function useSession() {
           if (msg.type === "combat" && msg.combat) setCombat(msg.combat as CombatView);
           if (msg.type === "calendar" && msg.calendar) setCalendar(msg.calendar as CalendarView);
           if (msg.type === "clocks" && msg.clocks) setClocks(msg.clocks as ClocksView);
-          if (msg.type === "read-aloud" && typeof msg.text === "string") setReadAloudNow({ text: msg.text, title: String(msg.title ?? ""), at: Date.now() });
+          if (msg.type === "read-aloud" && typeof msg.text === "string") {
+            const item = { text: msg.text, title: String(msg.title ?? ""), at: Date.now() };
+            setReadAloudNow(item);
+            setReadAloudLog((current) => [...current, item].slice(-30));
+          }
           if (msg.type === "options" && msg.options) setOptions(msg.options as TableOptions);
           if (msg.type === "map-share") {
             setMapShared((count) => count + 1);
@@ -1534,6 +1540,7 @@ export function useSession() {
     clocksOp,
     forgedAction,
     readAloudNow,
+    readAloudLog,
     sendReadAloud,
     dismissReadAloud,
     pings,

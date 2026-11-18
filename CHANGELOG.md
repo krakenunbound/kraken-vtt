@@ -8,6 +8,7 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **Read aloud in a window**: the bubble's window button opens a Read aloud window, listing this session's read-alouds newest first. Move it, tuck it away or pop it out to another screen like any window; while it is open, read-alouds go there instead of a bubble.
 - **Read-aloud bubbles close with an ×** on their frame, and **Read aloud on screen** (Settings > You at the table) keeps them to the chat for anyone who prefers that. That setting and **Whose turn it is** are now kept with each person's other settings (before, they could switch themselves back on).
 - **Write your own adventure pages**: a story entry's pages can now be text, two columns, a heading, a picture alone or on the left or right of text, or a separator (scrollwork, knot, double rule, stars). Each page has a frame (parchment, read-aloud boxes, sidebar, note, warning, stone, gilded) and any background colour; read-aloud frames send their words to chat and over the map. Books' own framed boxes are drawn in their frames too.
 - **Windows have frames in the table's theme**: a dark band edged in the theme's colour with a flourish in each corner, a patterned interior apart from the wallpaper, and the panels inside ruled in gold. The chat has it too; the map and Map Studio stay edge to edge.

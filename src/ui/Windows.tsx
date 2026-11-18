@@ -12,7 +12,7 @@ import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopO
 // the edge of the main window, or sent out with its pop-out button, becomes a
 // window of its own that can go on another monitor.
 
-export type WindowKind = "assets" | "studio" | "imagelist" | "assistant" | "characters" | "party" | "combat" | "players" | "sheet" | "settings" | "decals" | "wallpapers" | "gmicons" | "towers" | "deathmarkers" | "calendar" | "effects" | "clocks" | "motd" | "krits" | "library" | "dice" | "sound" | "books" | "book" | "images" | "picture" | "notes" | "note" | "charselect" | "records" | "record" | "adventure" | "story" | "map" | "cards" | "ships" | "bookrecord" | "oracles" | "delve" | "sessionlog";
+export type WindowKind = "assets" | "studio" | "imagelist" | "assistant" | "characters" | "party" | "combat" | "players" | "sheet" | "settings" | "decals" | "wallpapers" | "gmicons" | "towers" | "deathmarkers" | "calendar" | "effects" | "clocks" | "motd" | "krits" | "library" | "dice" | "sound" | "books" | "book" | "images" | "picture" | "notes" | "note" | "charselect" | "records" | "record" | "adventure" | "story" | "map" | "cards" | "ships" | "bookrecord" | "oracles" | "delve" | "sessionlog" | "readaloud";
 type Placement = { x: number; y: number; w: number; h: number; out?: ScreenPlace | null };
 // minimized: tucked away to the tray (still open: its state kept), brought back from the tray or its sidebar button.
 export type OpenWindow = { key: string; kind: WindowKind; title: string; payload?: string; z: number; popped: boolean; minimized?: boolean } & Placement;
@@ -36,6 +36,7 @@ const DEFAULTS: Record<WindowKind, Placement> = {
   effects: { x: 260, y: 80, w: 640, h: 640 },
   clocks: { x: 300, y: 70, w: 720, h: 520 },
   motd: { x: 380, y: 120, w: 520, h: 480 },
+  readaloud: { x: 420, y: 70, w: 560, h: 420 },
   sessionlog: { x: 300, y: 90, w: 640, h: 640 },
   krits: { x: 300, y: 110, w: 600, h: 440 },
   ships: { x: 220, y: 60, w: 720, h: 720 },
@@ -512,7 +513,7 @@ const TRAY_ICON: Partial<Record<WindowKind, Parameters<typeof Icon>[0]["name"]>>
   map: "map", studio: "pen", book: "book", books: "book", bookrecord: "book", story: "book", adventure: "book", record: "book", records: "book",
   sheet: "character", characters: "character", charselect: "character", party: "party", players: "players", combat: "combat",
   settings: "settings", sound: "music", assistant: "sparkle", calendar: "calendar", notes: "chat", note: "chat", effects: "flask",
-  clocks: "hourglass", dice: "d20", towers: "tower", library: "map", imagelist: "map", images: "map", picture: "map", sessionlog: "book",
+  clocks: "hourglass", dice: "d20", towers: "tower", readaloud: "chat", library: "map", imagelist: "map", images: "map", picture: "map", sessionlog: "book",
 };
 // Where the GM left the tray (null: just above the quick slots).
 function readTrayPlace(): { x: number; y: number } | null {

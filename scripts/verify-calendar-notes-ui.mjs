@@ -184,7 +184,16 @@ try {
   await settle(500);
   assert(!(await page.$(".read-aloud-bubble")), "with read aloud on screen off, no bubble on the GM's screen");
   await tool("kraken_dice_settings", { readAloud: true });
-  await seat.click(".read-aloud-bubble [data-action=\"read-aloud-close\"]");
+  // The bubble's window button: the read-aloud in a window of its own (to move, or pop out); the next one goes there, not to a bubble.
+  await seat.click(".read-aloud-bubble [data-action=\"read-aloud-window\"]");
+  await seat.waitForSelector('.window[data-window="readaloud"] .read-aloud-entry.newest:has-text("Torchlight flickers")');
+  assert(!(await seat.$(".read-aloud-bubble")), "the bubble goes once its window is open");
+  await tool("kraken_read_aloud", { text: "A bell tolls somewhere below.", title: "The Cellar" });
+  await seat.waitForSelector('.window[data-window="readaloud"] .read-aloud-entry.newest:has-text("A bell tolls")', { timeout: 8000 });
+  await settle(400);
+  assert(!(await seat.$(".read-aloud-bubble")) && (await seat.locator(".window[data-window=\"readaloud\"] .read-aloud-entry").count()) >= 2, "with its window open, a read-aloud goes there (the newest first), no bubble");
+  await seat.click('.window[data-window="readaloud"] button[aria-label^="Close"]');
+  await page.click(".read-aloud-bubble [data-action=\"read-aloud-close\"]").catch(() => undefined);
   report.push("read-aloud: the NPC's boxed text has the GM's button (not the player's); read, it shows in chat and as a bubble over the test player's map; kraken_read_aloud with the player's map closed: floating over their table");
 
   // A chat line into a note: the player says something, drags it into a new note, and onto the Notes list.

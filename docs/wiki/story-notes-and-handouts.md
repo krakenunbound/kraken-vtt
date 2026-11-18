@@ -33,7 +33,7 @@ See [Records, books and packs](records-books-and-packs.md#sharing-with-the-playe
 
 ## Read aloud
 
-Boxed text in an adventure, and story pages in a read-aloud frame, have a speech button for the GM. Its words go to chat and appear over everyone's map as a speech bubble; the × on the bubble closes it. Anyone who would rather read it in the chat only turns off **Read aloud on screen** in Settings > You at the table. `/story text` in chat posts story text without a name.
+Boxed text in an adventure, and story pages in a read-aloud frame, have a speech button for the GM. Its words go to chat and appear over everyone's map as a speech bubble; the × on the bubble closes it, and its window button opens a **Read aloud** window (every read-aloud of the session, newest first) to move or pop out; while that window is open, read-alouds go there instead. Anyone who would rather read it in the chat only turns off **Read aloud on screen** in Settings > You at the table. `/story text` in chat posts story text without a name.
 
 ## The Calendar
 

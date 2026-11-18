@@ -32,7 +32,7 @@ import { CalendarWindow } from "../notes/CalendarWindow";
 import { EffectsWindow } from "../effects/EffectsWindow";
 import { ClocksStrip, ClocksWindow } from "../notes/ClocksWindow";
 import { MotdWindow } from "../notes/MotdWindow";
-import { ReadAloudBubble, useAnyMapShown } from "../books/ReadAloudBubble";
+import { ReadAloudBubble, ReadAloudWindow, useAnyMapShown } from "../books/ReadAloudBubble";
 import { readAloud } from "../books/readAloud";
 import { BooksWindow, BookWindow, ImagesWindow, PictureWindow } from "../books/Books";
 import { ImagesList } from "../books/ImagesList";
@@ -584,6 +584,8 @@ export function Desktop({
                     ? { kind: "deathmarkers" as const, title: "Death Markers" }
                   : command.window === "charselect"
                     ? { kind: "charselect" as const, title: "Character Selection" }
+                  : command.window === "readaloud"
+                    ? { kind: "readaloud" as const, title: "Read aloud" }
                   : command.window === "krits"
                     ? { kind: "krits" as const, title: "Critical Hits & Fumbles" }
                   : command.window === "cards"
@@ -802,6 +804,7 @@ export function Desktop({
               {item.kind === "clocks" ? <ClocksWindow session={session} /> : null}
               {item.kind === "motd" ? <MotdWindow session={session} /> : null}
               {item.kind === "sessionlog" ? <SessionLogWindow session={session} /> : null}
+              {item.kind === "readaloud" ? <ReadAloudWindow log={session.readAloudLog} /> : null}
               {item.kind === "note" && item.payload ? <NoteWindow session={session} id={item.payload} /> : null}
               {item.kind === "decals" ? <DecalPicker session={session} onClose={() => windows.close(item.key)} /> : null}
               {item.kind === "wallpapers" ? <DecalPicker session={session} kind="wallpaper" onClose={() => windows.close(item.key)} /> : null}
