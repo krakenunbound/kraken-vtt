@@ -252,12 +252,13 @@ export type SoundItem = { id: string; kind: string; group: string; name: string 
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };
 // Bookkeeping, each part the GM may switch off (electron/bookkeeping.cjs); variant: 5E variant encumbrance.
 export type BookkeepingOptions = { ammo: boolean; consumables: boolean; rations: boolean; light: boolean; encumbrance: boolean; variant: boolean };
-export type TableOptions = { paused?: boolean; towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; motd?: { text: string; links: QuickSlot[] }; decal: string; wallpaper: string; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; tokenEffects?: "full" | "icons" | "off"; playerEffects?: "none" | "lights" | "conditions" | "all"; autoApply?: boolean; languages?: string[]; currencies?: string[]; modifierPresets?: { label: string; value: number }[]; theme?: string; bookkeeping?: BookkeepingOptions; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
+export type TableOptions = { paused?: boolean; towerReveal: boolean; towerExternal?: boolean; towerStyle?: string; deathMarkers?: { on: boolean; default: string; byType: Record<string, string> }; motd?: { text: string; links: QuickSlot[] }; decal: string; wallpaper: string; wallpaperFit?: WallpaperFit; gmIcon: string; soundHidden: "off" | "combat" | "all"; soundRepeat: number; diceHold?: number; tokenEffects?: "full" | "icons" | "off"; playerEffects?: "none" | "lights" | "conditions" | "all"; autoApply?: boolean; languages?: string[]; currencies?: string[]; modifierPresets?: { label: string; value: number }[]; theme?: string; bookkeeping?: BookkeepingOptions; wizard35?: Wizard35Options; wizard2e?: Wizard2eOptions };
 // The D&D 3.5E character wizard's options (the GM's, as FG's KrakenCharWizard35E).
 export type Wizard35Options = { methods: number[]; rollLock: boolean; lowReroll: boolean; vault: boolean };
 // The AD&D 2E character wizard's options (the GM's): ability rolls once only, the PHB methods allowed, gold above 1st level.
 export type Wizard2eOptions = { rollLock: boolean; methods: number[]; gold: "phb" | "perlevel" | "xlevel" };
 export type DecalItem = { id: string; name: string; group: string; ruleset?: string };
+export type WallpaperFit = "fill" | "fit" | "stretch" | "tile" | "center";
 export type PictureKind = "decal" | "wallpaper" | "gmicon" | "tile" | "tower";
 // The combat tracker as the host shows it to this seat (electron/combat.cjs viewFor).
 // A character's face as everyone is told it (FG's character list).

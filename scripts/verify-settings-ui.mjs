@@ -109,6 +109,18 @@ try {
   assert((await tool("kraken_table_options")).towerExternal === true && (await page.locator('[data-setting="tower-look"]').count()) === 1, "the tower switch puts it on the table; one Dice Tower button still");
   report.push("the GM's Settings: five sections, switch rows with short labels and their hints, the 2E methods as a readable checklist; the lock, a method and the tower switch reach the table's options");
 
+  // The wallpaper's position, as Windows': chosen in its picker, tried at once on this screen, the table's on OK.
+  await page.click('[data-setting="wallpaper"]');
+  await page.waitForSelector('.decal-picker[data-kind="wallpaper"] .decal-tile');
+  await page.click('.decal-picker[data-kind="wallpaper"] .decal-tile >> nth=0');
+  await page.selectOption('[data-setting="wallpaper-fit"]', "fit");
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".desktop-surface")).backgroundSize.includes("contain"));
+  assert(((await tool("kraken_table_options")).wallpaperFit ?? "tile") === "tile", "only tried: the table still tiles");
+  await page.click('.decal-picker[data-kind="wallpaper"] [data-action="decal-ok"]');
+  await settle(600);
+  assert((await tool("kraken_table_options")).wallpaperFit === "fit", "OK: the table's wallpaper fits the screen");
+  report.push("the wallpaper's Position (Fill, Fit, Stretch, Tile, Centre): tried on the GM's screen at once, the table's on OK");
+
   // A player's Settings, in Chrome.
   browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1200, height: 900 } });

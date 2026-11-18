@@ -248,9 +248,18 @@ function useWallpaperStyle(session: Session) {
     image.onload = () => setBig((known) => ({ ...known, [url]: image.naturalWidth >= 1500 }));
     image.src = url;
   }, [url]);
+  const fit = usePreviewed("wallpaperFit", session.options.wallpaperFit) || "tile";
   if (!url) return undefined;
-  const size = big[url] ? "auto" : "384px 384px";
-  return { backgroundImage: `linear-gradient(rgba(6, 8, 10, ${big[url] ? 0.2 : 0.42}), rgba(6, 8, 10, ${big[url] ? 0.2 : 0.42})), url("${url}")`, backgroundSize: `auto, ${size}`, backgroundRepeat: "repeat" };
+  // As Windows': fill (covers the screen, cropped), fit (the whole picture), stretch, tile, center.
+  const shade = big[url] || fit !== "tile" ? 0.2 : 0.42;
+  const size = fit === "fill" ? "cover" : fit === "fit" ? "contain" : fit === "stretch" ? "100% 100%" : fit === "center" ? "auto" : big[url] ? "auto" : "384px 384px";
+  return {
+    backgroundImage: `linear-gradient(rgba(6, 8, 10, ${shade}), rgba(6, 8, 10, ${shade})), url("${url}")`,
+    backgroundSize: `auto, ${size}`,
+    backgroundRepeat: fit === "tile" ? "repeat" : "no-repeat",
+    backgroundPosition: "center",
+    backgroundColor: "#06080a",
+  };
 }
 
 // The table for both sides, laid out as FG's desktop: the map (or the emblem)

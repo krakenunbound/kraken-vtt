@@ -132,6 +132,16 @@ try {
   await settle();
   assert(ann.options().wallpaper === tiles && gm.errors.some((reason) => reason.includes("No wallpaper")), "the Kraken emblem is a decal, not a wallpaper");
   assert(server.persisted().options.wallpaper === tiles, "the wallpaper is saved with the campaign");
+  // How it meets the screen, as Windows': tile to begin with; each way set by the agent reaches Ann; nonsense stays tile.
+  assert((await tool({ kind: "wallpaper" })).wallpaperFit === "tile", "tiled to begin with");
+  for (const fit of ["fill", "fit", "stretch", "center", "tile"]) {
+    assert((await tool({ kind: "wallpaper", fit })).wallpaperFit === fit, `the agent sets ${fit}`);
+    await settle();
+    assert(ann.options().wallpaperFit === fit, `Ann gets ${fit}`);
+  }
+  gm.send({ type: "table-options", options: { wallpaperFit: "sideways" } });
+  await settle();
+  assert(ann.options().wallpaperFit === "tile", "an unknown way is tile");
   assert((await tool({ kind: "wallpaper", action: "set", id: "" })).wallpaper === "", "back to a plain desktop");
 
   // The GM's chat picture (the Kraken GM Icon extension's): the Kraken to begin with, beside the GM's lines only.

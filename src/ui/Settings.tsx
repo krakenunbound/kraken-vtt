@@ -5,7 +5,7 @@ import { PALETTE } from "../dice/DiceWindow";
 import { TOWER_LOOKS, TowerArt, towerLook } from "./TowerArt";
 import { useEffect, useMemo, useState, useSyncExternalStore, type DragEvent, useRef } from "react";
 import { cardsStore } from "../cards/cardsStore";
-import type { DecalItem, PictureKind, Session } from "../session/useSession";
+import type { DecalItem, PictureKind, Session, WallpaperFit } from "../session/useSession";
 import { Emblem } from "./Emblem";
 import { useWindows } from "./Windows";
 import { SettingRow, SettingsSection, Toggle } from "./SettingsParts";
@@ -398,6 +398,8 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
   // Tried on this screen as it is clicked (pickerPreview); OK makes it the table's, Cancel or closing puts back what was.
   const previewKey: PreviewKey = wallpaper ? "wallpaper" : gmIcon ? "gmIcon" : tower ? "towerStyle" : "decal";
   const kept = useRef(false);
+  // The wallpaper's position (as Windows'), tried at once like the pictures.
+  const [fit, setFit] = useState<WallpaperFit>(session.options.wallpaperFit ?? "tile");
   const choose = (id: string) => {
     setChosen(id);
     pickerPreview.set(previewKey, tower ? id || "stone" : id);
@@ -405,8 +407,12 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
   useEffect(
     () => () => {
       // Kept: the preview stays until the table's own setting has come back, so nothing flickers to the old one.
-      if (kept.current) window.setTimeout(() => pickerPreview.clear(previewKey), 1500);
-      else pickerPreview.clear(previewKey);
+      const clear = () => {
+        pickerPreview.clear(previewKey);
+        pickerPreview.clear("wallpaperFit");
+      };
+      if (kept.current) window.setTimeout(clear, 1500);
+      else clear();
     },
     [previewKey],
   );
@@ -445,7 +451,7 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
   function apply(id: string) {
     pickerPreview.set(previewKey, tower ? id || "stone" : id);
     kept.current = true;
-    session.setTableOptions(wallpaper ? { wallpaper: id } : gmIcon ? { gmIcon: id } : tower ? { towerStyle: id || "stone" } : { decal: id });
+    session.setTableOptions(wallpaper ? { wallpaper: id, wallpaperFit: fit } : gmIcon ? { gmIcon: id } : tower ? { towerStyle: id || "stone" } : { decal: id });
     onClose();
   }
 
@@ -553,6 +559,26 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
           <button type="button" data-action="decal-browse" onClick={() => void browse()}>
             Browse…
           </button>
+        ) : null}
+        {wallpaper ? (
+          <label className="wallpaper-fit" title="How the picture meets the screen, as Windows' desktop background">
+            Position{" "}
+            <select
+              data-setting="wallpaper-fit"
+              value={fit}
+              onChange={(event) => {
+                const next = event.target.value as WallpaperFit;
+                setFit(next);
+                pickerPreview.set("wallpaperFit", next);
+              }}
+            >
+              <option value="fill">Fill</option>
+              <option value="fit">Fit</option>
+              <option value="stretch">Stretch</option>
+              <option value="tile">Tile</option>
+              <option value="center">Centre</option>
+            </select>
+          </label>
         ) : null}
         {tower ? null : (
           <button type="button" data-action="decal-empty" onClick={() => apply("")}>

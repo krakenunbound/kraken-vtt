@@ -300,6 +300,8 @@ function savedOptions(value) {
     motd: options.motd && typeof options.motd === "object" ? { text: id(options.motd.text, "").slice(0, 8000), links: Array.isArray(options.motd.links) ? options.motd.links.filter((link) => link && typeof link === "object").slice(0, 40) : [] } : { text: "", links: [] },
     decal: id(options.decal, "kraken"),
     wallpaper: id(options.wallpaper, ""),
+    // How the wallpaper meets the screen, as Windows': fill (cover), fit, stretch, tile (the default), center.
+    wallpaperFit: ["fill", "fit", "stretch", "tile", "center"].includes(options.wallpaperFit) ? options.wallpaperFit : "tile",
     gmIcon: id(options.gmIcon, GM_ICON),
     // Sounds for the GM's hidden rolls, as Kraken's Syrinscape extension:
     // "off" none, "combat" attacks, damage, healing and initiative only, "all".

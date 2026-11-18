@@ -1523,10 +1523,12 @@ const TOOLS = [
       id: string("Decal or wallpaper id (set)"),
       path: string("Full path of a .png, .webp, .jpg or .gif (import)"),
       search: string("Part of the name, group or game (list)"),
+      fit: { type: "string", enum: ["fill", "fit", "stretch", "tile", "center"], description: "wallpaper, set or alone: how it meets the screen, as Windows' (fill covers it, fit shows all of it, stretch, tile, center)" },
     }),
     run(args, ctx) {
       const agent = needTable(ctx);
       const wallpaper = args.kind === "wallpaper";
+      if (wallpaper && args.fit && (args.action ?? "view") === "view") return out({ wallpaperFit: agent.setOptions({ wallpaperFit: args.fit }).wallpaperFit });
       const gmIcon = args.kind === "gmicon";
       const key = wallpaper ? "wallpaper" : gmIcon ? "gmIcon" : "decal";
       const library = wallpaper ? agent.wallpapers() : gmIcon ? agent.gmIcons() : agent.decals();
@@ -1536,14 +1538,17 @@ const TOOLS = [
         const all = [...(wallpaper || gmIcon ? [] : [{ id: "kraken", name: "Kraken", group: "Maelstrom" }]), ...(library ? library.list() : [])];
         return out({ [`${key}s`]: all.filter((item) => !wanted || `${item.group} ${item.name} ${item.ruleset ?? ""}`.toLowerCase().includes(wanted)), folder: library?.folder ?? null });
       }
-      if (action === "set") return out({ [key]: agent.setOptions({ [key]: String(args.id ?? "") })[key] });
+      if (action === "set") {
+        const set = agent.setOptions({ [key]: String(args.id ?? ""), ...(wallpaper && args.fit ? { wallpaperFit: args.fit } : {}) });
+        return out({ [key]: set[key], ...(wallpaper ? { wallpaperFit: set.wallpaperFit } : {}) });
+      }
       if (action === "import") {
         if (!library) throw new Error(`This table has no ${key} library.`);
         const item = library.addFile(String(args.path ?? ""));
         agent.setOptions({ [key]: item.id });
         return out({ imported: item, [key]: item.id });
       }
-      return out({ [key]: agent.options()[key] });
+      return out({ [key]: agent.options()[key], ...(wallpaper ? { wallpaperFit: agent.options().wallpaperFit ?? "tile" } : {}) });
     },
   },
   {

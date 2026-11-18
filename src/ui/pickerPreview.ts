@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 // wallpaper, the GM icon, the dice tower): shown at once on this screen
 // alone, as the GM clicks through them; OK makes it the table's (every
 // screen), Cancel or closing the picker puts back what was there.
-export type PreviewKey = "decal" | "wallpaper" | "gmIcon" | "towerStyle";
+export type PreviewKey = "decal" | "wallpaper" | "wallpaperFit" | "gmIcon" | "towerStyle";
 let preview: Partial<Record<PreviewKey, string>> = {};
 const listeners = new Set<() => void>();
 
