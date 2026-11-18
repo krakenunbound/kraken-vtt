@@ -114,21 +114,29 @@ try {
     const body = await response.arrayBuffer(); return { status: response.status, name: decodeURIComponent(response.headers.get("X-File-Name") || ""), size: body.byteLength, text: response.status === 200 ? "" : new TextDecoder().decode(body) };
   });
   assert(started.status === 200 && started.name === "Cellar.png" && started.size === pngBytes.length, `Maelstrom hands Map Studio the picked file (${JSON.stringify(started)})`);
+  // The map window last left out in a window of its own (as a GM with two monitors leaves it).
+  await page.evaluate(() => window.localStorage.setItem("kraken-window:map", JSON.stringify({ x: 20, y: 60, w: 900, h: 700, out: { sx: window.screenX + 120, sy: window.screenY + 120, w: 900, h: 660 } })));
   await plain.click('[data-start="picture"]');
   // With the campaign hosted, the picture becomes one of its own maps (as FG's): its file in
-  // the campaign's Maps folder, a record in Campaign > Images, open in the image window, and
-  // Map Studio working on that one master.
-  await page.waitForSelector('[data-image-window="Cellar"]', { timeout: 20000 });
+  // the campaign's Maps folder, a record in Campaign > Images, and Map Studio working on that
+  // one master. Nothing else opens: no image window, here or in a window of its own.
+  for (let wait = 0; wait < 80 && !(await tool("kraken_records_list", { type: "image" })).records.some((record) => record.name === "Cellar"); wait++) await settle(250);
   const listed = (await tool("kraken_records_list", { type: "image" })).records.find((record) => record.name === "Cellar");
   const own = listed ? await tool("kraken_record_get", { id: listed.id }) : null;
   assert(own?.data?.own && own.data.file === "Cellar.png", `the picture is a record in Campaign > Images (${JSON.stringify(own ?? (await tool("kraken_records_list", { type: "image" })))})`);
   assert(existsSync(path.join(mapsFolder, "Cellar.png")), "its file is in the campaign's Maps folder");
   const bound = await studioFrame("kraken=");
   await bound.waitForFunction(() => window.KrakenStudio?.project?.width === 320, null, { timeout: 20000 });
+  await settle(1500);
+  const mapViews = async () => ({
+    own: await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length - 1),
+    docked: await page.$$eval('.window[data-window="map"]', (all) => all.length),
+  });
+  const alone = await mapViews();
+  assert(alone.own === 0 && alone.docked === 0, `Map Studio alone shows it: no image window opens with it (${JSON.stringify(alone)})`);
   const asked = await app.evaluate(() => globalThis.lastPick);
   assert(path.resolve(asked.defaultPath) === path.resolve(mapsFolder), `the dialog starts in the campaign's maps folder (${asked.defaultPath}, not ${mapsFolder})`);
   // A wall drawn in Map Studio is the map's at once (saved by itself into its master), no Save pressed.
-  const wallsBefore = await walls();
   await bound.evaluate(() => {
     const S = window.KrakenStudio;
     S.snapshot();
@@ -136,16 +144,18 @@ try {
     S.save();
     S.draw();
   });
-  for (let wait = 0; wait < 60 && (await walls()) === wallsBefore; wait++) await settle(250);
-  assert((await walls()) === wallsBefore + 1, `the wall drawn in Map Studio is in the map master by itself (${await walls()}, was ${wallsBefore})`);
-  // Closed, and opened again from Campaign > Images: the same map, the wall there.
-  await tool("kraken_image", { action: "close" });
+  await bound.waitForFunction(() => Number(document.querySelector("#saveKrakenBtn")?.dataset.saved ?? 0) > 0, null, { timeout: 15000 });
+  // Opened from Campaign > Images: once (in a window of its own, where the map window was left), the wall there.
   await page.click('.sidebar [data-launch="imagelist"]');
   await page.click(`[data-image-record="${own.id}"]`);
-  await page.waitForSelector('[data-image-window="Cellar"]');
-  assert((await walls()) === wallsBefore + 1, "opened again from Images: the same map, with the wall");
+  for (let wait = 0; wait < 40 && (await walls()) === 0; wait++) await settle(250);
+  assert((await walls()) === 1, `opened from Images: the same map, with the wall drawn in Map Studio (${await walls()})`);
+  const shown = await mapViews();
+  assert(shown.own + shown.docked === 1, `it opens once (${JSON.stringify(shown)})`);
+  await tool("kraken_image", { action: "close" });
+  await page.evaluate(() => window.localStorage.removeItem("kraken-window:map"));
   await page.click('.sidebar [data-launch="imagelist"]');
-  report.push("Open a map picture: Maelstrom's dialog starts in Campaigns/Studio/Maps; the picture becomes the campaign's own map (its file there, a record in Images, open in the image window); a wall drawn in Map Studio is in its master by itself; opened again from Images, the same map with the wall");
+  report.push("Open a map picture: Maelstrom's dialog starts in Campaigns/Studio/Maps; the picture becomes the campaign's own map (its file there, a record in Images) and opens in Map Studio alone; a wall drawn there is in its master by itself; opened from Images it opens once, with the wall");
 
   // Settings > Map Studio art: the GM points it at a folder of art packs (nothing assumed); the art is read.
   const require = createRequire(import.meta.url);

@@ -1844,27 +1844,37 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     // the editor needs it, and the editor's work written back into it. The
     // walls, lights and weather replace the image's own; tokens, labels, paint
     // and image layers made in Kraken stay.
-    studioView() {
+    studioView(of = null) {
+      // A map's master by its scene (one of the campaign's own maps), open anywhere or not.
+      if (of && of.id !== scene?.id) return { scene: of, walls: state.walls[of.id] ?? [], lights: state.lights[of.id] ?? [], fx: state.fx[of.id] ?? [], regions: state.regions[of.id] ?? [], studio: state.studio[of.id] ?? null };
       if (!scene) return null;
       return { scene, walls: wallsHere(), lights: lightsHere(), fx: fxHere(), regions: regionsHere(), studio: state.studio[scene.id] ?? null };
     },
-    fromStudio({ walls = [], lights = [], fx = [], regions = null, project = null, picture = null }) {
-      if (!scene) throw new Error("No scene is open.");
-      state.walls[scene.id] = walls.map(cleanWall).filter(Boolean).slice(0, MAX_WALLS_STUDIO);
+    fromStudio({ walls = [], lights = [], fx = [], regions = null, project = null, picture = null, of = null }) {
+      // Into the open scene, or (of) a map's master that is not open now: the same master wherever it is shown.
+      const open = scene;
+      const target = of ?? scene;
+      if (!target) throw new Error("No scene is open.");
+      state.walls[target.id] = walls.map(cleanWall).filter(Boolean).slice(0, MAX_WALLS_STUDIO);
       // Map Studio's traps and regions play at the table.
       // One the GM switched off at the table stays off (the same id, else the same kind and name).
       if (Array.isArray(regions)) {
-        const was = state.regions[scene.id] ?? [];
+        const was = state.regions[target.id] ?? [];
         const off = (region) => was.some((old) => old.on === false && (old.id === region.id || (old.kind === region.kind && old.name === region.name)));
-        state.regions[scene.id] = regions.map(cleanRegion).filter(Boolean).slice(0, MAX_REGIONS).map((region) => (off(region) ? { ...region, on: false } : region));
+        state.regions[target.id] = regions.map(cleanRegion).filter(Boolean).slice(0, MAX_REGIONS).map((region) => (off(region) ? { ...region, on: false } : region));
       }
-      state.lights[scene.id] = lights.map(cleanLight).filter(Boolean).slice(0, 500);
-      state.fx[scene.id] = fx.map(cleanFx).filter(Boolean).slice(0, 20);
-      const before = state.studio[scene.id] ?? {};
-      state.studio[scene.id] = { project, picture: picture ?? before.picture ?? null, saved: Date.now() };
-      liveScene();
+      state.lights[target.id] = lights.map(cleanLight).filter(Boolean).slice(0, 500);
+      state.fx[target.id] = fx.map(cleanFx).filter(Boolean).slice(0, 20);
+      const before = state.studio[target.id] ?? {};
+      state.studio[target.id] = { project, picture: picture ?? before.picture ?? null, saved: Date.now() };
+      if (open && open.id === target.id) liveScene();
       changed();
-      return { walls: state.walls[scene.id].length, lights: state.lights[scene.id].length, fx: state.fx[scene.id].length, regions: regionsHere().length };
+      return { walls: state.walls[target.id].length, lights: state.lights[target.id].length, fx: state.fx[target.id].length, regions: (state.regions[target.id] ?? []).length };
+    },
+    // A map's grid as the GM set it in the Grid tab (for one not open now: Map Studio working on its master).
+    gridOf(sceneId) {
+      const grid = state.settings[sceneId]?.grid ?? {};
+      return { size: grid.size ?? 100, type: 1, distance: grid.distance ?? 5, units: "ft", offsetX: grid.offsetX ?? 0, offsetY: grid.offsetY ?? 0 };
     },
     // The picture Map Studio painted for a scene (its file name and version), if any.
     studioPicture: (sceneId) => state.studio[sceneId]?.picture ?? null,

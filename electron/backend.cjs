@@ -469,8 +469,11 @@ async function studioUrl() {
 // Map Studio's library; a token names it for the editor's page.
 const bridge = () => require("./studio/krakenBridge.cjs");
 const studioAssets = () => require("./studio/assets.cjs");
-function openMaster(sceneId) {
+// A Map Studio session's master: the image open in the image window, or (scene) one of
+// the campaign's own maps by its scene, whether it is open anywhere or not.
+function openMaster(sceneId, scene = null) {
   if (!table || !hosted) throw new Error("Host the campaign first: Map Studio saves into its images.");
+  if (scene) return table.agent.map.studioView(scene);
   const view = table.agent.map.studioView();
   if (!view || (sceneId && view.scene.id !== sceneId)) throw new Error("That image is no longer open in Maelstrom: open it again, then Map Studio.");
   return view;
@@ -522,17 +525,23 @@ async function studioAdopt({ name, bytes }) {
   const known = records.list({ type: "image" }).find((record) => record.data?.own && record.data?.file === file);
   const title = stem.replace(/[_-]+/g, " ").trim() || "Map";
   if (!known) records.create({ type: "image", name: title, visibility: "gm", data: { own: true, file } }, table.agent.seat);
-  // Opened in the image window (Map Studio works on the image open there).
-  await ask("ui", { kind: "image", action: "open", own: true, file, name: known?.name ?? title }, 60000);
-  const view = table.agent.map.studioView();
-  if (!view) throw new Error("The map did not open in Maelstrom's image window.");
-  const { url } = await studioOpenImage({ sceneId: view.scene.id, name: known?.name ?? title, picture: bytes });
-  return { url, file, record: known?.id ?? null };
+  // Map Studio works on the map's master by its scene (as the table's /table/own-map names it):
+  // nothing else opens (the image window shows it when the GM opens it from Images).
+  const meta = await require("sharp")(bytes, { limitInputPixels: 200_000_000 }).metadata();
+  const id = `own-${file.toLowerCase().replace(/\.[a-z0-9]+$/, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60)}`;
+  const grid = table.agent.map.gridOf(id);
+  const scene = { id, name: known?.name ?? title, width: meta.width, height: meta.height, padding: 0, grid };
+  const { url } = await studioUrl();
+  const studio = studioAssets();
+  await studio.whenReady();
+  const asset = await studio.imageImport(bytes, scene.name);
+  const token = bridge().openSession({ sceneId: id, scene, name: scene.name, pictureId: asset.id, size: { width: asset.width, height: asset.height }, campaignId: hosted.id });
+  return { url: `${url}/?kraken=${token}`, file, record: known?.id ?? null };
 }
 async function studioOpen(token) {
   const found = bridge().session(token);
   if (!found) throw new Error("Open the image in Map Studio from Maelstrom again.");
-  const view = openMaster(found.sceneId);
+  const view = openMaster(found.sceneId, found.scene ?? null);
   return { project: bridge().projectFor({ view, pictureId: found.pictureId, size: found.size, name: found.name }), kraken: { scene: view.scene.name } };
 }
 // Map Studio's pictures for an image, kept with the GM's data by campaign and scene.
@@ -540,7 +549,7 @@ const studioPictureFile = (campaignId, picture) => path.join(USER_DATA, "studio"
 async function studioSave(token, project, image) {
   const found = bridge().session(token);
   if (!found) throw new Error("Open the image in Map Studio from Maelstrom again.");
-  const view = openMaster(found.sceneId);
+  const view = openMaster(found.sceneId, found.scene ?? null);
   const master = bridge().masterFrom(project, view.scene);
   let picture = null;
   // Art painted on the map: the rendered map is the image's picture now.
@@ -552,7 +561,7 @@ async function studioSave(token, project, image) {
     fs.mkdirSync(path.dirname(target), { recursive: true });
     await require("sharp")(Buffer.from(match[2], "base64"), { limitInputPixels: 200_000_000 }).webp({ quality: 92 }).toFile(target);
   }
-  const counts = table.agent.map.fromStudio({ ...master, project, picture });
+  const counts = table.agent.map.fromStudio({ ...master, project, picture, of: found.scene ?? null });
   emit("studio-saved", { sceneId: view.scene.id, picture: Boolean(picture) });
   return { saved: true, ...counts, picture: Boolean(picture) };
 }
