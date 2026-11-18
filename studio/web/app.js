@@ -309,10 +309,12 @@
       };
     });
   }
+  // As far out as the GM likes (a 9,600-pixel map shows whole on any screen); Fit map to window brings it back.
+  const MIN_ZOOM = 0.01;
   function fit() {
     let r = $("#viewport").getBoundingClientRect();
     z = Math.max(
-      0.2,
+      MIN_ZOOM,
       Math.min(
         3,
         Math.min((r.width - 30) / p.width, (r.height - 30) / p.height),
@@ -326,6 +328,14 @@
     return p.objects.slice().reverse().find(o=>o.visible!==false&&!o.locked&&!window.KrakenLayers?.locked(o)&&!window.KrakenLayers?.hidden(o)&&window.KrakenEditorCore.rotatedHitTest(o,a));
   }
   c.onpointerdown = (e) => {
+    // The middle button (or Space held) pans whatever tool is in hand, before any tool sees the press:
+    // a wall half drawn stays half drawn while the map moves to show where it goes next.
+    if (e.button === 1 || (space && e.button === 0)) {
+      e.preventDefault();
+      c.setPointerCapture(e.pointerId);
+      drag = { k: "pan", x: e.clientX - pan.x, y: e.clientY - pan.y };
+      return;
+    }
     if(window.KrakenGrid?.pointerDown(e))return;
     if(window.KrakenRegions?.pointerDown(e))return;
     if(window.KrakenWeather?.pointerDown(e))return;
@@ -392,6 +402,13 @@
     } else drag = { k: "draw", a: { x: grid(a.x, "x"), y: grid(a.y, "y") } };
   };
   c.onpointermove = (e) => {
+    // Panning (the middle button, or Space) comes before every tool, so the tools keep what they hold.
+    if (drag?.k === "pan") {
+      pan = { x: e.clientX - drag.x, y: e.clientY - drag.y };
+      draw();
+      window.KrakenLOS?.pointerMove?.(e);
+      return;
+    }
     if(window.KrakenGrid?.pointerMove(e))return;
     if(window.KrakenRegions?.pointerMove(e))return;
     if(window.KrakenWeather?.pointerMove(e))return;
@@ -416,6 +433,10 @@
     }
   };
   c.onpointerup = (e) => {
+    if (drag?.k === "pan") {
+      drag = null;
+      return;
+    }
     if(window.KrakenGrid?.pointerUp(e))return;
     if(window.KrakenRegions?.pointerUp(e))return;
     if(window.KrakenWeather?.pointerUp(e))return;
@@ -475,7 +496,7 @@
         x: (e.clientX - r.left - pan.x) / z,
         y: (e.clientY - r.top - pan.y) / z,
       };
-    z = Math.max(0.2, Math.min(3, z * (e.deltaY < 0 ? 1.12 : 0.89)));
+    z = Math.max(MIN_ZOOM, Math.min(3, z * (e.deltaY < 0 ? 1.12 : 0.89)));
     pan = { x: e.clientX - r.left - a.x * z, y: e.clientY - r.top - a.y * z };
     draw();
   };

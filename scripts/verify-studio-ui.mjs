@@ -145,6 +145,37 @@ try {
     S.draw();
   });
   await bound.waitForFunction(() => Number(document.querySelector("#saveKrakenBtn")?.dataset.saved ?? 0) > 0, null, { timeout: 15000 });
+  // Zoomed out as far as the GM likes (past the old 20% stop); Fit map to window brings it back.
+  const canvas = await bound.locator("#mapCanvas").boundingBox();
+  const middle = { x: canvas.x + canvas.width / 2, y: canvas.y + canvas.height / 2 };
+  await page.mouse.move(middle.x, middle.y);
+  for (let notch = 0; notch < 45; notch++) await page.mouse.wheel(0, 120);
+  await settle(300);
+  const zoomedOut = await bound.evaluate(() => window.KrakenStudio.getDocument().view.z);
+  assert(zoomedOut < 0.1, `the wheel zooms far out (${zoomedOut})`);
+  await bound.click("#railFit");
+  const fitted = await bound.evaluate(() => window.KrakenStudio.getDocument().view.z);
+  assert(fitted > zoomedOut * 5, `Fit map to window brings it back (${zoomedOut} -> ${fitted})`);
+  // A wall half drawn: the middle button pans the map, the wall still in hand, then it goes on.
+  await bound.evaluate(() => window.KrakenStudio.switchMode("los"));
+  await bound.click('[data-los-tool="line"]');
+  // Points where they are clicked (the little test map's grid would snap them together).
+  if (await bound.isChecked("#losGridSnap")) await bound.click("#losGridSnap");
+  const wallsAtStart = await bound.evaluate(() => window.KrakenStudio.project.walls.length);
+  await page.mouse.click(middle.x - 200, middle.y - 80);
+  await page.mouse.click(middle.x + 150, middle.y - 80);
+  const panFrom = await bound.evaluate(() => ({ ...window.KrakenStudio.getDocument().view.pan }));
+  await page.mouse.move(middle.x, middle.y);
+  await page.mouse.down({ button: "middle" });
+  await page.mouse.move(middle.x - 120, middle.y - 40, { steps: 8 });
+  await page.mouse.up({ button: "middle" });
+  const panTo = await bound.evaluate(() => ({ ...window.KrakenStudio.getDocument().view.pan }));
+  assert(Math.abs(panTo.x - panFrom.x + 120) < 6 && Math.abs(panTo.y - panFrom.y + 40) < 6, `the middle button pans the map mid-wall (${JSON.stringify(panFrom)} -> ${JSON.stringify(panTo)})`);
+  assert((await bound.evaluate(() => window.KrakenStudio.project.walls.length)) === wallsAtStart, "the wall is still being drawn (nothing finished by the pan)");
+  await page.mouse.dblclick(middle.x + 60, middle.y + 120);
+  const drawn = await bound.evaluate(() => window.KrakenStudio.project.walls.at(-1)?.points?.length ?? 0);
+  assert(drawn === 6, `the wall goes on after the pan: three points, one wall (${drawn / 2} points)`);
+  report.push("Map Studio zooms out past the old 20% stop (Fit map to window brings it back); mid-wall, the middle button pans the map and the wall goes on");
   // Opened from Campaign > Images: once (in a window of its own, where the map window was left), the wall there.
   await page.click('.sidebar [data-launch="imagelist"]');
   await page.click(`[data-image-record="${own.id}"]`);
