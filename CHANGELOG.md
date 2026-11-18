@@ -8,7 +8,7 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
-- **UI scale in Settings** (You at the table): make everything on your screen smaller to fit more on it, or bigger, from 50% to 200%. In the GM app it zooms every window, popped-out ones and Map Studio too; each screen keeps its own. `/scaleui` does the same.
+- **UI scale in Settings** (You at the table): make everything on your screen smaller to fit more on it, or bigger, from 50% to 200% (90% until you choose). In the GM app it zooms every window, popped-out ones and Map Studio too; each screen keeps its own. `/scaleui` does the same.
 - **Story entries step on with arrows**: the window an adventure's story entry opens in has ‹ previous and next › at its foot, in the Story list's order, and its title follows the entry (in a popped-out window too).
 - **A character dragged onto Map Studio is their own token** even when the drag carries only the character (a quick slot, a sheet): Map Studio looks up their name and token picture, no more letter in a circle.
 - **Rain and snow: Amount is how much falls**, Opacity how strongly it shows. Less rain is fewer drops, each as clear as before (Amount used to fade the drops instead, and its lowest setting still left a third of them).

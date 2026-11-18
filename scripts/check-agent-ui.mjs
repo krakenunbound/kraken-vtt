@@ -137,6 +137,7 @@ try {
   await page.waitForSelector('.chat-line[data-kind="emote"] .chat-kind');
   // The UI scale is the windows' own zoom (the map's pointer maths stays true), a pop-out's too; Settings has it as well.
   const zoomOf = () => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map((window) => Math.round(window.webContents.getZoomFactor() * 100)));
+  assert((await zoomOf()).every((zoom) => zoom === 90), `with nothing chosen the screen is at 90% (${await zoomOf()})`);
   await say("/scaleui 125");
   await page.waitForFunction(() => document.documentElement.style.zoom === "");
   assert((await zoomOf()).every((zoom) => zoom === 125), `/scaleui 125 zooms the window (${await zoomOf()})`);
