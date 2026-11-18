@@ -424,6 +424,9 @@ function createWindow() {
   });
   win.webContents.on("did-create-window", (child, details) => {
     child.webContents.on("will-navigate", (event) => event.preventDefault());
+    // Owned by the table's window: it stays in front of the table (a click on the
+    // table no longer hides it, so things can be dragged onto it), on any monitor.
+    child.setParentWindow(win);
     // Known by its name, so the table can bring it back when it was minimized (popout-show).
     const name = String(details?.frameName ?? "");
     if (name) {
