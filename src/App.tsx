@@ -461,6 +461,8 @@ export function App() {
     forgetView(chosen.id);
     setPrep({ scene: chosen, bytes, book: image.book });
     await session.publish(chosen, { prep: true });
+    // Already the image shown (in a window minimized, or behind others): to the front again.
+    mapWindow.front?.();
     return { opened: chosen.name, id: chosen.id, onTable: false };
   }
   // Map Studio on this image: its picture (as this window has it) and its master.

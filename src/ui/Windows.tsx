@@ -11,7 +11,8 @@ import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopO
 
 export type WindowKind = "assets" | "studio" | "imagelist" | "assistant" | "characters" | "party" | "combat" | "players" | "sheet" | "settings" | "decals" | "wallpapers" | "gmicons" | "towers" | "deathmarkers" | "calendar" | "effects" | "clocks" | "motd" | "krits" | "library" | "dice" | "sound" | "books" | "book" | "images" | "picture" | "notes" | "note" | "charselect" | "records" | "record" | "adventure" | "story" | "map" | "cards" | "ships" | "bookrecord" | "oracles" | "delve" | "sessionlog";
 type Placement = { x: number; y: number; w: number; h: number; out?: ScreenPlace | null };
-export type OpenWindow = { key: string; kind: WindowKind; title: string; payload?: string; z: number; popped: boolean } & Placement;
+// minimized: tucked away to the tray (still open: its state kept), brought back from the tray or its sidebar button.
+export type OpenWindow = { key: string; kind: WindowKind; title: string; payload?: string; z: number; popped: boolean; minimized?: boolean } & Placement;
 
 const DEFAULTS: Record<WindowKind, Placement> = {
   assistant: { x: 860, y: 60, w: 460, h: 700 },
@@ -114,6 +115,9 @@ type Manager = {
   toggle: (kind: WindowKind, title: string, payload?: string) => void;
   close: (key: string) => void;
   focus: (key: string) => void;
+  // Tucked away to the tray, and back where it was, in front.
+  minimize: (key: string) => void;
+  restore: (key: string) => void;
   move: (key: string, placement: Partial<Placement>) => void;
   isOpen: (kind: WindowKind) => boolean;
   // Out to a window of its own (at that place on the screen), and back in.
@@ -178,7 +182,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (existing) {
-        setWindows((current) => current.map((item) => (item.key === key ? { ...item, title, z: AT_BACK.includes(item.kind) ? item.z : ++top.current } : item)));
+        setWindows((current) => current.map((item) => (item.key === key ? { ...item, title, minimized: false, z: AT_BACK.includes(item.kind) ? item.z : ++top.current } : item)));
         return;
       }
       // Opened here, not in a state update, so the browser sees the click that asked for it.
@@ -197,10 +201,22 @@ export function WindowProvider({ children }: { children: ReactNode }) {
     setWindows((current) => current.filter((item) => item.key !== key));
   }, []);
 
+  const minimize = useCallback((key: string) => {
+    setWindows((current) => current.map((item) => (item.key === key && !item.popped ? { ...item, minimized: true } : item)));
+  }, []);
+  const restore = useCallback((key: string) => {
+    setWindows((current) => current.map((item) => (item.key === key ? { ...item, minimized: false, z: AT_BACK.includes(item.kind) ? item.z : ++top.current } : item)));
+  }, []);
+
   const toggle = useCallback(
     (kind: WindowKind, title: string, payload?: string) => {
       const key = payload ? `${kind}:${payload}` : kind;
       const existing = windows.find((item) => item.key === key);
+      // Tucked away: its button brings it back, in front.
+      if (existing?.minimized) {
+        restore(key);
+        return;
+      }
       // Out in a window of its own: the button closes it, as it closes any
       // window (a window of its own out of sight never holds the button).
       if (existing?.popped) {
@@ -218,7 +234,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
       const placed = place(key, title, remembered(kind, payload));
       setWindows((current) => (current.some((item) => item.key === key) ? current : [...current, { key, kind, title, payload, z: zFor(kind), ...placed }]));
     },
-    [windows, place, close, focus],
+    [windows, place, close, focus, restore],
   );
 
   const move = useCallback((key: string, placement: Partial<Placement>) => {
@@ -276,13 +292,15 @@ export function WindowProvider({ children }: { children: ReactNode }) {
       toggle,
       close,
       focus,
+      minimize,
+      restore,
       move,
       popOut,
       dockBack,
       popup: (key) => popups.current.get(key),
       isOpen: (kind) => windows.some((item) => item.kind === kind),
     }),
-    [windows, open, toggle, close, focus, move, popOut, dockBack],
+    [windows, open, toggle, close, focus, minimize, restore, move, popOut, dockBack],
   );
   return <WindowContext.Provider value={value}>{children}</WindowContext.Provider>;
 }
@@ -299,7 +317,7 @@ function fitToScreen(place: Placement): Placement {
 // corner. Dragged past the edge of the main window it pops out, and keeps
 // following the pointer until it is let go.
 export function FloatingWindow({ item, children }: { item: OpenWindow; children: ReactNode }) {
-  const { focus, move, close, popOut, dockBack, popup } = useWindows();
+  const { focus, move, close, popOut, dockBack, popup, minimize } = useWindows();
   const drag = useRef<{ mode: "move" | "size"; startX: number; startY: number; grabX: number; grabY: number; place: Placement } | null>(null);
   const live = useRef({ item, move, popOut, popup });
   live.current = { item, move, popOut, popup };
@@ -425,7 +443,9 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
       data-window={item.kind}
       role="dialog"
       aria-label={item.title}
-      style={{ left: item.x, top: item.y, width: item.w, height: item.h, zIndex: 100 + item.z }}
+      data-minimized={item.minimized ? "true" : undefined}
+      // Minimized: out of sight, its content kept as it was (a map's walls half drawn, a sheet's tab).
+      style={{ left: item.x, top: item.y, width: item.w, height: item.h, zIndex: 100 + item.z, ...(item.minimized ? { display: "none" } : {}) }}
       onPointerDown={() => focus(item.key)}
     >
       <header className="window-title" onPointerDown={begin("move")} onDoubleClick={() => move(item.key, fitToScreen(firstPlace(item.kind)))}>
@@ -436,6 +456,9 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
             <Icon name="map" size={16} />
           </button>
         ) : null}
+        <button type="button" className="window-close" data-action="window-minimize" title="Minimize: tucked away to the tray below; click it there, or its sidebar button, to bring it back" aria-label={`Minimize ${item.title}`} onClick={() => minimize(item.key)}>
+          <Icon name="minimize" size={16} />
+        </button>
         {STAYS_IN.includes(item.kind) ? null : (
           <button type="button" className="window-close" title="Out to a window of its own (for another monitor)" aria-label={`Pop out ${item.title}`} onClick={() => popOut(item.key)}>
             <Icon name="popout" size={16} />
@@ -450,5 +473,22 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
       </div>
       <div className="window-resize" onPointerDown={begin("size")} aria-hidden="true" />
     </section>
+  );
+}
+
+// The tray of minimized windows (along the bottom of the table): one chip for
+// each, a click brings it back where it was, in front.
+export function WindowTray() {
+  const { windows, restore } = useWindows();
+  const tucked = windows.filter((item) => item.minimized);
+  if (!tucked.length) return null;
+  return (
+    <nav className="window-tray" aria-label="Minimized windows">
+      {tucked.map((item) => (
+        <button key={item.key} type="button" className="window-tray-chip" data-window-chip={item.key} title={`Bring back ${item.title}`} onClick={() => restore(item.key)}>
+          <span>{item.title}</span>
+        </button>
+      ))}
+    </nav>
   );
 }

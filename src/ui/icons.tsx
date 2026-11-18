@@ -66,6 +66,8 @@ const PATHS: Record<string, string> = {
   popout: "M14 4h6v6M20 4l-8 8M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10",
   dock: "M10 14H4V8M4 14l8-8M6 4h12.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5V18",
   minus: "M6 12h12",
+  // A window tucked away to the tray.
+  minimize: "M6 18h12",
   chat: "M4 5h16v11H9l-5 4Z",
   tower: "M7 21V9l-2-2V3h3v2h2V3h4v2h2V3h3v4l-2 2v12ZM10 21v-4a2 2 0 0 1 4 0v4",
   flag: "M5 21V4m0 0h11l-2 4 2 4H5",

@@ -40,7 +40,7 @@ import { StudioWindow } from "../studio/StudioWindow";
 import { mapWindow, studioOpener } from "../table/imageWindow";
 import { Icon } from "./icons";
 import { sound } from "../sound/soundEngine";
-import { FloatingWindow, useWindows } from "./Windows";
+import { FloatingWindow, useWindows, WindowTray } from "./Windows";
 import { AssistantWindow } from "./AssistantWindow";
 import { CardsWindow } from "../cards/CardsWindow";
 import { cardsStore } from "../cards/cardsStore";
@@ -497,7 +497,7 @@ export function Desktop({
       agentCommands.register("windows", (command) => {
         if (command.kind !== "windows") return null;
         const { windows: manager, launchers: kinds, characters: sheets } = live.current;
-        const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped }));
+        const list = () => manager.windows.map((item) => ({ key: item.key, kind: item.kind, title: item.title, poppedOut: item.popped, minimized: Boolean(item.minimized) }));
         if (command.action === "list") return { open: list(), kinds: [...kinds.map((item) => entryId(item)), "sheet", "book", "images", "picture", "note", "decals", "wallpapers", "gmicons", "towers", "deathmarkers", "krits", "dice", "charselect", "cards"] };
         let key: string = command.window ?? "";
         if (command.window === "note") {
@@ -570,6 +570,8 @@ export function Desktop({
         if (!manager.windows.some((item) => item.key === key)) throw new Error(`${key} is not open.`);
         if (command.action === "close") manager.close(key);
         if (command.action === "dock") manager.dockBack(key);
+        if (command.action === "minimize") manager.minimize(key);
+        if (command.action === "restore") manager.restore(key);
         if (command.action === "popout" && !manager.popOut(key)) throw new Error("The window could not pop out.");
         return { [command.action]: key };
       }),
@@ -782,6 +784,8 @@ export function Desktop({
             ),
           )}
         </div>
+        {/* Minimized windows, a chip each: a click brings one back. */}
+        <WindowTray />
         {/* Above the windows, as FG's hotkey bar: always there to drop onto. */}
         <QuickSlots session={session} />
         {overlay}

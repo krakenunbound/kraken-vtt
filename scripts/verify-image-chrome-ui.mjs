@@ -139,6 +139,28 @@ try {
   const pinNow = await pin.boundingBox();
   assert(Math.abs(pinNow.x - pinAt.x - 120) < 12 && Math.abs(pinNow.y - pinAt.y - 80) < 12, `the pin moved where it was dragged (${JSON.stringify(pinAt)} -> ${JSON.stringify(pinNow)})`);
   report.push("the GM drags a map pin to move it");
+
+  // Minimize: the map window tucked away to the tray (still open, the moved pin kept); its chip
+  // brings it back; minimized again (by the agent), opening the image again brings it back.
+  const mapWindow = '.window[data-window="map"]';
+  await page.click(`${mapWindow} [data-action="window-minimize"]`);
+  await page.waitForSelector(`${mapWindow}[data-minimized="true"]`, { state: "attached" });
+  assert(!(await page.locator(mapWindow).isVisible()), "minimized: the map window is out of sight");
+  const chip = page.locator('.window-tray [data-window-chip="map"]');
+  await chip.waitFor();
+  if (process.env.SHOT) await page.screenshot({ path: process.env.SHOT.replace(".png", "-tray.png") });
+  const listed = await tool("kraken_windows", { action: "list" });
+  assert(listed.open.some((item) => item.kind === "map" && item.minimized), `the agent sees it minimized (${JSON.stringify(listed.open)})`);
+  await chip.click();
+  await page.locator(mapWindow).waitFor({ state: "visible" });
+  assert(!(await page.$(".window-tray")), "brought back: the tray is empty and gone");
+  const pinKept = await pin.boundingBox();
+  assert(Math.abs(pinKept.x - pinNow.x) < 3 && Math.abs(pinKept.y - pinNow.y) < 3, "the map as it was left (the moved pin where it was)");
+  await tool("kraken_windows", { action: "minimize", kind: "map" });
+  await page.waitForSelector(`${mapWindow}[data-minimized="true"]`, { state: "attached" });
+  await tool("kraken_image", { action: "open", book: tower.name, name: YARD });
+  await page.locator(mapWindow).waitFor({ state: "visible" });
+  report.push("minimize: the map window goes to the tray (the agent sees it), comes back from its chip as it was left, and when the image is opened again");
   const pinsBefore = await page.$$eval("[data-label]", (all) => all.length);
   await press('[data-action="map-pins"]');
   await settle(400);
