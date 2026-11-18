@@ -46,6 +46,10 @@ function startUpdater({ hosting, register = () => undefined }) {
       updater.autoInstallOnAppQuit = false;
       // Every Kraken release so far is a pre-release (an alpha).
       updater.allowPrerelease = true;
+      // One download of the whole installer, not the differential one: that
+      // asks GitHub for hundreds of small pieces and crawled (minutes stuck at
+      // 9% on a gigabit line), and its bar counts only the new pieces.
+      updater.disableDifferentialDownload = true;
       updater.logger = null;
       if (feed) {
         // Run from the source, the updater's own settings (an installed Kraken
