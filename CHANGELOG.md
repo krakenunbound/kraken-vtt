@@ -8,6 +8,8 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **The start screen's MAELSTROM fits its panel**, its size taken from the room it has (it ran past the panel's edge with the New campaign form open).
+
 - **Chat languages are written in their own scripts**, as in Fantasy Grounds, each fitting its people: runes for Dwarven, Giant and Gnome, flowing Georgian loops for Elvish, the Ogham tree-script for Sylvan and Druidic, hard Old Turkic angles for Orc, Goblin and Gnoll, clawed Old South Arabian for Draconic, Phoenician for Infernal, spiky Old Hungarian for Abyssal, sacred Coptic for Celestial, Gothic for Undercommon, cuneiform wedges for Deep Speech, Old Italic for the elemental tongues. Those who know the language (and the GM) read the script with a translation beneath; everyone else sees only the script of its sounds. Common and Halfling have none. The fonts (Google's Noto, OFL) come with Maelstrom, so players need nothing installed.
 
 - **The start screen's scenes go round by themselves**, twelve seconds each, like a demo; the mouse wheel over the dots steps through them, and a click on a dot still picks one. They stay put while the pointer is on the dots, and do not move for those whose system asks for less motion.
