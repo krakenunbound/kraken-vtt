@@ -1,6 +1,9 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("kraken", {
+  // A window of its own brought back (restored if minimized, in front), and whether it is minimized.
+  popOutShow: (name) => ipcRenderer.invoke("popout-show", name),
+  popOutMinimized: (name) => ipcRenderer.invoke("popout-minimized", name),
   addresses: () => ipcRenderer.invoke("addresses"),
   network: () => ipcRenderer.invoke("network"),
   campaigns: () => ipcRenderer.invoke("campaigns"),

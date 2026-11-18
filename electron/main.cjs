@@ -128,6 +128,23 @@ async function onBackend(child, message) {
   }
 }
 
+// Windows of their own (the table's pop-outs), by name: one minimized comes back
+// when the table asks for it (its sidebar button, opening it again).
+const popOutWindows = new Map();
+ipcMain.handle("popout-show", (_event, name) => {
+  const child = popOutWindows.get(String(name ?? ""));
+  if (!child || child.isDestroyed()) return false;
+  if (child.isMinimized()) child.restore();
+  child.show();
+  child.focus();
+  return true;
+});
+// Whether a window of its own is minimized (its sidebar button brings it back rather than closing it).
+ipcMain.handle("popout-minimized", (_event, name) => {
+  const child = popOutWindows.get(String(name ?? ""));
+  return Boolean(child && !child.isDestroyed() && child.isMinimized());
+});
+
 // A file picked in the app's own dialog, for the backend (Map Studio's Open, starting in
 // the campaign's maps folder): its path, or null when the GM cancels.
 async function pickOp({ title, defaultPath, filters }) {
@@ -401,8 +418,14 @@ function createWindow() {
       },
     };
   });
-  win.webContents.on("did-create-window", (child) => {
+  win.webContents.on("did-create-window", (child, details) => {
     child.webContents.on("will-navigate", (event) => event.preventDefault());
+    // Known by its name, so the table can bring it back when it was minimized (popout-show).
+    const name = String(details?.frameName ?? "");
+    if (name) {
+      popOutWindows.set(name, child);
+      child.on("closed", () => popOutWindows.delete(name));
+    }
     // A window of its own always lands where it can be seen: one remembered on
     // a monitor no longer there (or off every screen) comes up beside Kraken's.
     try {

@@ -94,7 +94,9 @@ const memoryOf = (kind: WindowKind, payload?: string) => (kind === "books" && pa
 function remembered(kind: WindowKind, payload?: string): Placement {
   try {
     const saved = JSON.parse(window.localStorage.getItem(`kraken-window:${memoryOf(kind, payload)}`) ?? "null");
-    if (saved && [saved.x, saved.y, saved.w, saved.h].every((value) => Number.isFinite(value))) return { x: saved.x, y: saved.y, w: saved.w, h: saved.h, out: saved.out ?? null };
+    // A window of its own last seen minimized (parked by Windows at -32000) opens in the main window instead.
+    const parked = saved?.out && (saved.out.sx <= -30000 || saved.out.sy <= -30000);
+    if (saved && [saved.x, saved.y, saved.w, saved.h].every((value) => Number.isFinite(value))) return { x: saved.x, y: saved.y, w: saved.w, h: saved.h, out: parked ? null : (saved.out ?? null) };
   } catch {
     /* no memory: defaults */
   }
@@ -178,7 +180,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
       const key = payload ? `${kind}:${payload}` : kind;
       const existing = windows.find((item) => item.key === key);
       if (existing?.popped) {
-        popups.current.get(key)?.focus();
+        showPopOut(popups.current.get(key));
         return;
       }
       if (existing) {
@@ -218,9 +220,13 @@ export function WindowProvider({ children }: { children: ReactNode }) {
         return;
       }
       // Out in a window of its own: the button closes it, as it closes any
-      // window (a window of its own out of sight never holds the button).
+      // window (a window of its own out of sight never holds the button);
+      // minimized, the button brings it back instead.
       if (existing?.popped) {
-        close(key);
+        const child = popups.current.get(key);
+        const ask = window.kraken?.popOutMinimized;
+        if (child && !child.closed && ask) void ask(child.name).then((minimized) => (minimized ? showPopOut(child) : close(key)));
+        else close(key);
         return;
       }
       if (existing && (existing.z === top.current || AT_BACK.includes(existing.kind))) {
@@ -303,6 +309,14 @@ export function WindowProvider({ children }: { children: ReactNode }) {
     [windows, open, toggle, close, focus, minimize, restore, move, popOut, dockBack],
   );
   return <WindowContext.Provider value={value}>{children}</WindowContext.Provider>;
+}
+
+// A window of its own to the front, restored first if it was minimized (focus alone leaves it minimized).
+function showPopOut(child: Window | undefined) {
+  if (!child || child.closed) return;
+  const show = window.kraken?.popOutShow;
+  if (show) void show(child.name).then((shown) => shown || child.focus());
+  else child.focus();
 }
 
 function fitToScreen(place: Placement): Placement {

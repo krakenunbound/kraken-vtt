@@ -87,6 +87,8 @@ export function PopOutWindow({
         return;
       }
       const place = { sx: child.screenX, sy: child.screenY, w: child.innerWidth, h: child.innerHeight };
+      // Minimized, Windows parks a window at -32000: not a place to open it again.
+      if (child.document.visibilityState === "hidden" || place.sx <= -30000 || place.sy <= -30000) return;
       const key = JSON.stringify(place);
       if (key !== last) {
         last = key;

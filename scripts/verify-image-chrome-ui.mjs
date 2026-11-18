@@ -161,6 +161,31 @@ try {
   await tool("kraken_image", { action: "open", book: tower.name, name: YARD });
   await page.locator(mapWindow).waitFor({ state: "visible" });
   report.push("minimize: the map window goes to the tray (the agent sees it), comes back from its chip as it was left, and when the image is opened again");
+
+  // A window of its own minimized with the system's button: its place is not remembered as
+  // Windows' parking spot (-32000), and opening it again brings it back (restored, in front).
+  await tool("kraken_windows", { action: "open", kind: "settings" });
+  await tool("kraken_windows", { action: "popout", kind: "settings" });
+  await settle(1500);
+  const minimizedOut = await app.evaluate(({ BrowserWindow }) => {
+    const [main] = BrowserWindow.getAllWindows().sort((a, b) => a.id - b.id);
+    const child = BrowserWindow.getAllWindows().find((win) => win !== main && /Settings/.test(win.getTitle()));
+    child?.minimize();
+    return Boolean(child);
+  });
+  assert(minimizedOut, "Settings popped out into a window of its own");
+  await settle(2500);
+  const kept = await page.evaluate(() => JSON.parse(window.localStorage.getItem("kraken-window:settings") ?? "null"));
+  assert(kept?.out && kept.out.sx > -30000 && kept.out.sy > -30000, `minimized, its place is not Windows' parking spot (${JSON.stringify(kept)})`);
+  await tool("kraken_windows", { action: "open", kind: "settings" });
+  await settle(1200);
+  const back = await app.evaluate(({ BrowserWindow }) => {
+    const child = BrowserWindow.getAllWindows().find((win) => /Settings/.test(win.getTitle()) && win.getTitle() !== "");
+    return child ? { minimized: child.isMinimized(), visible: child.isVisible() } : null;
+  });
+  assert(back && !back.minimized && back.visible, `opened again: the window of its own is back, not minimized (${JSON.stringify(back)})`);
+  await tool("kraken_windows", { action: "close", kind: "settings" });
+  report.push("a window of its own minimized by the system: its place kept (not the -32000 parking spot), and opening it again restores it");
   const pinsBefore = await page.$$eval("[data-label]", (all) => all.length);
   await press('[data-action="map-pins"]');
   await settle(400);
