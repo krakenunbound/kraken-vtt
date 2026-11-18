@@ -17,10 +17,10 @@ const fgFolder = path.join(work, "fg-modules");
 const packsFolder = path.join(work, "packs");
 process.env.KRAKEN_PACKS = packsFolder;
 process.env.KRAKEN_MODULE_CACHE = path.join(work, "cache");
-const { zipSync, strToU8 } = require("fflate");
+const { zipSync, unzipSync, strToU8 } = require("fflate");
 const { readModule, modulePicture, resolveModule } = require("../electron/importers/fgModule.cjs");
 const { createBookShelf, describe } = require("../electron/books.cjs");
-const { makePack, readManifest, packFor, VERSION } = require("../electron/packs.cjs");
+const { makePack, readManifest, readEntries, packFor, VERSION } = require("../electron/packs.cjs");
 const { fgModuleBundle } = require("../electron/importers/fgMaps.cjs");
 
 function assert(condition, message) {
@@ -98,6 +98,34 @@ const old = new Date(Date.now() - 3600000);
 fs.utimesSync(at(NAME), old, old);
 shelf.refresh();
 assert(shelf.list().filter((item) => item.name === NAME).map((item) => item.pack).join() === "true", "an older module: the pack");
+
+// A pack's description and records are read without reading the pack whole
+// (a pack holds hundreds of megabytes of pictures): the same bytes as
+// unzipping it, from a pack and from an FG module, stored and deflated alike.
+{
+  const sameAs = (file, names) => {
+    const whole = unzipSync(new Uint8Array(fs.readFileSync(file)), { filter: (entry) => names.includes(entry.name) });
+    const read = readEntries(file, names);
+    return Object.keys(whole).length === names.length && names.every((name) => Buffer.compare(Buffer.from(whole[name]), Buffer.from(read[name] ?? [])) === 0);
+  };
+  assert(sameAs(made.file, ["kraken-pack.json", "records.json"]), "a pack's description and records, as unzipped");
+  const big = path.join(work, "Big.mod");
+  fs.writeFileSync(big, zipSync({ "definition.xml": strToU8("<root><name>Big</name></root>"), "images/huge.png": [new Uint8Array(40 * 1024 * 1024), { level: 0 }], "db.xml": strToU8("<root><encounter/></root>".repeat(1000)) }));
+  assert(sameAs(big, ["definition.xml", "db.xml"]), "an FG module's entries, as unzipped");
+  const reads = [];
+  const readSync = fs.readSync;
+  fs.readSync = (fd, buffer, ...rest) => {
+    reads.push(buffer.length);
+    return readSync(fd, buffer, ...rest);
+  };
+  try {
+    readEntries(big, ["definition.xml", "db.xml"]);
+  } finally {
+    fs.readSync = readSync;
+  }
+  const bytes = reads.reduce((sum, length) => sum + length, 0);
+  assert(bytes > 0 && bytes < 1024 * 1024, `a 40 MB module's two small entries read without reading it whole (${bytes} bytes read)`);
+}
 
 // Not packs: a zip without the description, and one from a newer Kraken.
 fs.writeFileSync(path.join(packsFolder, "Not a pack.kpack"), zipSync({ "hello.txt": strToU8("hi") }));

@@ -10,6 +10,7 @@ Collected here until the next major release (alpha to beta).
 
 - **Party Sheet and Calendar sit with the Combat Tracker** in the sidebar's tools (as in Fantasy Grounds), no longer under Player. Drag a character from Character Selection onto the Party Sheet to add them, and **Party from who's here** adds every connected player's characters and takes out those whose player is away. Character Selection opens beside the party sheet, not over it.
 - **The sound volumes follow your ears**: a slider halfway sounds about half as loud, and turned well down it is quiet (before, a loud sound pack stayed loud until nearly zero). The dice keep their own volume.
+- **The book list is read much faster**: Maelstrom reads only each book's description from its pack, not the whole pack, so a newly added book no longer stalls the table for seconds; an agent's request made while Maelstrom is busy now waits instead of failing.
 - **Every record has an anchor**: the Maelstrom mark at the top left of a sheet, NPC, note, item, picture or book window. Drag it to link the record anywhere: a quick slot, the party sheet, the combat tracker, a note or a story entry.
 - **The GM can speak as their own characters**: the chat's Speak as lists the characters the GM made (and no player has taken).
 

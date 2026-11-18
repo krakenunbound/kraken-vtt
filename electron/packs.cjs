@@ -1,7 +1,7 @@
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { unzipSync, strFromU8, strToU8, Zip, ZipPassThrough, ZipDeflate } = require("fflate");
+const { unzipSync, inflateSync, strFromU8, strToU8, Zip, ZipPassThrough, ZipDeflate } = require("fflate");
 
 // Kraken packs: a book, an adventure or a rulebook in Kraken's own file, so it
 // opens on any computer with Kraken and nothing else (no Fantasy Grounds, no
@@ -78,9 +78,45 @@ const isPack = (file) => String(file).toLowerCase().endsWith(EXTENSION);
 // A book's file name, safe on every system (the pack keeps its own name inside).
 const fileName = (name) => `${String(name).replace(/[<>:"/\\|?*\x00-\x1f]/g, "_").replace(/[. ]+$/, "").slice(0, 120) || "Book"}${EXTENSION}`;
 
-// The pack's own description (only that entry is unpacked).
+// Some entries of a pack (or any zip: an FG module), read from the zip's directory at its end: only
+// those entries' bytes are read from disk, not the whole file (a pack is
+// hundreds of megabytes of pictures; its description a few kilobytes).
+function readEntries(file, names) {
+  const wanted = typeof names === "function" ? names : (name) => names.includes(name);
+  const fd = fs.openSync(file, "r");
+  try {
+    const size = fs.fstatSync(fd).size;
+    const at = (length, position) => {
+      const buffer = Buffer.alloc(length);
+      fs.readSync(fd, buffer, 0, length, position);
+      return buffer;
+    };
+    const tail = at(Math.min(size, 65557), Math.max(0, size - 65557));
+    const end = tail.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
+    if (end < 0) throw new Error("That is not a Maelstrom pack.");
+    const directory = at(tail.readUInt32LE(end + 12), tail.readUInt32LE(end + 16));
+    const found = {};
+    for (let i = 0; i + 46 <= directory.length && directory.readUInt32LE(i) === 0x02014b50; ) {
+      const nameLength = directory.readUInt16LE(i + 28);
+      const name = directory.toString("utf8", i + 46, i + 46 + nameLength);
+      if (wanted(name)) {
+        const method = directory.readUInt16LE(i + 10);
+        const packed = directory.readUInt32LE(i + 20);
+        const local = at(30, directory.readUInt32LE(i + 42));
+        const data = at(packed, directory.readUInt32LE(i + 42) + 30 + local.readUInt16LE(26) + local.readUInt16LE(28));
+        found[name] = method === 8 ? inflateSync(data) : new Uint8Array(data);
+      }
+      i += 46 + nameLength + directory.readUInt16LE(i + 30) + directory.readUInt16LE(i + 32);
+    }
+    return found;
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+// The pack's own description (only that entry is read).
 function readManifest(file) {
-  const found = unzipSync(new Uint8Array(fs.readFileSync(file)), { filter: (entry) => entry.name === MANIFEST });
+  const found = readEntries(file, [MANIFEST]);
   const bytes = found[MANIFEST];
   if (!bytes) throw new Error("That is not a Maelstrom pack (no kraken-pack.json).");
   const manifest = JSON.parse(strFromU8(bytes));
@@ -91,7 +127,7 @@ function readManifest(file) {
 
 // A pack read whole (its description and records; pictures stay packed).
 function readPack(file) {
-  const found = unzipSync(new Uint8Array(fs.readFileSync(file)), { filter: (entry) => entry.name === MANIFEST || entry.name === RECORDS });
+  const found = readEntries(file, [MANIFEST, RECORDS]);
   if (!found[MANIFEST]) throw new Error("That is not a Maelstrom pack (no kraken-pack.json).");
   const manifest = JSON.parse(strFromU8(found[MANIFEST]));
   if (manifest?.format !== FORMAT) throw new Error("That is not a Maelstrom pack.");
@@ -276,4 +312,4 @@ function makePack(source, { read, describe, folder = packFolder(), onProgress = 
   return { file: target, name: manifest.name, title: manifest.title, ruleset: manifest.ruleset, records: records.length, pictures: kept.length, bytes: fs.statSync(target).size };
 }
 
-module.exports = { BUNDLED, packVersion, packCurrent, packFolder, isPack, fileName, readManifest, readPack, packFor, packIndex, preferPack, makePack, krakenRuleset, EXTENSION, FORMAT, VERSION };
+module.exports = { BUNDLED, readEntries, packVersion, packCurrent, packFolder, isPack, fileName, readManifest, readPack, packFor, packIndex, preferPack, makePack, krakenRuleset, EXTENSION, FORMAT, VERSION };

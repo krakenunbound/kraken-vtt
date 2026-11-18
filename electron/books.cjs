@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { unzipSync, strFromU8 } = require("fflate");
+const { strFromU8 } = require("fflate");
 const { DOMParser } = require("@xmldom/xmldom");
 const { readModule, modulePicture } = require("./importers/fgModule.cjs");
 const packs = require("./packs.cjs");
@@ -126,7 +126,7 @@ function describe(file) {
       return fs.existsSync(at) ? fs.readFileSync(at) : null;
     };
   } else {
-    const zip = unzipSync(new Uint8Array(fs.readFileSync(file)), { filter: (entry) => /^(definition|db|client)\.xml$|^thumbnail\.(png|jpg|webp)$/i.test(entry.name) });
+    const zip = packs.readEntries(file, (name) => /^(definition|db|client)\.xml$|^thumbnail\.(png|jpg|webp)$/i.test(name));
     get = (name) => zip[name] ?? null;
   }
   const definition = get("definition.xml");

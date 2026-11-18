@@ -135,6 +135,10 @@ function startAgentServer(ctx, { version = "0.1.0", port = Number(process.env.KR
       reply(res, 200, answer);
     });
   });
+  // No keep-alive timer: an agent's next call on its open connection, sent
+  // while the backend is busy, would meet the timer when the backend is free
+  // and be cut off (ECONNRESET) unread. The agent closes idle connections.
+  server.keepAliveTimeout = 0;
 
   return new Promise((resolve, reject) => {
     server.once("error", reject);

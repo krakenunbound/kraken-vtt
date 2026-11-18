@@ -125,10 +125,13 @@ try {
   await page.waitForSelector(`[data-hear="${track}"][aria-pressed="false"]`, { timeout: 5000 });
   assert(!(await page.evaluate((id) => window.__krakenSound.isPlaying(id), track)), "clicked again, it stops");
 
-  // A scene's own sound: B1's map on the table, the Tavern loop playing, kept for the scene from the window.
+  // A scene's own sound: B1's map on the table (the book made active first), the Tavern loop playing, kept for the scene from the window.
+  await tool("kraken_books", { action: "activate", book: "B1 In Search of the Unknown (C&C)" });
   await tool("kraken_open_fg_module", { module: "B1 In Search of the Unknown (C&C)" });
   await page.waitForSelector(".map-toolbar", { timeout: 60000 });
   await tool("kraken_sound", { action: "ambience", do: "add", id: "ambience/Tavern" });
+  // The map opened over the Sound window: the sidebar's Sound Sets brings it to the front.
+  await page.click('.sidebar [data-launch="sound"]');
   await page.click('[data-tab="ambience"]');
   await page.waitForSelector('[data-scene-sound="none"]');
   await page.click('[data-action="scene-sound-keep"]');
