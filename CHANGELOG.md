@@ -4,8 +4,12 @@ What changed in each release of Maelstrom VTT (called Kraken VTT until alpha.92)
 [Releases](https://github.com/krakenunbound/maelstrom-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
-## Next
+## 0.1.0-alpha.96: Only your own maps, and faster updates
 
+- **A campaign shows only the maps you loaded in it.** Putting a book's maps on the table used to save a copy of them inside the campaign, and hosting reopened that copy even after the book was turned off (one GM's campaign kept opening another adventure's village map). Now a book's maps stay in the book: hosting reads them from it, only while it is active, and a copy an older version left behind is deleted.
+- **Faster updates.** The updater downloads the whole new version in one go instead of hundreds of small pieces, which crawled (stuck near 9% on a fast line). This takes effect when you update from this version on.
+- **Natural 20s and 1s only on a lone d20.** The flare, the fanfare and the trombone are for a check, an attack or a save; rolling a handful of d20s no longer plays them for any 1 or 20 among them.
+- **The dice tower has no "Tower off" text under it**: its look shows whether it is on.
 - **Firefox and Brave work for players**, tested: joining, the map, the 3D dice and chat from Firefox, and the player tests run in Brave. The guides now list Chrome, Edge, Brave and Firefox (Safari is untested).
 
 ## 0.1.0-alpha.95: New maps and a home on the web
