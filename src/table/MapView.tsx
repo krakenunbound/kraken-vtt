@@ -76,6 +76,10 @@ type Camera = { x: number; y: number; scale: number };
 // Where each scene was being looked at (this screen): the map put into a window of
 // its own, or back, or drawn again, shows just what it showed, never framed anew.
 const views = new Map<string, { camera: Camera; framed: string }>();
+// A map opened afresh (not moved to another window) is framed anew: fitted and centred.
+export function forgetView(sceneId: string) {
+  views.delete(sceneId);
+}
 // The GM's copied tokens (Ctrl+C), kept across scenes for a paste on another map.
 const tokenClipboard: { items: { recordId: string | null; name: string; dx: number; dy: number }[] } = { items: [] };
 type Point = { x: number; y: number };
@@ -424,6 +428,9 @@ function MapViewInner({
   const [maskMode, setMaskMode] = useState<"reveal" | "hide">("reveal");
   const [labelStyle, setLabelStyle] = useState<LabelStyle>({ text: "", font: "Bebas Neue", size: 1, color: "#ffffff", outline: { width: 2, color: "#000000" }, shadow: { offset: 0, blur: 0, color: "#000000" }, group: "", icon: "" });
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
+  // A pin or label the GM is dragging (FG): where it is now, until let go.
+  const [labelDrag, setLabelDrag] = useState<{ id: string; x: number; y: number } | null>(null);
+  const labelDragged = useRef(false);
   const [paintStyle, setPaintStyle] = useState<PaintStyle>({ color: "#c0392b", width: 6, alpha: 1, fill: null, fillAlpha: 0.4, group: "" });
   const [selectedFx, setSelectedFx] = useState<string | null>(null);
   // The FX tab's brush: how wide it paints an effect's area, in map pixels.
@@ -608,6 +615,8 @@ function MapViewInner({
     });
   }, [scene.imageUrl, videoMap]);
   const framedFor = useRef(views.get(sceneIn.id)?.framed ?? "");
+  // The camera as the last fit set it (null once the GM pans or zooms it away).
+  const fitted = useRef<Camera | null>(null);
   // The view kept as it changes, for when the map moves to another window.
   useEffect(() => {
     if (framedFor.current.startsWith(`${scene.id}|`)) views.set(scene.id, { camera, framed: framedFor.current });
@@ -620,10 +629,22 @@ function MapViewInner({
       if (rect.width < 10 || rect.height < 10) return;
       const own = mine[0];
       const key = `${scene.id}|${own ? "token" : "fit"}`;
+      // Fitted, and not moved since: the window took its size (it opens, it is resized), fitted again to it.
+      const untouched = fitted.current !== null && fitted.current === cameraRef.current;
+      if (untouched && framedFor.current === `${scene.id}|fit` && (gm || !own)) {
+        const refit = fitCamera(rect.width, rect.height, sceneFrame(scene), scene.width, scene.height);
+        fitted.current = refit;
+        setCamera(refit);
+        return;
+      }
       if (framedFor.current === key || (framedFor.current.startsWith(`${scene.id}|`) && !own)) return;
       framedFor.current = key;
       if (!gm && own) setCamera(centeredOn(rect, own, PLAYER_SQUARE_PX / size));
-      else setCamera(fitCamera(rect.width, rect.height, sceneFrame(scene), scene.width, scene.height));
+      else {
+        const first = fitCamera(rect.width, rect.height, sceneFrame(scene), scene.width, scene.height);
+        fitted.current = first;
+        setCamera(first);
+      }
     };
     apply();
     // Watched from the window the map is in (its own, on another monitor, tells of its size only to its own observer).
@@ -963,6 +984,43 @@ function MapViewInner({
         </div>
       );
     });
+  }
+
+  // The GM drags a pin or label to move it; a click without a drag still opens a pin.
+  function grabLabel(event: React.PointerEvent, label: { id: string; x: number; y: number }) {
+    event.stopPropagation();
+    if (!gm || !actions.label || event.button !== 0) return;
+    const start = worldAt(event.clientX, event.clientY);
+    if (!start) return;
+    const offset = { x: label.x - start.x, y: label.y - start.y };
+    const from = { x: event.clientX, y: event.clientY };
+    const view = event.currentTarget.ownerDocument.defaultView ?? window;
+    let moved = false;
+    const at = (clientX: number, clientY: number) => {
+      const point = worldAt(clientX, clientY);
+      return point ? { x: Math.round(point.x + offset.x), y: Math.round(point.y + offset.y) } : null;
+    };
+    const move = (moveEvent: PointerEvent) => {
+      if (!moved && Math.hypot(moveEvent.clientX - from.x, moveEvent.clientY - from.y) < 5) return;
+      moved = true;
+      const point = at(moveEvent.clientX, moveEvent.clientY);
+      if (point) setLabelDrag({ id: label.id, ...point });
+    };
+    const up = (upEvent: PointerEvent) => {
+      view.removeEventListener("pointermove", move);
+      view.removeEventListener("pointerup", up);
+      view.removeEventListener("pointercancel", up);
+      if (!moved) return setLabelDrag(null);
+      labelDragged.current = true;
+      view.setTimeout(() => (labelDragged.current = false), 0);
+      const point = at(upEvent.clientX, upEvent.clientY);
+      if (point) actions.label?.("update", { id: label.id, patch: point });
+      // Kept where it was dropped until the table says so.
+      view.setTimeout(() => setLabelDrag((current) => (current?.id === label.id ? null : current)), 600);
+    };
+    view.addEventListener("pointermove", move);
+    view.addEventListener("pointerup", up);
+    view.addEventListener("pointercancel", up);
   }
 
   function worldAt(clientX: number, clientY: number): Point | null {
@@ -1944,13 +2002,16 @@ function MapViewInner({
             {(map.labels ?? [])
               .filter((label) => (map.groups ?? []).find((group) => group.name === label.group)?.shown !== false)
               .filter((label) => pinsShown || !label.link)
-              .map((label) => {
+              .map((shownLabel) => {
+                const label = labelDrag?.id === shownLabel.id ? { ...shownLabel, x: labelDrag.x, y: labelDrag.y } : shownLabel;
+                // The GM drags pins always, and plain text while the editor's Text tab is open.
+                const grabbable = gm && Boolean(actions.label) && (Boolean(label.link) || (editorOpen && editTab === "text"));
                 const fontSize = label.size * size * 0.8;
                 const anchor = label.anchor === "left" ? "start" : label.anchor === "right" ? "end" : "middle";
                 const baseline = label.anchor === "top" ? "hanging" : label.anchor === "bottom" ? "auto" : "central";
                 const icon = { pin: "📍", trap: "⚠", door: "🚪", chest: "🧰" }[label.icon as "pin"] ?? "";
                 return (
-                  <g key={label.id} transform={`rotate(${label.rotation} ${label.x} ${label.y})`} opacity={label.hidden ? 0.45 : 1} data-label={label.id} data-label-text={label.text} style={label.link ? { pointerEvents: "auto", cursor: "pointer" } : undefined} onPointerDown={label.link ? (event) => event.stopPropagation() : undefined} onClick={label.link ? () => openPin(label.link as { kind: string; id: string }) : undefined} filter={label.shadow.blur > 0 || label.shadow.offset > 0 ? `url(#shadow-${label.id})` : undefined}>
+                  <g key={label.id} transform={`rotate(${label.rotation} ${label.x} ${label.y})`} opacity={label.hidden ? 0.45 : 1} data-label={label.id} data-label-text={label.text} style={label.link || grabbable ? { pointerEvents: "auto", cursor: grabbable ? (labelDrag?.id === label.id ? "grabbing" : "grab") : "pointer" } : undefined} onPointerDown={label.link || grabbable ? (event) => (grabbable ? grabLabel(event, shownLabel) : event.stopPropagation()) : undefined} onClick={label.link ? () => !labelDragged.current && openPin(label.link as { kind: string; id: string }) : undefined} filter={label.shadow.blur > 0 || label.shadow.offset > 0 ? `url(#shadow-${label.id})` : undefined}>
                     <text x={label.x} y={label.y} textAnchor={anchor} dominantBaseline={baseline} fontFamily={`"${label.font}", Cinzel, sans-serif`} fontSize={fontSize} fill={label.color} stroke={label.outline.width > 0 ? label.outline.color : "none"} strokeWidth={label.outline.width * fontSize * 0.04} paintOrder="stroke" strokeLinejoin="round">
                       {icon ? `${icon} ` : ""}
                       {label.text}

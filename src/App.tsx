@@ -9,7 +9,7 @@ import { withGrid } from "../shared/map/geometry.mjs";
 import { imageMime, inspectZip, PICTURE, pictureBundle, type ImportCandidate, type LoadedAdventure } from "./foundry/importBundle";
 import { useSession } from "./session/useSession";
 import { SetupScreen } from "./setup/SetupScreen";
-import { MapView, type MapScene } from "./table/MapView";
+import { forgetView, MapView, type MapScene } from "./table/MapView";
 import { DESIGNS, EFFECTS, FONTS, MATERIALS, PRESETS, diceStore, fullLook, type DiceLook } from "./dice/diceStore";
 import type { DiceSettingsPatch } from "./kraken";
 import { agentCommands } from "./ui/agentCommands";
@@ -264,6 +264,7 @@ export function App() {
     setSceneIndex(index);
     const next = table.scenes[index];
     if (next) {
+      forgetView(next.id);
       void publishCurrent(next);
       saveView(candidate.name, next.id);
     }
@@ -456,6 +457,8 @@ export function App() {
       mapWindow.front?.();
       return { opened: chosen.name, id: chosen.id, onTable: true };
     }
+    // Opened afresh: fitted and centred in its window, not where it was last left.
+    forgetView(chosen.id);
     setPrep({ scene: chosen, bytes, book: image.book });
     await session.publish(chosen, { prep: true });
     return { opened: chosen.name, id: chosen.id, onTable: false };

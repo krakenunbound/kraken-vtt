@@ -77,9 +77,20 @@ try {
   await tool("kraken_books", { action: "activate", book: tower.id });
   await tool("kraken_books", { action: "activate", book: handbook.id });
 
+  // Where the map lies in its window: the whole of it in view, and centred.
+  const framing = () =>
+    page.evaluate((name) => {
+      const box = document.querySelector(".map-window .viewport")?.getBoundingClientRect();
+      const map = document.querySelector(".map-window .viewport .world")?.getBoundingClientRect();
+      if (!box || !map) return null;
+      return { inside: map.left >= box.left - 2 && map.right <= box.right + 2 && map.top >= box.top - 2 && map.bottom <= box.bottom + 2, centred: Math.abs((map.left + map.right) / 2 - (box.left + box.right) / 2) < box.width * 0.05 && Math.abs((map.top + map.bottom) / 2 - (box.top + box.bottom) / 2) < box.height * 0.05, fills: Math.max(map.width / box.width, map.height / box.height) };
+    }, YARD);
   // The image window's corner: Lock and Tools.
   await tool("kraken_image", { action: "open", book: tower.name, name: YARD });
   await page.waitForSelector(`[data-image-window="${YARD}"]`);
+  await settle(800);
+  const opened = await framing();
+  assert(opened?.inside && opened.centred && opened.fills > 0.85, `opened: the whole map in view, centred, fitted to the window (${JSON.stringify(opened)})`);
   await page.waitForSelector('.map-corner [data-action="map-editor"][aria-pressed="true"]');
   assert(await page.$(".map-editor"), "unlocked: the editor at the side");
   if (process.env.SHOT) await page.screenshot({ path: process.env.SHOT.replace(".png", "-unlocked.png") });
@@ -104,9 +115,30 @@ try {
   await press('[data-action="map-nav"]');
   await page.waitForSelector(".map-nav", { state: "detached" });
   report.push("the navigation pad pans the map");
+  // Panned away, closed and opened again: framed anew (fitted and centred), not where it was left.
+  await tool("kraken_image", { action: "close" });
+  await tool("kraken_image", { action: "open", book: tower.name, name: YARD });
+  await page.waitForSelector(`[data-image-window="${YARD}"]`);
+  await settle(800);
+  const again = await framing();
+  assert(again?.inside && again.centred, `opened again after panning away: fitted and centred again (${JSON.stringify(again)})`);
+  report.push("a map opens fitted and centred in its window, and again after it was panned away and closed");
 
   // Pins hidden and shown; the player vision preview.
   await tool("kraken_label", { action: "add", text: "Story pin", x: 300, y: 300, link: { kind: "record", id: "nothing" } }).catch(() => undefined);
+  // The GM drags the pin to move it (a click alone still opens it).
+  const pin = page.locator('[data-label-text="Story pin"]');
+  await pin.waitFor();
+  const pinAt = await pin.boundingBox();
+  await page.mouse.move(pinAt.x + pinAt.width / 2, pinAt.y + pinAt.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(pinAt.x + pinAt.width / 2 + 60, pinAt.y + pinAt.height / 2 + 40, { steps: 8 });
+  await page.mouse.move(pinAt.x + pinAt.width / 2 + 120, pinAt.y + pinAt.height / 2 + 80, { steps: 8 });
+  await page.mouse.up();
+  await settle(1200);
+  const pinNow = await pin.boundingBox();
+  assert(Math.abs(pinNow.x - pinAt.x - 120) < 12 && Math.abs(pinNow.y - pinAt.y - 80) < 12, `the pin moved where it was dragged (${JSON.stringify(pinAt)} -> ${JSON.stringify(pinNow)})`);
+  report.push("the GM drags a map pin to move it");
   const pinsBefore = await page.$$eval("[data-label]", (all) => all.length);
   await press('[data-action="map-pins"]');
   await settle(400);
