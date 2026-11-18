@@ -2481,3 +2481,59 @@ label.set-row { cursor: pointer; }
 .window-tools .map-toolbar .tool,
 .window-tools .map-corner .tool { width: 28px; height: 28px; }
 .window-tools .map-corner { order: 2; border-radius: 999px; }
+
+/* ==========================================================================
+   Window frames, in the table's theme: a dark band edged in the accent colour,
+   a flourish in each corner (Maelstrom's own), an interior patterned apart from
+   the table's wallpaper, and the inner panels ruled in gold. Not the map, its
+   backdrop or Map Studio (they fill their windows edge to edge). The chat too.
+   ========================================================================== */
+:is(.window:not(.window-backdrop):not([data-window="map"]):not([data-window="studio"]), .chat-dock:not(.popped)) {
+  --frame-band: color-mix(in srgb, var(--panel) 55%, #000);
+  --frame-gold: color-mix(in srgb, var(--brass) 78%, transparent);
+  padding: 11px;
+  border: 1px solid #000;
+  border-radius: 7px;
+  background-color: var(--panel);
+  background-image:
+    radial-gradient(ellipse at 50% -10%, color-mix(in srgb, var(--brass) 9%, transparent), transparent 62%),
+    repeating-linear-gradient(45deg, color-mix(in srgb, var(--brass) 4%, transparent) 0 1px, transparent 1px 15px),
+    repeating-linear-gradient(-45deg, color-mix(in srgb, var(--brass) 4%, transparent) 0 1px, transparent 1px 15px);
+}
+:is(.window:not(.window-backdrop):not([data-window="map"]):not([data-window="studio"]), .chat-dock:not(.popped))::before,
+:is(.window:not(.window-backdrop):not([data-window="map"]):not([data-window="studio"]), .chat-dock:not(.popped))::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  border-radius: inherit;
+}
+/* The band: a gold edge outside, the band, a gold rule inside. */
+:is(.window:not(.window-backdrop):not([data-window="map"]):not([data-window="studio"]), .chat-dock:not(.popped))::before {
+  box-shadow: inset 0 0 0 1px var(--frame-gold), inset 0 0 0 2px #000, inset 0 0 0 9px var(--frame-band), inset 0 0 0 10px var(--frame-gold), inset 0 0 0 11px rgba(0, 0, 0, 0.7);
+}
+/* The corner flourishes, in the accent colour. */
+:is(.window:not(.window-backdrop):not([data-window="map"]):not([data-window="studio"]), .chat-dock:not(.popped))::after {
+  inset: 0;
+  background: var(--brass);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2056%2056%27%3E%3Cg%20transform%3D%27%27%3E%3Cpath%20d%3D%27M0%200H24C20%203%2017%206%2016.5%2010C12%2010.5%2010%2012.5%2010%2016.5C6%2017%203%2020%200%2024Z%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%278%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%272.2%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%273.4%27%2F%3E%3Cpath%20d%3D%27M23%205.5H48M5.5%2023V48%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.8%27%2F%3E%3Cpath%20d%3D%27M48%205.5q4%200%204%204M5.5%2048q0%204%204%204%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.4%27%2F%3E%3Ccircle%20cx%3D%2735%27%20cy%3D%275.5%27%20r%3D%271.8%27%2F%3E%3Ccircle%20cx%3D%275.5%27%20cy%3D%2735%27%20r%3D%271.8%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") top left / 56px 56px no-repeat, url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2056%2056%27%3E%3Cg%20transform%3D%27translate(56%200)%20scale(-1%201)%27%3E%3Cpath%20d%3D%27M0%200H24C20%203%2017%206%2016.5%2010C12%2010.5%2010%2012.5%2010%2016.5C6%2017%203%2020%200%2024Z%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%278%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%272.2%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%273.4%27%2F%3E%3Cpath%20d%3D%27M23%205.5H48M5.5%2023V48%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.8%27%2F%3E%3Cpath%20d%3D%27M48%205.5q4%200%204%204M5.5%2048q0%204%204%204%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.4%27%2F%3E%3Ccircle%20cx%3D%2735%27%20cy%3D%275.5%27%20r%3D%271.8%27%2F%3E%3Ccircle%20cx%3D%275.5%27%20cy%3D%2735%27%20r%3D%271.8%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") top right / 56px 56px no-repeat, url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2056%2056%27%3E%3Cg%20transform%3D%27translate(0%2056)%20scale(1%20-1)%27%3E%3Cpath%20d%3D%27M0%200H24C20%203%2017%206%2016.5%2010C12%2010.5%2010%2012.5%2010%2016.5C6%2017%203%2020%200%2024Z%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%278%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%272.2%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%273.4%27%2F%3E%3Cpath%20d%3D%27M23%205.5H48M5.5%2023V48%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.8%27%2F%3E%3Cpath%20d%3D%27M48%205.5q4%200%204%204M5.5%2048q0%204%204%204%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.4%27%2F%3E%3Ccircle%20cx%3D%2735%27%20cy%3D%275.5%27%20r%3D%271.8%27%2F%3E%3Ccircle%20cx%3D%275.5%27%20cy%3D%2735%27%20r%3D%271.8%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") bottom left / 56px 56px no-repeat, url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2056%2056%27%3E%3Cg%20transform%3D%27translate(56%2056)%20scale(-1%20-1)%27%3E%3Cpath%20d%3D%27M0%200H24C20%203%2017%206%2016.5%2010C12%2010.5%2010%2012.5%2010%2016.5C6%2017%203%2020%200%2024Z%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%278%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%272.2%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%273.4%27%2F%3E%3Cpath%20d%3D%27M23%205.5H48M5.5%2023V48%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.8%27%2F%3E%3Cpath%20d%3D%27M48%205.5q4%200%204%204M5.5%2048q0%204%204%204%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.4%27%2F%3E%3Ccircle%20cx%3D%2735%27%20cy%3D%275.5%27%20r%3D%271.8%27%2F%3E%3Ccircle%20cx%3D%275.5%27%20cy%3D%2735%27%20r%3D%271.8%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") bottom right / 56px 56px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2056%2056%27%3E%3Cg%20transform%3D%27%27%3E%3Cpath%20d%3D%27M0%200H24C20%203%2017%206%2016.5%2010C12%2010.5%2010%2012.5%2010%2016.5C6%2017%203%2020%200%2024Z%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%278%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%272.2%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%273.4%27%2F%3E%3Cpath%20d%3D%27M23%205.5H48M5.5%2023V48%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.8%27%2F%3E%3Cpath%20d%3D%27M48%205.5q4%200%204%204M5.5%2048q0%204%204%204%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.4%27%2F%3E%3Ccircle%20cx%3D%2735%27%20cy%3D%275.5%27%20r%3D%271.8%27%2F%3E%3Ccircle%20cx%3D%275.5%27%20cy%3D%2735%27%20r%3D%271.8%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") top left / 56px 56px no-repeat, url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2056%2056%27%3E%3Cg%20transform%3D%27translate(56%200)%20scale(-1%201)%27%3E%3Cpath%20d%3D%27M0%200H24C20%203%2017%206%2016.5%2010C12%2010.5%2010%2012.5%2010%2016.5C6%2017%203%2020%200%2024Z%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%278%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%272.2%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%273.4%27%2F%3E%3Cpath%20d%3D%27M23%205.5H48M5.5%2023V48%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.8%27%2F%3E%3Cpath%20d%3D%27M48%205.5q4%200%204%204M5.5%2048q0%204%204%204%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.4%27%2F%3E%3Ccircle%20cx%3D%2735%27%20cy%3D%275.5%27%20r%3D%271.8%27%2F%3E%3Ccircle%20cx%3D%275.5%27%20cy%3D%2735%27%20r%3D%271.8%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") top right / 56px 56px no-repeat, url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2056%2056%27%3E%3Cg%20transform%3D%27translate(0%2056)%20scale(1%20-1)%27%3E%3Cpath%20d%3D%27M0%200H24C20%203%2017%206%2016.5%2010C12%2010.5%2010%2012.5%2010%2016.5C6%2017%203%2020%200%2024Z%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%278%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%272.2%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%273.4%27%2F%3E%3Cpath%20d%3D%27M23%205.5H48M5.5%2023V48%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.8%27%2F%3E%3Cpath%20d%3D%27M48%205.5q4%200%204%204M5.5%2048q0%204%204%204%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.4%27%2F%3E%3Ccircle%20cx%3D%2735%27%20cy%3D%275.5%27%20r%3D%271.8%27%2F%3E%3Ccircle%20cx%3D%275.5%27%20cy%3D%2735%27%20r%3D%271.8%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") bottom left / 56px 56px no-repeat, url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2056%2056%27%3E%3Cg%20transform%3D%27translate(56%2056)%20scale(-1%20-1)%27%3E%3Cpath%20d%3D%27M0%200H24C20%203%2017%206%2016.5%2010C12%2010.5%2010%2012.5%2010%2016.5C6%2017%203%2020%200%2024Z%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%278%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%272.2%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%273.4%27%2F%3E%3Cpath%20d%3D%27M23%205.5H48M5.5%2023V48%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.8%27%2F%3E%3Cpath%20d%3D%27M48%205.5q4%200%204%204M5.5%2048q0%204%204%204%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.4%27%2F%3E%3Ccircle%20cx%3D%2735%27%20cy%3D%275.5%27%20r%3D%271.8%27%2F%3E%3Ccircle%20cx%3D%275.5%27%20cy%3D%2735%27%20r%3D%271.8%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") bottom right / 56px 56px no-repeat;
+}
+.window:not(.window-backdrop):not([data-window="map"]):not([data-window="studio"]) > .window-title {
+  margin: 0 0 6px;
+  padding-left: 30px;
+  border: 1px solid color-mix(in srgb, var(--brass) 40%, transparent);
+  border-radius: 4px;
+  background: linear-gradient(color-mix(in srgb, var(--panel-2) 88%, var(--brass)), color-mix(in srgb, var(--panel) 80%, #000));
+}
+.window:not(.window-backdrop):not([data-window="map"]):not([data-window="studio"]) > .window-body { border-radius: 4px; }
+/* The record's link point: the corner's own medallion. */
+.window > .window-title .window-anchor { margin-left: -22px; outline: 1px solid var(--frame-gold); outline-offset: 1px; background: var(--frame-band); }
+/* Panels inside: ruled in gold. */
+.window :is(.book-index, .book-page, .records-main, .records-lists) {
+  border: 1px solid color-mix(in srgb, var(--brass) 42%, transparent);
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+  background-color: color-mix(in srgb, var(--panel) 70%, #000);
+}
