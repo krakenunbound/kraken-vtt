@@ -8,6 +8,9 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **Secret doors in Map Studio.** Map Studio has both a Secret Door (hidden from the players until the GM opens it, then a door) and a Toggleable Wall (a wall the GM switches open and shut); before, its "Toggleable Wall" was really the secret door, and a secret door saved into a book's map came back as an ordinary door the players could see. The included adventures' secret doors are secret again.
+- **Map Studio opens in the campaign's own folder.** Open a map picture and Open a project file start in Documents/Kraken VTT/Campaigns/<your campaign>/Maps (made when first used), not wherever the last download went.
+
 - **Dice in the hand are thrown with your swing**, as in Fantasy Grounds: pick up a handful (right-click a die, Pick up 10) press the button, swing, and let go. A slow swing rolls them gently, a hard one sends them bouncing off the rails. A slow drag from the tray now keeps its own slow speed too (it used to be raised to a medium toss).
 
 ## 0.1.0-alpha.96: Only your own maps, and faster updates
