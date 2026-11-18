@@ -70,7 +70,9 @@ contextBridge.exposeInMainWorld("kraken", {
     ask: (text) => ipcRenderer.invoke("assistant-ask", text),
     stop: () => ipcRenderer.invoke("assistant-stop"),
     reset: () => ipcRenderer.invoke("assistant-reset"),
-    setKey: (key) => ipcRenderer.invoke("assistant-key", key),
+    setKey: (key, provider) => ipcRenderer.invoke("assistant-key", key, provider),
+    settings: (patch) => ipcRenderer.invoke("assistant-settings", patch),
+    models: () => ipcRenderer.invoke("assistant-models"),
     onEvent: (handler) => {
       const listener = (_event, value) => handler(value);
       ipcRenderer.on("assistant-event", listener);

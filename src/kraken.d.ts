@@ -33,12 +33,16 @@ export type KrakenUpnp = { ok: boolean; method: string; external?: string; error
 // Links that seat a player: the table's password in the #fragment (never sent to the server).
 export type KrakenInvite = { internet: string; lan: string[]; local: string; upnp?: KrakenUpnp | null };
 
+export type KrakenAssistantProvider = { id: string; name: string; placeholder: string; env: string; hasKey: boolean; keyFrom: string | null };
+export type KrakenAssistantStatus = { busy: boolean; provider: string; model: string; base: string; log: never[]; hasKey: boolean; keyFrom: string | null; providers: KrakenAssistantProvider[] };
 export type KrakenAssistantApi = {
-  status: () => Promise<{ busy: boolean; model: string; log: never[]; hasKey: boolean; keyFrom: string | null }>;
+  status: () => Promise<KrakenAssistantStatus>;
   ask: (text: string) => Promise<unknown>;
   stop: () => Promise<unknown>;
   reset: () => Promise<unknown>;
-  setKey: (key: string) => Promise<{ busy: boolean; model: string; log: never[]; hasKey: boolean; keyFrom: string | null }>;
+  setKey: (key: string, provider?: string) => Promise<KrakenAssistantStatus>;
+  settings: (patch: { provider?: string; model?: string; base?: string }) => Promise<KrakenAssistantStatus>;
+  models: () => Promise<string[]>;
   onEvent: (handler: (event: never) => void) => () => void;
 };
 export type KrakenPackRow = {

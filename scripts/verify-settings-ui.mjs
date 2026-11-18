@@ -121,6 +121,20 @@ try {
   assert((await tool("kraken_table_options")).wallpaperFit === "fit", "OK: the table's wallpaper fits the screen");
   report.push("the wallpaper's Position (Fill, Fit, Stretch, Tile, Centre): tried on the GM's screen at once, the table's on OK");
 
+  // The DM assistant: any provider the GM has a key for (not Claude alone); its key and model are that provider's.
+  await page.click('.sidebar [data-launch="assistant"]');
+  await page.waitForSelector('[data-assistant="provider"]');
+  const offered = await page.$$eval('[data-assistant="provider"] option', (all) => all.map((option) => option.value));
+  assert(["anthropic", "openai", "gemini", "xai", "deepseek", "openrouter", "custom"].every((id) => offered.includes(id)), `every provider is offered (${offered})`);
+  await page.selectOption('[data-assistant="provider"]', "xai");
+  await page.waitForSelector('input[aria-label="xAI Grok API key"][placeholder="xai-..."]');
+  assert((await page.evaluate(() => window.kraken.assistant.status())).provider === "xai", "the choice is kept");
+  await page.selectOption('[data-assistant="provider"]', "custom");
+  await page.waitForSelector('[data-assistant="base"]');
+  await page.selectOption('[data-assistant="provider"]', "anthropic");
+  await page.click('.sidebar [data-launch="assistant"]');
+  report.push("the DM assistant: Claude, OpenAI, Gemini, Grok, DeepSeek, OpenRouter or another OpenAI-compatible service; each asks for its own key, another service for its address");
+
   // A player's Settings, in Chrome.
   browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 1200, height: 900 } });

@@ -2424,7 +2424,7 @@ const TOOLS = [
   {
     name: "kraken_assistant",
     description:
-      "The GM's DM assistant (the sidebar's Assistant window: Claude driving these same tools for the GM): action view (the conversation so far, whether it is working, whether it has an API key), ask (text: what the GM says to it; waits for its answer), stop (after the round under way), reset (a fresh conversation). The key is set in its window or ANTHROPIC_API_KEY, never here.",
+      "The GM's DM assistant (the sidebar's Assistant window: an AI model of the GM's choice, Claude, OpenAI's GPT or Codex, Gemini, Grok, DeepSeek, OpenRouter or another OpenAI-compatible service, driving these same tools for the GM): action view (the conversation so far, the provider and model, whether it is working, whether it has an API key), ask (text: what the GM says to it; waits for its answer), stop (after the round under way), reset (a fresh conversation). The provider, model and key are chosen in its window (or ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, XAI_API_KEY, DEEPSEEK_API_KEY, OPENROUTER_API_KEY in .env.local), never here.",
     inputSchema: object({ action: { type: "string", enum: ["view", "ask", "stop", "reset"] }, text: string("ask: what to say to the assistant") }),
     async run(args, ctx) {
       const assistant = ctx.assistant?.();

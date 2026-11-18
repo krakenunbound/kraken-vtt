@@ -1463,6 +1463,11 @@ textarea.cc-field.tall { min-height: 220px; }
 .assistant-key { padding: 10px; border: 1px solid var(--brass); border-radius: 10px; background: rgba(216, 180, 106, 0.08); font-size: 0.85rem; }
 .assistant-key p { margin: 0 0 8px; }
 .assistant-key-row { display: flex; gap: 6px; }
+/* The assistant's provider, model (and a service's address): one row, wrapping in a narrow window. */
+.assistant-setup { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 0.8rem; color: var(--muted); }
+.assistant-setup label { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1 1 180px; }
+.assistant-setup select,
+.assistant-setup input { flex: 1; min-width: 0; font-size: 0.8rem; }
 .assistant-key-row input { flex: 1; min-width: 0; }
 .assistant-log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; }
 .assistant-ideas { display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 0.85rem; }

@@ -8,6 +8,11 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **The DM Assistant works with any AI provider you have a key for**: Claude, OpenAI (GPT, Codex), Google Gemini, xAI Grok, DeepSeek, OpenRouter, or another OpenAI-compatible service (a local one like Ollama or LM Studio too). Choose the provider and a model from its own list in the Assistant's window; each provider keeps its own key, encrypted on your computer.
+- **Players have an icon in chat**: a player speaking as themselves has their character's token beside the line, as the GM has the GM icon.
+- **Wallpaper position, as Windows'**: Fill, Fit, Stretch, Tile or Centre, chosen in the wallpaper picker (and previewed as you choose).
+- **Map Studio zooms out as far as you like** (Fit map to window brings it back), and the middle mouse button (or Space) pans the map even in the middle of drawing a wall.
+
 - **A Dice Tower button in Settings**, beside GM Icon, to choose the tower's look at any time (it was hidden until the tower was put on the table).
 
 - **Pickers preview as you click.** Choosing a background decal, desktop wallpaper, GM icon or dice tower look shows it at once on your screen; OK makes it the table's (every screen), Cancel or closing the picker puts back what was there. Players see nothing until OK.

@@ -253,6 +253,8 @@ for (const name of [
   "assistant-ask",
   "assistant-stop",
   "assistant-reset",
+  "assistant-settings",
+  "assistant-models",
   "packs",
   "packs-make",
 ])
@@ -313,12 +315,14 @@ ipcMain.handle("campaign-manage", async (_event, input) => {
   return call("campaign-manage", input);
 });
 
-// The DM assistant's key the GM typed: kept encrypted on this computer, known to the backend for the run.
-const assistantKeys = assistantModule.keyStore(path.join(app.getPath("userData"), "assistant-key.bin"), safeStorage);
-const sendTypedKey = () => call("assistant-typed-key", assistantKeys.get() ?? "").catch(() => undefined);
-ipcMain.handle("assistant-key", (_event, key) => {
-  assistantKeys.set(typeof key === "string" ? key : "");
-  return call("assistant-typed-key", typeof key === "string" ? key : "");
+// The DM assistant's keys the GM typed, one for each provider: kept encrypted on this computer, known to the backend for the run.
+const assistantKeys = (provider) => assistantModule.keyStore(assistantModule.keyFileOf(app.getPath("userData"), provider), safeStorage);
+const sendTypedKey = () =>
+  Promise.all(Object.keys(assistantModule.PROVIDERS).map((provider) => call("assistant-typed-key", assistantKeys(provider).get() ?? "", provider).catch(() => undefined)));
+ipcMain.handle("assistant-key", (_event, key, provider = "anthropic") => {
+  const which = assistantModule.PROVIDERS[provider] ? provider : "anthropic";
+  assistantKeys(which).set(typeof key === "string" ? key : "");
+  return call("assistant-typed-key", typeof key === "string" ? key : "", which);
 });
 
 // --- The agent bridge's commands for the window -------------------------------------------

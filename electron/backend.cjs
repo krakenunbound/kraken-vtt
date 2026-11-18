@@ -760,10 +760,14 @@ const calls = {
   "assistant-stop": () => assistant.stop(),
   "assistant-reset": () => assistant.reset(),
   // The key the GM typed (kept encrypted by the window's process): known here for this run.
-  "assistant-typed-key": (key) => {
-    typedKey = typeof key === "string" ? key : "";
+  "assistant-typed-key": (key, provider = "anthropic") => {
+    typedKeys[assistantModule.PROVIDERS[provider] ? provider : "anthropic"] = typeof key === "string" ? key : "";
     return assistantStatus();
   },
+  // The GM's choice of provider, model and (another OpenAI-style service) its address.
+  "assistant-settings": (patch) => setAssistantChoice(patch),
+  // The models the chosen provider offers this key.
+  "assistant-models": () => assistant.models(),
   hosting: () => Boolean(table || hosted),
   // The start screen's campaign menu (and kraken_campaigns): rename, duplicate, export, delete, backups, open its folder.
   "campaign-manage": (input) => manageCampaign(input ?? {}),
@@ -829,14 +833,34 @@ const agentContext = {
 
 // The DM assistant (GM only): the key from the environment or .env.local, or
 // one the GM typed into its window (kept encrypted by the window's process).
-let typedKey = "";
-function assistantKey() {
-  if (typedKey) return { key: typedKey, from: "app" };
-  return assistantModule.envKey(APP_DIR);
+// Each provider's key, and the GM's choice of provider, model (and a service's address), kept between runs.
+const typedKeys = {};
+function assistantKey(provider = assistantChoice().provider) {
+  if (typedKeys[provider]) return { key: typedKeys[provider], from: "app" };
+  return assistantModule.envKey(APP_DIR, provider);
+}
+const assistantChoiceFile = () => path.join(USER_DATA, "assistant.json");
+function assistantChoice() {
+  try {
+    const saved = JSON.parse(fs.readFileSync(assistantChoiceFile(), "utf8"));
+    return { provider: assistantModule.PROVIDERS[saved.provider] ? saved.provider : "anthropic", model: String(saved.model ?? ""), base: String(saved.base ?? "") };
+  } catch {
+    return { provider: "anthropic", model: "", base: "" };
+  }
+}
+function setAssistantChoice(patch) {
+  const next = { ...assistantChoice(), ...(patch && typeof patch === "object" ? patch : {}) };
+  if (!assistantModule.PROVIDERS[next.provider]) throw new Error("No such provider.");
+  // Another provider: its own model, chosen from its list.
+  if (patch?.provider && patch.provider !== assistantChoice().provider && patch.model === undefined) next.model = "";
+  fs.mkdirSync(USER_DATA, { recursive: true });
+  fs.writeFileSync(assistantChoiceFile(), JSON.stringify({ provider: next.provider, model: String(next.model).slice(0, 200), base: String(next.base).slice(0, 300) }));
+  return assistantStatus();
 }
 const assistant = assistantModule.createAssistant({
   ctx: agentContext,
-  key: () => assistantKey()?.key ?? null,
+  settings: () => assistantChoice(),
+  key: (provider) => assistantKey(provider)?.key ?? null,
   makeClient: (key) => {
     const Anthropic = require("@anthropic-ai/sdk").default;
     return new Anthropic({ apiKey: key });
@@ -844,8 +868,14 @@ const assistant = assistantModule.createAssistant({
   onEvent: (event) => emit("assistant-event", event),
 });
 function assistantStatus() {
-  const found = assistantKey();
-  return { ...assistant.view(), hasKey: Boolean(found), keyFrom: found?.from ?? null };
+  const choice = assistantChoice();
+  const found = assistantKey(choice.provider);
+  const providers = Object.entries(assistantModule.PROVIDERS).map(([id, provider]) => {
+    const key = assistantKey(id);
+    return { id, name: provider.name, placeholder: provider.placeholder, env: provider.env[0] ?? "", hasKey: Boolean(key), keyFrom: key?.from ?? null };
+  });
+  // A local service (Ollama, LM Studio) may need no key.
+  return { ...assistant.view(), hasKey: Boolean(found) || choice.provider === "custom", keyFrom: found?.from ?? null, providers };
 }
 
 // --- Messages ---------------------------------------------------------------------

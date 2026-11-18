@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "./icons";
 
-// The DM assistant (the GM's alone): a chat with Claude, which acts at the
-// table with Kraken's own tools (electron/assistant.cjs). Each tool it uses is
+// The DM assistant (the GM's alone): a chat with the AI model of the GM's
+// choice (Claude, OpenAI, Gemini, Grok, DeepSeek, OpenRouter or another
+// OpenAI-compatible service, on the GM's own key), which acts at the table
+// with Maelstrom's own tools (electron/assistant.cjs). Each tool it uses is
 // shown as it runs, so the GM sees what it did.
 
 type AssistantEvent =
@@ -11,7 +13,8 @@ type AssistantEvent =
   | { kind: "tool-result"; name: string; ok: boolean; text: string }
   | { kind: "note" | "error"; text: string }
   | { kind: "thinking" | "done" | "reset" };
-type Status = { busy: boolean; model: string; log: AssistantEvent[]; hasKey: boolean; keyFrom: string | null };
+type Provider = { id: string; name: string; placeholder: string; env: string; hasKey: boolean; keyFrom: string | null };
+type Status = { busy: boolean; provider: string; model: string; base: string; log: AssistantEvent[]; hasKey: boolean; keyFrom: string | null; providers: Provider[] };
 
 const IDEAS = [
   "Roll a random encounter for the party's level and put it on the tracker",
@@ -37,6 +40,9 @@ export function AssistantWindow() {
   const [text, setText] = useState("");
   const [key, setKey] = useState("");
   const [problem, setProblem] = useState("");
+  // The chosen provider's models (its own list), and a service's address being typed.
+  const [models, setModels] = useState<string[] | null>(null);
+  const [base, setBase] = useState("");
   const end = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -60,6 +66,24 @@ export function AssistantWindow() {
   useEffect(() => {
     end.current?.scrollIntoView({ block: "end" });
   }, [log, busy]);
+  // The provider's own list of models, once it has a key.
+  useEffect(() => {
+    if (!api || !status?.hasKey) return setModels(null);
+    let live = true;
+    setModels(null);
+    void api
+      .models()
+      .then((list: string[]) => live && setModels(list))
+      .catch((error: unknown) => {
+        if (!live) return;
+        setModels([]);
+        setProblem(`The model list could not be read: ${error instanceof Error ? error.message : String(error)}`);
+      });
+    return () => {
+      live = false;
+    };
+  }, [api, status?.provider, status?.hasKey, status?.base]);
+  useEffect(() => setBase(status?.base ?? ""), [status?.base]);
 
   if (!api) return <p className="assistant-empty">The assistant runs in the GM's Maelstrom app.</p>;
 
@@ -76,9 +100,18 @@ export function AssistantWindow() {
       setBusy(false);
     }
   };
+  const choose = async (patch: { provider?: string; model?: string; base?: string }) => {
+    try {
+      setProblem("");
+      setStatus(await api.settings(patch));
+    } catch (error) {
+      setProblem(error instanceof Error ? error.message : String(error));
+    }
+  };
+  const provider = status?.providers.find((item) => item.id === status.provider) ?? null;
   const saveKey = async () => {
     try {
-      setStatus(await api.setKey(key));
+      setStatus(await api.setKey(key, status?.provider));
       setKey("");
       setProblem("");
     } catch (error) {
@@ -88,14 +121,53 @@ export function AssistantWindow() {
 
   return (
     <div className="assistant" data-assistant={busy ? "busy" : "idle"}>
-      {status && !status.hasKey ? (
+      {status ? (
+        <div className="assistant-setup">
+          <label>
+            Provider{" "}
+            <select data-assistant="provider" value={status.provider} disabled={busy} onChange={(event) => void choose({ provider: event.target.value })}>
+              {status.providers.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                  {item.hasKey ? "" : " (no key)"}
+                </option>
+              ))}
+            </select>
+          </label>
+          {status.provider === "custom" ? (
+            <label>
+              Address{" "}
+              <input data-assistant="base" value={base} placeholder="http://localhost:11434/v1" onChange={(event) => setBase(event.target.value)} onBlur={() => base !== status.base && void choose({ base })} spellCheck={false} />
+            </label>
+          ) : null}
+          {status.hasKey ? (
+            <label>
+              Model{" "}
+              {models && models.length ? (
+                <select data-assistant="model" value={status.model} disabled={busy} onChange={(event) => void choose({ model: event.target.value })}>
+                  {status.model && !models.includes(status.model) ? <option value={status.model}>{status.model}</option> : null}
+                  {status.model ? null : <option value="">Choose a model…</option>}
+                  {models.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input data-assistant="model" defaultValue={status.model} key={`${status.provider}-${status.model}`} placeholder={models ? "the model's name" : "reading its models…"} onBlur={(event) => event.target.value !== status.model && void choose({ model: event.target.value.trim() })} spellCheck={false} />
+              )}
+            </label>
+          ) : null}
+        </div>
+      ) : null}
+      {status && !status.hasKey && provider ? (
         <div className="assistant-key">
           <p>
-            The assistant talks to Claude ({status.model}) with your own Claude API key. Paste it here: it stays on this computer, encrypted, and is never shown to
-            players. (Or put ANTHROPIC_API_KEY in .env.local.)
+            The assistant works with any AI provider you have a key for. Paste your {provider.name} API key: it stays on this computer, encrypted, and is never shown to players.
+            {provider.env ? ` (Or put ${provider.env} in .env.local.)` : ""}
           </p>
           <div className="assistant-key-row">
-            <input type="password" value={key} onChange={(event) => setKey(event.target.value)} placeholder="sk-ant-..." aria-label="Claude API key" autoComplete="off" spellCheck={false} />
+            <input type="password" value={key} onChange={(event) => setKey(event.target.value)} placeholder={provider.placeholder} aria-label={`${provider.name} API key`} autoComplete="off" spellCheck={false} />
             <button type="button" onClick={() => void saveKey()} disabled={!key.trim()}>
               Save key
             </button>
@@ -178,7 +250,7 @@ export function AssistantWindow() {
             New chat
           </button>
           {status?.hasKey && status.keyFrom === "app" ? (
-            <button type="button" className="ghost" title="Forget the saved key" disabled={busy} onClick={() => void api.setKey("").then(setStatus)}>
+            <button type="button" className="ghost" title={`Forget the saved ${provider?.name ?? ""} key`} disabled={busy} onClick={() => void api.setKey("", status.provider).then(setStatus)}>
               Forget key
             </button>
           ) : null}

@@ -171,6 +171,45 @@ try {
     assert(planner.after.round === 2 && turns.some((line) => /Thorin/.test(line)) && turns.some((line) => /Orc/.test(line)), `round 1 run, each had a turn, round 2 begun: ${JSON.stringify({ round: planner.after.round, turns })}`);
     stepNote = `step 6 through the loop: Thorin built, on the tracker with an orc, initiative, his attack in chat, round ${planner.after.round}`;
   }
+  // Any provider with an OpenAI-style API (OpenAI, Gemini, Grok, DeepSeek, OpenRouter, a local server):
+  // a stand-in service answers; the tool runs at the table and its result goes back as a tool message.
+  {
+    const calls = [];
+    const replies = [
+      { choices: [{ finish_reason: "tool_calls", message: { role: "assistant", content: "Rolling it.", tool_calls: [{ id: "c1", type: "function", function: { name: "kraken_roll", arguments: JSON.stringify({ formula: "1d20+5", label: "Any provider's roll" }) } }] } }] },
+      { choices: [{ finish_reason: "stop", message: { role: "assistant", content: "A 15 (10 + 5)." } }] },
+    ];
+    const fakeFetch = async (url, init = {}) => {
+      calls.push({ url, init });
+      if (url.endsWith("/models")) return new Response(JSON.stringify({ data: [{ id: "grok-a" }, { id: "grok-b" }] }), { status: 200 });
+      if (init.headers?.Authorization !== "Bearer xai-key") return new Response(JSON.stringify({ error: { message: "bad key" } }), { status: 401 });
+      return new Response(JSON.stringify(replies.shift()), { status: 200 });
+    };
+    let choice = { provider: "xai", model: "grok-b" };
+    const anyEvents = [];
+    const any = createAssistant({ ctx, settings: () => choice, key: (provider) => (provider === "xai" ? "xai-key" : null), makeClient: () => null, fetchImpl: fakeFetch, onEvent: (event) => anyEvents.push(event) });
+    assert(JSON.stringify(await any.models()) === JSON.stringify(["grok-a", "grok-b"]), "the provider's own list of models");
+    server.agent.dice.force([10]);
+    await any.ask("Roll 1d20+5 for me");
+    const asked = calls.filter((call) => call.url.endsWith("/chat/completions"));
+    assert(asked.length === 2 && asked[0].url === "https://api.x.ai/v1/chat/completions", `Grok's address (${asked.map((call) => call.url)})`);
+    const body = JSON.parse(asked[0].init.body);
+    assert(body.model === "grok-b" && body.messages[0].role === "system" && body.tools.some((tool) => tool.type === "function" && tool.function.name === "kraken_roll") && !body.tools.some((tool) => tool.function.name === "kraken_ui_eval"), "the chosen model, the skill as its system message, the bridge's tools as functions (none withheld)");
+    const second = JSON.parse(asked[1].init.body);
+    const toolMessage = second.messages.find((message) => message.role === "tool");
+    assert(toolMessage?.tool_call_id === "c1" && /15/.test(toolMessage.content), `the tool's result goes back to it (${JSON.stringify(toolMessage)})`);
+    const rolled = JSON.parse((await callTool("kraken_chat_log", {}, ctx)).content[0].text).find((item) => item.roll?.label === "Any provider's roll");
+    assert(rolled?.roll?.total === 15, "the roll happened at the table");
+    assert(anyEvents.some((event) => event.kind === "assistant" && /A 15/.test(event.text)), "its answer is shown");
+    // Another provider: a fresh conversation in that API's shape; a refused key says whose.
+    choice = { provider: "anthropic" };
+    const switched = await any.ask("Hello");
+    assert(switched.log.some((event) => event.kind === "error" && /Claude \(Anthropic\) API key/.test(event.text)), "Claude with no key: says to add Claude's key");
+    choice = { provider: "deepseek", model: "deepseek-x" };
+    const refused = await createAssistant({ ctx, settings: () => choice, key: () => "wrong", makeClient: () => null, fetchImpl: fakeFetch }).ask("Hi");
+    assert(refused.log.some((event) => event.kind === "error" && /DeepSeek API key was refused/.test(event.text)), "a refused key says which provider refused it");
+  }
+  console.log("ok assistant, any provider: an OpenAI-style service (Grok here) gets the chosen model, the skill and the tools; its tool call runs at the table and the result goes back; the model list is the provider's; another provider starts afresh; a refused key is named");
   console.log(`${stepNote}`);
   console.log("ok assistant: tools run on the table (a re-roll in chat, the tracker read), results go back together, thinking kept, a failing tool and a refusal handled, no key explained, kraken_ui_eval withheld, kraken_assistant drives it");
 } finally {
