@@ -127,6 +127,17 @@ try {
   ann.send({ type: "modifiers", action: "key", key: "dis" });
   await settle();
   assert(!ann.stacks.at(-1).keys.includes("adv") && ann.stacks.at(-1).keys.includes("dis"), "DIS turns ADV off");
+  // Keys that conflict never stand together: +2 or -2; Crit, Max or Half.
+  ann.send({ type: "modifiers", action: "key", key: "plus2" });
+  ann.send({ type: "modifiers", action: "key", key: "minus2" });
+  for (const id of ["crit", "max", "half"]) ann.send({ type: "modifiers", action: "key", key: id });
+  await settle();
+  stack = ann.stacks.at(-1);
+  assert(stack.keys.includes("minus2") && !stack.keys.includes("plus2"), `-2 turns +2 off: ${JSON.stringify(stack.keys)}`);
+  assert(stack.keys.includes("half") && !stack.keys.includes("crit") && !stack.keys.includes("max"), `Half turns Crit and Max off: ${JSON.stringify(stack.keys)}`);
+  ann.send({ type: "modifiers", action: "key", key: "minus2" });
+  ann.send({ type: "modifiers", action: "key", key: "half" });
+  await settle();
   ann.send({ type: "modifiers", action: "key", key: "adv" });
   ann.send({ type: "modifiers", action: "key", key: "crit" });
   await settle();

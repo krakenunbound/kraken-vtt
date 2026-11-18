@@ -8,6 +8,8 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **Roll keys that conflict no longer stand together**: +2 or -2 (pressing one turns the other off), and Crit, Max or Half, one at a time. Each game keeps its own keys.
+
 - **Changed your mind about a roll?** Let the dice go with a still hand (no swing), or drop them back on the chat, and nothing is rolled, as in Fantasy Grounds. A right-click still puts dice in the hand back too.
 
 - **The DM Assistant works with any AI provider you have a key for**: Claude, OpenAI (GPT, Codex), Google Gemini, xAI Grok, DeepSeek, OpenRouter, or another OpenAI-compatible service (a local one like Ollama or LM Studio too). Choose the provider and a model from its own list in the Assistant's window; each provider keeps its own key, encrypted on your computer.

@@ -26,15 +26,17 @@ export const KEYS = {
   dis: { id: "dis", label: "DIS", tip: "Disadvantage: the next d20 roll rolls two and keeps the lower", die: "dis" },
   boon: { id: "boon", label: "Boon", tip: "Boon: the next roll adds a die and keeps the highest two", die: "adv" },
   bane: { id: "bane", label: "Bane", tip: "Bane: the next roll adds a die and keeps the lowest two", die: "dis" },
-  plus1: { id: "plus1", label: "+1", tip: "+1 on the next roll", add: 1 },
-  plus2: { id: "plus2", label: "+2", tip: "+2 on the next roll", add: 2 },
-  minus2: { id: "minus2", label: "-2", tip: "-2 on the next roll", add: -2 },
+  // One bonus or penalty key at a time: +2 and -2 would only cancel out.
+  plus1: { id: "plus1", label: "+1", tip: "+1 on the next roll", add: 1, group: "bonus" },
+  plus2: { id: "plus2", label: "+2", tip: "+2 on the next roll", add: 2, group: "bonus" },
+  minus2: { id: "minus2", label: "-2", tip: "-2 on the next roll", add: -2, group: "bonus" },
   opp: { id: "opp", label: "Opp", tip: "An opportunity attack: the next attack is marked so", on: ["attack"] },
   cover: { id: "cover", label: "Cover", tip: "The target has half cover: -2 on the next attack", add: -2, on: ["attack"], group: "cover" },
   scover: { id: "scover", label: "S. cover", tip: "The target has three-quarters cover: -5 on the next attack", add: -5, on: ["attack"], group: "cover" },
-  crit: { id: "crit", label: "Crit", tip: "The next damage roll is a critical: its dice doubled", damage: "crit", on: ["damage"] },
-  max: { id: "max", label: "Max", tip: "The next damage roll does its most: every die at its highest", damage: "max", on: ["damage", "heal"] },
-  half: { id: "half", label: "Half", tip: "The next damage roll is halved (rounded down)", damage: "half", on: ["damage"] },
+  // One damage key at a time: a critical, the most, or half.
+  crit: { id: "crit", label: "Crit", tip: "The next damage roll is a critical: its dice doubled", damage: "crit", on: ["damage"], group: "damage" },
+  max: { id: "max", label: "Max", tip: "The next damage roll does its most: every die at its highest", damage: "max", on: ["damage", "heal"], group: "damage" },
+  half: { id: "half", label: "Half", tip: "The next damage roll is halved (rounded down)", damage: "half", on: ["damage"], group: "damage" },
 };
 
 // Most games: the two numbers. A game with a die key or its own lists them.
