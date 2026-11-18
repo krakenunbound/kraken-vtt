@@ -39,8 +39,9 @@ A Maelstrom pack (`.kpack`) is one book in one file: a rulebook, a bestiary, an 
 
 - **Make packs** in **Modules**, on the **Packs** tab: **Make pack** for one book, or **Make N packs** for all of them. Each pack holds the book's pages, records, maps with walls and doors, and pictures.
 - **Where they go:** `Documents/Kraken VTT/Packs` (on Linux, `~/Documents/Kraken VTT/Packs`). Set `KRAKEN_PACKS` for another folder. **Open folder** on the Packs tab opens it.
-- **On another computer:** install Maelstrom, create that folder, and copy the `.kpack` files into it. The books open there with no Fantasy Grounds at all.
-- **Pack or module:** Maelstrom reads the pack in place of the module, unless the module is newer. Choose **Make again** after you change a module.
+- **Names:** one file per book, straight in that folder, named after the module's file (`B2 The Keep on the Borderlands (AD&D 2E).mod` makes `B2 The Keep on the Borderlands (AD&D 2E).kpack`). Renaming a pack's file is harmless: Maelstrom also knows it by the book's name inside.
+- **On another computer:** install Maelstrom and start it once (it makes the folder), then copy the `.kpack` files into it. The books open there with no Fantasy Grounds at all.
+- **Pack or module:** Maelstrom reads the pack in place of the module, unless the module is newer or the pack was made by an older Maelstrom. Choose **Make again** after you change a module.
 - **Maelstrom's own games' books** are packs too, and come with Maelstrom. A pack of your own with the same name is read instead.
 
 **Packs made from your books are yours alone.** Keep them to yourself; never share them.

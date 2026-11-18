@@ -1,39 +1,62 @@
-# The Kraken pack format (.kpack)
+# The Maelstrom pack format (.kpack)
 
-A Kraken pack is one book in one file: a rulebook, a bestiary, an adventure,
-a map or token pack. It is Kraken's equivalent of a Fantasy Grounds `.mod` or
-a Foundry compendium pack. Kraken reads its books only from packs. Its own
-games' books ship as packs too, so nothing about a book is built into the
-app's code.
+A pack is one book in one file: a rulebook, a bestiary, an adventure, a map
+or token pack. It is Maelstrom's equivalent of a Fantasy Grounds `.mod` or a
+Foundry compendium pack. Maelstrom was called Kraken VTT until alpha.92, so
+the format, its folder and its tools still say "Kraken" (`kraken-pack.json`,
+`Documents/Kraken VTT/Packs`, `kraken_packs`).
+
+Maelstrom's own games ship their books only as packs, so nothing about a
+book is built into the app's code. A GM's own books come from their Fantasy
+Grounds modules: Maelstrom reads a module directly, or the pack made from it
+(see [Which copy is read](#which-copy-is-read)).
 
 ## Where packs go
 
-Put `.kpack` files in the **packs folder**. Kraken reads it at startup and
-whenever the Books window opens:
+Put `.kpack` files in the **packs folder**:
 
 | System | Folder |
 |---|---|
 | Windows | `C:\Users\<you>\Documents\Kraken VTT\Packs` |
 | Linux | `~/Documents/Kraken VTT/Packs` |
 
-Set `KRAKEN_PACKS` to use another folder. Kraken creates the folder the first
-time you make a pack. On a new computer, create it yourself and copy the
-`.kpack` files in. **Books > Packs > Open folder** opens it.
+Set `KRAKEN_PACKS` to use another folder. Maelstrom creates the folder, with
+its `README.md`, when it starts. The folder is flat: one file per book, no
+subfolders (its `Wizards` folder holds character wizards, not books).
+**Modules > Packs > Open folder** opens it. Copy the folder to another
+computer and every book comes along; that computer needs no Fantasy Grounds.
 
 A campaign shows the packs for its game, plus the packs marked for any game.
 Make a book active in **Modules** to bring its records into the campaign, or
 read it in **Books**.
 
+## File names
+
+`makePack` names the file after the **module's file**, not the book's title:
+`B2 The Keep on the Borderlands (AD&D 2E).mod` becomes
+`B2 The Keep on the Borderlands (AD&D 2E).kpack`, and a store module such as
+`2806727-Dungeon_Builder_5E_V6.mod` becomes `2806727-Dungeon_Builder_5E_V6.kpack`.
+Making the pack again overwrites that file, and only once the new one is
+whole (it is written as `<name>.kpack.part` first).
+
+Maelstrom finds a pack by the book's `name` inside it or by its file name
+without `.kpack`. Renaming the file therefore does no harm, as long as the
+`name` inside stays the same: other books link to it by that name.
+
 ## What is inside
 
-A pack is a zip file with three kinds of entry:
+A pack is a zip file:
 
 ```text
 kraken-pack.json   what the book is
 records.json       its records
-images/...         its pictures, maps and tokens, at the paths the records name
-tokens/...
+<the module's own paths>   its pictures, maps, tokens, sounds and video
 ```
+
+The media files keep the paths they had in the module (`images/map-1.webp`,
+`tokens/ogre.png`, `sounds/door.ogg`), because the records name them by those
+paths. A pack keeps `.png .webp .jpg .jpeg .gif .webm .mp4 .ogg .mp3 .wav .m4a`
+files and leaves out the module's XML and scripts.
 
 ### kraken-pack.json
 
@@ -56,60 +79,150 @@ tokens/...
 }
 ```
 
-- `name` is how other books link to this one.
-- `ruleset` is the Kraken game the pack is for: `Castles & Crusades`,
-  `D&D 3.5E`, `AD&D 2E`, `D&D 5E`, `Traveller`, `Descending Darkness`,
-  `Apeira Astra`, or `Any` for every game.
+- `name` is the book's name in the module, and how other books link to it.
+- `title` is what the Books window shows.
+- `ruleset` is the Maelstrom game the pack is for, worked out from the
+  module's Fantasy Grounds ruleset:
+
+  | Fantasy Grounds ruleset | `ruleset` |
+  |---|---|
+  | SiegeCore, CnCRPG | `Castles & Crusades` |
+  | 3.5E | `D&D 3.5E` |
+  | 2E | `AD&D 2E` |
+  | 5E | `D&D 5E` |
+  | MGT2 | `Traveller` |
+  | Descending Darkness | `Descending Darkness` |
+  | Apeira Astra | `Apeira Astra` |
+  | Cairn | `Cairn` |
+  | Ironsworn | `Ironsworn` |
+  | Starforged | `Starforged` |
+  | Basic Fantasy | `Basic Fantasy` |
+  | Fate Core | `Fate Core` |
+  | Fate Accelerated | `Fate Accelerated` |
+  | Forged in the Dark | `Forged in the Dark` |
+  | CoreRPG, Any, none | `Any` (every game) |
+
+  Any other ruleset name is kept as it is. A pack whose `ruleset` matches no
+  Maelstrom game shows in no campaign.
 - `hasBook` says whether the pack has pages to read in Books.
-- `hasStory` says whether it is an adventure with story entries.
-- `version` is the format's version. Kraken refuses a pack made by a newer
-  Kraken, and reads the source module instead of a pack in an older format.
+- `hasStory` says whether it has story entries (an adventure).
+- `pictures` lists the media files in the pack.
+- `version` is the format's version (2 now). Maelstrom refuses a pack made by
+  a newer Maelstrom, and reads the source module instead of a pack in an
+  older format, until that pack is made again.
+- `calendar` (optional) is the world's calendar the book brings: `greyhawk`,
+  `harptos`, `mystara`, `golarion`, `gregorian`, `imperial`, `waning`, `astra`.
+  When a book with a calendar is made active, the campaign's calendar
+  switches to it. Packs made from modules do not write this field; without it,
+  Maelstrom recognises a setting by the book's name, title or category
+  (Mystara and its Known World, Greyhawk, the Forgotten Realms, Golarion).
 
 ### records.json
 
-An array of records, in the form a Kraken campaign keeps them:
+An array of records, in the form a campaign keeps them:
 
 ```json
 { "id": "c-c-players-handbook:...", "type": "npc", "name": "Goblin",
   "visibility": "gm", "source": "C&C Player's Handbook", "data": { ... } }
 ```
 
-Record types include:
+Record types (as counted in real packs) include:
 
-- the book's pages and its contents;
-- `npc`, `item`, `spell`, and the game's classes, races and feats;
-- `encounter`, which is a story entry;
-- `battle`, a prepared encounter, and `treasureparcel`;
-- `table`, a random table;
+- `refpage`, a book page, and `refindex`, its contents. A page has `text`
+  and `blocks`; a block holds text (`text`, and `text2` for a second
+  column), a picture (`image` or `picture`, with `caption`, `align`,
+  `scale`), and a `frame` name. Books draw these frames: `text1` to
+  `text5`, `blue`, `green`, `brown`, `pink`, `yellow`, `grey`,
+  `sidebar`, `book`, `page`, `picture` (`noframe` or none: no frame). The
+  boxed ones (`blue`, `green`, `brown`, `grey`, `text2` to `text5`) get
+  the GM's read-aloud button;
+- `encounter`, a story entry (Fantasy Grounds' story records, in the Story
+  list, by category), and `story`/`storytemplate` from books that use story
+  templates;
+- `npc`, `item`, `spell` and `spelldesc`, `spelllists`, and the game's
+  own kinds: `class`, `race`, `feat`, `skill`, `specialability`, C&C's
+  `siegepackage` and `siegepower`, `pregencharsheet` (pregenerated
+  characters);
+- `battle`, a prepared encounter, `battlerandom`, a random encounter, and
+  `treasureparcels`;
+- `tables`, a random table;
 - `image`, a picture or a map. A map record holds its grid, walls, doors and
-  lights.
+  lights;
+- `calendar`, a book's own calendar data, and `license`.
 
-Rich text uses Kraken's small markup: p, h, b, i, u, list/li, table/tr/td,
-frame and link. A link names its target by the record's path and the pack's
-name, for example `npc.goblin@C&C Monsters & Treasure`. Each record's `data`
-keeps the fields its game's sheets read.
+Rich text uses a small markup: p, h, b, i, u, list/li, table/tr/td, frame and
+link. A link names its target by the record's path and the pack's name, for
+example `npc.goblin@C&C Monsters & Treasure`. Each record's `data` keeps the
+fields its game's sheets read.
+
+A campaign's own story entries (World > Story > New) are not pack records.
+They are written in Maelstrom, with pages of their own kinds (text, columns,
+heading, pictures, separators) and frames (`kraken_story`).
+
+## Which copy is read
+
+When a book is both a module and a pack, Maelstrom reads the **pack**, unless:
+
+- the module file is newer than the pack (the GM changed the module since);
+- the pack is in an older format (`version` below 2).
+
+Then the module is read until the pack is made again (**Make again**). The
+GM's own packs come before the packs Maelstrom ships: a pack with the same
+name in the packs folder is read instead.
 
 ## Making packs
 
-- **From your Fantasy Grounds books:** in **Books > Packs**, choose
+- **From your Fantasy Grounds books:** in **Modules > Packs**, choose
   **Make pack** for one book or **Make N packs** for all of them. The
   `kraken_packs` tool does the same. A pack is read once from the module and
-  then stands on its own. Choose *Make again* after you change the module.
-- **Kraken's own games:** run `npm run build-games`, then
+  then stands on its own.
+- **Maelstrom's own games:** run `npm run build-games`, then
   `npm run build-packs`. These write the module folders in `games/modules`,
-  then pack them into `games/packs`, which the installer ships. Your own packs
-  come first: one with the same name in your packs folder is read instead.
+  then pack them into `games/packs`, which the installer ships.
+
+## Converting a book: an agent's checklist
+
+Do this through Maelstrom's MCP server (`kraken`) while Maelstrom is running
+with a campaign hosted. Never write a pack by hand.
+
+1. **Find it.** `kraken_packs` `list` with the campaign's game as `ruleset`
+   lists each Fantasy Grounds module that fits, its pack (current, older than
+   the module, or none) and packs with no module on this computer. Use
+   `ruleset: ""` to list every game.
+2. **Make it.** `kraken_packs` `make` with `books: [<module id or name>]`, or
+   `["all"]` for every listed book without a current pack. Packs are made one
+   at a time in the background; `list` shows the one being made and how far
+   it is. Wait until its pack shows as current.
+3. **Check what it holds.** The result and `list` give the record and
+   picture counts. Then:
+   - `kraken_books` `activate` (book), then `contents` and `page` for a
+     rulebook's chapters, pages and pictures;
+   - `kraken_library` `list` with `kind` `story`, `npc`, `battle`, `parcel`,
+     `table`, `image` or `map` for an adventure's records;
+   - open a map from the Library: its walls, doors and lights came from the
+     module's map.
+4. **Check the game.** The pack's `ruleset` must be a Maelstrom game (see the
+   table above), or it shows in no campaign. A module made for CoreRPG
+   becomes `Any`.
+5. **Report.** Give the pack's file, its record and picture counts, and
+   anything that did not come across.
+
+Things that stop a conversion:
+
+- a module Fantasy Grounds keeps encrypted (a store vault module that Fantasy
+  Grounds unlocks itself) cannot be read, so no pack can be made from it;
+- a file that is not a Fantasy Grounds module (no `definition.xml`).
 
 ## Rules versus books
 
 A pack carries a game's content: its classes, spells, monsters, gear and
-adventures. The rules that use that content are Kraken's code, one engine per
-game (`shared/<game>/`): how a d20 attack, a C&C Siege check or a Traveller
-2d6 roll works. Fantasy Grounds splits a ruleset from its modules the same
-way. A new game needs its rules in Kraken. Its books are packs.
+adventures. The rules that use that content are Maelstrom's code, one engine
+per game (`shared/<game>/`): how a d20 attack, a C&C Siege check or a
+Traveller 2d6 roll works. Fantasy Grounds splits a ruleset from its modules
+the same way. A new game needs its rules in Maelstrom. Its books are packs.
 
 ## Licensing
 
 Packs made from the books you own are yours alone. They are never shipped
-with Kraken or put in its repository. Kraken's own games' packs are original
-and ship with the app.
+with Maelstrom or put in its repository; never upload or share them. Maelstrom's
+own games' packs are original and ship with the app.
