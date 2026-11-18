@@ -325,7 +325,9 @@ export function AdventureList({ session, kind, onStory }: { session: Session; ki
 }
 
 // One story entry (FG's story record), read by the GM: its text from the module.
-export function StoryWindow({ session, path }: { session: Session; path: string }) {
+export function StoryWindow({ session, path: opened }: { session: Session; path: string }) {
+  // The entry shown: the one it opened with, then wherever its arrows step to.
+  const [path, setPath] = useState(opened);
   const module = path.split("@").slice(1).join("@");
   useEffect(() => {
     session.libraryAction("story", { module, path });
@@ -339,6 +341,16 @@ export function StoryWindow({ session, path }: { session: Session; path: string 
   useEffect(() => markInlineRolls(storyText.current), [entry?.html]);
   const windows = useWindows();
   const [status, setStatus] = useState("");
+  // The window's title follows the entry it shows.
+  useEffect(() => {
+    if (entry?.name && path !== opened) windows.open("story", entry.name, opened);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entry?.name]);
+  const step = (to: { path: string } | null | undefined) => {
+    if (!to) return;
+    setStatus("");
+    setPath(to.path);
+  };
   // The entry as the campaign's own story record, to change and share (the adventure's stays as it is).
   const copy = () =>
     session
@@ -356,6 +368,14 @@ export function StoryWindow({ session, path }: { session: Session; path: string 
           <h3>{entry.name}</h3>
           {entry.category ? <p className="hint">{entry.category}</p> : null}
           <div className="book-text" ref={storyText} dangerouslySetInnerHTML={{ __html: entry.html ?? "" }} />
+          <nav className="book-turn story-turn">
+            <button type="button" data-action="story-prev" disabled={!entry.prev} aria-label="Previous entry" onClick={() => step(entry.prev)}>
+              ‹ {entry.prev?.name ?? ""}
+            </button>
+            <button type="button" data-action="story-next" disabled={!entry.next} aria-label="Next entry" onClick={() => step(entry.next)}>
+              {entry.next?.name ?? ""} ›
+            </button>
+          </nav>
         </>
       ) : (
         <p className="hint">Reading…</p>

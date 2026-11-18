@@ -132,7 +132,11 @@ function storyEntry(fgPath) {
   const record = find(moduleOf(fgPath), fgPath);
   const { toHtml } = require("./books.cjs");
   const html = typeof record.data.text === "string" ? toHtml(record.data.text, () => null) : "";
-  return { path: fgPath, name: record.name, category: record.data.fgCategory ?? "", html };
+  // The entries before and after it, in the Story list's order (its arrows step through them).
+  const order = list(moduleOf(fgPath), "story");
+  const at = order.findIndex((item) => item.path === fgPath);
+  const near = (item) => (item ? { path: item.path, name: item.name } : null);
+  return { path: fgPath, name: record.name, category: record.data.fgCategory ?? "", html, prev: at > 0 ? near(order[at - 1]) : null, next: at >= 0 ? near(order[at + 1]) : null };
 }
 
 // A book's random tables, as records (the 2E krits read their book's).

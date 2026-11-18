@@ -184,6 +184,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
       const key = payload ? `${kind}:${payload}` : kind;
       const existing = windows.find((item) => item.key === key);
       if (existing?.popped) {
+        if (existing.title !== title) setWindows((current) => current.map((item) => (item.key === key ? { ...item, title } : item)));
         showPopOut(popups.current.get(key));
         return;
       }

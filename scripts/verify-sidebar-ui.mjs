@@ -233,7 +233,17 @@ try {
     await page.click(entry);
     await page.waitForSelector('.story-window .book-text:has-text("IN SEARCH OF THE UNKNOWN")', { timeout: 15000 });
     assert(!(await page.$(".story-window script")), "no markup from the entry runs");
-    adventure = `B1's encounters and its story (the Introduction read)`;
+    // Its arrows step through the story in the list's order, the window's title following.
+    const listed = await page.evaluate((selector) => [...document.querySelectorAll(selector)].map((row) => row.dataset.libraryItem), '[data-adventure-list="story"] [data-records-book] [data-library-item]');
+    const after = listed[listed.indexOf("00.03 Introduction") + 1];
+    const next = await page.textContent('.story-window [data-action="story-next"]');
+    assert(after && next.includes(after), `the next arrow names the entry after it in the list (${after}: ${next})`);
+    await page.click('.story-window [data-action="story-next"]');
+    await page.waitForSelector(`.story-window h3:text-is("${after}")`, { timeout: 15000 });
+    await page.waitForFunction((name) => [...document.querySelectorAll(".window-title, .window-head")].some((el) => el.textContent.includes(name)), after, { timeout: 5000 });
+    await page.click('.story-window [data-action="story-prev"]');
+    await page.waitForSelector('.story-window h3:text-is("00.03 Introduction")', { timeout: 15000 });
+    adventure = `B1's encounters and its story (the Introduction read, its arrows on to ${after} and back)`;
   }
 
   // A test player: the same Character lists (the book is shared), and a race dropped on their own character.

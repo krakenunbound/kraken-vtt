@@ -8,6 +8,7 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **Story entries step on with arrows**: the window an adventure's story entry opens in has ‹ previous and next › at its foot, in the Story list's order, and its title follows the entry (in a popped-out window too).
 - **A character dragged onto Map Studio is their own token** even when the drag carries only the character (a quick slot, a sheet): Map Studio looks up their name and token picture, no more letter in a circle.
 - **Rain and snow: Amount is how much falls**, Opacity how strongly it shows. Less rain is fewer drops, each as clear as before (Amount used to fade the drops instead, and its lowest setting still left a third of them).
 - **No more comparisons to other programs in the interface**: tooltips and settings say what a thing does, not which other program does it that way.
