@@ -55,7 +55,9 @@ try {
   const campaign = await tool("kraken_campaign_create", { name: "Studio play", ruleset: "Castles & Crusades" });
   await tool("kraken_host", { campaignId: campaign.id, port: 47494, password: "pw" });
   await page.waitForSelector("text=Hosting");
-  const aldra = await tool("kraken_record_create", { type: "character", name: "Aldra", data: { level: 1 } });
+  const picked = (await tool("kraken_art", { kind: "token" })).art.find((item) => !item.id.endsWith(".webm"));
+  assert(picked, "the art library has a token picture");
+  const aldra = await tool("kraken_record_create", { type: "character", name: "Aldra", data: { level: 1, token: picked.id } });
   const goblin = await tool("kraken_record_create", { type: "npc", name: "Goblin", data: {} });
   await tool("kraken_party_edit", { members: [aldra.id] });
   await tool("kraken_combat", { action: "add", recordId: goblin.id });
@@ -116,6 +118,15 @@ try {
   const fromParty = await drag(`[data-member="${aldra.id}"]`, await free());
   assert(JSON.parse(fromParty["application/x-kraken-token"] ?? "{}").name === "Aldra" && fromParty["application/x-kraken-record"] === aldra.id, `a Party Sheet member carries its token and record (${JSON.stringify(fromParty)})`);
   let state = await play();
+  await settle(500);
+  const drawn = await frame.evaluate(async () => {
+    const c = window.KrakenPlay._state.party.find((item) => item.name === "Aldra");
+    let capture = "";
+    try { capture = (await window.KrakenStudio.capture({ grid: false, walls: false })).slice(0, 22); } catch (error) { capture = String(error.message); }
+    return { picture: c?.picture?.slice(0, 15) ?? null, loaded: Boolean(c?.image?.naturalWidth), capture };
+  });
+  assert(drawn.loaded && drawn.picture === "data:image/png;" && drawn.capture === "data:image/png;base64,", `Aldra's own token picture is her token in Play test, and the map can still be captured (${JSON.stringify(drawn)})`);
+  if (process.env.SHOT) { const box = await page.locator(".studio-frame").boundingBox(); await page.screenshot({ path: process.env.SHOT, clip: box }); }
   assert(state.mode === "play" && state.party.includes("Aldra") && state.who === "Aldra", `a character dragged from the Party Sheet onto Map Studio's map starts Play test with their token (${JSON.stringify(state)})`);
   const second = await free();
   await tool("kraken_windows", { action: "close", kind: "party" });
@@ -131,7 +142,7 @@ try {
   await settle(300);
   state = await play();
   assert(state.who === "Aldra", `a click on another character's token looks through their eyes (${JSON.stringify(state)})`);
-  report.push("Aldra dragged from the Party Sheet and the Goblin from the tracker onto Map Studio's map: Play test starts with their tokens, a click switches whose eyes it uses");
+  report.push("Aldra (her own token picture) dragged from the Party Sheet and the Goblin from the tracker onto Map Studio's map: Play test starts with their tokens, a click switches whose eyes it uses");
 
   // The agent: render play with a party.
   const shot = await studio("render", { view: "play", party: [{ name: "Bram", at: [2.5, 2.5] }, { name: "Cleo", at: [9.5, 5.5] }] });

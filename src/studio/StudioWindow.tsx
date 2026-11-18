@@ -40,7 +40,7 @@ export function StudioWindow({ project: page }: { project?: string }) {
       }
     };
   }, [url]);
-  const drop = (event: React.DragEvent) => {
+  const drop = async (event: React.DragEvent) => {
     event.preventDefault();
     setCatching(false);
     const target = frame.current;
@@ -48,8 +48,18 @@ export function StudioWindow({ project: page }: { project?: string }) {
     const read = (type: string) => { try { return JSON.parse(event.dataTransfer.getData(type) || "null"); } catch { return null; } };
     const slot = read(SLOT_DRAG);
     const token = read(TOKEN_DRAG) ?? (slot && (slot.kind === "sheet" || slot.kind === "record") ? { name: slot.label, record: slot.record } : null) ?? { name: "Character", record: event.dataTransfer.getData("application/x-kraken-record") || null };
-    const box = target.getBoundingClientRect();
-    target.contentWindow.postMessage({ kind: "kraken-token-drop", token, x: event.clientX - box.left, y: event.clientY - box.top }, url);
+    const box = target.getBoundingClientRect(), x = event.clientX - box.left, y = event.clientY - box.top;
+    // Its token picture handed over as data (drawn from another site, it would spoil Map Studio's pictures of the map).
+    let picture = "";
+    if (typeof token.art === "string" && token.art) {
+      try {
+        const response = await fetch(token.art);
+        if (response.ok) picture = await new Promise<string>((done) => { const reader = new FileReader(); reader.onload = () => done(String(reader.result)); reader.onerror = () => done(""); response.blob().then((blob) => reader.readAsDataURL(blob), () => done("")); });
+      } catch {
+        /* no picture: Map Studio shows the name's first letter */
+      }
+    }
+    target.contentWindow.postMessage({ kind: "kraken-token-drop", token: { name: token.name, record: token.record, picture }, x, y }, url);
   };
   useEffect(() => {
     if (page && /^http:\/\/127\.0\.0\.1:\d+\//.test(page)) {

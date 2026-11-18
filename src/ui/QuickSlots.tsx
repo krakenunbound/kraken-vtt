@@ -17,7 +17,7 @@ import { agentCommands } from "./agentCommands";
 export const SLOT_DRAG = "text/kraken-slot";
 // A random table's result dragged from its window (into the chat's entry, its words).
 export const TABLE_RESULT_DRAG = "application/x-kraken-table-result";
-// A character or creature as a token (from the Party Sheet, the tracker): {name, record, ct}. Map Studio's
+// A character or creature as a token (from the Party Sheet, the tracker): {name, record, ct, art (its token picture's address)}. Map Studio's
 // Play test reads it (it cannot look the record up), and puts that token where it is dropped.
 export const TOKEN_DRAG = "application/x-kraken-token";
 

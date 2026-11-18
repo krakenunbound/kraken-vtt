@@ -133,11 +133,14 @@ window.KrakenPlay = (() => {
     if (st.who) Object.assign(st.who, {x: to.x, y: to.y, facing: st.facing});
   }
   // A character on the test map (dropped from the Party Sheet or the tracker, or the agent's render): its own token, and the test sees with it.
-  function addCharacter(p, {name, record}, at) {
+  function addCharacter(p, {name, record, picture}, at) {
     const q = st.snap ? snapCentre(p, at) : at;
     let one = st.party.find(c => record && c.record === record);
     if (!one) { one = {name: String(name || 'Character').slice(0, 40), record: record || null, x: q.x, y: q.y, facing: 0}; st.party.push(one); }
     else Object.assign(one, {x: q.x, y: q.y});
+    if (typeof picture === 'string' && picture.startsWith('data:image/') && one.picture !== picture) {
+      one.picture = picture; one.image = new Image(); one.image.onload = () => S().draw(); one.image.src = picture;
+    }
     lookWith(one);
     return one;
   }
@@ -287,26 +290,37 @@ window.KrakenPlay = (() => {
       ctx.fillText(locked ? '🔒' : open ? '⇄' : '▮', c.x, c.y + 1 / zoom);
       ctx.restore();
     }
-    // The other characters, where they were left; a click looks through their eyes.
-    const tr = p.grid * 0.38;
-    ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    for (const c of st.party) {
-      if (c === st.who) continue;
-      ctx.fillStyle = '#6b7280'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2 / zoom;
-      ctx.beginPath(); ctx.arc(c.x, c.y, tr, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      label(ctx, c.name, c.x, c.y + tr + 3 / zoom, zoom);
+    // The characters: their own token pictures, where they were left; a click looks through their eyes.
+    const tr = p.grid * 0.47, aimed = LIGHTS[st.light][3] < 360;
+    for (const c of st.party) if (c !== st.who) token(ctx, c, c, tr, zoom, false);
+    token(ctx, st.who, st.token, tr, zoom, true);
+    // Which way they face, only for a cone of light (a bullseye lantern: Q and E turn it).
+    if (aimed) {
+      const t = st.token;
+      ctx.save(); ctx.fillStyle = '#ffd25e'; ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5 / zoom;
+      ctx.beginPath(); ctx.moveTo(t.x + Math.cos(st.facing) * tr * 1.35, t.y + Math.sin(st.facing) * tr * 1.35);
+      ctx.lineTo(t.x + Math.cos(st.facing + 0.35) * tr * 1.05, t.y + Math.sin(st.facing + 0.35) * tr * 1.05);
+      ctx.lineTo(t.x + Math.cos(st.facing - 0.35) * tr * 1.05, t.y + Math.sin(st.facing - 0.35) * tr * 1.05); ctx.closePath();
+      ctx.fill(); ctx.stroke(); ctx.restore();
     }
-    if (st.who) label(ctx, st.who.name, st.token.x, st.token.y + tr + 3 / zoom, zoom);
-    ctx.restore();
-    // The token, with its facing.
-    const t = st.token;
+  }
+  // One token: the character's picture in a circle (else the first letter of the name), its name under it;
+  // the one whose eyes the test uses ringed in gold. who null: the test's own token.
+  function token(ctx, who, at, r, zoom, looking) {
     ctx.save();
-    ctx.fillStyle = '#2c7be5'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3 / zoom;
-    ctx.beginPath(); ctx.arc(t.x, t.y, tr, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(t.x + Math.cos(st.facing) * tr * 1.5, t.y + Math.sin(st.facing) * tr * 1.5);
-    ctx.lineTo(t.x + Math.cos(st.facing + 2.5) * tr * 0.6, t.y + Math.sin(st.facing + 2.5) * tr * 0.6);
-    ctx.lineTo(t.x + Math.cos(st.facing - 2.5) * tr * 0.6, t.y + Math.sin(st.facing - 2.5) * tr * 0.6); ctx.closePath();
-    ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.beginPath(); ctx.arc(at.x, at.y, r, 0, Math.PI * 2);
+    if (who?.image?.complete && who.image.naturalWidth) {
+      ctx.save(); ctx.clip();
+      const im = who.image, k = Math.max(2 * r / im.naturalWidth, 2 * r / im.naturalHeight);
+      ctx.drawImage(im, at.x - im.naturalWidth * k / 2, at.y - im.naturalHeight * k / 2, im.naturalWidth * k, im.naturalHeight * k);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = who ? '#4b5563' : '#2c7be5'; ctx.fill();
+      if (who) { ctx.fillStyle = '#fff'; ctx.font = `bold ${r}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(who.name.slice(0, 1).toUpperCase(), at.x, at.y + r * 0.05); }
+    }
+    ctx.beginPath(); ctx.arc(at.x, at.y, r, 0, Math.PI * 2);
+    ctx.lineWidth = (looking ? 4 : 2) / zoom; ctx.strokeStyle = looking ? '#ffd25e' : '#ffffff'; ctx.stroke();
+    if (who) { ctx.textAlign = 'center'; ctx.textBaseline = 'top'; label(ctx, who.name, at.x, at.y + r + 3 / zoom, zoom); }
     ctx.restore();
   }
 
@@ -365,7 +379,7 @@ window.KrakenPlay = (() => {
     const p = S().project;
     box.innerHTML = `
       <div class="los-title">Play test</div>
-      <p class="los-help">Drag the blue token, click where to walk, or use the arrow keys / WASD. Click a door or window to open or close it; Shift-click locks or unlocks. Nothing here changes the map.</p>
+      <p class="los-help">Drag a character from the Party Sheet or the tracker onto the map to test with their token; click another to look through their eyes. Drag the token, click where to walk, or use the arrow keys / WASD. Click a door or window to open or close it; Shift-click locks or unlocks. Nothing here changes the map.</p>
       <label class="play-row">Light source <select id="playLight">${Object.entries(LIGHTS).map(([id, l]) => `<option value="${id}" ${id === st.light ? 'selected' : ''}>${esc(l[0])}${l[2] ? ` (${l[1]}/${l[2]} ft)` : ''}</option>`).join('')}</select></label>
       <label class="play-row">Vision <select id="playVision">${Object.entries(VISION).map(([id, v]) => `<option value="${id}" ${id === st.vision ? 'selected' : ''}>${esc(v[0])}</option>`).join('')}</select></label>
       <label class="play-row">Time of day <select id="playSky"><option value="">The map's own (${esc(skyName(p))})</option>${Object.entries(window.KrakenLighting?.AMBIENT || {}).filter(([id]) => id !== 'custom').map(([id, a]) => `<option value="${id}" ${id === st.sky ? 'selected' : ''}>${esc(a.label)}</option>`).join('')}</select></label>
@@ -433,7 +447,7 @@ window.KrakenPlay = (() => {
     if (ev.source !== window.parent || ev.data?.kind !== 'kraken-token-drop' || !S()?.project) return;
     const {token, x, y} = ev.data;
     if (!active()) S().switchMode('play');
-    addCharacter(S().project, {name: token?.name, record: token?.record}, S().point({clientX: Number(x), clientY: Number(y)}));
+    addCharacter(S().project, {name: token?.name, record: token?.record, picture: token?.picture}, S().point({clientX: Number(x), clientY: Number(y)}));
     S().draw();
     S().toast(`${st.who.name} is on the map: the test sees with them. Click another character to look through their eyes.`);
   });

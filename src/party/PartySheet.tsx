@@ -183,7 +183,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                   onDragStart={(event) => {
                     if (!gm || (event.target as HTMLElement).closest("input, button, select")) return;
                     event.dataTransfer.setData("application/x-kraken-record", member.id);
-                    event.dataTransfer.setData(TOKEN_DRAG, JSON.stringify({ name: member.name, record: member.id }));
+                    event.dataTransfer.setData(TOKEN_DRAG, JSON.stringify({ name: member.name, record: member.id, art: session.recordArtUrl(member.id, "token") }));
                     event.dataTransfer.effectAllowed = "copy";
                   }}
                   // An effect or a roll dropped on a member lands on that character (its token or tracker entry).
