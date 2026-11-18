@@ -46,6 +46,8 @@ export type MapToken = {
   senses?: string;
   // Felt by tremorsense alone (a player's view): its shape, not a sight of it.
   sensed?: boolean;
+  // A trap holds it: it waits for the GM.
+  held?: boolean;
   // The GM's and its owner's: moves that can be undone, and this turn's path ([x, y, ...]) on the tracker.
   undo?: number;
   path?: number[];
@@ -57,7 +59,11 @@ export type MapSound = { id: string; name: string; sound: string; x: number; y: 
 // A player's move waiting for the GM while movement is locked (FG's TokenMoveManager).
 export type MoveRequest = { id: string; name: string; by: string; from: { x: number; y: number }; to: { x: number; y: number }; at: number };
 // A region of the map, the GM's (Map Studio's Traps & regions, a bundle's Foundry regions).
-export type MapRegion = { id: string; kind: "trap" | "pit" | "difficult" | "teleport"; name: string; note: string; points: number[]; on: boolean; cost?: number; to?: string | { x: number; y: number; sceneId?: string } };
+export type MapRegion = { id: string; kind: "trap" | "pit" | "difficult" | "teleport"; name: string; note: string; points: number[]; on: boolean; cost?: number; to?: string | { x: number; y: number; sceneId?: string }; revealed?: boolean; trap?: TrapInfo };
+// What a trap does when it springs (Map Studio's Traps & regions): auto roll or apply, else the GM rolls.
+export type TrapInfo = { damage?: string; damageType?: string; save?: { attribute: string; dc?: number }; half?: boolean; effect?: { label: string; duration?: number }; auto?: "roll" | "apply" };
+// A token a trap holds, for the GM's Traps sprung strip: the trap and what has been rolled so far.
+export type HeldToken = { tokenId: string; name: string; held: { region: string; name: string; at: number; save?: { success: boolean | null; total: number }; damage?: { total: number } }; region: MapRegion | null };
 // An effect on a creature as its owner and the GM see it (the tracker's, or a token's out of the fight):
 // its words, rounds left of `total`, put out for now (a light), its picture, who put it on.
 export type TrackedEffect = { id: string; label: string; duration: number; total?: number; paused?: boolean; icon?: string; source?: string; gmOnly?: boolean };
@@ -80,7 +86,7 @@ export type MapSettings = {
   diagonal?: string | null;
   diagonalRule?: string;
 };
-export type MapDoor = { id: string; group?: string; x1: number; y1: number; x2: number; y2: number; state: number; secret?: boolean; kind?: string };
+export type MapDoor = { id: string; group?: string; x1: number; y1: number; x2: number; y2: number; state: number; secret?: boolean; found?: boolean; kind?: string };
 // A wall in the GM's map editor (FG's kinds with Foundry's senses).
 export type WallKind = "wall" | "terrain" | "door" | "secret" | "toggle" | "window" | "illusion" | "invisible" | "ethereal" | "shadow" | "custom";
 export type EditWall = { id: string; x1: number; y1: number; x2: number; y2: number; kind: WallKind; sight: number; light: number; sound: number; move: number; dir: number; door: number; ds: number; toggle: "none" | "gm" | "players"; threshold: number | null; hidden: boolean; group?: string };
@@ -127,6 +133,9 @@ export type TableMap = {
   terrain?: import("../table/Ruler").TerrainArea[];
   // Moves waiting for the GM (a player: their own), and the GM's regions.
   moveRequests?: MoveRequest[];
+  // The GM: tokens traps hold. A player: the traps the GM has shown them (their outline alone).
+  held?: HeldToken[];
+  traps?: { id: string; kind: string; points: number[] }[];
   regions?: MapRegion[];
   // The GM's sounds placed on the map.
   mapSounds?: MapSound[];
@@ -1452,6 +1461,9 @@ export function useSession() {
   const undoMove = useCallback((id: string) => send({ type: "token-undo", id }), [send]);
   // The GM's sounds placed on the map (add, update, remove).
   const mapSound = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "map-sound", action, ...payload }), [send]);
+  // A trap: its rolls, applied, let go (tokenId), shown to the players or hidden (region, on); a secret door found.
+  const trap = useCallback((action: string, payload: Record<string, unknown> = {}) => send({ type: "trap", action, ...payload }), [send]);
+  const doorFound = useCallback((id: string, on: boolean) => send({ type: "door-found", id, on }), [send]);
   const approveMoves = useCallback((ids: string[] | "all", accept: boolean) => send({ type: "move-approve", ...(ids === "all" ? { all: true } : { ids }), accept }), [send]);
   // The GM: the map opens on every player's screen.
   const shareMap = useCallback(() => send({ type: "map-share" }), [send]);
@@ -1531,6 +1543,8 @@ export function useSession() {
     resetExplored,
     undoMove,
     approveMoves,
+    trap,
+    doorFound,
     mapSound,
     mapShared,
     notice,

@@ -571,6 +571,16 @@ select {
 .map-sound-row .map-sound-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .map-sound-row input[type="range"] { width: 4.5rem; }
 .move-approval small { color: #aab; }
+/* Traps: the GM's strip of tokens they hold, the eye that shows one to the players, a held token. */
+.traps-sprung { border-color: rgba(229, 57, 53, 0.6); }
+.trap-held .trap-rolled { color: #f3c969; }
+.trap-held button.tool { padding: 2px 6px; font-size: 0.78rem; }
+.overlay.regions .region-reveal { pointer-events: auto; cursor: pointer; }
+.overlay.regions .region-reveal rect { fill: rgba(12, 16, 22, 0.85); stroke: #e53935; stroke-width: 1.2; }
+.overlay.regions .region-reveal path { fill: none; stroke: #f2f2f0; stroke-width: 1.4; stroke-linecap: round; }
+.overlay.regions .region-reveal.on rect { fill: #e53935; }
+.token.token-held { outline: 3px dashed #e53935; outline-offset: 3px; border-radius: 50%; }
+.overlay.doors .player-door.secret.found:hover .door-shape { fill: rgba(95, 211, 138, 0.45); }
 .token-elevation {
   position: absolute;
   top: 2%;

@@ -49,6 +49,18 @@ function playerColor(name) {
   return PLAYER_COLORS[hash % PLAYER_COLORS.length];
 }
 
+// A token a trap or pit holds (only that token: the others go on): the region, its name, and the save and
+// damage rolled for it so far. Released by the GM (or when the trap's automation has applied it).
+function heldOf(raw) {
+  if (!raw || typeof raw !== "object" || !raw.region) return null;
+  return {
+    region: text(raw.region, "").slice(0, 64),
+    name: text(raw.name, "Trap").slice(0, 120),
+    at: Math.round(num(raw.at, 0)),
+    ...(raw.save && typeof raw.save === "object" ? { save: { success: raw.save.success === null || raw.save.success === undefined ? null : Boolean(raw.save.success), total: Math.round(num(raw.save.total, 0)) } } : {}),
+    ...(raw.damage && typeof raw.damage === "object" ? { damage: { total: Math.max(0, Math.round(num(raw.damage.total, 0))) } } : {}),
+  };
+}
 function cleanToken(raw) {
   if (!raw || typeof raw !== "object") return null;
   const x = num(raw.x, NaN);
@@ -57,6 +69,7 @@ function cleanToken(raw) {
   return {
     id: text(raw.id, "").slice(0, 40) || `t-${crypto.randomBytes(6).toString("hex")}`,
     recordId: raw.recordId ? text(raw.recordId, "").slice(0, 160) : null,
+    ...(heldOf(raw.held) ? { held: heldOf(raw.held) } : {}),
     sourceId: raw.sourceId ? text(raw.sourceId, "").slice(0, 80) : null,
     name: text(raw.name, "Token").slice(0, 48),
     x,
@@ -191,6 +204,8 @@ function cleanWall(raw) {
     toggle: ["none", "gm", "players"].includes(raw.toggle) ? raw.toggle : (base.toggle ?? "none"),
     threshold: num(raw.threshold, 0) > 0 ? num(raw.threshold, 0) : null,
     hidden: Boolean(raw.hidden),
+    // A secret door the GM has marked found: the players see it and use it as a door.
+    ...(raw.found ? { found: true } : {}),
     // The door it is a side of (a door drawn as a box or shape opens as one, as FG's).
     ...(typeof raw.group === "string" && raw.group.trim() ? { group: raw.group.trim().slice(0, 60) } : {}),
   };
@@ -480,6 +495,22 @@ const EXPLORED_KEPT = 400;
 // region by name, or a point on another scene). Players are never sent the
 // traps, pits and teleports, nor any note.
 const REGION_KINDS = ["trap", "pit", "difficult", "teleport"];
+// What a trap does when it springs (Map Studio's Traps & regions: studio/web/regions.js cleanTrap keeps the same):
+// damage (dice), damageType, save {attribute, dc}, half (on a save), effect {label, duration}, auto: roll | apply.
+function cleanTrap(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const words = (value, n) => String(value ?? "").trim().slice(0, n);
+  const out = {};
+  const damage = words(raw.damage, 40).replace(/\s+/g, "");
+  if (damage && /^[0-9dDkKhHlL+\-*x/()]+$/.test(damage)) out.damage = damage;
+  if (words(raw.damageType, 20)) out.damageType = words(raw.damageType, 20);
+  const attribute = words(raw.save?.attribute, 20).toLowerCase();
+  if (attribute) out.save = { attribute, ...(raw.save.dc !== null && raw.save.dc !== "" && Number.isFinite(Number(raw.save.dc)) ? { dc: Math.round(Math.min(99, Math.max(-20, Number(raw.save.dc)))) } : {}) };
+  if (raw.half && out.save) out.half = true;
+  if (words(raw.effect?.label, 60)) out.effect = { label: words(raw.effect.label, 60), ...(Number(raw.effect.duration) > 0 ? { duration: Math.min(1000, Math.round(Number(raw.effect.duration))) } : {}) };
+  if (raw.auto === "roll" || raw.auto === "apply") out.auto = raw.auto;
+  return Object.keys(out).length ? out : null;
+}
 function cleanRegion(raw) {
   if (!raw || typeof raw !== "object" || !REGION_KINDS.includes(raw.kind)) return null;
   const points = Array.isArray(raw.points) ? raw.points.map(Number).filter(Number.isFinite).slice(0, 2000) : [];
@@ -492,6 +523,9 @@ function cleanRegion(raw) {
     note: typeof raw.note === "string" ? raw.note.slice(0, 4000) : "",
     points: points.map((value) => Math.round(value * 10) / 10),
     on: raw.on !== false,
+    // Shown to the players by the GM (a trap found): they see its outline, never its note or what it does.
+    ...(raw.revealed ? { revealed: true } : {}),
+    ...((raw.kind === "trap" || raw.kind === "pit") && cleanTrap(raw.trap) ? { trap: cleanTrap(raw.trap) } : {}),
     ...(raw.kind === "difficult" ? { cost: Math.min(5, Math.max(1, num(raw.cost, 2))) } : {}),
     ...(raw.kind === "teleport"
       ? {
@@ -877,7 +911,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     return null;
   }
   // A token moved, as its mover may: stopped by walls (collide), at the edge of
-  // a trap a player's token steps into, or sent on by a teleport. The move is
+  // a trap a player's token steps into (and held there until the GM lets it go), or sent on by a teleport. The move is
   // kept to undo and for this turn's path.
   function stepToken(token, to, seat, { snap, collide }) {
     const from = { x: token.x, y: token.y };
@@ -910,7 +944,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
           // A trap or pit: the token stops on the first square of it.
           const stop = geometry.snapCenter(scene, hit.at.x, hit.at.y, token.squares);
           at = geometry.pointInPolygon(stop.x, stop.y, hit.region.points) ? stop : { x: Math.round(hit.at.x), y: Math.round(hit.at.y) };
-          if (!tester) state.locked[scene.id] = true;
+          if (!tester) token.held = { region: hit.region.id, name: hit.region.name, at: Date.now() };
         }
       }
     }
@@ -1051,6 +1085,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       healthShow: shows.health,
       namesShow: shows.names,
       elevation: token.elevation ?? 0,
+      // Held by a trap: it waits for the GM (its player sees so).
+      ...(token.held ? { held: true } : {}),
       ...(seat.role === "dm" ? { unidentified: token.unidentified ?? "", senses: token.senses ?? "" } : {}),
       x: token.x,
       y: token.y,
@@ -1116,7 +1152,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     // Doors, and windows and toggle walls players may open (FG's toggleable).
     const doorList = wallsHere()
       .filter((wall) => wall.door > 0 || wall.toggle === "players" || wall.toggle === "gm")
-      .map((wall) => ({ id: wall.id, group: doorGroup(wall), x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2 || wall.toggle === "gm", kind: wall.door > 0 ? "door" : wall.kind, state: wall.id in doors ? doors[wall.id] : wall.ds }));
+      .map((wall) => ({ id: wall.id, group: doorGroup(wall), x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, secret: wall.door === 2 || wall.toggle === "gm", found: Boolean(wall.found), kind: wall.door > 0 ? "door" : wall.kind, state: wall.id in doors ? doors[wall.id] : wall.ds }));
     const mask = maskHere();
     const groups = groupsHere();
     const shared = { sceneId: scene.id, sight: sightOn(), locked, darkness: dark, settings: { grid: settings.grid, weather: settings.weather, darkness: settings.darkness, diagonal: settings.diagonal, diagonalRule: diagonalNow() }, drawings: drawingsHere(), deathMarkers: deathMarkersHere(), mask: mask.on || mask.shapes.length ? mask : null, groups, fx: fxHere(), templates: templatesFor(seat) };
@@ -1133,6 +1169,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         sounds: [],
         // Moves players asked for while movement is locked, for the GM's approval strip.
         moveRequests: requestsHere(),
+        // Tokens a trap holds, for the GM's Traps sprung strip: the trap, and the save and damage rolled so far.
+        held: all.filter((token) => token.held).map((token) => ({ tokenId: token.id, name: token.name, held: token.held, region: regionsHere().find((region) => region.id === token.held.region) ?? null })),
         // Every region (traps and their notes too), and the difficult terrain the ruler counts.
         regions: regionsHere(),
         terrain: terrainOut(),
@@ -1196,9 +1234,9 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       return true;
     });
     // A door a player sees any side of is shown whole (all its sides).
-    const seenSide = (door) => !door.secret && !masked((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2) && (!vision || geometry.seen((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2, vision, slack));
+    const seenSide = (door) => (!door.secret || door.found) && !masked((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2) && (!vision || geometry.seen((door.x1 + door.x2) / 2, (door.y1 + door.y2) / 2, vision, slack));
     const seenGroups = new Set(doorList.filter(seenSide).map((door) => door.group));
-    const playerDoors = doorList.filter((door) => !door.secret && seenGroups.has(door.group));
+    const playerDoors = doorList.filter((door) => (!door.secret || door.found) && seenGroups.has(door.group));
     return {
       // A token felt by tremorsense alone is marked so (a shape, not a sight of it).
       tokens: tokens.map((token) => (sensedOnly.has(token.id) ? { ...publicToken(token, seat, assetToken), name: "", health: null, art: undefined, video: undefined, light: null, sensed: true } : publicToken(token, seat, assetToken))),
@@ -1208,10 +1246,12 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       // Their own moves waiting for the GM, and the difficult terrain (no traps, no notes) the ruler counts.
       moveRequests: requestsHere().filter((request) => request.by === seat.name),
       terrain: terrainOut(),
+      // The traps the GM has shown them: where they are, nothing of what they do.
+      traps: regionsHere().filter((region) => region.revealed && (region.kind === "trap" || region.kind === "pit")).map(({ id, kind, points }) => ({ id, kind, points })),
       // Magical darkness reaching what the player sees, and where their truesight sees through it.
       darkAreas: darkAreas.filter((area) => !area.hidden && (!vision || mine.some((token) => Math.hypot(token.x - area.x, token.y - area.y) <= area.radiusPx) || vision.some((polygon) => geometry.polygonsOverlap(area.polygon, polygon)))).map(({ hidden: _hidden, ...area }) => area),
       trueSeeing,
-      doors: playerDoors.map(({ secret, ...door }) => door),
+      doors: playerDoors.map(({ secret, found, ...door }) => door),
       vision,
       // Only the lights that reach what the player sees now: a light's polygon
       // is the outline of its room, and an unseen room's outline is the GM's.
@@ -1466,6 +1506,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (!scene) throw new Error("No scene is open.");
       const token = findToken(id);
       if (!canMove(token, seat)) throw new Error("That is not your token.");
+      if (seat.role !== "dm" && token.held) throw new Error(`${token.name}: The trap holds it: the GM decides what happens.`);
       if (seat.role !== "dm" && state.locked[scene.id] && !String(seat.name ?? "").startsWith("@")) {
         // Locked: the move becomes a request with its path on the GM's map (not a play test's token).
         requestMove(token, to, seat);
@@ -1486,6 +1527,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       const list = moves.map((item) => ({ token: findToken(String(item.id)), to: { x: num(item.x, NaN), y: num(item.y, NaN) } }));
       if (list.some(({ to }) => !Number.isFinite(to.x) || !Number.isFinite(to.y))) throw new Error("Where to?");
       for (const { token } of list) if (!canMove(token, seat)) throw new Error(`${token.name} is not your token.`);
+      if (seat.role !== "dm") for (const { token } of list) if (token.held) throw new Error(`${token.name}: The trap holds it: the GM decides what happens.`);
       if (seat.role !== "dm" && state.locked[scene.id] && !String(seat.name ?? "").startsWith("@")) {
         for (const { token, to } of list) requestMove(token, to, seat);
         changed({ keepVision: true });
@@ -1509,6 +1551,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         if (!canMove(token, seat)) throw new Error("That is not your token.");
         if (last.by !== seat.name) throw new Error("Its last move was not yours.");
         if (state.locked[scene.id]) throw new Error("The GM has locked token movement.");
+        if (token.held) throw new Error(`${token.name}: The trap holds it: the GM decides what happens.`);
       }
       token.x = last.from.x;
       token.y = last.from.y;
@@ -1603,7 +1646,40 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       const index = list.findIndex((item) => item.id === id);
       if (index < 0) throw new Error(`No region ${id}.`);
       list.splice(index, 1);
+      // Whoever it held goes free.
+      for (const token of tokensHere()) if (token.held?.region === id) delete token.held;
       changed({ keepVision: true });
+    },
+    // A token a trap holds: the rolls made for it (save, damage), and let go (the GM, or the trap's automation).
+    heldToken(tokenId) {
+      const token = tokensHere().find((item) => item.id === tokenId);
+      if (!token?.held) throw new Error("No trap holds that token.");
+      return { token, region: regionsHere().find((region) => region.id === token.held.region) ?? null };
+    },
+    updateHeld(tokenId, patch, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM decides what a trap does.");
+      const { token } = this.heldToken(tokenId);
+      token.held = heldOf({ ...token.held, ...patch });
+      changed({ keepVision: true });
+      return token.held;
+    },
+    release(tokenId, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM lets a token go.");
+      const { token } = this.heldToken(tokenId);
+      delete token.held;
+      changed({ keepVision: true });
+      return { token: token.id, released: true };
+    },
+    // A secret door found (FG: the GM shows it): the players see it and use it as a door; hidden again on off.
+    setFound(wallId, on, seat) {
+      if (seat.role !== "dm") throw new Error("Only the GM shows a secret door.");
+      const wall = wallsHere().find((item) => item.id === wallId);
+      if (!wall) throw new Error(`No door ${wallId}.`);
+      // Every side of it (a door drawn as a box is one door).
+      const group = wall.group;
+      for (const item of wallsHere()) if (item === wall || (group && item.group === group)) { if (on) item.found = true; else delete item.found; }
+      changed();
+      return { door: wallId, found: Boolean(on) };
     },
     update(id, patch, seat) {
       const token = findToken(id);
@@ -1647,13 +1723,14 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (!scene) throw new Error("No scene is open.");
       const wall = wallsHere().find((item) => item.id === wallId && (item.door > 0 || (item.toggle && item.toggle !== "none")));
       if (!wall) throw new Error(`No door ${wallId}.`);
-      if (seat.role !== "dm" && wall.toggle === "gm") throw new Error("Only the GM can open that.");
+      if (seat.role !== "dm" && wall.toggle === "gm" && !wall.found) throw new Error("Only the GM can open that.");
       const doors = doorsHere();
       const current = wallId in doors ? doors[wallId] : wall.ds;
       const next = wanted === undefined ? (current === 1 ? 0 : 1) : wanted;
       if (![0, 1, 2].includes(next)) throw new Error("A door is open, closed or locked.");
       if (seat.role !== "dm") {
-        if (wall.door === 2) throw new Error("You cannot see a door there.");
+        // A secret door is no door to them, until the GM has marked it found.
+        if (wall.door === 2 && !wall.found) throw new Error("You cannot see a door there.");
         if (current === 2) throw new Error("The door is locked.");
         if (next === 2) throw new Error("Only the GM can lock a door.");
         const view = viewFor(seat, "");

@@ -83,6 +83,8 @@ const MESSAGES = {
   "explored-reset": "kraken_line_of_sight",
   "token-undo": "kraken_token_move",
   "move-approve": "kraken_token_move",
+  trap: "kraken_region",
+  "door-found": "kraken_door",
   "map-sound": "kraken_map_sound",
   template: "kraken_template",
   effects: "kraken_effects",

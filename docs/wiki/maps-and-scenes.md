@@ -94,7 +94,7 @@ The ping tool marks a spot for everyone, in your colour.
 
 Traps and regions from Map Studio (and a Foundry bundle's regions) play at the table:
 
-- A **trap** or **pit** stops a player's token on its first square, tells you its name and note in a line only you see, and locks movement until you unlock it.
+- A **trap** or **pit** stops a player's token on its first square and holds that token alone (the others move on), and tells you its name and note in a line only you see. In **Traps sprung**, along the bottom of the map, roll its save and damage and **Apply** them (half or none on a save, its effect on a failed one), or let the token go. Set a trap to roll, or roll and apply, by itself in Map Studio (Traps & regions, When it springs). Click a trap's eye to show players where it is; right-click a secret door when they find it.
 - **Difficult terrain** costs more on the ruler.
 - A **teleport** sends whoever steps in to the region it names.
 

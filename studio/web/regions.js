@@ -1,7 +1,9 @@
 /* Traps & regions: areas of the map that do something when a token enters them.
  *
- * A region is {id, kind, name, note, points: [x, y, ...], cost?}. Kinds:
- * trap (the GM is warned and the game pauses), pit (a trap you fall into),
+ * A region is {id, kind, name, note, points: [x, y, ...], cost?, trap?}. A trap's or pit's
+ * trap: {damage (dice), damageType, save {attribute, dc}, half (on a save), effect {label, duration},
+ * auto: off (the GM rolls) | roll (rolled for the GM) | apply (rolled and applied, the token goes on)}. Kinds:
+ * trap (the token that springs it is held there and the GM is warned), pit (a trap you fall into),
  * difficult (difficult terrain: moving costs more). Exported to Foundry as
  * regions with behaviours, to Fantasy Grounds as a GM-only pin and note, and
  * read by Kraken VTT from either. */
@@ -10,7 +12,7 @@ window.KrakenRegions = (() => {
   const S = () => window.KrakenStudio, $ = s => document.querySelector(s);
   // kind -> label, colour, help, default name
   const KINDS = {
-    trap: ['Trap', '#e53935', 'Springs when a token enters: the game pauses and the GM sees its name and note.', 'Trap'],
+    trap: ['Trap', '#e53935', 'Springs when a token enters: that token is held there, the GM sees its name and note, and rolls or applies what it does (below).', 'Trap'],
     pit: ['Pit', '#8e24aa', 'A trap that drops whoever steps in. Draw invisible walls round its edge too if it should block movement.', 'Pit'],
     difficult: ['Difficult terrain', '#f9a825', 'Moving through it costs more: 2 means each square counts double.', 'Difficult terrain'],
     teleport: ['Teleport', '#00acc1', 'Whoever steps in is moved to the region named in Destination (draw that one too: a teleport, a trap or terrain).', 'Teleport'],
@@ -27,8 +29,25 @@ window.KrakenRegions = (() => {
     if (out.points.length < 6 || out.points.length % 2) throw Error('A region needs at least three corners.');
     if (out.kind === 'difficult') out.cost = Math.min(5, Math.max(1, Number(r.cost) || 2));
     if (out.kind === 'teleport') out.to = r.to && typeof r.to === 'object' ? {x: Number(r.to.x) || 0, y: Number(r.to.y) || 0, ...(r.to.sceneId ? {sceneId: String(r.to.sceneId)} : {})} : String(r.to || '').slice(0, 120);
+    if (out.kind === 'trap' || out.kind === 'pit') { const trap = cleanTrap(r.trap); if (trap) out.trap = trap; }
     if (!out.name) out.name = KINDS[out.kind][3];
     return out;
+  }
+  // What a trap does when it springs (the table plays it: kraken mapState.cjs cleanTrap keeps the same).
+  const AUTO = {off: 'The GM rolls (the token waits)', roll: 'Rolled for the GM (the token waits)', apply: 'Rolled and applied (the token goes on)'};
+  function cleanTrap(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const words = (v, n) => String(v ?? '').trim().slice(0, n);
+    const out = {};
+    const damage = words(raw.damage, 40).replace(/\s+/g, '');
+    if (damage && /^[0-9dDkKhHlL+\-*x/()]+$/.test(damage)) out.damage = damage;
+    if (words(raw.damageType, 20)) out.damageType = words(raw.damageType, 20);
+    const attribute = words(raw.save?.attribute, 20).toLowerCase();
+    if (attribute) out.save = {attribute, ...(Number.isFinite(Number(raw.save.dc)) && raw.save.dc !== '' && raw.save.dc !== null ? {dc: Math.round(Math.min(99, Math.max(-20, Number(raw.save.dc))))} : {})};
+    if (raw.half && out.save) out.half = true;
+    if (words(raw.effect?.label, 60)) out.effect = {label: words(raw.effect.label, 60), ...(Number(raw.effect.duration) > 0 ? {duration: Math.min(1000, Math.round(Number(raw.effect.duration)))} : {})};
+    if (AUTO[raw.auto] && raw.auto !== 'off') out.auto = raw.auto;
+    return Object.keys(out).length ? out : null;
   }
 
   function inside(pts, q) {
@@ -67,6 +86,7 @@ window.KrakenRegions = (() => {
       ${r ? `<div class="region-edit">
         <label>Name <input id="regionName" value="${esc(r.name)}"></label>
         <label>What happens (GM note) <textarea id="regionNote" rows="4">${esc(r.note)}</textarea></label>
+        ${r.kind === 'trap' || r.kind === 'pit' ? trapFields(r.trap || {}) : ''}
         ${r.kind === 'difficult' ? `<label>Movement cost <input id="regionCost" type="number" min="1" max="5" step="0.25" value="${r.cost}"></label>` : ''}
         ${r.kind === 'teleport' ? `<label>Destination <select id="regionTo"><option value="">Choose a region…</option>${list().filter(x => x.id !== r.id).map(x => `<option ${x.name === r.to ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>` : ''}
         <button class="los-action" id="regionDelete">Delete this ${esc(KINDS[r.kind][0].toLowerCase())}</button>
@@ -76,13 +96,32 @@ window.KrakenRegions = (() => {
     box.querySelectorAll('[data-region-tool]').forEach(b => b.onclick = () => { tool = b.dataset.regionTool; drawing = null; render(); hint(); S().draw(); });
     box.querySelectorAll('[data-region-id]').forEach(b => b.onclick = () => { selected = b.dataset.regionId; render(); S().draw(); });
     if (r) {
-      const edit = (field, value) => { S().snapshot(); r[field] = value; Object.assign(r, normalize(r)); S().save(); S().draw(); };
+      const edit = (field, value) => { S().snapshot(); r[field] = value; const next = normalize(r); if (!next.trap) delete r.trap; Object.assign(r, next); S().save(); S().draw(); };
       $('#regionName').onchange = e => { edit('name', e.target.value); render(); };
       $('#regionNote').onchange = e => edit('note', e.target.value);
       if ($('#regionCost')) $('#regionCost').onchange = e => edit('cost', Number(e.target.value));
       if ($('#regionTo')) $('#regionTo').onchange = e => edit('to', e.target.value);
       $('#regionDelete').onclick = () => remove(r.id);
+      if ($('#trapDamage')) {
+        const read = () => ({damage: $('#trapDamage').value, damageType: $('#trapType').value, save: {attribute: $('#trapSave').value, dc: $('#trapDc').value === '' ? null : Number($('#trapDc').value)}, half: $('#trapHalf').checked,
+          effect: {label: $('#trapEffect').value, duration: Number($('#trapDuration').value) || 0}, auto: $('#trapAuto').value});
+        for (const id of ['trapDamage', 'trapType', 'trapSave', 'trapDc', 'trapHalf', 'trapEffect', 'trapDuration', 'trapAuto']) $('#' + id).onchange = () => { edit('trap', read()); if (!r.trap) delete r.trap; };
+      }
     }
+  }
+  // A trap's damage, save and effect, and how much the table does by itself when it springs.
+  function trapFields(d) {
+    return `<div class="region-trap">
+        <label>Damage <input id="trapDamage" placeholder="2d6" value="${esc(d.damage || '')}" title="Dice, as in chat: 2d6, 1d10+2"></label>
+        <label>Damage type <input id="trapType" placeholder="fire, piercing…" value="${esc(d.damageType || '')}"></label>
+        <label>Save <input id="trapSave" list="trapSaves" placeholder="dex, reflex…" value="${esc(d.save?.attribute || '')}" title="The save the game makes against it (its own names: dex, reflex, breath…)"></label>
+        <datalist id="trapSaves">${['str', 'dex', 'con', 'int', 'wis', 'cha', 'fortitude', 'reflex', 'will', 'paralyzation', 'petrification', 'rod', 'breath', 'spell', 'death', 'wands', 'paralysis'].map(v => `<option value="${v}">`).join('')}</datalist>
+        <label>Save DC <input id="trapDc" type="number" min="-20" max="99" value="${d.save?.dc ?? ''}" title="The DC, challenge level or modifier the game uses"></label>
+        <label class="play-check"><input id="trapHalf" type="checkbox" ${d.half ? 'checked' : ''}> Half damage on a save</label>
+        <label>Effect on a failed save <input id="trapEffect" placeholder="Poisoned, Prone…" value="${esc(d.effect?.label || '')}"></label>
+        <label>Effect lasts (rounds) <input id="trapDuration" type="number" min="0" max="1000" value="${d.effect?.duration ?? ''}"></label>
+        <label>When it springs <select id="trapAuto">${Object.entries(AUTO).map(([id, words]) => `<option value="${id}" ${(d.auto || 'off') === id ? 'selected' : ''}>${esc(words)}</option>`).join('')}</select></label>
+      </div>`;
   }
   function remove(id) {
     S().snapshot();

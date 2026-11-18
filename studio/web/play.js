@@ -43,7 +43,9 @@ window.KrakenPlay = (() => {
   const st = {token: null, light: 'torch', vision: 'normal', darkness: 0.85, sky: '', tint: null, snap: true, collide: true, showWalls: false,
     facing: 0, doors: {}, drag: null, project: null,
     // Characters dragged in from Maelstrom (the Party Sheet, the tracker): tokens of their own; who: the one whose eyes the test uses.
-    party: [], who: null};
+    party: [], who: null,
+    // The door or window under the pointer (all of it lights up), and whether the secret doors have been found.
+    hover: null, secretsFound: false};
   const active = () => S().mode === 'play';
 
   // --- the map's grid -------------------------------------------------------
@@ -128,9 +130,31 @@ window.KrakenPlay = (() => {
         if (st.snap) { const c = snapCentre(p, to); if (blocked(p, from, c) >= 1) to = c; }
       }
     }
+    // A trap or pit on the way springs: the token stops on its first square, and the GM sees what it does (as at the table).
+    const sprung = trapOnTheWay(p, from, to);
+    if (sprung) { to = sprung.at; S().toast(`${st.who?.name || 'The token'} sprang ${sprung.region.kind === 'pit' ? 'the pit' : 'the trap'} "${sprung.region.name}"${trapWords(sprung.region)}`); }
     if (Math.hypot(to.x - from.x, to.y - from.y) > 1) st.facing = Math.atan2(to.y - from.y, to.x - from.x);
     st.token = to;
     if (st.who) Object.assign(st.who, {x: to.x, y: to.y, facing: st.facing});
+  }
+  const insideOf = (pts, q) => { let hit = false; for (let i = 0, j = pts.length - 2; i < pts.length; j = i, i += 2) if ((pts[i + 1] > q.y) !== (pts[j + 1] > q.y) && q.x < (pts[j] - pts[i]) * (q.y - pts[i + 1]) / (pts[j + 1] - pts[i + 1]) + pts[i]) hit = !hit; return hit; };
+  function trapOnTheWay(p, a, b) {
+    const traps = (p.regions || []).filter(r => (r.kind === 'trap' || r.kind === 'pit') && r.on !== false && !insideOf(r.points, a));
+    if (!traps.length) return null;
+    const steps = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / (p.grid / 4)));
+    for (let i = 1; i <= steps; i++) {
+      const q = {x: a.x + (b.x - a.x) * i / steps, y: a.y + (b.y - a.y) * i / steps}, region = traps.find(r => insideOf(r.points, q));
+      if (region) { const c = snapCentre(p, q); return {region, at: insideOf(region.points, c) ? c : q}; }
+    }
+    return null;
+  }
+  // What a trap does, in words: its note, its save and its damage.
+  function trapWords(r) {
+    const d = r.trap || {}, bits = [];
+    if (d.save?.attribute) bits.push(`save ${d.save.attribute}${d.save.dc ? ` ${d.save.dc}` : ''}${d.half ? ' for half' : ''}`);
+    if (d.damage) bits.push(`${d.damage}${d.damageType ? ` ${d.damageType}` : ''} damage`);
+    if (d.effect?.label) bits.push(d.effect.label);
+    return (r.note ? `: ${r.note}` : '') + (bits.length ? ` (${bits.join(', ')})` : '');
   }
   // A character on the test map (dropped from the Party Sheet or the tracker, or the agent's render): its own token, and the test sees with it.
   function addCharacter(p, {name, record, picture}, at) {
@@ -150,12 +174,19 @@ window.KrakenPlay = (() => {
   }
 
   // --- doors ------------------------------------------------------------------
-  const doors = p => p.walls.filter(w => flagsOf(w).has('toggleable') && !flagsOf(w).has('terrain') && !flagsOf(w).has('pit'));
+  const doors = p => p.walls.filter(w => flagsOf(w).has('toggleable') && !flagsOf(w).has('terrain') && !flagsOf(w).has('pit') && (st.secretsFound || !flagsOf(w).has('hidden')));
   function doorPoint(w) {
     const s = segs(w), m = s[Math.floor(s.length / 2)] || s[0];
     return {x: (m.x1 + m.x2) / 2, y: (m.y1 + m.y2) / 2};
   }
-  const doorAt = (p, q) => doors(p).find(w => { const c = doorPoint(w); return Math.hypot(c.x - q.x, c.y - q.y) <= Math.max(10, p.grid * 0.28) / Math.max(0.3, S().zoom) * Math.min(1, S().zoom * 1.5); });
+  // The whole door or window is the target: anywhere along it, about as thick as its art (a third of a square each side).
+  const reachOf = p => Math.max(p.grid * 0.3, 6 / Math.max(0.05, S().zoom || 1));
+  function nearSegment(q, s) {
+    const dx = s.x2 - s.x1, dy = s.y2 - s.y1, l = dx * dx + dy * dy || 1;
+    const k = Math.max(0, Math.min(1, ((q.x - s.x1) * dx + (q.y - s.y1) * dy) / l));
+    return Math.hypot(q.x - s.x1 - k * dx, q.y - s.y1 - k * dy);
+  }
+  const doorAt = (p, q) => doors(p).find(w => segs(w).some(s => nearSegment(q, s) <= reachOf(p)));
 
   // --- lights -----------------------------------------------------------------
   function lightsFor(p) {
@@ -278,7 +309,14 @@ window.KrakenPlay = (() => {
       ctx.restore();
     }
 
-    // Doors and windows: a handle to click, in the test's own state.
+    // Doors and windows: all of one lights up under the pointer (a click opens or closes it); a small mark shows its state.
+    const lit = st.hover && doors(p).find(w => w.id === st.hover);
+    if (lit) {
+      const f = flagsOf(lit), locked = isLocked(lit);
+      ctx.save(); ctx.lineCap = 'round'; ctx.lineWidth = reachOf(p) * 2;
+      ctx.strokeStyle = locked ? 'rgba(224,90,80,0.45)' : f.has('hidden') ? 'rgba(166,18,212,0.4)' : 'rgba(70,90,255,0.45)';
+      ctx.beginPath(); for (const s of segs(lit)) { ctx.moveTo(s.x1, s.y1); ctx.lineTo(s.x2, s.y2); } ctx.stroke(); ctx.restore();
+    }
     for (const w of doors(p)) {
       const c = doorPoint(w), open = isOpen(w), locked = isLocked(w), f = flagsOf(w);
       const kind = f.has('allow_vision') ? 'window' : f.has('hidden') ? 'secret' : 'door';
@@ -349,6 +387,12 @@ window.KrakenPlay = (() => {
     moveTo(q); S().draw(); return true;
   }
   function pointerMove(e) {
+    if (active() && !st.drag) {
+      const over = doorAt(S().project, S().point(e))?.id ?? null;
+      $('#mapCanvas').style.cursor = over ? 'pointer' : '';
+      if (over !== st.hover) { st.hover = over; S().draw(); }
+      return false;
+    }
     if (!active() || !st.drag) return false;
     const was = st.snap; st.snap = false; moveTo(S().point(e)); st.snap = was; S().draw(); return true;
   }
@@ -387,6 +431,7 @@ window.KrakenPlay = (() => {
       <label class="play-check"><input id="playSnap" type="checkbox" ${st.snap ? 'checked' : ''}> Snap to the squares</label>
       <label class="play-check"><input id="playCollide" type="checkbox" ${st.collide ? 'checked' : ''}> Walls stop me</label>
       <label class="play-check"><input id="playWalls" type="checkbox" ${st.showWalls ? 'checked' : ''}> Show the walls</label>
+      <label class="play-check" title="Players do not see a secret door until it is found (at the table, the GM reveals it)"><input id="playSecrets" type="checkbox" ${st.secretsFound ? 'checked' : ''}> Secret doors found</label>
       <label class="play-row">Feet per square <input id="playFeet" type="number" min="1" max="100" step="1" value="${feetPerSquare(p)}"></label>
       <p class="los-help" id="playInfo">${esc(describe(p))}</p>
       <button class="los-action" id="playReset">Close every door again</button>`;
@@ -398,6 +443,7 @@ window.KrakenPlay = (() => {
     $('#playSnap').onchange = e => { st.snap = e.target.checked; S().draw(); };
     $('#playCollide').onchange = e => { st.collide = e.target.checked; };
     $('#playWalls').onchange = e => { st.showWalls = e.target.checked; S().draw(); };
+    $('#playSecrets').onchange = e => { st.secretsFound = e.target.checked; S().draw(); };
     $('#playFeet').onchange = e => { const v = Math.max(1, Math.min(100, Number(e.target.value) || 5)); S().snapshot(); S().project.gridDistance = v; S().save(); redraw(); };
     $('#playReset').onclick = () => { st.doors = {}; S().draw(); };
   }

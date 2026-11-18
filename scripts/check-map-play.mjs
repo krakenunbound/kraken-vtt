@@ -297,19 +297,58 @@ try {
   ann.send({ type: "token-update", id: annToken.id, patch: { elevation: 0 } });
   console.log("ok elevation");
 
-  // 8. Regions: a trap stops a player's token on its first square, tells the GM alone and locks movement.
-  const trap = await tool("kraken_region", { action: "add", kind: "trap", name: "Pit of spikes", note: "DC 12 Dex or 2d6", rect: { col: 2, row: 5, cols: 1, rows: 1 } });
+  // 8. Regions: a trap stops a player's token on its first square and holds that token alone (the
+  // others go on); the GM alone is told, rolls its save and damage, applies them, and lets it go.
+  const trap = await tool("kraken_region", { action: "add", kind: "trap", name: "Pit of spikes", note: "DC 12 Dex or 2d6", rect: { col: 2, row: 5, cols: 1, rows: 1 }, trap: { damage: "2d6", damageType: "piercing", save: { attribute: "dex", dc: 12 }, half: true, effect: { label: "Bleeding", duration: 3 } } });
+  assert(trap.trap?.damage === "2d6" && trap.trap.save.dc === 12 && trap.trap.half === true, `the trap keeps what it does: ${JSON.stringify(trap.trap)}`);
   await tool("kraken_token_move", { id: annToken.id, col: 0, row: 5 });
   ann.send({ type: "token-move", id: annToken.id, x: 225, y: 275 });
   await latest(dm, "notice", (m) => /Pit of spikes/.test(m.text), "the GM is told");
   const stopped = at();
   assert(stopped.x === 125 && stopped.y === 275, `she stops on the trap: ${stopped.x},${stopped.y}`);
-  assert(server.agent.map.lockedNow(), "the trap locks movement");
+  assert(!server.agent.map.lockedNow(), "the table goes on: only her token is held");
+  assert(server.agent.map.tokens().find((token) => token.id === annToken.id).held?.region === trap.id, "her token is held by the trap");
   const secret = server.agent.chatLog(5).find((line) => /Pit of spikes/.test(line.text));
   assert(secret?.secret === true && /DC 12/.test(secret.text), "a line only the GM sees, with its note");
-  assert(!ann.inbox.some((m) => JSON.stringify(m).includes("DC 12")) && !("regions" in server.agent.viewFor("Ann")), "Ann never gets the trap or its note");
-  await tool("kraken_line_of_sight", { lockMovement: false });
+  assert(!ann.inbox.some((m) => JSON.stringify(m).includes("DC 12")) && !("regions" in server.agent.viewFor("Ann")) && !("held" in server.agent.viewFor("Ann")), "Ann never gets the trap, its note or what it does");
+  assert(server.agent.viewFor("Ann").tokens.find((token) => token.id === annToken.id).held === true, "she sees her token is held");
+  // Held: her own moves and her undo are refused.
+  ann.inbox.length = 0;
+  ann.send({ type: "token-move", id: annToken.id, x: 325, y: 275 });
+  await latest(ann, "error", (m) => /trap holds/.test(m.reason ?? ""), "her move is refused while the trap holds her");
+  assert(at().x === 125, "she has not moved");
+  // Shown to the players: her view has the trap's outline, never its name, note or damage.
+  assert((server.agent.viewFor("Ann").traps ?? []).length === 0, "a hidden trap is not in her view");
+  dm.send({ type: "trap", action: "reveal", region: trap.id, on: true });
+  await latest(ann, "map", (m) => (m.traps ?? []).length === 1, "the trap shown to her");
+  const shown = server.agent.viewFor("Ann").traps[0];
+  assert(JSON.stringify(Object.keys(shown).sort()) === '["id","kind","points"]', `only where it is: ${JSON.stringify(shown)}`);
+  // The GM's strip: held, rolled (dice forced: a 15 saves against 12; the spikes roll 9), applied: half, no effect on a save, and she goes on.
+  assert((await tool("kraken_region", { action: "held" }))[0]?.tokenId === annToken.id, "the agent lists who the trap holds");
+  await tool("kraken_dice_force", { values: [15] });
+  const rolledSave = await tool("kraken_region", { action: "save", tokenId: annToken.id });
+  assert(rolledSave.save?.success === true && rolledSave.save.total >= 12, `her save against it: ${JSON.stringify(rolledSave)}`);
+  await tool("kraken_dice_force", { values: [4, 5] });
+  const rolledDamage = await tool("kraken_region", { action: "damage", tokenId: annToken.id });
+  assert(rolledDamage.damage?.total === 9, `its damage, rolled for the GM: ${JSON.stringify(rolledDamage)}`);
+  assert(server.agent.chatLog(4).filter((line) => /\[DAMAGE\] Pit of spikes on/.test(line.text)).every((line) => line.secret), "the damage roll is the GM's alone");
+  const applied = await tool("kraken_region", { action: "apply", tokenId: annToken.id });
+  assert(applied.saved === true && applied.damage === 4 && !applied.effect, `applied: half on a save, no effect: ${JSON.stringify(applied)}`);
+  assert(!server.agent.map.tokens().find((token) => token.id === annToken.id).held, "applied, she goes on");
+  const annEntry = server.agent.combat.entries().find((entry) => entry.recordId === annRecord.id);
+  assert(annEntry, "she joined the tracker to take the damage");
+  // A trap set to roll and apply by itself: it springs, the table rolls, applies and lets her go.
+  await tool("kraken_region", { action: "update", id: trap.id, trap: { damage: "1d4", auto: "apply" } });
+  await tool("kraken_token_move", { id: annToken.id, col: 1, row: 5 });
+  await tool("kraken_dice_force", { values: [3] });
+  ann.send({ type: "token-move", id: annToken.id, x: 225, y: 275 });
+  await latest(dm, "notice", (m) => /rolled and applied/.test(m.text), "the GM is told it applied itself");
+  for (let tries = 0; tries < 50 && server.agent.map.tokens().find((token) => token.id === annToken.id).held; tries += 1) await wait(20);
+  assert(!server.agent.map.tokens().find((token) => token.id === annToken.id).held, "the trap applied itself and let her go");
+  await tool("kraken_combat", { action: "end" });
+  dm.send({ type: "trap", action: "reveal", region: trap.id, on: false });
   await tool("kraken_region", { action: "update", id: trap.id, on: false });
+  console.log("ok traps hold the token that springs them; rolled, applied, shown to the players");
   // Difficult terrain: the ruler counts it; players get its shape for measuring.
   await tool("kraken_region", { action: "add", kind: "difficult", cost: 2, rect: { col: 6, row: 0, cols: 2, rows: 1 } });
   measured = await tool("kraken_ruler", { squares: [{ col: 5, row: 0 }, { col: 8, row: 0 }] });
@@ -323,9 +362,10 @@ try {
   await latest(ann, "map", (m) => m.tokens.some((t) => t.id === annToken.id && t.x === 425 && t.y === 275), "the teleport sends her to the far side");
   // Map Studio's regions come to the table with its walls (krakenBridge masterFrom).
   const bridge = require("../electron/studio/krakenBridge.cjs");
-  const master = bridge.masterFrom({ walls: [], lights: [], effects: [], regions: [{ id: "s1", kind: "pit", name: "Well", note: "10 ft down", points: [0, 0, 50, 0, 50, 50, 0, 50] }] }, server.agent.map.scene());
+  const master = bridge.masterFrom({ walls: [], lights: [], effects: [], regions: [{ id: "s1", kind: "pit", name: "Well", note: "10 ft down", points: [0, 0, 50, 0, 50, 50, 0, 50], trap: { damage: "1d6", save: { attribute: "dex", dc: 10 }, auto: "roll" } }] }, server.agent.map.scene());
   const counts = server.agent.map.fromStudio({ ...master, walls: server.agent.map.walls().map((wall) => ({ ...wall })), project: null });
   assert(counts.regions === 1 && server.agent.map.regions()[0].kind === "pit", `Map Studio's regions: ${JSON.stringify(counts)}`);
+  assert(server.agent.map.regions()[0].trap?.damage === "1d6" && server.agent.map.regions()[0].trap.auto === "roll", `a trap's details come with it: ${JSON.stringify(server.agent.map.regions()[0])}`);
   assert(server.persisted().map.regions.crypt.length === 1, "regions are saved");
   // Switched off at the table, the well stays off when Map Studio saves to Kraken again.
   await tool("kraken_region", { action: "update", id: server.agent.map.regions()[0].id, on: false });

@@ -144,6 +144,33 @@ try {
   assert(state.who === "Aldra", `a click on another character's token looks through their eyes (${JSON.stringify(state)})`);
   report.push("Aldra (her own token picture) dragged from the Party Sheet and the Goblin from the tracker onto Map Studio's map: Play test starts with their tokens, a click switches whose eyes it uses");
 
+  // Play test's doors: the whole door is the target (a click near its end opens it); a secret door is not there
+  // until it is found. A trap on the way stops the token on its first square and says what it does.
+  await studio("door", { from: [9, 2], to: [9, 6], art: false });
+  await studio("door", { from: [11, 2], to: [11, 6], kind: "secret" });
+  await studio("region", { kind: "trap", name: "Spikes", note: "Under the rug", rect: { x: 2, y: 6, width: 1, height: 1 }, trap: { damage: "2d6", save: { attribute: "dex", dc: 12 }, half: true } });
+  const clickAt = async (sx, sy) => {
+    const at = await frame.evaluate(([x, y]) => { const r = document.querySelector("#mapCanvas").getBoundingClientRect(), z = window.KrakenStudio.zoom, g = window.KrakenStudio.project.grid; return { x: r.left + x * g * z, y: r.top + y * g * z }; }, [sx, sy]);
+    const box = await page.locator(".studio-frame").boundingBox();
+    await page.mouse.click(box.x + at.x, box.y + at.y);
+    await settle(200);
+  };
+  const doorState = () => frame.evaluate(() => { const p = window.KrakenStudio.project, s = window.KrakenPlay._state; const d = p.walls.find((w) => (w.flags || []).includes("toggleable") && !(w.flags || []).includes("hidden")); return Boolean(s.doors[d.id]?.open); });
+  assert(!(await doorState()), "the door starts closed");
+  await clickAt(9, 2.5);
+  assert(await doorState(), "a click near the door's end (half a square from it) opens it");
+  const secretShown = () => frame.evaluate(() => { const p = window.KrakenStudio.project, s = window.KrakenPlay._state; const d = p.walls.find((w) => (w.flags || []).includes("hidden") && (w.flags || []).includes("toggleable")); return d ? (d.id in s.doors) : "none"; });
+  await clickAt(11, 4);
+  assert((await secretShown()) === false, "a secret door is not there until it is found");
+  await frame.check("#playSecrets");
+  await clickAt(11, 4);
+  assert((await secretShown()) === true, "found, it opens");
+  await frame.evaluate(() => { const s = window.KrakenPlay._state; s.token = { x: 50, y: 650 }; });
+  await clickAt(4.5, 6.5);
+  const stoppedAt = await frame.evaluate(() => ({ x: window.KrakenPlay._state.token.x, toast: document.querySelector(".toast, #toast, [class*=toast]")?.textContent ?? "" }));
+  assert(stoppedAt.x === 250 && /Spikes/.test(stoppedAt.toast) && /2d6/.test(stoppedAt.toast), `a trap on the way stops the token on its square and says what it does (${JSON.stringify(stoppedAt)})`);
+  report.push("Play test: a door opens from a click near its end; a secret door is there only when found; a trap stops the token and says what it does");
+
   // The agent: render play with a party.
   const shot = await studio("render", { view: "play", party: [{ name: "Bram", at: [2.5, 2.5] }, { name: "Cleo", at: [9.5, 5.5] }] });
   assert(shot.party?.length === 2 && shot.party[1].name === "Cleo" && shot.party[1].looking, `kraken_map_studio render play with party (${JSON.stringify(shot.party)})`);

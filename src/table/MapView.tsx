@@ -27,7 +27,7 @@ import { TokenBadges } from "./TokenBadges";
 import { useExplored } from "./explored";
 import { TokenMenuExtras } from "./TokenMenuExtras";
 import { DarknessAreas } from "./DarknessAreas";
-import { MoveApprovals, MoveRequestGhosts, RegionShapes, TokenPaths } from "./MovePlay";
+import { MoveApprovals, MoveRequestGhosts, RegionShapes, RevealedTraps, TokenPaths, TrapsSprung } from "./MovePlay";
 import { MapSoundMarkers, MapSoundsPanel } from "./MapSounds";
 import { MapVideo, isVideoScene } from "./MapVideo";
 // three.js only loads when a scene has weather.
@@ -151,6 +151,9 @@ export type MapActions = {
   // Undo a token's last move; the GM's approval of moves asked for while movement is locked.
   undoMove?: (id: string) => void;
   approveMoves?: (ids: string[] | "all", accept: boolean) => void;
+  // A trap's rolls, applied, let go, shown or hidden; a secret door found (the GM's).
+  trap?: (action: string, payload?: Record<string, unknown>) => void;
+  doorFound?: (id: string, on: boolean) => void;
   // The GM's sounds placed on the map, and the sound library to pick from.
   mapSound?: (action: string, payload?: Record<string, unknown>) => void;
   soundList?: () => Promise<import("../session/useSession").SoundLibrary>;
@@ -252,7 +255,7 @@ type Menu = { id: string; left: number; top: number };
 // FG's doors: a door is one shape (its sides arrive as wall lines named
 // fg-<door>-<n>, or share a group), drawn and clicked as one. A shape that
 // closes on itself is a polygon; a single door line stays a line.
-type DoorShape = { id: string; group: string; points: number[]; closed: boolean; cx: number; cy: number; state: number; secret: boolean };
+type DoorShape = { id: string; group: string; points: number[]; closed: boolean; cx: number; cy: number; state: number; secret: boolean; found: boolean };
 function doorShapes(doors: MapDoor[]): DoorShape[] {
   const groups = new Map<string, MapDoor[]>();
   for (const door of doors) {
@@ -275,6 +278,7 @@ function doorShapes(doors: MapDoor[]): DoorShape[] {
       cy: (Math.min(...ys) + Math.max(...ys)) / 2,
       state: list[0].state,
       secret: Boolean(list[0].secret),
+      found: Boolean(list[0].found),
     };
   });
 }
@@ -2142,7 +2146,7 @@ function MapViewInner({
               return (
                 <g
                   key={door.id}
-                  className={["player-door", door.secret ? "secret" : "", locked ? "locked" : ""].filter(Boolean).join(" ")}
+                  className={["player-door", door.secret ? "secret" : "", door.found ? "found" : "", locked ? "locked" : ""].filter(Boolean).join(" ")}
                   data-door={door.id}
                   data-door-group={door.group}
                   data-state={door.state}
@@ -2151,8 +2155,14 @@ function MapViewInner({
                     event.stopPropagation();
                     if (!locked || gm) actions.setDoor(door.id);
                   }}
+                  // The GM: a secret door right-clicked is found (the players see it and use it), or hidden again.
+                  onContextMenu={gm && door.secret ? (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    actions.doorFound?.(door.id, !door.found);
+                  } : undefined}
                 >
-                  <title>{locked ? (gm ? "Locked door. Click to open (right-click the wall to unlock in the editor)." : "Locked door") : open ? "Open door. Click to close." : "Closed door. Click to open."}</title>
+                  <title>{`${locked ? (gm ? "Locked door. Click to open (right-click the wall to unlock in the editor)." : "Locked door") : open ? "Open door. Click to close." : "Closed door. Click to open."}${gm && door.secret ? (door.found ? " Found: the players see it. Right-click to hide it again." : " Secret: the players do not see it. Right-click when they find it.") : ""}`}</title>
                   {door.closed ? (
                     <polygon className="door-shape" points={door.points.join(" ")} />
                   ) : (
@@ -2216,7 +2226,7 @@ function MapViewInner({
             })}
           </svg>
         ) : null}
-        {gm ? <RegionShapes regions={map.regions} width={frame.worldWidth} height={frame.worldHeight} scale={camera.scale} /> : null}
+        {gm ? <RegionShapes regions={map.regions} width={frame.worldWidth} height={frame.worldHeight} scale={camera.scale} reveal={(id, on) => actions.trap?.("reveal", { region: id, on })} /> : <RevealedTraps traps={map.traps} width={frame.worldWidth} height={frame.worldHeight} scale={camera.scale} />}
         {gm && (settingsOpen || (editorOpen && editTab === "lights")) ? <MapSoundMarkers sounds={map.mapSounds} perFoot={size / (scene.grid.distance > 0 ? scene.grid.distance : 5)} width={frame.worldWidth} height={frame.worldHeight} scale={camera.scale} /> : null}
         <TokenPaths tokens={tokens} scene={scene} diagonal={diagonal} units={units} terrain={map.terrain} width={frame.worldWidth} height={frame.worldHeight} scale={camera.scale} />
         <MoveRequestGhosts requests={map.moveRequests} tokens={tokens} width={frame.worldWidth} height={frame.worldHeight} scale={camera.scale} />
@@ -2228,7 +2238,7 @@ function MapViewInner({
           return (
             <div
               key={token.id}
-              className={["token", ...tokenFxClasses((token.effects?.fx ?? []) as FxKey[], fxMode), token.sensed ? "token-sensed" : "", canDrag ? "token-draggable" : "", token.mine ? "token-mine" : "", token.active ? "token-active" : "", targeted.includes(token.id) ? "token-targeted" : "", selected === token.id ? "token-selected" : "", picked.includes(token.id) ? "token-picked" : "", token.hidden ? "token-hidden" : "", isDragged ? "token-lifted" : ""]
+              className={["token", ...tokenFxClasses((token.effects?.fx ?? []) as FxKey[], fxMode), token.sensed ? "token-sensed" : "", token.held ? "token-held" : "", canDrag ? "token-draggable" : "", token.mine ? "token-mine" : "", token.active ? "token-active" : "", targeted.includes(token.id) ? "token-targeted" : "", selected === token.id ? "token-selected" : "", picked.includes(token.id) ? "token-picked" : "", token.hidden ? "token-hidden" : "", isDragged ? "token-lifted" : ""]
                 .filter(Boolean)
                 .join(" ")}
               data-token={token.id}
@@ -2989,6 +2999,7 @@ function MapViewInner({
         />
       ) : null}
       {gm ? <MoveApprovals requests={map.moveRequests} approve={actions.approveMoves} /> : null}
+      {gm ? <TrapsSprung held={map.held} act={actions.trap} /> : null}
       {notice ? (
         <p className="map-toast" role="status">
           {notice}

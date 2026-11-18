@@ -215,6 +215,7 @@ function krakenRegions(regions, origin) {
     note: region.note ?? "",
     points: shiftPoints(region.points, origin.x, origin.y),
     ...(region.kind === "difficult" ? { cost: region.cost } : {}),
+    ...(region.trap && (region.kind === "trap" || region.kind === "pit") ? { trap: region.trap } : {}),
     ...(region.kind === "teleport" ? { to: region.to && typeof region.to === "object" ? { ...region.to, x: Number(region.to.x) + origin.x, y: Number(region.to.y) + origin.y } : region.to ?? "" } : {}),
   }));
 }
@@ -226,6 +227,7 @@ function studioRegions(regions, origin) {
     note: region.note ?? "",
     points: shiftPoints(region.points, -origin.x, -origin.y),
     ...(region.kind === "difficult" ? { cost: region.cost } : {}),
+    ...(region.trap && (region.kind === "trap" || region.kind === "pit") ? { trap: region.trap } : {}),
     ...(region.kind === "teleport" ? { to: region.to && typeof region.to === "object" ? { ...region.to, x: region.to.x - origin.x, y: region.to.y - origin.y } : region.to ?? "" } : {}),
   }));
 }

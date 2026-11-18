@@ -894,10 +894,76 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   // locks movement until the GM lets the table go on.
   function regionSprang({ region, token, seat }, prepOnly) {
     const what = region.kind === "teleport" ? "stepped into the teleport" : `sprang the ${region.kind}`;
-    const line = `${token.name} ${what} "${region.name}"${region.note ? `: ${region.note}` : ""}${region.kind === "trap" || region.kind === "pit" ? " (movement is locked: unlock it to go on)" : ""}`;
+    const holds = region.kind === "trap" || region.kind === "pit";
+    const line = `${token.name} ${what} "${region.name}"${region.note ? `: ${region.note}` : ""}${holds ? (region.trap?.auto === "apply" ? " (rolled and applied by itself)" : " (it holds them: roll, apply or let them go in Traps sprung)") : ""}`;
     if (!prepOnly) agentHandle.say(line, "Map", true);
     for (const [ws, client] of clients) if (client.role === "dm") send(ws, { type: "notice", text: line.slice(0, 300) });
-    if (seat.role !== "dm" && region.kind !== "teleport") for (const [ws, client] of clients) if (client.name === seat.name && client.role !== "dm") send(ws, { type: "notice", text: "Something happens. The GM has stopped the table." });
+    if (seat.role !== "dm" && region.kind !== "teleport") for (const [ws, client] of clients) if (client.name === seat.name && client.role !== "dm") send(ws, { type: "notice", text: `Something happens to ${token.name}. The GM decides what.` });
+    // The trap's own automation (Map Studio's "When it springs"): rolled for the GM, or rolled and applied.
+    if (!prepOnly && holds && (region.trap?.auto === "roll" || region.trap?.auto === "apply") && token.held) {
+      resolveTrap(map, token.id, region.trap.auto === "apply" ? "apply" : "roll").catch((error) => agentHandle.say(`${token.name}: the trap could not ${region.trap.auto} (${error instanceof Error ? error.message : error})`, "Map", true));
+    }
+  }
+  // A token a trap holds, as the GM (or the trap's automation) deals with it: save rolls its save
+  // (the game's own save for a creature on the tracker, else a d20 against the DC), damage rolls its
+  // damage (for the GM's eyes), roll does both, apply rolls what is still to roll and applies it (half
+  // or none on a save, through the tracker so the game's rules run; the creature joins the tracker if
+  // it is not on it; the effect on a failed save) and lets the token go; release lets it go.
+  // An unrevealed trap is called "Trap" (or "Pit") in chat, never by its name.
+  async function resolveTrap(working, tokenId, action) {
+    const { token, region } = working.heldToken(tokenId);
+    if (action === "release") return working.release(token.id, GM_SEAT);
+    const trap = region?.trap ?? {};
+    const what = region?.revealed ? region.name : region?.kind === "pit" ? "Pit" : "Trap";
+    const roll = (formula, label) => agentHandle.roll(formula, label, "Map", true, { mods: false });
+    const rollSave = async () => {
+      if (!trap.save?.attribute || token.held.save) return;
+      const entry = entryOfToken(token.id);
+      let save = null;
+      if (entry) {
+        try {
+          const made = await combat.save(entry.id, trap.save.attribute, trap.save.dc, what);
+          if (made && typeof made.success === "boolean") save = { success: made.success, total: Math.round(num(made.total, 0)) };
+        } catch {
+          /* not one of this game's saves: a d20 against the DC */
+        }
+      }
+      if (!save) {
+        const made = roll("1d20", `[SAVE] ${token.name} vs ${what}: ${trap.save.attribute.toUpperCase()}${trap.save.dc !== undefined ? ` ${trap.save.dc}` : ""}`);
+        save = { success: trap.save.dc !== undefined ? made.total >= trap.save.dc : null, total: made.total };
+      }
+      working.updateHeld(token.id, { save }, GM_SEAT);
+    };
+    const rollDamage = () => {
+      if (!trap.damage || token.held.damage) return;
+      const made = roll(trap.damage, `[DAMAGE] ${what} on ${token.name}${trap.damageType ? ` (${trap.damageType})` : ""}`);
+      working.updateHeld(token.id, { damage: { total: made.total } }, GM_SEAT);
+    };
+    if (action === "save" || action === "roll" || action === "apply") await rollSave();
+    if (action === "damage" || action === "roll" || action === "apply") rollDamage();
+    if (action !== "apply") return working.heldToken(token.id).token.held;
+    const held = working.heldToken(token.id).token.held;
+    const saved = held.save?.success === true;
+    let amount = held.damage?.total ?? 0;
+    if (saved) amount = trap.half ? Math.floor(amount / 2) : 0;
+    const done = { token: token.id, saved, damage: amount };
+    if (amount > 0) {
+      let entry = entryOfToken(token.id);
+      if (!entry && token.recordId) {
+        await combat.add({ recordId: token.recordId }, GM_SEAT);
+        entry = entryOfToken(token.id);
+      }
+      if (!entry) throw new Error(`${token.name} has no sheet to take the damage: apply it by hand.`);
+      await combat.dropRoll(entry.id, { kind: "damage", total: amount, type: trap.damageType || undefined, name: what }, GM_SEAT);
+    }
+    if (trap.effect?.label && !saved) {
+      const api = effects();
+      await api.ready;
+      await api.apply({ to: { tokenId: token.id }, effect: { label: trap.effect.label, duration: trap.effect.duration ?? 0 } }, GM_SEAT);
+      done.effect = trap.effect.label;
+    }
+    working.release(token.id, GM_SEAT);
+    return done;
   }
   // A creature's turn begins on the tracker: its token's path (this turn's moves) starts again.
   let turnOf = null;
@@ -2971,7 +3037,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
 
       // The map: tokens, doors, line of sight and pings (mapState.cjs decides
       // who may do what).
-      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-update", "draw-erase", "draw-clear", "death-marker", "wall", "map-undo", "mask", "label", "map-group", "fx", "tile", "explored-reset", "token-undo", "move-approve", "map-sound"].includes(msg.type)) {
+      if (["token-place", "token-move", "token-remove", "token-update", "door", "sight", "lock", "scene-settings", "light-place", "light-update", "light-remove", "draw", "draw-update", "draw-erase", "draw-clear", "death-marker", "wall", "map-undo", "mask", "label", "map-group", "fx", "tile", "explored-reset", "token-undo", "move-approve", "map-sound", "trap", "door-found"].includes(msg.type)) {
         const working = mapOf(client);
         // Testing: the GM's moves of the test token are a player's (walls, locks).
         const testToken = (id) => testing && client.role === "dm" && working.tokens().some((token) => token.id === id && token.owner === TEST_SEAT.name);
@@ -3008,6 +3074,15 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
             working.remove(String(msg.id ?? ""), seat);
           } else if (msg.type === "token-update") {
             working.update(String(msg.id ?? ""), msg.patch ?? {}, seat);
+          } else if (msg.type === "door-found") {
+            // A secret door found: the players see it and use it (off: hidden again).
+            working.setFound(String(msg.id ?? ""), msg.on !== false, seat);
+          } else if (msg.type === "trap") {
+            // The GM's Traps sprung strip (and the trap's eye on the map): roll, apply, let go; shown to the players or hidden.
+            if (client.role !== "dm") throw new Error("Only the GM decides what a trap does.");
+            if (msg.action === "reveal") working.updateRegion(String(msg.region ?? ""), { revealed: msg.on !== false }, seat);
+            else if (["save", "damage", "roll", "apply", "release"].includes(msg.action)) resolveTrap(working, String(msg.tokenId ?? ""), msg.action).catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "The trap could not do that." }));
+            else throw new Error("What should the trap do?");
           } else if (msg.type === "door") {
             working.setDoor(String(msg.id ?? ""), msg.state === undefined ? undefined : num(msg.state, -1), seat);
           } else if (msg.type === "sight") {
@@ -3453,6 +3528,8 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     activeBookId,
     requireActiveBook,
     seat: { role: "dm", name: "Agent" },
+    // A token a trap holds: save, damage, roll, apply or release (as the GM's Traps sprung strip).
+    resolveTrap: (tokenId, action) => resolveTrap(map, String(tokenId ?? ""), action),
     // A damage card changed (combat.cjs landOn, applyCard): its chat line keeps it and
     // every seat that sees the line is told; players do not see hidden creatures on it.
     cardUpdate(id, view) {

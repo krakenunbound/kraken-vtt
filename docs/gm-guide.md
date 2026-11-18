@@ -355,11 +355,20 @@ weather with masks, mark traps and regions, generate a dungeon, and play test.
 - **Elevation:** Alt+wheel over a token raises or lowers it a square's
   distance (or the token menu's Elevation); a badge shows its height to everyone.
 - **Traps and regions** from Map Studio (and a Foundry bundle's regions) play
-  at the table. A trap or pit stops a player's token on its first square, tells
-  you its name and note in a line only you see, and locks movement until you
-  unlock it. Difficult terrain costs more on the ruler. A teleport sends whoever
-  steps in to the region it names. You see them as faint outlines; players never
-  get them.
+  at the table. A trap or pit stops a player's token on its first square and
+  holds that token alone (everyone else moves on), and tells you its name and
+  note in a line only you see. Its row in **Traps sprung** (along the bottom of
+  the map) rolls its save and its damage and **Apply** puts them on (half or
+  none on a save, the effect on a failed one, through the tracker, so the game's
+  own rules run) and lets the token go; the cross lets it go as it is. A trap
+  can roll by itself, or roll and apply by itself: Map Studio's Traps & regions,
+  "When it springs". Difficult terrain costs more on the ruler. A teleport sends
+  whoever steps in to the region it names. You see them as faint outlines;
+  players never get them, until you click a trap's eye: then they see where it
+  is (never its note or what it does).
+- **Secret doors:** players do not see a secret door. Right-click it when they
+  find it: it is a door to them, to open like any other. Right-click again to
+  hide it.
 - **Animated maps:** a map whose picture is a video (.webm, .mp4, as Foundry's
   animated scenes) plays as the map for everyone.
 - **Sounds on a map:** **Scene > Sounds on this map** places a sound from your

@@ -169,9 +169,11 @@ squares of margin round the outside.
 
 - `weather` with `areas` keeps it where it belongs: smoke (`myst`, MystFade
   0.3 to 0.5) in a fire hall, `rain` outdoors, `water` on a pool.
-- `region`: `trap` (the game pauses and the GM sees its name and note when a
-  token steps in), `pit`, `difficult` (cost 2). Put the adventure's triggers
-  here with a note saying what happens.
+- `region`: `trap` (a token that steps in is held there and the GM sees its
+  name and note), `pit`, `difficult` (cost 2). Put the adventure's triggers
+  here with a note saying what happens, and give a trap what it does: `trap`
+  {damage "2d6", damageType, save {attribute, dc}, half, effect {label,
+  duration}, auto roll|apply}, so the table can roll it (or apply it) itself.
 
 ### 9. Look at it (every time)
 

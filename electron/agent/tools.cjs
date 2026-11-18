@@ -1145,7 +1145,7 @@ const TOOLS = [
   {
     name: "kraken_token_move",
     description:
-      "Move a token to a square (col/row, its top-left square), or several together (a group dragged as one, as Foundry's multi-select): ids and dcol/drow, the squares across and down each moves. asPlayer: move them the way their owner would, stopped by walls and closed doors when line of sight is on, and springing traps (a player's token stops on a trap's first square, the GM is told its name and note, movement locks) and teleports; the answer says whether a wall stopped one. undo: true takes the token's (id) last move back, as Ctrl+Z or the token menu's Undo move (the GM any token's; a player only their own last move); path: true reads its moves (this turn's path on the combat tracker: it starts again when its turn begins). While movement is locked, players' moves wait as requests (FG's TokenMoveManager, the GM's approval strip on the map): requests: true lists them; approve: a token id, or all, with accept true (move it as its player would) or false (cancel).",
+      "Move a token to a square (col/row, its top-left square), or several together (a group dragged as one, as Foundry's multi-select): ids and dcol/drow, the squares across and down each moves. asPlayer: move them the way their owner would, stopped by walls and closed doors when line of sight is on, and springing traps (a player's token stops on a trap's first square and the trap holds it until the GM lets it go: kraken_region held, apply, release) and teleports; the answer says whether a wall stopped one. undo: true takes the token's (id) last move back, as Ctrl+Z or the token menu's Undo move (the GM any token's; a player only their own last move); path: true reads its moves (this turn's path on the combat tracker: it starts again when its turn begins). While movement is locked, players' moves wait as requests (FG's TokenMoveManager, the GM's approval strip on the map): requests: true lists them; approve: a token id, or all, with accept true (move it as its player would) or false (cancel).",
     inputSchema: object({ id: string("Token id"), col: number("Square across"), row: number("Square down"), ids: { type: "array", items: { type: "string" }, description: "Several tokens moved together" }, dcol: number("Squares across each moves (with ids)"), drow: number("Squares down each moves (with ids)"), asPlayer: { type: "boolean" }, undo: { type: "boolean", description: "Undo the token's last move" }, path: { type: "boolean", description: "Read the token's moves" }, requests: { type: "boolean", description: "List the moves waiting for the GM" }, approve: string("A token id, or all: its waiting move"), accept: { type: "boolean", description: "With approve: true moves it, false cancels" } }),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);
@@ -2033,10 +2033,12 @@ const TOOLS = [
   },
   {
     name: "kraken_door",
-    description: "Open, close or lock a door on the scene (ids from kraken_map).",
-    inputSchema: object({ id: string("Door (wall) id"), state: { type: "string", enum: ["open", "closed", "locked"] } }, ["id", "state"]),
+    description: "Open, close or lock a door on the scene (ids from kraken_map). found: a secret door shown to the players (true; they see it and use it as a door) or hidden again (false).",
+    inputSchema: object({ id: string("Door (wall) id"), state: { type: "string", enum: ["open", "closed", "locked"] }, found: { type: "boolean" } }, ["id"]),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);
+      if (args.found !== undefined) return out(map.setFound(args.id, args.found, seat));
+      if (!args.state) throw new Error("state (open, closed, locked) or found.");
       const state = map.setDoor(args.id, { closed: 0, open: 1, locked: 2 }[args.state], seat);
       return out({ id: args.id, state });
     },
@@ -2182,10 +2184,13 @@ const TOOLS = [
   {
     name: "kraken_region",
     description:
-      "Regions of the map (Map Studio's Traps & regions, a bundle's Foundry regions), played at the table: trap and pit (a player's token that steps in stops on its first square, the GM is told its name and note in a line only the GM sees, and movement locks until the GM unlocks it: kraken_line_of_sight lockMovement false), difficult (moving through costs more: cost 2 makes each square count double on the ruler), teleport (whoever steps in goes to its destination: to = another region's name, or {x, y} in scene pixels, or {sceneId, x, y} on a scene the table has opened). Players are never sent traps, pits, teleports or notes. action list (default); add (kind, name, note, points [x, y, ...] in scene pixels or rect {col, row, cols, rows} in squares, cost, to); update (id and any of those, on false to switch it off); remove (id).",
+      "Regions of the map (Map Studio's Traps & regions, a bundle's Foundry regions), played at the table: trap and pit (a player's token that steps in stops on its first square and is held there, only that token, the others go on; the GM is told its name and note in a line only the GM sees; a trap's trap {damage (dice), damageType, save {attribute, dc}, half, effect {label, duration}, auto roll|apply} says what it does and how much the table does by itself), difficult (moving through costs more: cost 2 makes each square count double on the ruler), teleport (whoever steps in goes to its destination: to = another region's name, or {x, y} in scene pixels, or {sceneId, x, y} on a scene the table has opened). Players are never sent traps, pits, teleports or notes, but a trap or pit the GM reveals (revealed true): its outline alone. action list (default); add (kind, name, note, points [x, y, ...] in scene pixels or rect {col, row, cols, rows} in squares, cost, to, trap); update (id and any of those, on false to switch it off, revealed true or false); remove (id); held (the tokens traps hold, with the save and damage rolled so far); save, damage, roll (both), apply (rolls what is left, applies the damage through the tracker, half or none on a save, the effect on a failed save, and lets the token go), release (tokenId: let it go as it is).",
     inputSchema: object({
-      action: { type: "string", enum: ["list", "add", "update", "remove"] },
+      action: { type: "string", enum: ["list", "add", "update", "remove", "held", "save", "damage", "roll", "apply", "release"] },
       id: string("Region id"),
+      tokenId: string("save, damage, roll, apply, release: the token a trap holds"),
+      revealed: { type: "boolean", description: "update: a trap or pit shown to the players (its outline only)" },
+      trap: { type: "object", description: "A trap's or pit's: {damage: \"2d6\", damageType, save: {attribute, dc}, half, effect: {label, duration}, auto: \"roll\" | \"apply\"}" },
       kind: { type: "string", enum: ["trap", "pit", "difficult", "teleport"] },
       name: string("Its name"),
       note: string("The GM's note: what happens"),
@@ -2208,6 +2213,8 @@ const TOOLS = [
         rest.points = [x0, y0, x1, y0, x1, y1, x0, y1];
       }
       if (action === "list") return out(map.regions());
+      if (action === "held") return out(map.tokens().filter((token) => token.held).map((token) => ({ tokenId: token.id, name: token.name, held: token.held, region: map.regions().find((region) => region.id === token.held.region) ?? null })));
+      if (["save", "damage", "roll", "apply", "release"].includes(action)) return needTable(ctx).resolveTrap(args.tokenId, action).then(out);
       if (action === "add") return out(map.addRegion(rest, seat));
       if (action === "update") return out(map.updateRegion(String(id ?? ""), rest, seat));
       map.removeRegion(String(id ?? ""), seat);
