@@ -101,6 +101,13 @@ try {
   await seat.click(".dice-pool .play-button");
   const seatLow = await heard(seat, "low", seatHigh, "the player");
   const gmLow = await heard(page, "low", gmHigh, "the GM");
+  // Twenty d20s at once, one of them a 1: not a check, so no trombone (nor a fanfare).
+  await tool("kraken_dice_force", { values: [1, 20, ...Array(18).fill(7)] });
+  await tool("kraken_roll", { formula: "20d20", label: "A handful", as: "Agent" });
+  await new Promise((resolve) => setTimeout(resolve, 7000));
+  const plays = async (where) => Number((await sound(where)).split(":")[3] ?? 0);
+  assert((await plays(page)) === gmLow, `20d20 with a 1 and a 20 among them plays nothing on the GM's screen (${await sound(page)}, was ${gmLow})`);
+  assert((await plays(seat)) === seatLow, `nor on the player's (${await sound(seat)}, was ${seatLow})`);
   const levels = [await sound(page), await sound(seat)];
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok natural sound ui: a natural 20 plays the fanfare and a natural 1 the sad trombone on the GM's screen and a test player's, each with its audio running and its meter reading the sound (GM ${levels[0]}, player ${levels[1]}; plays ${gmLow}, ${seatLow})`);

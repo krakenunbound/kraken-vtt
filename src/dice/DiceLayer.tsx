@@ -180,8 +180,9 @@ function createEngine(host: HTMLDivElement) {
             const max = kind === "d100" || kind === "d100tens" ? null : String(Number(kind.slice(1)));
             if (max && shown === max && kind !== "d20") effects.burst(group.position.x, group.position.y, group.position.z, colors);
           });
-        // A natural 20 or a 1 on a d20 flares where it lies.
-        if (item.look.crit !== false)
+        // A natural 20 or a 1 on a d20 flares where it lies: only a d20 thrown alone (a
+        // check, an attack, a save). Among other dice (20d20, a handful) a 1 means nothing.
+        if (item.look.crit !== false && item.dice.length === 1)
           item.groups.forEach((group, die) => {
             if (item.dice[die].kind !== "d20") return;
             const shown = item.labels[die][topFace("d20", group.quaternion)];
