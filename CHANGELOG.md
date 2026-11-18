@@ -4,6 +4,10 @@ What changed in each release of Maelstrom VTT (called Kraken VTT until alpha.92)
 [Releases](https://github.com/krakenunbound/maelstrom-vtt/releases) page. The
 full log of the work is in [PLAN.md](PLAN.md).
 
+## Next
+
+Collected here until the next major release (alpha to beta).
+
 ## 0.1.0-alpha.96: Only your own maps, and faster updates
 
 - **A campaign shows only the maps you loaded in it.** Putting a book's maps on the table used to save a copy of them inside the campaign, and hosting reopened that copy even after the book was turned off (one GM's campaign kept opening another adventure's village map). Now a book's maps stay in the book: hosting reads them from it, only while it is active, and a copy an older version left behind is deleted.
