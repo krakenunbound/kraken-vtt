@@ -8,6 +8,10 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **The start screen's scenes go round by themselves**, twelve seconds each, like a demo; the mouse wheel over the dots steps through them, and a click on a dot still picks one. They stay put while the pointer is on the dots, and do not move for those whose system asks for less motion.
+- **A map opens fitted and centred** in its window, every time it is opened (it used to come back wherever it was last panned to, even off the window), and is fitted again if the window changes size before you move it.
+- **Map pins can be moved**: the GM drags a pin (a click still opens it), and plain text on the map while the map editor's Text tab is open.
+
 - **Secret doors in Map Studio.** Map Studio has both a Secret Door (hidden from the players until the GM opens it, then a door) and a Toggleable Wall (a wall the GM switches open and shut); before, its "Toggleable Wall" was really the secret door, and a secret door saved into a book's map came back as an ordinary door the players could see. The included adventures' secret doors are secret again.
 - **Map Studio opens in the campaign's own folder.** Open a map picture and Open a project file start in Documents/Kraken VTT/Campaigns/<your campaign>/Maps (made when first used), not wherever the last download went.
 
