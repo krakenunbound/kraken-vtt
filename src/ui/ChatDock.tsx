@@ -820,6 +820,11 @@ export function ChatDock({ session }: { session: Session }) {
     samples.push({ x: event.screenX, y: event.screenY, t: now });
     while (samples.length > 2 && now - samples[0].t > 140) samples.shift();
   };
+  // Not thrown after all (FG): let go with a still hand, or dropped back on the chat and its dice tray.
+  // A still hand: no movement in the last eighth of a second before letting go.
+  const stillFor = (samples: { t: number }[]) => !samples.length || performance.now() - samples[samples.length - 1].t > 125;
+  const putBack = (view: Window, clientX: number, clientY: number, vx: number, vy: number, samples: { t: number }[]) =>
+    stillFor(samples) || Math.hypot(vx, vy) < 0.05 || Boolean(view.document.elementFromPoint(clientX, clientY)?.closest(".chat-dock"));
   // Thrown on the table from a point: toward the middle when let go without a throw.
   const throwFrom = (view: Window, screenX: number, screenY: number, clientX: number, clientY: number, vx = 0, vy = 0) => {
     const offset = view === window ? { x: screenX - clientX, y: screenY - clientY } : screenOffset();
@@ -883,6 +888,7 @@ export function ChatDock({ session }: { session: Session }) {
       if (slot >= 0) return keepOnSlot(slot, held);
       if (overTower(event.clientX, event.clientY)) return rollDice(held, true, { x: event.clientX, y: event.clientY });
       const { vx, vy } = handSpeed(samples, event.screenX, event.screenY);
+      if (putBack(view, event.clientX, event.clientY, vx, vy, samples)) return;
       throwFrom(view, event.screenX, event.screenY, event.clientX, event.clientY, vx, vy);
       rollDice(held, tower, { x: event.clientX, y: event.clientY });
     };
@@ -981,6 +987,7 @@ export function ChatDock({ session }: { session: Session }) {
       }
       // Thrown on the table (the main window's): the dice leave the hand there, that fast.
       const { vx, vy } = handSpeed(samples, upEvent.screenX, upEvent.screenY);
+      if (putBack(view, upEvent.clientX, upEvent.clientY, vx, vy, samples)) return;
       throwFrom(view, upEvent.screenX, upEvent.screenY, upEvent.clientX, upEvent.clientY, vx, vy);
       rollDice(dice, tower, { x: upEvent.clientX, y: upEvent.clientY });
     };
@@ -1283,7 +1290,7 @@ export function ChatDock({ session }: { session: Session }) {
                 Custom Dice ›
               </button>
               {MANY.map((count) => (
-                <button key={count} type="button" role="menuitem" data-many={count} title="Pick them up: click the table to throw them, the tower to roll there, or a quick slot to keep them there; a right-click puts them back" onClick={(event) => pickUp([...pool, ...Array<number>(count).fill(menu.sides as number)], { x: event.clientX, y: event.clientY })}>
+                <button key={count} type="button" role="menuitem" data-many={count} title="Pick them up: swing and let go over the table to throw them, over the tower to roll there, or over a quick slot to keep them there. Not rolling after all: let go with a still hand, over the chat, or right-click" onClick={(event) => pickUp([...pool, ...Array<number>(count).fill(menu.sides as number)], { x: event.clientX, y: event.clientY })}>
                   <b>{count}×</b> Pick up {count} d{menu.sides === 100 ? "%" : menu.sides === FATE_SIDES ? "F" : menu.sides}
                 </button>
               ))}

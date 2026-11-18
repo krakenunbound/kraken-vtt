@@ -192,6 +192,25 @@ try {
     await settle(3500);
     return Number(await page.evaluate(() => document.documentElement.dataset.lastThrow ?? "0"));
   };
+  // Not rolled after all (FG): let go with a still hand, or over the chat: nothing rolls, the hand is empty.
+  for (const [how, x, y] of [["a still hand", 700, 500], ["over the chat", null, null]]) {
+    await page.click('.tray-die[aria-label="d20"]', { button: "right" });
+    await page.click('[data-many="2"]');
+    const chatBox = await page.locator(".chat-dock .chat-log").boundingBox();
+    const at = x === null ? { x: chatBox.x + chatBox.width / 2, y: chatBox.y + chatBox.height / 2 } : { x, y };
+    await page.mouse.move(at.x - 40, at.y, { steps: 2 });
+    await page.waitForSelector('.dice-ghost.held[data-held="2d20"]');
+    const rolls = (await tool("kraken_chat_log", { count: 50 })).length;
+    await page.mouse.move(at.x, at.y, { steps: 4 });
+    await settle(400);
+    await page.mouse.down();
+    await settle(300);
+    await page.mouse.up();
+    await settle(1500);
+    assert((await tool("kraken_chat_log", { count: 50 })).length === rolls, `let go with ${how}: nothing rolled`);
+    assert(!(await page.$(".dice-ghost.held")), `let go with ${how}: the hand is empty`);
+  }
+  report.push("dice picked up and let go with a still hand, or over the chat: not rolled, the hand empty (FG)");
   const gentle = await swing(120, 500);
   const hard = await swing(700, 120);
   assert(hard > gentle * 4, `a hard swing throws much faster than a gentle one (gentle ${gentle}, hard ${hard} screens a second)`);
