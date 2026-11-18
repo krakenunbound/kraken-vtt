@@ -1178,6 +1178,17 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       if (found) {
         entry.recordId = found.id;
         spokenArt.add(found.id);
+        if (speaker && speaker.role !== "dm") speaker.lastSpokenAs = found.id;
+      }
+    }
+    // A player speaking as themselves: their character's token beside the line (as the GM has the GM icon):
+    // the one they last spoke as, else their first.
+    if (!entry.recordId && speaker && speaker.role !== "dm" && entry.kind !== "story") {
+      const theirs = records.list({ type: "character", owner: speaker.name });
+      const icon = theirs.find((record) => record.id === speaker.lastSpokenAs) ?? theirs[0];
+      if (icon) {
+        entry.iconRecord = icon.id;
+        spokenArt.add(icon.id);
       }
     }
     chat.push(entry);
@@ -1690,7 +1701,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       const record = client ? records.get(url.searchParams.get("record") || "") : null;
       const allowed =
         record &&
-        (canSee(record, seatOf(client)) || map.tokens().some((item) => item.recordId === record.id && !item.hidden) || client.role === "dm" || (spokenArt.has(record.id) && url.searchParams.get("kind") === "portrait"));
+        (canSee(record, seatOf(client)) || map.tokens().some((item) => item.recordId === record.id && !item.hidden) || client.role === "dm" || (spokenArt.has(record.id) && url.searchParams.get("kind") !== "card"));
       const kind = url.searchParams.get("kind") === "portrait" ? "picture" : url.searchParams.get("kind") === "card" ? "card" : "token";
       // A character's: its token (or portrait, or its race and class's), from the art library, as a still.
       if (allowed && record.type === "character" && art) {

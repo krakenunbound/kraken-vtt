@@ -207,6 +207,8 @@ export type ChatLine = {
   share?: { name: string; type: string; text: string };
   // The record that speaks (a character, or a creature the GM speaks or rolls as): its portrait.
   recordId?: string;
+  // A player speaking as themselves: their character, whose token shows beside the line.
+  iconRecord?: string;
   // Ask the players (a party roll): who rolls, and what each rolled.
   prompt?: ChatPrompt;
 };

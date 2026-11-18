@@ -240,7 +240,14 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
           <Icon name={mark.icon} size={13} />
         </span>
       ) : null}
-      {line.recordId && !story ? <SpeakerPortrait line={line} session={session} /> : line.gm && gmIcon && !story ? <img className="chat-icon" src={gmIcon} alt="" draggable={false} /> : null}
+      {line.recordId && !story ? (
+        <SpeakerPortrait line={line} session={session} />
+      ) : line.gm && gmIcon && !story ? (
+        <img className="chat-icon" src={gmIcon} alt="" draggable={false} />
+      ) : line.iconRecord && !story ? (
+        // A player speaking as themselves: their character's token, as the GM has the GM icon.
+        <img className="chat-icon chat-player-icon" src={session.recordArtUrl(line.iconRecord, "token")} alt="" draggable={false} data-chat-icon={line.iconRecord} onError={(event) => (event.currentTarget.style.display = "none")} />
+      ) : null}
       {!system && !story && line.kind !== "emote" ? <b className="chat-from">{line.from}{line.kind === "mood" && line.mood ? <i className="chat-mood"> ({line.mood})</i> : null}</b> : null}
       {line.to ? <span className="chat-tag whisper-tag">to {line.to.join(", ")}</span> : null}
       {line.kind === "ooc" ? <span className="chat-tag">OOC</span> : null}

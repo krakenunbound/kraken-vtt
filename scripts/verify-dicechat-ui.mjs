@@ -210,6 +210,15 @@ try {
   await seat.screenshot({ path: path.join(shots, "2b-player-language.png") });
   await page.selectOption('select[aria-label="Language"]', "");
 
+  // 2c. The player speaking as themselves (out of character): their character's token beside the line, as the GM has the GM icon.
+  await seat.selectOption('select[aria-label="Speak as"]', "");
+  await say(seat, "brb, grabbing a drink");
+  const icon = page.locator(".chat-line .chat-player-icon").last();
+  await icon.waitFor();
+  assert((await icon.getAttribute("data-chat-icon")) === hero.id, "the line carries the player's character");
+  assert(await icon.evaluate((img) => img.complete && img.naturalWidth > 0), "its token shows on the GM's screen");
+  await seat.selectOption('select[aria-label="Speak as"]', "Hagar");
+
   // 3. The GM drops a record into the chat's entry and shares it.
   await drop(page, ".chat-entry", { "text/kraken-slot": JSON.stringify({ kind: "record", record: relic.id, label: "Moon Amulet" }) });
   await page.waitForSelector(".chat-attached");
