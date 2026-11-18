@@ -135,8 +135,19 @@ try {
   await say("/me draws her sword");
   assert((await tool("kraken_chat_log", { count: 2 })).at(-1).kind === "emote", "/me is an emote");
   await page.waitForSelector('.chat-line[data-kind="emote"] .chat-kind');
+  // The UI scale is the windows' own zoom (the map's pointer maths stays true), a pop-out's too; Settings has it as well.
+  const zoomOf = () => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map((window) => Math.round(window.webContents.getZoomFactor() * 100)));
   await say("/scaleui 125");
-  assert((await page.evaluate(() => document.documentElement.style.zoom)) === "1.25", "/scaleui 125");
+  await page.waitForFunction(() => document.documentElement.style.zoom === "");
+  assert((await zoomOf()).every((zoom) => zoom === 125), `/scaleui 125 zooms the window (${await zoomOf()})`);
+  await tool("kraken_windows", { action: "open", kind: "settings" });
+  await page.waitForSelector('[data-setting="ui-scale"]');
+  assert((await page.inputValue('[data-setting="ui-scale"]')) === "125", "Settings shows the UI scale");
+  await page.fill('[data-setting="ui-scale"]', "80");
+  await page.press('[data-setting="ui-scale"]', "Enter");
+  await new Promise((done) => setTimeout(done, 300));
+  assert((await zoomOf()).every((zoom) => zoom === 80), `Settings' UI scale 80 makes everything smaller (${await zoomOf()})`);
+  await tool("kraken_windows", { action: "close", kind: "settings" });
   await say("/scaleui 100");
   await say("/nonsense");
   await page.waitForSelector(".chat-line.local");

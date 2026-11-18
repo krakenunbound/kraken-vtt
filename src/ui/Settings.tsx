@@ -8,6 +8,7 @@ import { cardsStore } from "../cards/cardsStore";
 import type { DecalItem, PictureKind, Session, WallpaperFit } from "../session/useSession";
 import { Emblem } from "./Emblem";
 import { useWindows } from "./Windows";
+import { getUiScale, setUiScale } from "./chatCommands";
 import { SettingRow, SettingsSection, Toggle } from "./SettingsParts";
 import { manifestOf, PANELS } from "../rulesets";
 import { TokenOptionsSection } from "../table/TokenOptions";
@@ -20,6 +21,19 @@ import { gameLanguages } from "../../shared/text/languages.mjs";
 // You at the table (every seat): your colour (your token's ring, your pings,
 // your drawings on the map, for everyone) and what happens when your turn
 // comes round. Kept with your name by the GM's app, so they follow you.
+// How big everything on this screen is (also /scaleui): smaller fits more on it.
+function UiScaleRow() {
+  const [scale, setScale] = useState(() => Math.round(getUiScale() * 100));
+  const apply = (value: number) => setUiScale(Math.min(200, Math.max(50, value)) / 100);
+  return (
+    <SettingRow label="UI scale" hint="How big everything on this screen is: windows, text and pictures. Smaller fits more on the screen. This screen only." className="settings-ui-scale">
+      <input type="range" min={50} max={150} step={5} value={Math.min(150, scale)} aria-label="UI scale (slider)" data-setting="ui-scale-slider" onChange={(event) => setScale(Number(event.target.value))} onPointerUp={() => apply(scale)} onKeyUp={() => apply(scale)} />
+      <input type="number" className="set-number" min={50} max={200} step={5} value={scale} aria-label="UI scale (percent)" data-setting="ui-scale" onChange={(event) => setScale(Number(event.target.value))} onBlur={() => apply(scale)} onKeyDown={(event) => { if (event.key === "Enter" && !event.nativeEvent.isComposing) apply(scale); }} />
+      <span className="set-unit">%</span>
+    </SettingRow>
+  );
+}
+
 function YouAtTheTable() {
   const settings = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
   return (
@@ -41,6 +55,7 @@ function YouAtTheTable() {
           </label>
         </div>
       </div>
+      <UiScaleRow />
       <Toggle label="Chime on your turn" hint="A soft chime when your turn comes round in combat." setting="turn-sound" checked={settings.turnSound !== false} onChange={(on) => diceStore.update({ turnSound: on })} />
       <Toggle label="Banner on your turn" hint="Your name across the screen when it is your turn." setting="turn-banner" checked={settings.turnBanner !== false} onChange={(on) => diceStore.update({ turnBanner: on })} />
       <Toggle label="Whose turn it is" hint="The portrait of whoever acts next, and the round as it begins, for a moment on every turn." setting="turn-card" checked={settings.turnCard !== false} onChange={(on) => diceStore.update({ turnCard: on })} />

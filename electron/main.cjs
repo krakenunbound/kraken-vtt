@@ -131,6 +131,14 @@ async function onBackend(child, message) {
 // Windows of their own (the table's pop-outs), by name: one minimized comes back
 // when the table asks for it (its sidebar button, opening it again).
 const popOutWindows = new Map();
+// The UI scale (Settings, /scaleui): every window's zoom, as the browser's own, so the map's pointer maths stays true.
+let uiScale = 1;
+ipcMain.on("ui-scale", (_event, factor) => {
+  const value = Number(factor);
+  if (!(value >= 0.5 && value <= 2)) return;
+  uiScale = value;
+  for (const window of BrowserWindow.getAllWindows()) if (!window.isDestroyed()) window.webContents.setZoomFactor(uiScale);
+});
 ipcMain.handle("popout-show", (_event, name) => {
   const child = popOutWindows.get(String(name ?? ""));
   if (!child || child.isDestroyed()) return false;
@@ -427,6 +435,9 @@ function createWindow() {
     // Owned by the table's window: it stays in front of the table (a click on the
     // table no longer hides it, so things can be dragged onto it), on any monitor.
     child.setParentWindow(win);
+    // At the table's UI scale.
+    child.webContents.on("did-finish-load", () => child.webContents.setZoomFactor(uiScale));
+    child.webContents.setZoomFactor(uiScale);
     // Known by its name, so the table can bring it back when it was minimized (popout-show).
     const name = String(details?.frameName ?? "");
     if (name) {

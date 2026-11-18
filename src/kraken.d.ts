@@ -103,6 +103,8 @@ export type KrakenApi = {
   campaignBundle: (id: string) => Promise<Uint8Array | null>;
   saveBundle: (id: string, bytes: Uint8Array | null) => Promise<void>;
   popOutShow?: (name: string) => Promise<boolean>;
+  // The GM app's UI scale: its windows' own zoom (pop-outs and Map Studio too).
+  setUiScale?: (factor: number) => void;
   popOutMinimized?: (name: string) => Promise<boolean>;
   saveView: (id: string, view: KrakenView | null) => Promise<void>;
   pickDecal: (kind?: "decal" | "wallpaper" | "gmicon" | "tile" | "tower") => Promise<KrakenDecal | null>;

@@ -431,8 +431,24 @@ export const COMMANDS: Command[] = [
 
 
 // The whole screen's size (FG's /scaleui), kept in this browser.
+// In the GM app the windows' own zoom; in a player's browser the page's CSS zoom.
+function applyUiScale(value: number) {
+  if (window.kraken?.setUiScale) {
+    document.documentElement.style.removeProperty("zoom");
+    window.kraken.setUiScale(value);
+  } else if (value === 1) document.documentElement.style.removeProperty("zoom");
+  else document.documentElement.style.setProperty("zoom", String(value));
+}
+export function getUiScale() {
+  try {
+    const saved = Number(window.localStorage.getItem("kraken-ui-scale"));
+    return saved >= 0.5 && saved <= 2 ? saved : 1;
+  } catch {
+    return 1;
+  }
+}
 export function setUiScale(value: number) {
-  document.documentElement.style.setProperty("zoom", String(value));
+  applyUiScale(value);
   try {
     window.localStorage.setItem("kraken-ui-scale", String(value));
   } catch {
@@ -440,12 +456,8 @@ export function setUiScale(value: number) {
   }
 }
 export function restoreUiScale() {
-  try {
-    const saved = Number(window.localStorage.getItem("kraken-ui-scale"));
-    if (saved >= 0.5 && saved <= 2) document.documentElement.style.setProperty("zoom", String(saved));
-  } catch {
-    /* normal size */
-  }
+  const saved = getUiScale();
+  if (saved !== 1) applyUiScale(saved);
 }
 
 export function findCommand(name: string) {
