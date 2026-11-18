@@ -1307,6 +1307,13 @@ export function useSession() {
     if (!response.ok) throw new Error(route === "list" ? "No books here." : "That book is not open to you.");
     return (await response.json()) as T;
   }, []);
+  // One of the campaign's own maps (the GM's): as a map bundle (its one master), and its picture.
+  const ownMap = useCallback(async (file: string) => {
+    const response = await fetch(`${originRef.current}/table/own-map?token=${assetRef.current}&file=${encodeURIComponent(file)}`);
+    if (!response.ok) throw new Error(response.status === 404 ? "That map's picture is no longer in the campaign's Maps folder." : "Only the GM opens the campaign's own maps.");
+    return new Uint8Array(await response.arrayBuffer());
+  }, []);
+  const ownPictureUrl = useCallback((file: string) => (assetRef.current ? `${originRef.current}/table/own-picture?token=${assetRef.current}&file=${encodeURIComponent(file)}` : ""), []);
   const bookUrl = useCallback(
     (route: "cover" | "picture", book: string, file = "") =>
       assetRef.current ? `${originRef.current}/book/${route}?${new URLSearchParams({ token: assetRef.current, book, ...(file ? { file } : {}) })}` : "",
@@ -1503,6 +1510,8 @@ export function useSession() {
     library,
     libraryAction,
     fgMaps,
+    ownMap,
+    ownPictureUrl,
     combat,
     calendar,
     calendarOp,

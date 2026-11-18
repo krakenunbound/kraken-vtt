@@ -247,6 +247,20 @@ window.KrakenShell = (() => {
   // Inside Maelstrom, Open asks Maelstrom: its own dialog starts in the campaign's maps folder
   // (Documents/Kraken VTT/Campaigns/<campaign>/Maps), where a web page's file picker would start
   // wherever it last was. On its own (no Maelstrom), the page's picker.
+  // A picture of the GM's, inside Maelstrom with a campaign hosted: it becomes one of the
+  // campaign's own maps (in Campaign > Images, one master, as FG's) and Map Studio works on
+  // that map, so what is drawn here is the map wherever the campaign shows it. Otherwise
+  // (no campaign, or Map Studio on its own) it opens here as a map of Map Studio's.
+  const adoptOrOpen = async file => {
+    let adopted = null;
+    try {
+      const r = await fetch('/api/kraken/adopt?name=' + encodeURIComponent(file.name), {method: 'POST', body: file});
+      if (r.ok) adopted = (await r.json()).adopted;
+      else if (r.status !== 400) S.toast('Could not add it to the campaign: ' + ((await r.json().catch(() => ({}))).error || r.status), true);
+    } catch { adopted = null; }
+    if (adopted?.url) { S.toast("Added to the campaign's Images: " + file.name); location.href = adopted.url; return; }
+    return openPicture(file);
+  };
   const pickFile = async (kind, input) => {
     let response = null;
     try { response = await fetch('/api/kraken/pick?kind=' + kind, {cache: 'no-store'}); } catch { response = null; }
@@ -255,7 +269,7 @@ window.KrakenShell = (() => {
     if (!response.ok) return S.toast('Could not open that file.');
     const name = decodeURIComponent(response.headers.get('X-File-Name') || 'map');
     const file = new File([await response.arrayBuffer()], name);
-    if (kind === 'picture') return openPicture(file);
+    if (kind === 'picture') return adoptOrOpen(file);
     const dt = new DataTransfer();
     dt.items.add(file);
     input.files = dt.files;
@@ -286,7 +300,7 @@ window.KrakenShell = (() => {
       dt.items.add(file);
       $('#fileInput').files = dt.files;
       $('#fileInput').dispatchEvent(new Event('change', {bubbles: true}));
-    } else openPicture(file);
+    } else adoptOrOpen(file);
   });
   window.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); $('#saveProjectBtn').click(); }

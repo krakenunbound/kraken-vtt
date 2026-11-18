@@ -2243,10 +2243,10 @@ const TOOLS = [
     name: "kraken_image",
     description:
       "FG's image window (the GM's): any picture of a book opened to edit, the same master wherever it is opened (its walls, doors, lights, paint and effects are kept by its id in the campaign; kraken_wall, kraken_light, kraken_draw and the other map tools work on it while it is open). The players do not see it until it is put in play. action open (book: the book's name or id; name: the picture's name as the Images list (kraken_library action list kind image) shows it, or file: its picture file in the book); play (put it on the table: the players see it); test (on: a play test, a test token on it and the GM's view a player's: walls, doors and light as a player meets them; off ends it); make (Assets' Make it a map: book and file, a picture of an active book or art pack, record or not (kraken_books contents lists its assets); it joins Campaign > Images and opens to edit); preview (on: the player vision preview, the GM's view as the players see it, their tokens' sight, the light and the dark; off ends it); close (back to the table's map); studio (open the open image in Map Studio, Kraken's map maker: art, walls, doors, lights, weather; its Save to Kraken writes them into the image).",
-    inputSchema: object({ action: { type: "string", enum: ["open", "make", "play", "test", "preview", "close", "studio"] }, book: string("open: the book's name or id"), name: string("open: the picture's name"), file: string("open: the picture's file in the book"), on: { type: "boolean" } }, ["action"]),
+    inputSchema: object({ action: { type: "string", enum: ["open", "make", "play", "test", "preview", "close", "studio"] }, book: string("open: the book's name or id"), name: string("open: the picture's name"), file: string("open: the picture's file in the book (with own: the file in the campaign's Maps folder)"), own: { type: "boolean", description: "open: one of the campaign's own maps (a picture of the GM's made a map in Map Studio: Campaign > Images lists it), by file" }, on: { type: "boolean" } }, ["action"]),
     async run(args, ctx) {
       needTable(ctx);
-      return out(await ctx.ui({ kind: "image", action: args.action, book: args.book, name: args.name, file: args.file, on: args.on }, 60000));
+      return out(await ctx.ui({ kind: "image", action: args.action, book: args.book, name: args.name, file: args.file, own: args.own, on: args.on }, 60000));
     },
   },
   {

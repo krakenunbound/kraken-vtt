@@ -3,7 +3,8 @@
 // picture: its walls, doors, lights, paint and effects are kept by its id in
 // the campaign), in the map window, for the GM alone until it is put in play.
 // The app sets the opener once a table is hosted.
-export type ImageRef = { book: string; name?: string; file?: string };
+// own: one of the campaign's own maps (a picture of the GM's, its file in the campaign's Maps folder), not a book's.
+export type ImageRef = { book: string; name?: string; file?: string; own?: boolean };
 export type ImageOpened = { opened: string; id: string; onTable: boolean };
 
 export const imageWindow: { open: ((image: ImageRef) => Promise<ImageOpened>) | null } = { open: null };

@@ -172,6 +172,11 @@ async function handlePost(req, res, url, raw) {
     const project = assets.validateProject(field(data, "project"));
     return json(res, await kraken.save(String(data.token ?? ""), project, typeof data.image === "string" ? data.image : ""));
   }
+  // A picture of the GM's made one of the campaign's own maps (in Images, one master): where Map Studio goes next, or null with no campaign hosted.
+  if (pathname === "/api/kraken/adopt") {
+    if (!kraken?.adopt) return json(res, { error: "Map Studio is not running inside Maelstrom." }, 400);
+    return json(res, { adopted: await kraken.adopt({ name: url.searchParams.get("name") || "Map.png", bytes: raw }) });
+  }
   if (pathname === "/api/import") return json(res, { project: await assets.importPortable(raw) });
   if (pathname === "/api/projects") {
     const data = parseJson(raw);

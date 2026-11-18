@@ -23,16 +23,17 @@ export function ImagesList({ session }: { session: Session }) {
     for (const book of books ?? []) session.libraryAction("list", { module: book.name, kind: "image", search });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [books, search]);
-  // The campaign's own images (Assets' Make it a map): a picture of an active book.
+  // The campaign's images: a picture of an active book made a map (Assets' Make it a map),
+  // and the campaign's own maps (a picture of the GM's, made a map in Map Studio).
   const campaignImages = Object.values(session.records)
     .filter((record) => record.type === "image" && typeof (record.data as { file?: unknown })?.file === "string")
-    .map((record) => record as typeof record & { data: { book: string; file: string } })
-    .filter((record) => (!search || record.name.toLowerCase().includes(search.toLowerCase())) && (books ?? []).some((book) => book.id === record.data.book))
+    .map((record) => record as typeof record & { data: { book: string; file: string; own?: boolean } })
+    .filter((record) => (!search || record.name.toLowerCase().includes(search.toLowerCase())) && (record.data.own || (books ?? []).some((book) => book.id === record.data.book)))
     .sort((a, b) => a.name.localeCompare(b.name));
-  const openRecord = async (record: { name: string; data: { book: string; file: string } }) => {
+  const openRecord = async (record: { name: string; data: { book: string; file: string; own?: boolean } }) => {
     setStatus(`Opening ${record.name}…`);
     try {
-      await imageWindow.open?.({ book: record.data.book, file: record.data.file, name: record.name });
+      await imageWindow.open?.({ book: record.data.book ?? "", file: record.data.file, name: record.name, own: record.data.own });
       setStatus("");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Could not open it.");
@@ -64,7 +65,7 @@ export function ImagesList({ session }: { session: Session }) {
               <div className="library-maps">
                 {campaignImages.map((record) => (
                   <button key={record.id} type="button" className="library-map" data-image={record.name} data-image-record={record.id} title={`Open ${record.name}`} onClick={() => void openRecord(record)}>
-                    <img src={session.bookUrl("picture", record.data.book, record.data.file)} alt="" loading="lazy" />
+                    <img src={record.data.own ? session.ownPictureUrl(record.data.file) : session.bookUrl("picture", record.data.book, record.data.file)} alt="" loading="lazy" />
                     <span>{record.name}</span>
                   </button>
                 ))}

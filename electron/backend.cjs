@@ -454,7 +454,7 @@ async function studioUrl() {
       ddFolders: studioSettings().dungeondraftFolders,
       packFolders: studioSettings().packFolders,
     };
-    options.kraken = { open: studioOpen, save: studioSave, pick: studioPick };
+    options.kraken = { open: studioOpen, save: studioSave, pick: studioPick, adopt: studioAdopt };
     studioServer = createStudioServer({ ...options, port: 47821 }).catch(() => createStudioServer({ ...options, port: 0 }));
     studioServer.catch(() => {
       studioServer = null;
@@ -503,6 +503,31 @@ async function studioPick(kind) {
   const file = await ask("pick", { title: kind === "project" ? "Open a project file" : "Open a map picture", defaultPath: campaignMapsFolder(), filters }, 30 * 60000);
   if (!file) return null;
   return { name: path.basename(file), bytes: fs.readFileSync(file) };
+}
+// Map Studio opened a picture of the GM's: it becomes one of the campaign's own maps,
+// as FG's: its file in the campaign's Maps folder, a record in Campaign > Images,
+// opened in the image window, and Map Studio working on that one master (Save to
+// Kraken, and its saves as it goes), so it is the same map wherever it is opened.
+async function studioAdopt({ name, bytes }) {
+  if (!table || !hosted) return null;
+  const folder = campaignMapsFolder();
+  const base = path.basename(String(name || "Map.png")).replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_");
+  const ext = (path.extname(base) || ".png").toLowerCase();
+  const stem = path.basename(base, path.extname(base)).slice(0, 80) || "Map";
+  // The same picture already there keeps its file (and so its master); another of the same name gets a number.
+  let file = `${stem}${ext}`;
+  for (let n = 2; fs.existsSync(path.join(folder, file)) && !fs.readFileSync(path.join(folder, file)).equals(bytes); n++) file = `${stem} (${n})${ext}`;
+  if (!fs.existsSync(path.join(folder, file))) fs.writeFileSync(path.join(folder, file), bytes);
+  const records = table.agent.records;
+  const known = records.list({ type: "image" }).find((record) => record.data?.own && record.data?.file === file);
+  const title = stem.replace(/[_-]+/g, " ").trim() || "Map";
+  if (!known) records.create({ type: "image", name: title, visibility: "gm", data: { own: true, file } }, table.agent.seat);
+  // Opened in the image window (Map Studio works on the image open there).
+  await ask("ui", { kind: "image", action: "open", own: true, file, name: known?.name ?? title }, 60000);
+  const view = table.agent.map.studioView();
+  if (!view) throw new Error("The map did not open in Maelstrom's image window.");
+  const { url } = await studioOpenImage({ sceneId: view.scene.id, name: known?.name ?? title, picture: bytes });
+  return { url, file, record: known?.id ?? null };
 }
 async function studioOpen(token) {
   const found = bridge().session(token);
@@ -643,7 +668,7 @@ const calls = {
         }
       },
     };
-    const next = createTableServer({ saved, archive, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: [...defaultRoots(dataFolder), ...krakenArtRoots()] }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), towers: towers(), dicePacks: dicePacks(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts(), prefs: prefs(), studioPicture: (sceneId) => studioPicture(sceneId) });
+    const next = createTableServer({ saved, archive, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: [...defaultRoots(dataFolder), ...krakenArtRoots()] }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), towers: towers(), dicePacks: dicePacks(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts(), prefs: prefs(), studioPicture: (sceneId) => studioPicture(sceneId), ownMaps: { folder: () => campaignMapsFolder() } });
     try {
       const info = await next.listen({ port: wanted, password });
       table = next;

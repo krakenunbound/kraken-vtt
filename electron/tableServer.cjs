@@ -475,7 +475,7 @@ function serveWeb(url, res, root) {
 // decals, wallpapers: the background decals and desktop tiles the GM can
 // choose from (decals.cjs).
 // sounds: the GM's sounds (sounds.cjs): one-shots, effects, ambience and music.
-function createTableServer({ saved = {}, archive = null, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, towers = null, dicePacks = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null, prefs: prefsStore = null, studioPicture = null } = {}) {
+function createTableServer({ saved = {}, archive = null, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, towers = null, dicePacks = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null, prefs: prefsStore = null, studioPicture = null, ownMaps = null } = {}) {
   // Each person's own settings (prefs.cjs): their colour and dice. Kept by the app for every campaign; in memory without a file.
   const prefs = prefsStore ?? createPrefsStore(null, diceLook);
   const prefsKey = (client) => (client.role === "dm" ? "@gm" : client.name);
@@ -1358,8 +1358,57 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     return out;
   }
 
+  // The campaign's own maps (a picture of the GM's, made a map in Map Studio or
+  // from Assets): its file in the campaign's Maps folder, its master by a scene
+  // id from its name, so it is one map wherever it is opened.
+  const ownMapId = (file) => `own-${String(file).toLowerCase().replace(/\.[a-z0-9]+$/, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60)}`;
+  const ownMapFile = (file) => {
+    const name = path.basename(String(file ?? ""));
+    if (!ownMaps || !/\.(png|jpe?g|webp)$/i.test(name)) return null;
+    const full = path.join(ownMaps.folder(), name);
+    return fs.existsSync(full) ? full : null;
+  };
+  const gmOf = (url) => {
+    const token = url.searchParams.get("token") || "";
+    const client = token ? [...clients.values()].find((item) => item.assetToken === token) : null;
+    return client?.role === "dm" ? client : null;
+  };
+
   const onRequest = (req, res) => {
     const url = new URL(req.url || "/", "http://127.0.0.1");
+    // One of the campaign's own maps: its picture (the painted one when Map Studio painted it), or as a map bundle.
+    if (req.method === "GET" && (url.pathname === "/table/own-map" || url.pathname === "/table/own-picture")) {
+      const file = ownMapFile(url.searchParams.get("file"));
+      if (!gmOf(url) || !file) {
+        res.writeHead(gmOf(url) ? 404 : 403, { "Cache-Control": "no-store" });
+        res.end();
+        return;
+      }
+      const id = ownMapId(path.basename(file));
+      const painted = studioPicture?.(id) ?? null;
+      const picture = painted ?? fs.readFileSync(file);
+      const ext = painted ? ".webp" : path.extname(file).toLowerCase();
+      if (url.pathname === "/table/own-picture") {
+        res.writeHead(200, { "Content-Type": { ".png": "image/png", ".webp": "image/webp" }[ext] ?? "image/jpeg", "Cache-Control": "no-store" });
+        res.end(picture);
+        return;
+      }
+      require("sharp")(picture, { limitInputPixels: 200_000_000 })
+        .metadata()
+        .then((meta) => {
+          const { zipSync, strToU8 } = require("fflate");
+          const name = path.basename(file).replace(/\.[a-z0-9]+$/i, "").replace(/[_-]+/g, " ").trim() || "Map";
+          const scene = { _id: id, name, width: meta.width, height: meta.height, padding: 0, backgroundColor: "#000000", grid: { size: 100, type: 1, distance: 5, units: "ft", color: "#000000", alpha: 0.25 }, background: { src: `map${ext}` }, walls: [], lights: [], tokens: [], notes: [] };
+          const bytes = zipSync({ "bundle.json": strToU8(JSON.stringify({ adventureData: { name, scenes: [scene] } })), [`map${ext}`]: new Uint8Array(picture) }, { level: 0 });
+          res.writeHead(200, { "Content-Type": "application/zip", "Content-Length": bytes.length, "Cache-Control": "no-store" });
+          res.end(Buffer.from(bytes));
+        })
+        .catch(() => {
+          res.writeHead(415, { "Cache-Control": "no-store" });
+          res.end("That picture could not be read.");
+        });
+      return;
+    }
     // An FG module's maps as a map bundle, for the GM's Library (its scenes' pins and FX seeded here).
     if (req.method === "GET" && url.pathname === "/table/fg-maps") {
       const token = url.searchParams.get("token") || "";

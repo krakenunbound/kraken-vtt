@@ -147,7 +147,7 @@ export function App() {
   const restored = useRef("");
   // FG's image window: an image opened privately (the GM's alone), its bundle
   // kept to put it in play. The same master as the table's (one per picture).
-  const [prep, setPrep] = useState<{ scene: MapScene; bytes: Uint8Array; book: string } | null>(null);
+  const [prep, setPrep] = useState<{ scene: MapScene; bytes: Uint8Array; book: string; own?: boolean; file?: string } | null>(null);
   const prepUrls = useRef<string[]>([]);
   // The table map whose window the GM closed: not opened again by itself (until another map is).
   const [mapHeld, setMapHeld] = useState("");
@@ -191,7 +191,7 @@ export function App() {
       // FG's image window: open an image (the GM's alone), put it in play, a play test, close it.
       if (command.kind === "image") {
         if (!current.connected || current.role !== "dm") throw new Error("Not hosting.");
-        if (command.action === "open") return live.current.openImage({ book: command.book ?? "", name: command.name, file: command.file });
+        if (command.action === "open") return live.current.openImage({ book: command.book ?? "", name: command.name, file: command.file, own: command.own });
         if (command.action === "play") return live.current.playImage();
         if (command.action === "close") {
           live.current.closeImage();
@@ -424,11 +424,11 @@ export function App() {
     try {
       // A map or picture the book keeps as an image record (its walls, lights, pins).
       // By its file when the book names one (a caption need not be the record's name).
-      bytes = await session.fgMaps(image.book, image.file ? "" : (image.name ?? ""), image.file ?? "");
+      bytes = image.own && image.file ? await session.ownMap(image.file) : await session.fgMaps(image.book, image.file ? "" : (image.name ?? ""), image.file ?? "");
     } catch (caught) {
       // Any other picture the book shows (a handout, a painting in its text):
       // an image of its own, its master kept by the picture itself.
-      if (!image.file) throw caught;
+      if (!image.file || image.own) throw caught;
       const response = await fetch(session.bookUrl("picture", image.book, image.file));
       if (!response.ok) throw caught;
       const raw = new Uint8Array(await response.arrayBuffer());
@@ -459,7 +459,7 @@ export function App() {
     }
     // Opened afresh: fitted and centred in its window, not where it was last left.
     forgetView(chosen.id);
-    setPrep({ scene: chosen, bytes, book: image.book });
+    setPrep({ scene: chosen, bytes, book: image.book, ...(image.own ? { own: true, file: image.file } : {}) });
     await session.publish(chosen, { prep: true });
     // Already the image shown (in a window minimized, or behind others): to the front again.
     mapWindow.front?.();
@@ -478,7 +478,7 @@ export function App() {
   useEffect(() => {
     return window.kraken?.onStudioSaved?.((saved) => {
       const open = live.current.prepNow;
-      if (open && open.scene.id === saved.sceneId && saved.picture) void live.current.openImage({ book: open.book, name: open.scene.name }).catch(() => undefined);
+      if (open && open.scene.id === saved.sceneId && saved.picture) void live.current.openImage(open.own ? { book: "", own: true, file: open.file, name: open.scene.name } : { book: open.book, name: open.scene.name }).catch(() => undefined);
     });
   }, []);
   // The GM closed the table map's window: remembered, so hosting again does not open it.
