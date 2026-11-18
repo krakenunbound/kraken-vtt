@@ -1566,6 +1566,10 @@ textarea.cc-field.tall { min-height: 220px; }
 .chat-tag.chat-lang { background: var(--brass-soft); color: var(--brass); }
 .chat-tag.chat-lang.unknown { opacity: 0.75; }
 .chat-garbled { font-family: "Palatino Linotype", Palatino, Georgia, serif; font-style: italic; letter-spacing: 0.06em; color: var(--muted); }
+/* A language's own script (some run right to left, as they were written); its translation beneath for those who know it. */
+.chat-spoken { display: inline-flex; flex-direction: column; gap: 2px; }
+.chat-script { font-size: 1.2em; letter-spacing: 0.08em; line-height: 1.5; unicode-bidi: isolate; overflow-wrap: anywhere; }
+.chat-translation { color: var(--muted); font-size: 0.85em; }
 .chat-understood { display: block; margin-top: 2px; color: var(--muted); font-size: 0.72rem; }
 
 /* FG's campaign lists: the lists down the side, a list grouped by category, the sharing icon. */

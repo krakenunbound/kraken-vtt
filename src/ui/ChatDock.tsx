@@ -19,6 +19,19 @@ import { DieShape, Icon } from "./icons";
 import { useWindows } from "./Windows";
 import { rulesetFor } from "../../shared/rulesets/registry.mjs";
 import { gameLanguages, knownLanguages, sameLanguage } from "../../shared/text/languages.mjs";
+import { SCRIPTS, scriptOf, writeIn } from "../../shared/text/scripts.mjs";
+// The scripts chat languages are written in (each font loads only when its letters are shown).
+import "@fontsource/noto-sans-runic/runic-400.css";
+import "@fontsource/noto-sans-ogham/ogham-400.css";
+import "@fontsource/noto-serif-georgian/georgian-400.css";
+import "@fontsource/noto-sans-old-persian/old-persian-400.css";
+import "@fontsource/noto-sans-old-south-arabian/old-south-arabian-400.css";
+import "@fontsource/noto-sans-phoenician/phoenician-400.css";
+import "@fontsource/noto-sans-old-hungarian/old-hungarian-400.css";
+import "@fontsource/noto-sans-gothic/gothic-400.css";
+import "@fontsource/noto-sans-coptic/coptic-400.css";
+import "@fontsource/noto-sans-old-italic/old-italic-400.css";
+import "@fontsource/noto-sans-old-turkic/old-turkic-400.css";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
 import "../effects/effects.css";
 
@@ -256,6 +269,19 @@ function Line({ line, gmIcon, session }: { line: ChatLine; gmIcon: string; sessi
       ) : line.kind === "emote" ? (
         <span className="chat-text">
           <b className="chat-from">{line.from}</b> <InlineRollText text={line.text} />
+        </span>
+      ) : line.lang && scriptOf(line.lang) ? (
+        // A language with a script (FG's language fonts): those who know it read the script and its
+        // translation; the others see only the script of its sounds.
+        <span className="chat-text chat-spoken" data-script={scriptOf(line.lang) ?? ""}>
+          <span className="chat-script" lang="und" style={{ fontFamily: `"${SCRIPTS[scriptOf(line.lang) as keyof typeof SCRIPTS].font}", serif` }}>
+            {writeIn(line.text, scriptOf(line.lang))}
+          </span>
+          {line.garbled ? null : (
+            <small className="chat-translation">
+              Translation: <InlineRollText text={line.text} />
+            </small>
+          )}
         </span>
       ) : line.garbled ? (
         <span className="chat-text chat-garbled">{line.text}</span>

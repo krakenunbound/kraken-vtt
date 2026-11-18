@@ -185,11 +185,28 @@ try {
   await page.waitForSelector('.chat-line[data-from="Hagar"] .chat-understood');
   assert((await page.textContent('.chat-line[data-from="Hagar"] .chat-understood')).includes("Hagar"), "the GM sees Hagar understood");
   assert((await tool("kraken_chat_log", { count: 2 })).some((line) => line.lang === "Orc" && line.text === "Grukk smash the door"), "the line kept its language");
+  // Written in Orc's script (Old Turkic), with its translation, for the GM and for Hagar's player who knows it.
+  for (const [who, where] of [["the GM", page], ["Hagar's player", seat]]) {
+    const orc = where.locator('.chat-line[data-from="Hagar"] .chat-spoken[data-script="old-turkic"]').last();
+    await orc.waitFor();
+    const script = await orc.locator(".chat-script").textContent();
+    assert(/[\u{10C00}-\u{10C48}]/u.test(script) && !/[a-z]/i.test(script), `${who} sees Orc's script (${script})`);
+    assert((await orc.locator(".chat-translation").textContent()).includes("Grukk smash the door"), `${who} reads its translation`);
+  }
   await seat.selectOption('select[aria-label="Language"]', "");
   await page.selectOption('select[aria-label="Language"]', "Elvish");
   await say(page, "The door is warded");
-  await seat.waitForSelector(".chat-line .chat-garbled");
+  // The player knows no Elvish: its script (Georgian's loops) of its sounds, no translation, the font loaded.
+  const elvish = seat.locator('.chat-spoken[data-script="georgian"]').last();
+  await elvish.waitFor();
   assert(!(await seat.textContent(".chat-log")).includes("The door is warded"), "the player hears only Elvish sounds");
+  assert((await elvish.locator(".chat-translation").count()) === 0, "no translation for a player who knows no Elvish");
+  const glyphs = await elvish.locator(".chat-script").textContent();
+  assert(/[\u10D0-\u10FF]/u.test(glyphs) && !/[a-z]/i.test(glyphs), `the player sees Elvish script (${glyphs})`);
+  const loaded = await seat.evaluate(async (text) => (await document.fonts.load('16px "Noto Serif Georgian"', text)).length > 0, glyphs);
+  assert(loaded, "the Georgian font loads in the player's browser");
+  const gmElvish = page.locator('.chat-spoken[data-script="georgian"]').last();
+  assert((await gmElvish.locator(".chat-translation").textContent()).includes("The door is warded"), "the GM reads the Elvish line's translation");
   await seat.screenshot({ path: path.join(shots, "2b-player-language.png") });
   await page.selectOption('select[aria-label="Language"]', "");
 
