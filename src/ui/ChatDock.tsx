@@ -493,7 +493,6 @@ function ExternalTower({ session, on, drop, title, towerRef, onToggle }: { sessi
             <Icon name="lock" size={11} />
           </span>
         ) : null}
-        <span className="tower-label">{on ? "Tower on" : "Tower off"}</span>
       </button>
       {menu ? (
         <div className="tower-menu" role="menu" aria-label="Dice tower" style={{ left: menu.x, top: menu.y }}>

@@ -1971,8 +1971,6 @@ textarea.cc-field.tall { min-height: 220px; }
 .tower-external:hover { transform: translateY(-2px); }
 .tower-external.drop { transform: scale(1.08); filter: drop-shadow(0 0 14px rgba(210, 161, 90, 0.75)); }
 .tower-external.dragging { cursor: grabbing; transition: none; }
-.tower-external .tower-label { display: block; margin-top: -4px; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-align: center; }
-.tower-external[aria-pressed="true"] .tower-label { color: var(--brass); }
 .tower-art { display: block; }
 .tower-art:not(.on) { filter: saturate(0.4) brightness(0.72); transition: filter 0.3s; }
 .tower-art.on .tower-door { animation: tower-glow 1.8s ease-in-out infinite; }
