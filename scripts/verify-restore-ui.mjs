@@ -2,8 +2,11 @@
 // theirs is written): its map came from a book that is not active in it, saved
 // by the book file's whole Windows path. Hosted, the map must not come back
 // (nothing on the table, no map window, no window of its own) and the saved map
-// is forgotten. The control: the same campaign with that book made active, the
-// map does come back.
+// is forgotten. Hosted a second time (the bug came back there: the campaign kept
+// a copy of the book's maps, bundle.zip, and with no saved map left to check it
+// opened the copy), still nothing: the copy is gone, as a campaign keeps no
+// copy of a book's maps. The control: that book made active, its map comes back,
+// read from the book.
 //
 // KRAKEN_TEST_CAMPAIGN: the campaign's id in the GM's Kraken data (default the
 // one that kept reopening); KRAKEN_TEST_PACKS: the GM's packs folder. Skipped
@@ -104,19 +107,28 @@ async function host(profile) {
   child.kill();
   await app.close();
   const view = JSON.parse(readFileSync(path.join(profile, "campaigns", id, "state.json"), "utf8")).view ?? null;
-  return { onTable, mapWindow, windows, view };
+  const copy = existsSync(path.join(profile, "campaigns", id, "bundle.zip"));
+  return { onTable, mapWindow, windows, view, copy };
 }
 
 const report = [];
 // As the campaign is: the book not active.
-const plain = await host(copyProfile());
-assert(!plain.onTable, `the inactive book's map is not on the table (${JSON.stringify(plain.onTable)})`);
-assert(!plain.mapWindow, "no map window opens");
-assert(plain.windows === 1, `no window of its own opens (${plain.windows} windows)`);
-assert(plain.view === null, `the saved map is forgotten (${JSON.stringify(plain.view)})`);
-report.push(`your campaign as it is (${VAULT} not active): no map on the table, no map window, no window of its own; the saved map forgotten`);
-// The control: that book made active, its map comes back.
+const mine = copyProfile();
+for (const time of ["first", "second"]) {
+  const plain = await host(mine);
+  assert(!plain.onTable, `${time} host: the inactive book's map is not on the table (${JSON.stringify(plain.onTable)})`);
+  assert(!plain.mapWindow, `${time} host: no map window opens`);
+  assert(plain.windows === 1, `${time} host: no window of its own opens (${plain.windows} windows)`);
+  assert(plain.view === null, `${time} host: the saved map is forgotten (${JSON.stringify(plain.view)})`);
+  assert(!plain.copy, `${time} host: the campaign keeps no copy of the book's maps (bundle.zip)`);
+  report.push(`your campaign as it is (${VAULT} not active), hosted a ${time} time: no map on the table, no map window, no window of its own, no copy of the book's maps kept`);
+}
+// The control: that book made active, its map comes back (from the book).
 const control = await host(copyProfile([VAULT]));
-assert(control.onTable?.id === saved.sceneId, `the control: with ${VAULT} active, its map comes back (${JSON.stringify(control.onTable)})`);
-report.push(`the control: ${VAULT} made active, its map (${control.onTable.name}) comes back`);
+// The same map: a book map's id is fg-<16 letters of where it came from>-<the map>;
+// an older Kraken named the place by the book file's path, the book now by its name.
+const mapPart = (sceneId) => String(sceneId ?? "").replace(/^fg-.{16}-/, "");
+assert(mapPart(control.onTable?.id) === mapPart(saved.sceneId),`the control: with ${VAULT} active, its map comes back (${JSON.stringify(control.onTable)})`);
+assert(!control.copy, "the control: still no copy kept in the campaign (the map is read from the book)");
+report.push(`the control: ${VAULT} made active, its map (${control.onTable.name}) comes back, read from the book`);
 console.log(`ok restore ui:\n  ${report.join("\n  ")}`);

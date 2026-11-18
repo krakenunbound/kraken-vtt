@@ -164,6 +164,11 @@ function writeBundle(file, id, bytes) {
   writeAtomic(path.join(folder(file, id), "bundle.zip"), bytes, { backup: false });
 }
 
+// The campaign's own adventure removed (a book's maps are never kept in it).
+function removeBundle(file, id) {
+  fs.rmSync(path.join(folder(file, id), "bundle.zip"), { force: true });
+}
+
 // --- Managing campaigns: rename, duplicate, export, delete, backups ---------------
 // Map Studio's pictures for a campaign's images live beside the campaigns, by id (backend.cjs studioPictureFile).
 function picturesFolder(file, id) {
@@ -313,4 +318,4 @@ function restore(file, input) {
   return { restored: chosen, campaign: found.name };
 }
 
-module.exports = { read, create, touch, setRuleset, exists, readState, writeState, readBundle, writeBundle, folder, picturesFolder, rename, duplicate, remove, exportZip, backups, backup, restore };
+module.exports = { read, create, touch, setRuleset, exists, readState, writeState, readBundle, writeBundle, removeBundle, folder, picturesFolder, rename, duplicate, remove, exportZip, backups, backup, restore };

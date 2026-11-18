@@ -9,13 +9,21 @@ export function bookTail(adventure) {
   return last.replace(/\.(mod|kpack|zip)$/i, "");
 }
 
-export function restoreAllowed(view, books) {
-  if (!view) return true;
-  const adventure = String(view.adventure ?? "");
+// Whether a saved map (an adventure's name and a scene id) is a book's, and
+// which book on the shelf it is. A book's maps are read from the book itself;
+// a campaign never keeps a copy of them.
+export function bookOf(view, books) {
+  const adventure = String(view?.adventure ?? "");
   const tail = bookTail(adventure);
   const names = (book) => [book.id, book.name, book.title];
-  const book = (books ?? []).find((item) => names(item).includes(adventure) || names(item).includes(tail));
+  const book = (books ?? []).find((item) => names(item).includes(adventure) || names(item).includes(tail)) ?? null;
   // A book's map: a book matched, its scene is a book map's (fg-...), or it names a book's file.
-  const fromBook = Boolean(book) || /^fg-/.test(String(view.sceneId ?? "")) || /\.(mod|kpack)$/i.test(adventure);
+  const fromBook = Boolean(book) || /^fg-/.test(String(view?.sceneId ?? "")) || /\.(mod|kpack)$/i.test(adventure);
+  return { fromBook, book };
+}
+
+export function restoreAllowed(view, books) {
+  if (!view) return true;
+  const { fromBook, book } = bookOf(view, books);
   return !fromBook || Boolean(book?.active);
 }

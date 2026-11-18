@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { rangesOf } from "../shared/map/ranges.mjs";
 import { dicePacks } from "./dice/dicePacks";
-import { restoreAllowed } from "../shared/table/restore.mjs";
+import { bookOf } from "../shared/table/restore.mjs";
 import { Icon } from "./ui/icons";
 import { imageWindow, mapWindow, studioOpener, type ImageRef } from "./table/imageWindow";
 import { gridLabel, preferredCandidateIndex, preferredSceneIndex } from "./foundry/geometry";
@@ -267,9 +267,17 @@ export function App() {
       void publishCurrent(next);
       saveView(candidate.name, next.id);
     }
+    return table;
   }
 
+  // The books on the shelf, with which are active in this campaign.
+  const shelf = async () => (await session.bookFetch<{ books: ShelfBook[] }>("list").catch(() => ({ books: [] as ShelfBook[] }))).books;
+
   // Put the campaign back the way the DM left it: the same adventure and scene.
+  // A book's maps are read from the book itself, and only while that book is
+  // active in the campaign; the campaign keeps a copy of the GM's own picture
+  // or bundle alone (bundle.zip). A copy of a book's maps left there by an
+  // older Kraken is removed, never shown.
   useEffect(() => {
     if (!campaignId || restored.current === campaignId) return;
     restored.current = campaignId;
@@ -279,22 +287,33 @@ export function App() {
     void (async () => {
       try {
         const { view, hasBundle } = await kraken.campaignView(campaignId);
-        if (!hasBundle || cancel) return;
-        // A book's map comes back only while that book is active in the campaign
-        // (an inactive book's maps are off limits); the GM's own picture or bundle always.
-        if (view && !restoreAllowed(view, (await session.bookFetch<{ books: ShelfBook[] }>("list").catch(() => ({ books: [] }))).books)) {
-          void kraken.saveView(campaignId, null).catch(() => undefined);
-          return;
+        if (cancel) return;
+        const books = await shelf();
+        let bytes: Uint8Array | null = null;
+        if (hasBundle) {
+          const kept = await kraken.campaignBundle(campaignId);
+          const keptFound = kept ? inspectZip(new Uint8Array(kept)) : [];
+          // An older Kraken kept a copy of a book's maps here: it goes.
+          if (keptFound.some((candidate) => bookOf({ adventure: candidate.name, sceneId: "" }, books).fromBook)) await kraken.saveBundle(campaignId, null);
+          else if (kept) bytes = new Uint8Array(kept);
         }
+        const fromBook = view ? bookOf(view, books) : { fromBook: false, book: null };
+        if (fromBook.fromBook) {
+          // A book's map: from the book, while it is active; else nothing (and the view is forgotten).
+          if (!fromBook.book?.active) {
+            await kraken.saveView(campaignId, null).catch(() => undefined);
+            return;
+          }
+          bytes = await session.fgMaps(fromBook.book.name);
+        }
+        if (!bytes || cancel) return;
+        const found = inspectZip(bytes);
+        if (found.length === 0 || cancel) return;
+        const named = view ? found.findIndex((candidate) => candidate.name === view.adventure) : -1;
+        const index = named >= 0 ? named : fromBook.fromBook ? 0 : preferredCandidateIndex(found);
         // The GM closed its window last time: it stays closed until a map is opened.
         if (view?.closed) setMapHeld(view.sceneId);
         setBusy(true);
-        const bytes = await kraken.campaignBundle(campaignId);
-        if (!bytes || cancel) return;
-        const found = inspectZip(new Uint8Array(bytes));
-        if (found.length === 0 || cancel) return;
-        const named = view ? found.findIndex((candidate) => candidate.name === view.adventure) : -1;
-        const index = named >= 0 ? named : preferredCandidateIndex(found);
         setCandidates(found);
         setAdventureIndex(index);
         showAdventure(found[index], view?.sceneId);
@@ -344,10 +363,16 @@ export function App() {
       const found = inspectZip(bytes);
       if (found.length === 0) throw new Error(`No prepared map bundle was in ${name}.`);
       const index = preferredCandidateIndex(found);
-      if (campaignId) await window.kraken?.saveBundle(campaignId, bytes);
       setCandidates(found);
       setAdventureIndex(index);
-      showAdventure(found[index]);
+      const table = showAdventure(found[index]);
+      // The campaign keeps the GM's own picture or bundle; a book's maps stay in the
+      // book (read from it again when the campaign is hosted, while it is active).
+      if (campaignId) {
+        const books = await shelf();
+        const ofBook = found.some((candidate) => bookOf({ adventure: candidate.name, sceneId: "" }, books).fromBook) || table.scenes.some((scene) => /^fg-/.test(scene.id));
+        await window.kraken?.saveBundle(campaignId, ofBook ? null : bytes);
+      }
       return { adventures: found.map((candidate) => candidate.name), opened: found[index].name };
     } finally {
       setBusy(false);

@@ -658,6 +658,8 @@ const calls = {
   },
   "save-bundle": (id, bytes) => {
     requireHosted(id);
+    // null: the campaign keeps no adventure of its own (a book's maps are read from the book).
+    if (bytes === null) return campaigns.removeBundle(campaignFile(), id);
     const buffer = bytesOf(bytes);
     if (buffer.length === 0) throw new Error("That adventure was empty.");
     campaigns.writeBundle(campaignFile(), id, buffer);
