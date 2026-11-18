@@ -526,6 +526,16 @@
     if(window.KrakenLOS?.keyDown(e))return;
     if(window.KrakenWallArt?.keyDown(e))return;
     if(window.KrakenBeta02?.keyDown(e))return;
+    // The arrow keys pan the map when no tool wants them (a wall half drawn stays in hand): a tenth of the view a press, Shift three.
+    const way = { ArrowLeft: [1, 0], ArrowRight: [-1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
+    if (way && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.preventDefault();
+      const r = $("#viewport").getBoundingClientRect();
+      const step = e.shiftKey ? 0.3 : 0.1;
+      pan = { x: pan.x + way[0] * r.width * step, y: pan.y + way[1] * r.height * step };
+      draw();
+      return;
+    }
     if (e.code === "Space") {
       space = true;
       e.preventDefault();

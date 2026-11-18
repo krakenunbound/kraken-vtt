@@ -164,6 +164,13 @@ try {
   const wallsAtStart = await bound.evaluate(() => window.KrakenStudio.project.walls.length);
   await page.mouse.click(middle.x - 200, middle.y - 80);
   await page.mouse.click(middle.x + 150, middle.y - 80);
+  // The arrow keys pan the map too, the wall still in hand.
+  const keyFrom = await bound.evaluate(() => ({ ...window.KrakenStudio.getDocument().view.pan }));
+  await bound.locator("body").press("ArrowRight");
+  const keyTo = await bound.evaluate(() => ({ ...window.KrakenStudio.getDocument().view.pan }));
+  const viewWidth = await bound.evaluate(() => document.querySelector("#viewport").getBoundingClientRect().width);
+  assert(Math.abs(keyFrom.x - keyTo.x - viewWidth * 0.1) < 2 && keyTo.y === keyFrom.y, `an arrow key pans a tenth of the view (${JSON.stringify(keyFrom)} -> ${JSON.stringify(keyTo)})`);
+  assert((await bound.evaluate(() => window.KrakenStudio.project.walls.length)) === wallsAtStart, "the wall is still being drawn after the arrow key");
   const panFrom = await bound.evaluate(() => ({ ...window.KrakenStudio.getDocument().view.pan }));
   await page.mouse.move(middle.x, middle.y);
   await page.mouse.down({ button: "middle" });
@@ -175,7 +182,7 @@ try {
   await page.mouse.dblclick(middle.x + 60, middle.y + 120);
   const drawn = await bound.evaluate(() => window.KrakenStudio.project.walls.at(-1)?.points?.length ?? 0);
   assert(drawn === 6, `the wall goes on after the pan: three points, one wall (${drawn / 2} points)`);
-  report.push("Map Studio zooms out past the old 20% stop (Fit map to window brings it back); mid-wall, the middle button pans the map and the wall goes on");
+  report.push("Map Studio zooms out past the old 20% stop (Fit map to window brings it back); mid-wall, the arrow keys and the middle button pan the map and the wall goes on");
   // Opened from Campaign > Images: once (in a window of its own, where the map window was left), the wall there.
   await page.click('.sidebar [data-launch="imagelist"]');
   await page.click(`[data-image-record="${own.id}"]`);
