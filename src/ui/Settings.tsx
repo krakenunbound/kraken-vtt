@@ -68,6 +68,9 @@ export function SettingsWindow({ session }: { session: Session }) {
             <button type="button" className="settings-button" data-setting="gmicon" onClick={() => windows.open("gmicons", "GM Icon")}>
               GM Icon
             </button>
+            <button type="button" className="settings-button" data-setting="tower-look" title="The dice tower's look: six drawn towers, painted ones, or a picture of your own" onClick={() => windows.open("towers", "Dice Tower")}>
+              Dice Tower
+            </button>
             <button type="button" className="settings-button" data-setting="krits" onClick={() => windows.open("krits", "Critical Hits & Fumbles")}>
               Critical Hits &amp; Fumbles
             </button>
@@ -100,13 +103,6 @@ export function SettingsWindow({ session }: { session: Session }) {
             checked={Boolean(session.options.towerExternal)}
             onChange={(on) => session.setTableOptions({ towerExternal: on })}
           />
-          {session.options.towerExternal ? (
-            <SettingRow label="The tower's look" hint="Six drawn looks, painted towers, or a picture of your own.">
-              <button type="button" className="settings-button" data-setting="tower-look" onClick={() => windows.open("towers", "Dice Tower")}>
-                Choose…
-              </button>
-            </SettingRow>
-          ) : null}
           <DiceHoldSetting session={session} />
         </SettingsSection>
       ) : null}

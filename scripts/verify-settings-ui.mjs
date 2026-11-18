@@ -99,9 +99,14 @@ try {
   await settle(600);
   const options = await tool("kraken_table_options");
   assert(options.wizard2e?.rollLock === true && !options.wizard2e.methods.includes(3), `the lock and Method III reached the table: ${JSON.stringify(options.wizard2e)}`);
+  // The dice tower's look is chosen from its own button beside the GM Icon, the tower on the table or not.
+  assert((await page.locator('[data-setting="tower-look"]').count()) === 1, "the Dice Tower button is there before the tower is on the table");
+  await page.click('[data-setting="tower-look"]');
+  await page.waitForSelector('.decal-picker[data-kind="tower"]');
+  await page.click('.decal-picker[data-kind="tower"] >> text=Cancel');
   await page.click('[data-setting="tower-external"]');
   await settle(500);
-  assert((await tool("kraken_table_options")).towerExternal === true && (await page.locator('[data-setting="tower-look"]').count()) === 1, "the tower switch puts it on the table and offers its look");
+  assert((await tool("kraken_table_options")).towerExternal === true && (await page.locator('[data-setting="tower-look"]').count()) === 1, "the tower switch puts it on the table; one Dice Tower button still");
   report.push("the GM's Settings: five sections, switch rows with short labels and their hints, the 2E methods as a readable checklist; the lock, a method and the tower switch reach the table's options");
 
   // A player's Settings, in Chrome.

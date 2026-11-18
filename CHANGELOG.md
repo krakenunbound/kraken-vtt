@@ -8,6 +8,8 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **A Dice Tower button in Settings**, beside GM Icon, to choose the tower's look at any time (it was hidden until the tower was put on the table).
+
 - **Pickers preview as you click.** Choosing a background decal, desktop wallpaper, GM icon or dice tower look shows it at once on your screen; OK makes it the table's (every screen), Cancel or closing the picker puts back what was there. Players see nothing until OK.
 
 - **A map you make in Map Studio is the campaign's map, one master, as in Fantasy Grounds.** Opening a picture in Map Studio (with a campaign hosted) puts it in the campaign's Maps folder and in Campaign > Images, and Map Studio works on that map (nothing else opens: it is in Map Studio alone until you open it from Images): walls, doors, lights, weather and painted art go into it as you work (a moment after each change, no Save needed), so it is the same map wherever the campaign opens it (Images, the table, a link). Images lists these maps beside the books' ones.
