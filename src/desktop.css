@@ -2586,3 +2586,7 @@ label.set-row { cursor: pointer; }
 .story-view .story-header :is(input, .field, .cc-field) { width: 100%; font: inherit; color: inherit; }
 .story-view .story-block.editing > .read-aloud-button { display: none; }
 .story-colours .swatch { border-color: var(--muted); }
+/* The read-aloud bubble's close button, on its frame's top right. */
+.read-aloud-bubble { padding-right: 34px; }
+.read-aloud-close { position: sticky; top: 0; float: right; margin: -6px -26px 4px 6px; z-index: 1; width: 24px; height: 24px; padding: 0; display: grid; place-items: center; border: 1px solid #a07a3c; border-radius: 50%; background: rgba(255, 248, 230, 0.7); color: #5a3a14; font-size: 1.05rem; line-height: 1; cursor: pointer; }
+.read-aloud-close:hover { background: #fff3d6; color: #2a1a08; }

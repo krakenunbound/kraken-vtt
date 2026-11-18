@@ -1,4 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
+import { diceStore } from "../dice/diceStore";
 import type { ReadAloud } from "../session/useSession";
 
 // How many maps are on this screen now: with none, the bubble floats over the table.
@@ -20,6 +21,8 @@ export const useAnyMapShown = () => useSyncExternalStore((listener) => (mapListe
 // of the map with the words in it, gone after the time it takes to read them
 // (or a click).
 export function ReadAloudBubble({ now, onDone, floating = false }: { now: ReadAloud | null; onDone: () => void; floating?: boolean }) {
+  // This screen may keep read-aloud to the chat only (Settings > You at the table).
+  const shown = useSyncExternalStore(diceStore.subscribe, diceStore.settings).readAloud !== false;
   // Its time counts from when it came (at: when this screen got it), however
   // often the map it sits over opens and closes in the meantime.
   useEffect(() => {
@@ -32,9 +35,12 @@ export function ReadAloudBubble({ now, onDone, floating = false }: { now: ReadAl
     const timer = window.setTimeout(onDone, left);
     return () => window.clearTimeout(timer);
   }, [now?.at]);
-  if (!now) return null;
+  if (!now || !shown) return null;
   return (
     <div key={now.at} className={floating ? "read-aloud-bubble floating" : "read-aloud-bubble"} role="status" data-read-aloud={now.at} title="Click to close" onClick={onDone} onPointerDown={(event) => event.stopPropagation()}>
+      <button type="button" className="read-aloud-close" data-action="read-aloud-close" aria-label="Close" title="Close" onClick={(event) => { event.stopPropagation(); onDone(); }}>
+        ×
+      </button>
       {now.title ? <span className="read-aloud-title">{now.title}</span> : null}
       <p>{now.text}</p>
     </div>

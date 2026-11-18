@@ -41,6 +41,8 @@ function cleanPrefs(input, before, lookOf) {
   // When their turn comes round: a bell, and a banner across their screen.
   if (typeof input.turnSound === "boolean") out.turnSound = input.turnSound;
   if (typeof input.turnBanner === "boolean") out.turnBanner = input.turnBanner;
+  if (typeof input.turnCard === "boolean") out.turnCard = input.turnCard;
+  if (typeof input.readAloud === "boolean") out.readAloud = input.readAloud;
   if (input.volume !== undefined) out.volume = clamp(input.volume, 0, 1, 0.7);
   if (input.tray !== undefined) out.tray = clamp(input.tray, 0.6, 1.6, 1);
   if (input.roll !== undefined) out.roll = clamp(input.roll, 0.5, 2.5, 1);

@@ -157,8 +157,9 @@ export const PRESETS: ({ name: string } & DiceLook)[] = [
 // color: this person's colour on the map (their pings and their ink); null is the table's colour for their name.
 // These are the user tier: kept by the GM's app under the person's name (prefs.cjs), so
 // they follow them to any browser, past a reload, a restart and signing in again.
+// readAloud: the GM's read-aloud also shown on this screen as a bubble (off: only in chat).
 // turnCard: whose turn it is (a portrait card) for every turn. turnSound, turnBanner: when this person's turn comes round on the combat tracker, a chime, and a banner across the screen.
-export type DiceSettings = { show: boolean; sound: boolean; volume: number; tray: number; roll: number; look: DiceLook; npc: DiceLook | null; damage: DiceLook | null; color: string | null; turnSound: boolean; turnBanner: boolean; turnCard?: boolean };
+export type DiceSettings = { show: boolean; sound: boolean; volume: number; tray: number; roll: number; look: DiceLook; npc: DiceLook | null; damage: DiceLook | null; color: string | null; turnSound: boolean; turnBanner: boolean; turnCard?: boolean; readAloud?: boolean };
 export type DiceSet = "look" | "npc" | "damage";
 type SettingsPatch = Partial<Omit<DiceSettings, "look" | "npc" | "damage">> & { look?: Partial<DiceLook>; npc?: Partial<DiceLook> | null; damage?: Partial<DiceLook> | null };
 const { name: _first, ...firstLook } = PRESETS.find((preset) => preset.name === "Classic Ruby") ?? PRESETS[0];
@@ -204,7 +205,7 @@ const keep = () => {
 };
 // The GM's app, which keeps these for this person (set when the seat is taken).
 let sink: ((patch: Record<string, unknown>) => void) | null = null;
-const SERVER_KEYS = ["show", "sound", "volume", "tray", "roll", "look", "npc", "damage", "color", "turnSound", "turnBanner"] as const;
+const SERVER_KEYS = ["show", "sound", "volume", "tray", "roll", "look", "npc", "damage", "color", "turnSound", "turnBanner", "turnCard", "readAloud"] as const;
 const forServer = (from: Partial<DiceSettings>) => Object.fromEntries(SERVER_KEYS.filter((key) => from[key] !== undefined).map((key) => [key, from[key]]));
 function adopt(saved: Record<string, unknown>) {
   const look = saved.look && typeof saved.look === "object" ? fullLook(saved.look as Partial<DiceLook>) : DEFAULTS.look;
@@ -221,6 +222,8 @@ function adopt(saved: Record<string, unknown>) {
     color: typeof saved.color === "string" ? saved.color : null,
     turnSound: typeof saved.turnSound === "boolean" ? saved.turnSound : DEFAULTS.turnSound,
     turnBanner: typeof saved.turnBanner === "boolean" ? saved.turnBanner : DEFAULTS.turnBanner,
+    ...(typeof saved.turnCard === "boolean" ? { turnCard: saved.turnCard } : {}),
+    ...(typeof saved.readAloud === "boolean" ? { readAloud: saved.readAloud } : {}),
   };
   keep();
   changed();

@@ -57,6 +57,7 @@ function YouAtTheTable() {
       </div>
       <UiScaleRow />
       <Toggle label="Chime on your turn" hint="A soft chime when your turn comes round in combat." setting="turn-sound" checked={settings.turnSound !== false} onChange={(on) => diceStore.update({ turnSound: on })} />
+      <Toggle label="Read aloud on screen" hint="The GM's read-aloud text also pops up over the map in a bubble (it is always in the chat)." setting="read-aloud-popup" checked={settings.readAloud !== false} onChange={(on) => diceStore.update({ readAloud: on })} />
       <Toggle label="Banner on your turn" hint="Your name across the screen when it is your turn." setting="turn-banner" checked={settings.turnBanner !== false} onChange={(on) => diceStore.update({ turnBanner: on })} />
       <Toggle label="Whose turn it is" hint="The portrait of whoever acts next, and the round as it begins, for a moment on every turn." setting="turn-card" checked={settings.turnCard !== false} onChange={(on) => diceStore.update({ turnCard: on })} />
     </SettingsSection>

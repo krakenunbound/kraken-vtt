@@ -2410,6 +2410,7 @@ const TOOLS = [
       who: string("With color, turnSound or turnBanner: a player's name, to set that player's (their user settings) instead of the GM's"),
       turnSound: { type: "boolean", description: "When this person's turn comes round on the combat tracker: a soft chime (a console tone in the sci-fi games; Settings > You at the table)" },
       turnBanner: { type: "boolean", description: "When this person's turn comes round: a banner across their screen" },
+      readAloud: { type: "boolean", description: "The GM's read-aloud text also popped up over the map on this screen (always in chat)" },
     }),
     async run(args, ctx) {
       if (args.character) {

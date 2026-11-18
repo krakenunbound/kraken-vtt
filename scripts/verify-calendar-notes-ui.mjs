@@ -164,7 +164,8 @@ try {
   await seat.waitForSelector('.chat-readaloud:has-text("The door creaks open")');
   await settle(600);
   await seat.screenshot({ path: path.join(SHOTS, "kraken-read-aloud-player.png") });
-  await seat.click(".read-aloud-bubble");
+  // Its × closes it.
+  await seat.click(".read-aloud-bubble [data-action=\"read-aloud-close\"]");
   await seat.waitForSelector(".read-aloud-bubble", { state: "detached" });
   // The player closes their map: a read-aloud floats over their table instead.
   await seat.click('[aria-label="Close Great Hall"]');
@@ -175,6 +176,15 @@ try {
   await seat.click('[data-launch="calendar"]');
   await seat.click('[aria-label="Close Calendar"]');
   await seat.waitForSelector(".read-aloud-bubble", { state: "detached", timeout: 12000 });
+  // Read aloud on screen turned off (the GM's own setting): the words come to the chat only; the player still gets the bubble.
+  await tool("kraken_dice_settings", { readAloud: false });
+  await tool("kraken_read_aloud", { text: "Torchlight flickers on the wet stone.", title: "The Cellar" });
+  await page.waitForSelector('.chat-readaloud:has-text("Torchlight flickers")', { timeout: 8000 });
+  await seat.waitForSelector('.read-aloud-bubble:has-text("Torchlight flickers")', { timeout: 8000 });
+  await settle(500);
+  assert(!(await page.$(".read-aloud-bubble")), "with read aloud on screen off, no bubble on the GM's screen");
+  await tool("kraken_dice_settings", { readAloud: true });
+  await seat.click(".read-aloud-bubble [data-action=\"read-aloud-close\"]");
   report.push("read-aloud: the NPC's boxed text has the GM's button (not the player's); read, it shows in chat and as a bubble over the test player's map; kraken_read_aloud with the player's map closed: floating over their table");
 
   // A chat line into a note: the player says something, drags it into a new note, and onto the Notes list.
