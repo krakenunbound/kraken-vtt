@@ -267,10 +267,11 @@
     water: [["WaterHorizontal", "Horizontal", 0.15], ["WaterIntensity", "Intensity", 0.15], ["WaterSpeed", "Speed", 0.2], ["WaterDroplet", "Droplet", 0.25]],
     clouds: [["CloudSpeed", "Speed", 0.75], ["CloudDensity", "Clouds", 0.75], ["CloudShadowDensity", "Shadows", 0.5], ["CloudOffset", "Offset", 0.25]],
     myst: [["MystFade", "Amount", 0.75], ["MystSpeed", "Speed", 1]],
-    snow: [["SnowFade", "Amount", 1], ["SnowIntensity", "Intensity", 0.204], ["SnowSpeed", "Speed", 0.55], ["SnowSize", "Size", 1]],
+    // Amount: how many flakes or drops; Opacity: how strongly they show (the same however many).
+    snow: [["SnowIntensity", "Amount", 0.204], ["SnowFade", "Opacity", 1], ["SnowSpeed", "Speed", 0.55], ["SnowSize", "Size", 1]],
     // Rain's Direction is the wind: 0.5 falls straight down, lower or higher leans it.
-    rain: [["RainFade", "Amount", 1], ["RainIntensity", "Intensity", 0.25], ["RainSpeed", "Speed", 0.6], ["RainDirection", "Wind", 0.5]],
-    blizzard: [["BlizzardFade", "Amount", 1], ["BlizzardSize", "Size", 0.5], ["BlizzardSpeed", "Speed", 0.6]],
+    rain: [["RainIntensity", "Amount", 0.25], ["RainFade", "Opacity", 1], ["RainSpeed", "Speed", 0.6], ["RainDirection", "Wind", 0.5]],
+    blizzard: [["BlizzardFade", "Opacity", 1], ["BlizzardSize", "Size", 0.5], ["BlizzardSpeed", "Speed", 0.6]],
     ocean: [["OceanDistortion", "Ripples", 0.5], ["OceanSizeX", "Wave width", 0.5], ["OceanSizeY", "Wave height", 0.5], ["OceanSpeed", "Speed", 0.4]],
   };
   const FX_BLUR = ["maskblur", "Blur", 0, 100];

@@ -232,7 +232,7 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
             }}
           >
             <input value={newName} onChange={(event) => setNewName(event.target.value)} placeholder={`New ${listLabel(only).replace(/s$/, "")}`} aria-label={`New ${listLabel(only).replace(/s$/, "")} name`} />
-            <button type="submit" data-action="record-new" title={`Make a new ${listLabel(only).replace(/s$/, "").toLowerCase()} (FG's +)`} disabled={!newName.trim()}>
+            <button type="submit" data-action="record-new" title={`Make a new ${listLabel(only).replace(/s$/, "").toLowerCase()}`} disabled={!newName.trim()}>
               <Icon name="plus" size={15} /> New
             </button>
           </form>
@@ -408,7 +408,7 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
         </small>
         <span className="record-tools">
           {canEdit && !Block ? (
-            <button type="button" className={editing ? "records-lock on" : "records-lock"} data-action="record-lock" aria-pressed={editing} title={editing ? "Lock it (done editing)" : "Unlock it to edit (FG's lock)"} aria-label={editing ? "Lock" : "Edit"} onClick={() => setUnlocked(!editing)}>
+            <button type="button" className={editing ? "records-lock on" : "records-lock"} data-action="record-lock" aria-pressed={editing} title={editing ? "Lock it (done editing)" : "Unlock it to edit"} aria-label={editing ? "Lock" : "Edit"} onClick={() => setUnlocked(!editing)}>
               <Icon name={editing ? "unlock" : "pen"} size={15} />
             </button>
           ) : null}
@@ -425,7 +425,7 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
           ) : null}
           {gm && !record.source ? (
             <>
-              <button type="button" className="ghost" data-action="record-duplicate" title="Duplicate (FG's): a copy, named (copy)" aria-label="Duplicate" onClick={() => void actions.duplicate(record)}>
+              <button type="button" className="ghost" data-action="record-duplicate" title="Duplicate: a copy, named (copy)" aria-label="Duplicate" onClick={() => void actions.duplicate(record)}>
                 <Icon name="plus" size={15} />
               </button>
               <button type="button" className="ghost" data-action="record-delete" title="Delete (Undo comes up for a moment)" aria-label="Delete" onClick={() => void actions.remove(record)}>

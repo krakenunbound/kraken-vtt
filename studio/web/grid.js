@@ -27,7 +27,7 @@ window.KrakenGrid = (() => {
         <label>Offset down <span><input type="number" id="gridOy" step="0.1" value="${off.y || 0}"> px</span></label>
       </div>
       <p class="los-help">One square is 5 ft. This map is ${(p.width / p.grid).toFixed(1).replace('.0', '')} × ${(p.height / p.grid).toFixed(1).replace('.0', '')} squares.<br>
-        Arrow keys nudge the grid 1 px (Alt 0.1, Shift 10); Ctrl+arrows change the square size, like Fantasy Grounds.</p>`;
+        Arrow keys nudge the grid 1 px (Alt 0.1, Shift 10); Ctrl+arrows change the square size.</p>`;
     box.querySelector('.grid-set').onclick = () => { setting = !setting; render(); hint(); };
     const read = () => apply(Number($('#gridSize').value) || p.grid, Number($('#gridOx').value) || 0, Number($('#gridOy').value) || 0);
     ['#gridSize', '#gridOx', '#gridOy'].forEach(id => { $(id).onchange = read; });

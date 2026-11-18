@@ -53,7 +53,7 @@ export function ImagesList({ session }: { session: Session }) {
       <section className="records-main">
         <div className="records-head">
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search" aria-label="Search images" />
-          <label className="images-maps-only" title="Only the maps (with a grid, walls or FG's map category)">
+          <label className="images-maps-only" title="Only the maps (with a grid, walls or a map category)">
             <input type="checkbox" checked={mapsOnly} onChange={(event) => setMapsOnly(event.target.checked)} /> Maps only
           </label>
         </div>

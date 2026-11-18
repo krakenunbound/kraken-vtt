@@ -262,7 +262,7 @@ export function DiceWindow({ session }: { session: Session }) {
             <input type="range" min={0} max={1} step={0.05} value={settings.volume} aria-label="Dice volume" onChange={(event) => diceStore.update({ volume: Number(event.target.value) })} />
           </SettingRow>
         ) : null}
-        {session.role === "dm" ? <Toggle label="Players see their own tower rolls" hint="Off: only you see what goes into the dice tower, as in Fantasy Grounds." checked={Boolean(session.options.towerReveal)} onChange={(on) => session.setTableOptions({ towerReveal: on })} setting="tower-reveal" /> : null}
+        {session.role === "dm" ? <Toggle label="Players see their own tower rolls" hint="Off: only you see what goes into the dice tower." checked={Boolean(session.options.towerReveal)} onChange={(on) => session.setTableOptions({ towerReveal: on })} setting="tower-reveal" /> : null}
       </section>
     </div>
   );

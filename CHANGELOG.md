@@ -8,6 +8,9 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **A character dragged onto Map Studio is their own token** even when the drag carries only the character (a quick slot, a sheet): Map Studio looks up their name and token picture, no more letter in a circle.
+- **Rain and snow: Amount is how much falls**, Opacity how strongly it shows. Less rain is fewer drops, each as clear as before (Amount used to fade the drops instead, and its lowest setting still left a third of them).
+- **No more comparisons to other programs in the interface**: tooltips and settings say what a thing does, not which other program does it that way.
 - **Party Sheet and Calendar sit with the Combat Tracker** in the sidebar's tools (as in Fantasy Grounds), no longer under Player. Drag a character from Character Selection onto the Party Sheet to add them, and **Party from who's here** adds every connected player's characters and takes out those whose player is away. Character Selection opens beside the party sheet, not over it.
 - **The sound volumes follow your ears**: a slider halfway sounds about half as loud, and turned well down it is quiet (before, a loud sound pack stayed loud until nearly zero). The dice keep their own volume.
 - **The book list is read much faster**: Maelstrom reads only each book's description from its pack, not the whole pack, so a newly added book no longer stalls the table for seconds; an agent's request made while Maelstrom is busy now waits instead of failing.

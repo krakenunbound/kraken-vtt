@@ -135,7 +135,7 @@ const TOOLS: Tool[] = [
   { id: "underline", label: "U", title: "Underline", run: (doc) => doc.execCommand("underline") },
   { id: "heading", label: "H", title: "Heading", run: (doc) => doc.execCommand("formatBlock", false, doc.queryCommandValue("formatBlock").toLowerCase() === "h4" ? "p" : "h4") },
   { id: "list", label: "•", title: "Bulleted list", run: (doc) => doc.execCommand("insertUnorderedList") },
-  { id: "frame", label: "❝", title: "Boxed text, read aloud (FG's frame)", run: (doc) => doc.execCommand("formatBlock", false, doc.queryCommandValue("formatBlock").toLowerCase() === "blockquote" ? "p" : "blockquote") },
+  { id: "frame", label: "❝", title: "Boxed text, read aloud", run: (doc) => doc.execCommand("formatBlock", false, doc.queryCommandValue("formatBlock").toLowerCase() === "blockquote" ? "p" : "blockquote") },
   { id: "table", label: "▦", title: "A table (two columns, two rows)", run: (doc) => doc.execCommand("insertHTML", false, "<table><tbody><tr><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table><p><br></p>") },
   { id: "plain", label: "¶", title: "Plain paragraph", run: (doc) => (doc.execCommand("removeFormat"), doc.execCommand("formatBlock", false, "p")) },
 ];

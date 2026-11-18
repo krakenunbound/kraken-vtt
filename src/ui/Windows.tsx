@@ -482,7 +482,7 @@ export function FloatingWindow({ item, children, link }: { item: OpenWindow; chi
         <span>{item.title}</span>
         <div className="window-tools" ref={setSlot} onPointerDown={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()} />
         {item.kind === "map" ? (
-          <button type="button" className="window-close" data-action="map-backdrop" title="Behind every window: the map fills the table (FG's background panel)" aria-label={`${item.title}: behind every window`} onClick={() => setBack(true)}>
+          <button type="button" className="window-close" data-action="map-backdrop" title="Behind every window: the map fills the table" aria-label={`${item.title}: behind every window`} onClick={() => setBack(true)}>
             <Icon name="map" size={16} />
           </button>
         ) : null}

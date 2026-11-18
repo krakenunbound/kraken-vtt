@@ -354,7 +354,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
             <div
               className="party-parcel"
               data-parcel-drop
-              title="Drop a treasure parcel here (FG's): its coins and items join the parcel"
+              title="Drop a treasure parcel here: its coins and items join the parcel"
               onDragOver={(event) => {
                 if (hasLink(event)) event.preventDefault();
               }}

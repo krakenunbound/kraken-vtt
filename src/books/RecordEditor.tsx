@@ -85,7 +85,7 @@ export function ShareMenu({ session, record, words = false }: { session: Session
         data-action="record-share"
         aria-pressed={on}
         aria-haspopup="menu"
-        title={`${shareWords(record)}: click to choose who sees it (FG's Share)`}
+        title={`${shareWords(record)}: click to choose who sees it`}
         {...({ popovertarget: menuId } as object)}
       >
         <Icon name={on ? "eye" : "eye-off"} size={15} />
@@ -301,7 +301,7 @@ export function IdentifyBar({ session, record }: { session: Session; record: Tab
   const identified = !(record.data.isidentified === 0 || record.data.isidentified === "0");
   return (
     <div className="identify-bar" data-identify={identified ? "on" : "off"}>
-      <label title="FG's Identified: unidentified, the players see only its unidentified name and notes">
+      <label title="Unidentified, the players see only its unidentified name and notes">
         <input type="checkbox" data-action="record-identified" checked={identified} onChange={(event) => void session.content("identify", { id: record.id, on: event.target.checked })} /> Identified
       </label>
       {identified ? null : (
@@ -365,7 +365,7 @@ export function TableRollBar({ session, record, book }: { session: Session; reco
         </select>
       ) : null}
       {gm ? (
-        <label title="The roll and its result for the GM alone (FG's /rollon -hide)">
+        <label title="The roll and its result for the GM alone">
           <input type="checkbox" data-action="table-hide" checked={hide} onChange={(event) => setHide(event.target.checked)} /> GM only
         </label>
       ) : null}
@@ -400,7 +400,7 @@ export function TableEditor({ session, record }: { session: Session; record: Tab
         <label>
           Columns <Field value={labels.length} editable number label="Columns" onSave={(value) => edit({ resultscols: Math.max(1, Math.min(30, Number(value) || 1)), rows: wire(resize(Math.max(1, Math.min(30, Number(value) || 1)))) })} />
         </label>
-        <label title="Its rolls for the GM alone (FG's Hide roll results)">
+        <label title="Its rolls for the GM alone">
           <input type="checkbox" checked={Number(record.data.hiderollresults) === 1} onChange={(event) => edit({ hiderollresults: event.target.checked ? 1 : 0 })} /> Hide rolls
         </label>
       </div>
@@ -657,7 +657,7 @@ export function EncounterView({ session, record, editable }: { session: Session;
             <th>Count</th>
             <th>Creature</th>
             <th>Faction</th>
-            <th title="FG's identified magnifier: blank, the players know what it is; else what they call it until they find out">Players see</th>
+            <th title="Blank, the players know what it is; else what they call it until they find out">Players see</th>
             {editable ? <th /> : null}
           </tr>
         </thead>
@@ -744,7 +744,7 @@ export function ParcelView({ session, record, editable }: { session: Session; re
             {item.isidentified === 0 ? <small className="hint"> (unidentified: {item.nonid_name || "Unidentified item"})</small> : null}
             {editable ? (
               <>
-                <label className="hint" title="FG's Identified">
+                <label className="hint" title="Identified">
                   <input type="checkbox" checked={item.isidentified !== 0} onChange={(event) => void session.content("identify", { id: record.id, item: key, on: event.target.checked })} /> Identified
                 </label>
                 <button type="button" className="ghost" aria-label={`Remove ${item.name}`} onClick={() => void act("remove", { key })}>
@@ -794,7 +794,7 @@ export function ParcelView({ session, record, editable }: { session: Session; re
         </>
       ) : null}
       <div className="cc-inline">
-        <button type="button" data-action="parcel-party" title="Into the party sheet's parcel, to hand out (as FG's drop on the party sheet)" onClick={() => void act("party", {}, "On the party sheet's parcel.")}>
+        <button type="button" data-action="parcel-party" title="Into the party sheet's parcel, to hand out" onClick={() => void act("party", {}, "On the party sheet's parcel.")}>
           <Icon name="party" size={14} /> To the party sheet
         </button>
         <select aria-label="Give to" value={to} onChange={(event) => setTo(event.target.value)}>

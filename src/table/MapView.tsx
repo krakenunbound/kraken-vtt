@@ -2900,7 +2900,7 @@ function MapViewInner({
         </div>
         {gm ? (
           <div className="tool-group">
-            <button type="button" className="tool" data-action="map-share" aria-label="Share with players" title="Share with players: the map opens on every player's screen, even where it was closed (FG's Share)" onClick={() => actions.shareMap?.()}>
+            <button type="button" className="tool" data-action="map-share" aria-label="Share with players" title="Share with players: the map opens on every player's screen, even where it was closed" onClick={() => actions.shareMap?.()}>
               <Icon name="share" />
             </button>
             <button type="button" className={pinsShown ? "tool on" : "tool"} data-action="map-pins" aria-pressed={pinsShown} aria-label="Pins" title={pinsShown ? "Pins shown (the map's shortcuts to its story and encounters): click to hide them" : "Pins hidden: click to show the map's shortcuts"} onClick={() => (setPinsShown(!pinsShown), keepFlag("kraken-map-pins", !pinsShown))}>

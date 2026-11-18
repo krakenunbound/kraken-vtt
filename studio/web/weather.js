@@ -192,15 +192,14 @@ window.KrakenWeather = (() => {
           <button class="los-action" data-fx-reset="none" title="Start again: the effect nowhere, then paint Show.">Hide everywhere</button>
           <button class="los-action" id="fxUndoStroke" ${e.mask?.ops.length ? '' : 'disabled'} title="Take back the last stroke (Ctrl+Z undoes anything).">Undo stroke</button>
         </div>
-        <div class="fx-mask-title">${esc(TYPES[e.type][0])} settings (as in Fantasy Grounds)</div>
+        <div class="fx-mask-title">${esc(TYPES[e.type][0])} settings</div>
         ${settings}
-        <button class="los-action" id="fxDefaults">FG defaults</button>
-        ${e.type === 'rain' ? `<label class="fx-slider" title="How big the drops and their rings are. Here, in Foundry and in Kraken VTT; Fantasy Grounds' rain has no size.">Drop size<input id="fxDropSize" type="range" min="0.25" max="3" step="0.05" value="${e.dropSize ?? 1}"><span>${e.dropSize ?? 1}x</span></label>
-        <p class="los-help">Drop size shows here, in Foundry and in Kraken VTT. Fantasy Grounds' rain has no size: it uses its own.</p>` : `<div class="fx-mask-title">Drift direction</div>
+        <button class="los-action" id="fxDefaults">Defaults</button>
+        ${e.type === 'rain' ? `<label class="fx-slider" title="How big the drops and their rings are.">Drop size<input id="fxDropSize" type="range" min="0.25" max="3" step="0.05" value="${e.dropSize ?? 1}"><span>${e.dropSize ?? 1}x</span></label>` : `<div class="fx-mask-title">Drift direction</div>
         <div class="fx-drift">${[['↑', 270, 'North'], ['↗', 315, 'North-east'], ['→', 0, 'East'], ['↘', 45, 'South-east'], ['↓', 90, 'South'], ['↙', 135, 'South-west'], ['←', 180, 'West'], ['↖', 225, 'North-west']].map(([arrow, deg, name]) =>
           `<button class="los-tool ${(e.drift ?? 0) === deg ? 'on' : ''}" data-fx-drift="${deg}" title="Drifts towards the ${name.toLowerCase()}">${arrow}</button>`).join('')}</div>
         <label class="fx-slider">Degrees<input id="fxDrift" type="range" min="0" max="359" step="1" value="${e.drift ?? 0}"><span>${e.drift ?? 0}°</span></label>
-        <p class="los-help">Moves the effect here and in Kraken VTT. Fantasy Grounds and Foundry have no direction for ${esc(TYPES[e.type][0].toLowerCase())}: they always move it their own way.</p>`}
+        <p class="los-help">The way the effect drifts.</p>`}
         <label class="fx-check"><input id="fxAnimate" type="checkbox" ${animate ? 'checked' : ''}> Animate effects here</label>
         <label class="fx-slider" title="How strongly the editor tints it; not exported.">Preview strength<input id="fxPreview" type="range" min="10" max="100" step="5" value="${Math.round((e.previewOpacity ?? 0.45) * 100)}"><span></span></label>
       </div>`;

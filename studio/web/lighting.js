@@ -93,16 +93,16 @@ window.KrakenLighting = (() => {
     box.innerHTML = `
       <div class="los-title">Outdoor light · time of day</div>
       <div class="los-types">
-        <button class="los-type ${!pick ? 'on' : ''}" data-ambient="" title="FG's own default: a map with lights is dark, a map without them fully lit.">Not set</button>
-        ${Object.entries(AMBIENT).map(([id, v]) => `<button class="los-type ${pick === id ? 'on' : ''}" data-ambient="${id}"${v.color ? ` title="${v.label}: Fantasy Grounds' own preset"` : ''}><i style="border-top:3px solid ${v.color || '#000'}"></i>${v.label}</button>`).join('')}
+        <button class="los-type ${!pick ? 'on' : ''}" data-ambient="" title="Default: a map with lights is dark, a map without them fully lit.">Not set</button>
+        ${Object.entries(AMBIENT).map(([id, v]) => `<button class="los-type ${pick === id ? 'on' : ''}" data-ambient="${id}"><i style="border-top:3px solid ${v.color || '#000'}"></i>${v.label}</button>`).join('')}
       </div>
       <p class="los-help">${!a ? (p.lights.length ? 'Not set: this map has lights, so outside them it is dark.' : 'Not set: with no lights the map is shown fully lit.')
         : a.preset === 'night' ? esc(AMBIENT.night.help)
-        : `Outdoor light reaches everywhere walls don't shut it out; your lights still add to it. Fantasy Grounds uses it as its ambient lighting, Foundry as the scene's darkness (${Math.round(darkness(p) * 100)}%).`}</p>
+        : `Outdoor light reaches everywhere walls don't shut it out; your lights still add to it. Darkness ${Math.round(darkness(p) * 100)}%.`}</p>
       ${a && a.preset !== 'night' ? `
         <div class="fx-row"><label>Colour <input id="ambColor" type="color" value="${a.color}"></label></div>
         ${slider('ambAlpha', 'Strength', 5, 100, 5, Math.round(a.alpha * 100), '%', 'How much the outdoor light lights the map')}
-        <label class="fx-check"><input id="ambShadows" type="checkbox" ${a.shadows ? 'checked' : ''}> Shadows (walls and art cast them, in FG)</label>
+        <label class="fx-check"><input id="ambShadows" type="checkbox" ${a.shadows ? 'checked' : ''}> Shadows (walls and art cast them)</label>
         ${a.shadows ? `${slider('ambAngle', 'Sun direction', 0, 359, 1, a.angle, '°', 'Where the light comes from (0 east, 90 south)')}
           ${slider('ambLength', 'Shadow length', 0, 20, 0.2, a.length, ' sq', 'In squares')}
           <div class="fx-row"><label>Shadow colour <input id="ambShadowColor" type="color" value="${a.shadowColor}"></label></div>
@@ -117,13 +117,13 @@ window.KrakenLighting = (() => {
         <b>${esc(LIGHTS[l.preset]?.[0] || 'Light')}</b>
         <label>Kind <select id="lightKind">${Object.entries(LIGHTS).map(([id, v]) => `<option value="${id}" ${id === (l.preset || 'custom') ? 'selected' : ''}>${esc(v[0])}</option>`).join('')}</select></label>
         <div class="fx-row"><label>Colour <input id="lightColor" type="color" value="${l.color}"></label></div>
-        ${slider('lightStrength', 'Strength', 1, 100, 1, l.strength ?? 100, '%', "How strongly it lights (FG: the colour's alpha)")}
+        ${slider('lightStrength', 'Strength', 1, 100, 1, l.strength ?? 100, '%', "How strongly it lights")}
         <div class="two"><label>Bright (ft) <input id="lightBright" type="number" min="0" max="10000" step="5" value="${l.bright}"></label><label>Dim (ft) <input id="lightDim" type="number" min="0" max="10000" step="5" value="${l.dim}"></label></div>
-        ${slider('lightFalloff', 'Bright falloff', 0, 100, 1, l.falloff ?? FALLOFF, '%', "How much of the bright light fades into the dim (FG's default 25%)")}
-        ${slider('lightDimFalloff', 'Dim falloff', 0, 100, 1, l.dimFalloff ?? DIM_FALLOFF, '%', "How much of the dim light fades out to darkness (FG's default 50%)")}
+        ${slider('lightFalloff', 'Bright falloff', 0, 100, 1, l.falloff ?? FALLOFF, '%', "How much of the bright light fades into the dim (default 25%)")}
+        ${slider('lightDimFalloff', 'Dim falloff', 0, 100, 1, l.dimFalloff ?? DIM_FALLOFF, '%', "How much of the dim light fades out to darkness (default 50%)")}
         <label>Animation <select id="lightAnim"><option value="">None</option><option value="flicker" ${l.animation === 'flicker' ? 'selected' : ''}>Flicker (flame)</option><option value="pulse" ${l.animation === 'pulse' ? 'selected' : ''}>Pulse</option></select></label>
-        ${l.animation ? slider('lightSpeed', 'Speed', 1, 100, 1, l.speed ?? 100, '%', "FG's animation speed (its torch is 25%)") : ''}
-        <label class="fx-check" title="FG's inverse light: takes light away, like the Darkness spell"><input id="lightInverse" type="checkbox" ${l.inverse ? 'checked' : ''}> Darkness (inverse: takes light away)</label>
+        ${l.animation ? slider('lightSpeed', 'Speed', 1, 100, 1, l.speed ?? 100, '%', "Animation speed (a torch is 25%)") : ''}
+        <label class="fx-check" title="Inverse light: takes light away, like the Darkness spell"><input id="lightInverse" type="checkbox" ${l.inverse ? 'checked' : ''}> Darkness (inverse: takes light away)</label>
         <label class="fx-check"><input id="lightOn" type="checkbox" ${l.on !== false ? 'checked' : ''}> On (an unlit light still exports, switched off)</label>
         <button class="los-action" id="lightDelete">Delete this light</button>
       </div>` : ''}

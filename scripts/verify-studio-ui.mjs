@@ -290,6 +290,30 @@ try {
   assert(shots.changed > shots.sampled * 0.08, `a capture has the clouds in it (${shots.changed} of ${shots.sampled} sampled pixels changed)`);
   report.push(`clouds added in Weather effects drift at once, on the GPU: ${fps} frames a second, ${fxAfter.cost.toFixed(1)} ms a frame; a capture has them`);
 
+  // Rain's Amount slider sets how many drops fall; their strength (Opacity) stays the same.
+  await again.evaluate(() => { for (const fx of window.KrakenStudio.project.effects) fx.visible = false; });
+  await again.evaluate(() => document.querySelector('[data-fx-add="rain"]').click());
+  await settle(300);
+  const amountLabel = await again.locator('.fx-slider:has([data-fx-set="RainIntensity"])').textContent();
+  const opacityLabel = await again.locator('.fx-slider:has([data-fx-set="RainFade"])').textContent();
+  assert(/^Amount/.test(amountLabel.trim()) && /^Opacity/.test(opacityLabel.trim()), `rain's sliders are Amount (the drops) and Opacity (${amountLabel} / ${opacityLabel})`);
+  const rainAt = async (amount) => {
+    await again.evaluate((v) => { const input = document.querySelector('[data-fx-set="RainIntensity"]'); input.value = String(v); input.dispatchEvent(new Event("change")); }, amount);
+    await settle(200);
+    return again.evaluate(async () => {
+      const S = window.KrakenStudio, rain = S.project.effects.at(-1);
+      const pixels = async () => { const img = new Image(); img.src = await S.capture({ grid: false, walls: false }); await img.decode(); const c = document.createElement("canvas"); c.width = img.width; c.height = img.height; const g = c.getContext("2d"); g.drawImage(img, 0, 0); return g.getImageData(0, 0, c.width, c.height).data; };
+      const wet = await pixels(); rain.visible = false; const dry = await pixels(); rain.visible = true; S.draw();
+      // Drops: pixels the rain brightens a lot; their strength: how much the brightest ones change.
+      const lift = []; for (let i = 0; i < dry.length; i += 4) { const d = wet[i] + wet[i + 1] + wet[i + 2] - dry[i] - dry[i + 1] - dry[i + 2]; if (d > 120) lift.push(d); }
+      lift.sort((x, y) => y - x);
+      return { drops: lift.length, strength: lift.length ? lift[Math.floor(lift.length * 0.05)] : 0 };
+    });
+  };
+  const few = await rainAt(8), many = await rainAt(60);
+  assert(few.drops > 0 && many.drops > few.drops * 2.5 && Math.abs(few.strength - many.strength) < 60, `less rain is fewer drops, each as strong (Amount 8: ${JSON.stringify(few)}; Amount 60: ${JSON.stringify(many)})`);
+  report.push(`rain's Amount sets how many drops fall (${few.drops} pixels of drops at 8, ${many.drops} at 60), Opacity how strong they are (the same: ${few.strength} and ${many.strength})`);
+
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok studio ui:\n  ${report.join("\n  ")}`);
 } finally {

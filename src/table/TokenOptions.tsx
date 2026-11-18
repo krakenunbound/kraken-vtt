@@ -38,7 +38,7 @@ export function TokenOptionsSection({ session }: { session: Session }) {
       </SettingRow>
       <SettingRow label="Token names" hint="Off: players see no names but their own. A token's unidentified name (its menu) is shown instead of its real one.">
         <select value={options.names ?? "hover"} onChange={(event) => set({ names: event.target.value })} aria-label="Token names" data-setting="token-names">
-          <option value="hover">On hover (as FG)</option>
+          <option value="hover">On hover</option>
           <option value="always">Always</option>
           <option value="off">Off</option>
         </select>

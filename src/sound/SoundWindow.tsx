@@ -322,7 +322,7 @@ function Triggers({ session, library }: { session: Session; library: SoundLibrar
   const shown = list.filter((item) => !search || `${item.name} ${item.on} ${item.result} ${item.sound}`.toLowerCase().includes(search.toLowerCase()));
   return (
     <div className="sound-triggers">
-      <p className="hint">As Syrinscape in FG: an attack plays its weapon's swing, the damage roll its hit, a natural 20 its crit and a natural 1 its fumble. The first trigger that fits, and has sounds, plays for everyone who sees the line, as its result shows. ▶ plays a trigger's sound on your screen only.</p>
+      <p className="hint">An attack plays its weapon's swing, the damage roll its hit, a natural 20 its crit and a natural 1 its fumble. The first trigger that fits, and has sounds, plays for everyone who sees the line, as its result shows. ▶ plays a trigger's sound on your screen only.</p>
       <div className="sound-trigger-options">
         <label>
           The GM's hidden rolls

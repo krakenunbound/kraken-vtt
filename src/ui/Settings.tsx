@@ -95,7 +95,7 @@ export function SettingsWindow({ session }: { session: Session }) {
       {gm ? <ThemeSetting session={session} /> : null}
       {gm ? (
         <SettingsSection title="Dice and the dice tower" setting="dice-table">
-          <Toggle label="Players see their own tower rolls" hint="Off: only you see what goes into the dice tower, as in Fantasy Grounds." checked={Boolean(session.options.towerReveal)} onChange={(on) => session.setTableOptions({ towerReveal: on })} setting="tower-reveal" />
+          <Toggle label="Players see their own tower rolls" hint="Off: only you see what goes into the dice tower." checked={Boolean(session.options.towerReveal)} onChange={(on) => session.setTableOptions({ towerReveal: on })} setting="tower-reveal" />
           <Toggle
             label="Dice tower on the table"
             hint="It stands apart from the chat, for everyone; each person places it where they like (right-click to lock it). Off: it sits in the chat."
@@ -110,18 +110,18 @@ export function SettingsWindow({ session }: { session: Session }) {
         <SettingsSection title="Combat" setting="combat">
           <SettingRow label="Clear targets" hint="When a creature's targets are cleared on the combat tracker.">
             <select value={(session.options as { clearTargets?: string }).clearTargets ?? "never"} onChange={(event) => session.setTableOptions({ clearTargets: event.target.value } as never)} aria-label="Clear targets" data-setting="clear-targets">
-              <option value="never">Never (as FG)</option>
+              <option value="never">Never</option>
               <option value="action">After a spell or an attack's damage</option>
               <option value="turn">At the end of the creature's turn</option>
             </select>
           </SettingRow>
-          <SettingRow label="Initiative" hint="Each creature rolls its own, or one roll for each kind of creature (all the goblins together), as FG's group initiative.">
+          <SettingRow label="Initiative" hint="Each creature rolls its own, or one roll for each kind of creature (all the goblins together).">
             <select value={(session.options as { initGroup?: string }).initGroup ?? "each"} onChange={(event) => session.setTableOptions({ initGroup: event.target.value } as never)} aria-label="Initiative" data-setting="init-group">
               <option value="each">Each creature</option>
               <option value="kind">By kind of creature</option>
             </select>
           </SettingRow>
-          <SettingRow label="Creatures' hit points" hint="When a creature joins the tracker: the book's listed hit points, its hit dice rolled each time (no two goblins alike), or the most they can be (FG's NPC hit points).">
+          <SettingRow label="Creatures' hit points" hint="When a creature joins the tracker: the book's listed hit points, its hit dice rolled each time (no two goblins alike), or the most they can be.">
             <select value={(session.options as { npcHp?: string }).npcHp ?? "listed"} onChange={(event) => session.setTableOptions({ npcHp: event.target.value } as never)} aria-label="Creatures' hit points" data-setting="npc-hp">
               <option value="listed">As listed</option>
               <option value="roll">Rolled</option>
@@ -129,9 +129,9 @@ export function SettingsWindow({ session }: { session: Session }) {
             </select>
           </SettingRow>
           <Toggle label="Party portraits in initiative order" hint="During a fight the portraits along the top of every screen re-arrange into turn order, the first to act on the left. Off: they keep the party's order." checked={Boolean((session.options as { partyByInitiative?: boolean }).partyByInitiative)} onChange={(on) => session.setTableOptions({ partyByInitiative: on } as never)} setting="party-by-initiative" />
-          <Toggle label="Roll initiative every round" hint="FG's house rule: at each new round everyone rolls initiative again and the order changes." checked={Boolean((session.options as { initEachRound?: boolean }).initEachRound)} onChange={(on) => session.setTableOptions({ initEachRound: on } as never)} setting="init-each-round" />
-          <Toggle label="Stop at the start of each round" hint="FG's option: a new round waits for your next click before anyone acts, so you can handle what happens at the top of the round." checked={Boolean((session.options as { roundStop?: boolean }).roundStop)} onChange={(on) => session.setTableOptions({ roundStop: on } as never)} setting="round-stop" />
-          <SettingRow label="Skip turns" hint="Whose turns the tracker passes over: dead and unconscious creatures (FG's), characters too, or no one.">
+          <Toggle label="Roll initiative every round" hint="A house rule: at each new round everyone rolls initiative again and the order changes." checked={Boolean((session.options as { initEachRound?: boolean }).initEachRound)} onChange={(on) => session.setTableOptions({ initEachRound: on } as never)} setting="init-each-round" />
+          <Toggle label="Stop at the start of each round" hint="A new round waits for your next click before anyone acts, so you can handle what happens at the top of the round." checked={Boolean((session.options as { roundStop?: boolean }).roundStop)} onChange={(on) => session.setTableOptions({ roundStop: on } as never)} setting="round-stop" />
+          <SettingRow label="Skip turns" hint="Whose turns the tracker passes over: dead and unconscious creatures, characters too, or no one.">
             <select value={(session.options as { skipDead?: string }).skipDead ?? "enemies"} onChange={(event) => session.setTableOptions({ skipDead: event.target.value } as never)} aria-label="Skip turns" data-setting="skip-dead">
               <option value="enemies">The dead and unconscious creatures</option>
               <option value="all">Characters too</option>
@@ -152,10 +152,10 @@ export function SettingsWindow({ session }: { session: Session }) {
               <option value="off">Off</option>
             </select>
           </SettingRow>
-          <SettingRow label="Apply damage" hint="Damage and healing land as the roll does (FG), or wait on the chat card's buttons (Foundry). Either way the card's buttons change what a creature took.">
+          <SettingRow label="Apply damage" hint="Damage and healing land as the roll does, or wait on the chat card's buttons. Either way the card's buttons change what a creature took.">
             <select value={session.options.autoApply === false ? "card" : "auto"} onChange={(event) => session.setTableOptions({ autoApply: event.target.value === "auto" })} aria-label="Apply damage" data-setting="auto-apply">
-              <option value="auto">At once (FG)</option>
-              <option value="card">From the chat card (Foundry)</option>
+              <option value="auto">At once</option>
+              <option value="card">From the chat card</option>
             </select>
           </SettingRow>
         </SettingsSection>

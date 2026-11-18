@@ -139,7 +139,7 @@ export const COMMANDS: Command[] = [
   {
     names: ["mod"],
     args: "[number] <for>",
-    help: "Add a number to the modifier box for the next roll (FG's /mod): /mod 2 Flanking",
+    help: "Add a number to the modifier box for the next roll: /mod 2 Flanking",
     group: "Dice",
     run: (rest, context) => {
       const [first = "", ...words] = rest.trim().split(/\s+/);
@@ -167,7 +167,7 @@ export const COMMANDS: Command[] = [
   {
     names: ["w", "whisper"],
     args: "[name, name] [message]",
-    help: "Whisper to players (or GM); the GM sees every whisper, as in FG",
+    help: "Whisper to players (or GM); the GM sees every whisper",
     group: "Talk",
     run: (rest, context) => {
       const { names, text } = splitNames(rest, context.session);

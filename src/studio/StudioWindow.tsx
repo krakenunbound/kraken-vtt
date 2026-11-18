@@ -13,7 +13,8 @@ const carried = (event: { dataTransfer: DataTransfer | null }) => [...(event.dat
 // testing, Fantasy Grounds and Foundry export), served by Kraken itself
 // (electron/studio/server.cjs). The GM's alone.
 // page: the editor's page Kraken made for an image (its master opens there), else Map Studio as it is.
-export function StudioWindow({ project: page }: { project?: string }) {
+// character: a character's name and token picture by its record (a drag from a quick slot or a sheet may carry only the record).
+export function StudioWindow({ project: page, character }: { project?: string; character?: (record: string) => { name: string; art: string } }) {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const frame = useRef<HTMLIFrameElement>(null);
@@ -61,9 +62,12 @@ export function StudioWindow({ project: page }: { project?: string }) {
     const box = target.getBoundingClientRect(), x = event.clientX - box.left, y = event.clientY - box.top;
     // Its token picture handed over as data (drawn from another site, it would spoil Map Studio's pictures of the map).
     let picture = "";
-    if (typeof token.art === "string" && token.art) {
+    const known = token.record && character ? character(String(token.record)) : null;
+    if (known?.name && (!token.name || token.name === "Character")) token.name = known.name;
+    const art = typeof token.art === "string" && token.art ? token.art : (known?.art ?? "");
+    if (art) {
       try {
-        const response = await fetch(token.art);
+        const response = await fetch(art);
         if (response.ok) picture = await new Promise<string>((done) => { const reader = new FileReader(); reader.onload = () => done(String(reader.result)); reader.onerror = () => done(""); response.blob().then((blob) => reader.readAsDataURL(blob), () => done("")); });
       } catch {
         /* no picture: Map Studio shows the name's first letter */

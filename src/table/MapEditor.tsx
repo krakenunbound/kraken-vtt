@@ -192,7 +192,7 @@ export function MapEditor(props: Props) {
                   }}>
                     Delete
                   </button>
-                  <button type="button" data-action="wall-toggle" onClick={() => changeWalls({ hidden: !one?.hidden })} title="FG: a toggled-off wall blocks nothing">
+                  <button type="button" data-action="wall-toggle" onClick={() => changeWalls({ hidden: !one?.hidden })} title="A toggled-off wall blocks nothing">
                     {one?.hidden ? "Turn on" : "Turn off"}
                   </button>
                   <button type="button" onClick={() => changeWalls({ dir: ((Number(one?.dir) || 0) + 1) % 3 })} title="One way: both sides, left only, right only">

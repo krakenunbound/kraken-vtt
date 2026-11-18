@@ -1117,7 +1117,7 @@ export function ChatDock({ session }: { session: Session }) {
           <span className="chat-attached" data-chat-attached={attached.kind}>
             <ChatLinkChip link={attached} session={session} />
             {session.role === "dm" && ["record", "sheet", "note"].includes(attached.kind) ? (
-              <button type="button" className={share ? "chat-share-toggle on" : "chat-share-toggle"} aria-pressed={share} aria-label="Share its text" title="Share: post the record's text, as the players know it (FG's Share)" onClick={() => setShare(!share)}>
+              <button type="button" className={share ? "chat-share-toggle on" : "chat-share-toggle"} aria-pressed={share} aria-label="Share its text" title="Share: post the record's text, as the players know it" onClick={() => setShare(!share)}>
                 <Icon name="share" size={13} />
               </button>
             ) : null}

@@ -116,6 +116,17 @@ try {
     return page.evaluate(() => window.__carried);
   };
   const play = () => frame.evaluate(() => ({ mode: window.KrakenStudio.mode, party: window.KrakenPlay._state.party.map((c) => c.name), who: window.KrakenPlay._state.who?.name ?? null }));
+  // A drag that carries only the character (a quick slot, a sheet): Map Studio still draws its own token picture.
+  const bare = await free();
+  await page.evaluate(([x, y, record]) => {
+    const data = new DataTransfer();
+    data.setData("application/x-kraken-record", record);
+    document.dispatchEvent(new DragEvent("dragenter", { dataTransfer: data, bubbles: true }));
+    return new Promise((done) => setTimeout(() => { document.querySelector(".studio-catch").dispatchEvent(new DragEvent("drop", { dataTransfer: data, clientX: x, clientY: y, bubbles: true, cancelable: true })); done(); }, 100));
+  }, [bare.x, bare.y, aldra.id]);
+  await settle(1200);
+  const bareDrawn = await frame.evaluate(() => { const c = window.KrakenPlay._state.party.find((item) => item.record); return { name: c?.name, picture: c?.picture?.slice(0, 15) ?? null, loaded: Boolean(c?.image?.naturalWidth) }; });
+  assert(bareDrawn.name === "Aldra" && bareDrawn.loaded && bareDrawn.picture === "data:image/png;", `a character dropped with only its record shows its own token picture, not a letter (${JSON.stringify(bareDrawn)})`);
   const fromParty = await drag(`[data-member="${aldra.id}"]`, await free());
   assert(JSON.parse(fromParty["application/x-kraken-token"] ?? "{}").name === "Aldra" && fromParty["application/x-kraken-record"] === aldra.id, `a Party Sheet member carries its token and record (${JSON.stringify(fromParty)})`);
   let state = await play();

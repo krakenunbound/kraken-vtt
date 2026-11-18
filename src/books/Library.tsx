@@ -142,7 +142,7 @@ export function LibraryWindow({ session, openMaps }: { session: Session; openMap
                           <small className="hint"> {item.npcs ?? item.summary ?? ""}</small>
                         </span>
                         {kind === "battle" ? (
-                          <button type="button" data-action="library-battle" title="Onto the combat tracker; on the open map, tokens where FG placed them (hidden)" onClick={() => session.libraryAction("battle", { path: item.path })}>
+                          <button type="button" data-action="library-battle" title="Onto the combat tracker; on the open map, tokens where the book placed them (hidden)" onClick={() => session.libraryAction("battle", { path: item.path })}>
                             ⚔ Add
                           </button>
                         ) : kind === "npc" ? (
@@ -217,7 +217,7 @@ function CampaignRecords({ session, type, label, search }: { session: Session; t
         }}
       >
         <input value={name} onChange={(event) => setName(event.target.value)} placeholder={`New ${label.replace(/s$/, "").toLowerCase()}`} aria-label={`New ${label.replace(/s$/, "").toLowerCase()} name`} />
-        <button type="submit" data-action="campaign-new" disabled={!name.trim()} title={`Make a new ${label.replace(/s$/, "").toLowerCase()} of the campaign's own (FG's +)`}>
+        <button type="submit" data-action="campaign-new" disabled={!name.trim()} title={`Make a new ${label.replace(/s$/, "").toLowerCase()} of the campaign's own`}>
           <Icon name="plus" size={15} /> New
         </button>
       </form>
@@ -295,7 +295,7 @@ export function AdventureList({ session, kind, onStory }: { session: Session; ki
                           </span>
                         )}
                         {kind === "story" ? null : kind === "battle" ? (
-                          <button type="button" data-action="library-battle" title="Onto the combat tracker; on the open map, tokens where FG placed them (hidden)" onClick={() => session.libraryAction("battle", { path: item.path })}>
+                          <button type="button" data-action="library-battle" title="Onto the combat tracker; on the open map, tokens where the book placed them (hidden)" onClick={() => session.libraryAction("battle", { path: item.path })}>
                             ⚔ Add
                           </button>
                         ) : kind === "npc" ? (

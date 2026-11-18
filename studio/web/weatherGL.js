@@ -98,12 +98,14 @@ vec4 effect(vec2 w) {
     // Rain seen from above: drops land and their rings spread. uA: amount, intensity, speed, wind; uB.x: drop size
     float k = uB.x;
     // The ground wet under it, a little darker and bluer.
-    vec4 col = vec4(0.12, 0.16, 0.24, 0.16);
+    // How many drops fall: none at 0, every cell by about half way; Opacity (uA.x) alone sets how strongly they show.
+    float many = 1.0 - pow(1.0 - clamp(uA.y, 0.0, 1.0), 4.0);
+    vec4 col = vec4(0.12, 0.16, 0.24, 0.16 * many);
     for (int i = 0; i < 3; i++) {
       float fi = float(i);
       vec3 s = scatter(w, uGrid * (0.6 + fi * 0.25) * k, fi * 31.0);
       float phase = fract(t * (0.5 + uA.z * 1.6) + s.z * 7.0);
-      float live = step(s.z, 0.35 + uA.y * 1.6);
+      float live = step(s.z, many);
       float edge = uGrid * 0.025 * k, r = phase * uGrid * 0.3 * k;
       float ring = 1.0 - smoothstep(edge * 0.4, edge, abs(length(s.xy * vec2(1.0, 1.2)) - r));
       float dot0 = (1.0 - smoothstep(0.0, uGrid * 0.03 * k, length(s.xy))) * step(phase, 0.1);
@@ -115,13 +117,14 @@ vec4 effect(vec2 w) {
   // Snow (5) and blizzard (6): flakes in layers, nearer ones bigger and faster. uA: amount, intensity, speed, size
   bool storm = uType == 6;
   vec4 col = storm ? vec4(0.95, 0.97, 1.0, 0.18 * uA.x) : vec4(0.0);
+  float many = storm ? 0.9 : 1.0 - pow(1.0 - clamp(uA.y, 0.0, 1.0), 4.0);
   for (int i = 0; i < 4; i++) {
     float fi = float(i);
     float pace = (storm ? 2.4 : 0.35) * (0.4 + uA.z * 1.6) * (0.6 + fi * 0.35);
     vec2 sway = vec2(sin(t * 0.7 + fi * 2.1), cos(t * 0.5 + fi)) * uGrid * (storm ? 0.05 : 0.12);
     vec2 p = w - uDir * t * pace * uGrid - sway;
     vec3 s = scatter(p, uGrid * (0.45 + fi * 0.18), fi * 13.0);
-    float live = step(s.z, storm ? 0.9 : 0.25 + uA.y * 2.4);
+    float live = step(s.z, many);
     float size = uGrid * (0.018 + fi * 0.008) * (0.5 + uA.w);
     vec2 d = s.xy;
     if (storm) { vec2 a = uDir, b = vec2(-uDir.y, uDir.x); d = vec2(dot(d, a) / 3.5, dot(d, b)); }
@@ -142,7 +145,7 @@ void main() {
   gl_FragColor = vec4(c.rgb, clamp(c.a, 0.0, 1.0) * shown * uAlpha);
 }`;
 
-  // The settings each type passes (FG's own fields, their FG defaults).
+  // The settings each type passes (the saved fields, their defaults).
   const DEFAULTS = {
     clouds: [['CloudSpeed', 0.75], ['CloudDensity', 0.75], ['CloudShadowDensity', 0.5], ['CloudOffset', 0.25]],
     myst: [['MystFade', 0.75], ['MystSpeed', 1]],

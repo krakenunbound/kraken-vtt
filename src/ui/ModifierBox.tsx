@@ -48,7 +48,7 @@ export function ModifierBox({ session, onMenu }: { session: Session; onMenu: (x:
     <div
       className={["modifier-box", stack.total || stack.slots.length ? "set" : "", over ? "drop" : ""].filter(Boolean).join(" ")}
       data-modifier-total={stack.total}
-      title="Modifier for the next roll (FG's modifier box): every roll you start next reads it, then it clears. The wheel or the buttons change it; drop a number, a roll or an effect on it to add one; a right-click picks one"
+      title="Modifier for the next roll: every roll you start next reads it, then it clears. The wheel or the buttons change it; drop a number, a roll or an effect on it to add one; a right-click picks one"
       onWheel={(event) => setTotal(stack.total + (event.deltaY < 0 ? 1 : -1))}
       onContextMenu={(event) => {
         event.preventDefault();

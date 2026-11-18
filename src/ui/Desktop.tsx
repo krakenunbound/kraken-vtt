@@ -784,7 +784,7 @@ export function Desktop({
               {item.kind === "party" ? <PartySheet session={session} /> : null}
               {item.kind === "imagelist" && gm ? <ImagesList session={session} /> : null}
               {item.kind === "assets" && gm ? <AssetsWindow session={session} /> : null}
-              {item.kind === "studio" && gm ? <StudioWindow project={item.payload} /> : null}
+              {item.kind === "studio" && gm ? <StudioWindow project={item.payload} character={(record) => ({ name: session.records[record]?.name ?? "", art: session.recordArtUrl(record, "token") })} /> : null}
               {item.kind === "cards" ? <CardsWindow session={session} characterId={item.payload} /> : null}
               {item.kind === "combat" ? <CombatTracker session={session} /> : null}
               {item.kind === "players" ? <PlayersWindow session={session} onMenu={gm ? playerMenu.open : undefined} /> : null}

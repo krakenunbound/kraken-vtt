@@ -82,7 +82,7 @@ export function CharacterSelect({ session, onSheet, onWizard, onClose }: { sessi
             type="button"
             className="ghost"
             data-action="blank-character"
-            title="A blank sheet, filled by hand: drag a race, a class, spells and gear onto it from the sidebar's lists (FG's Create)"
+            title="A blank sheet, filled by hand: drag a race, a class, spells and gear onto it from the sidebar's lists"
             onClick={() =>
               void createBlank(session)
                 .then((id) => done(id, "New character"))
