@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const os = require("os");
+const { settingCalendar } = require("../shared/calendars.mjs");
 const { WebSocketServer } = require("ws");
 const { createRecordStore, canSee, viewFor, hideNames } = require("./records.cjs");
 // The players' view of the party sheet and the records (records.cjs viewFor).
@@ -1240,6 +1241,9 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       shelf.active.add(info.id);
       if (info.forPlayers) shelf.shared.add(info.id);
       loadRecords(info);
+      // A world's book brings its calendar: Mystara the Thyatian, a Greyhawk book the Common Year.
+      const world = settingCalendar(info);
+      if (world && calendar.persisted().id !== world) calendar.set({ id: world }, GM_SEAT);
     } else if (!on) {
       shelf.active.delete(info.id);
       shelf.shared.delete(info.id);

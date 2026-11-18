@@ -266,6 +266,17 @@ try {
   const again = await studioFrame("kraken=");
   await again.waitForFunction(() => window.KrakenStudio?.project?.objects?.some((object) => object.id === "test-stamp"), null, { timeout: 30000 });
   report.push("opened in Map Studio again: the project as saved, its stamp kept");
+  // Weather effects opened with none yet, then Clouds added: the clouds drift (the map redrawn as they move).
+  await again.evaluate(() => window.KrakenStudio.switchMode("fx"));
+  await settle(300);
+  await again.click('[data-fx-add="clouds"]');
+  const frameAt = () => again.evaluate(() => document.querySelector("#mapCanvas").toDataURL("image/png").slice(-2000));
+  await settle(400);
+  const cloudsBefore = await frameAt();
+  await settle(1500);
+  const cloudsAfter = await frameAt();
+  assert((await again.evaluate(() => window.KrakenWeather.animating)) && cloudsBefore !== cloudsAfter, "clouds added after Weather effects opened empty drift across the map");
+  report.push("clouds added in Weather effects drift at once");
 
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok studio ui:\n  ${report.join("\n  ")}`);

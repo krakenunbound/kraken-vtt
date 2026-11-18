@@ -77,6 +77,16 @@ export const CALENDARS = [
     leap: (year) => year % 4 === 0,
   },
   {
+    id: "mystara",
+    name: "Thyatian (Mystara)",
+    era: "AC",
+    year: 1000,
+    // Twelve months of four weeks, each beginning on Lunadain; no leap days.
+    week: ["Lunadain", "Gromdain", "Tserdain", "Moldain", "Nytdain", "Loshdain", "Soladain"],
+    weekRestarts: true,
+    months: ["Nuwmont", "Vatermont", "Thaumont", "Flaurmont", "Yarthmont", "Klarmont", "Felmont", "Fyrmont", "Ambyrmont", "Sviftmont", "Eirmont", "Kaldmont"].map((name) => month(name, 28)),
+  },
+  {
     id: "golarion",
     name: "Golarion (Absalom Reckoning)",
     era: "AR",
@@ -135,6 +145,20 @@ export const CALENDARS = [
 const WITHOUT_MANIFEST = { "Pathfinder 1E": "golarion", "Pathfinder 2E": "golarion" };
 export const calendarFor = (ruleset = "") => rulesetNamed(ruleset)?.calendar ?? WITHOUT_MANIFEST[ruleset] ?? "gregorian";
 export const calendarOf = (id) => CALENDARS.find((item) => item.id === id) ?? CALENDARS[0];
+
+// A setting book's calendar: the one its pack names (manifest calendar), else
+// known by the world it is about. Made active, the book sets the campaign's.
+const SETTINGS = [
+  ["mystara", /mystara|known world|karameikos|thyatis|glantri|\bgaz\s?\d/i],
+  ["greyhawk", /greyhawk|flanaess|\boerth\b/i],
+  ["harptos", /forgotten realms|faer[uû]n|sword coast|waterdeep|\bthe realms\b/i],
+  ["golarion", /golarion|inner sea|absalom/i],
+];
+export function settingCalendar(book = {}) {
+  if (CALENDARS.some((item) => item.id === book.calendar)) return book.calendar;
+  const words = `${book.title ?? ""} ${book.name ?? ""} ${book.category ?? ""}`;
+  return SETTINGS.find(([, test]) => test.test(words))?.[0] ?? null;
+}
 
 // The months of a year (a leap year's extra days added).
 export function monthsOf(calendar, year) {

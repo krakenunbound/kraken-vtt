@@ -100,7 +100,7 @@ function parse(text) {
 
 // What a module is, from its definition.xml (and whether it has a book); a
 // Kraken pack, from its own description.
-const DESCRIBED = 2;
+const DESCRIBED = 3;
 function describe(file) {
   if (packs.isPack(file)) {
     const manifest = packs.readManifest(file);
@@ -115,6 +115,8 @@ function describe(file) {
       hasBook: Boolean(manifest.hasBook),
       hasStory: manifest.hasStory !== undefined ? Boolean(manifest.hasStory) : packHasStory(file),
       cover: String(manifest.cover ?? ""),
+      // The world's calendar it brings (shared/calendars.mjs settingCalendar).
+      calendar: typeof manifest.calendar === "string" ? manifest.calendar : "",
       pack: true,
     };
   }

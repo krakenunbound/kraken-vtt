@@ -12,6 +12,8 @@ Collected here until the next major release (alpha to beta).
 - **The sound volumes follow your ears**: a slider halfway sounds about half as loud, and turned well down it is quiet (before, a loud sound pack stayed loud until nearly zero). The dice keep their own volume.
 - **The book list is read much faster**: Maelstrom reads only each book's description from its pack, not the whole pack, so a newly added book no longer stalls the table for seconds; an agent's request made while Maelstrom is busy now waits instead of failing.
 - **Every record has an anchor**: the Maelstrom mark at the top left of a sheet, NPC, note, item, picture or book window. Drag it to link the record anywhere: a quick slot, the party sheet, the combat tracker, a note or a story entry.
+- **A world's book brings its calendar**: making Mystara active sets the campaign's calendar to the Thyatian (twelve months of 28 days, 1000 AC); a Greyhawk book sets the Common Year, a Forgotten Realms book Harptos, a Golarion book Absalom Reckoning. A pack can name its calendar itself. The GM can still choose any calendar.
+- **Map Studio's clouds drift**: weather added after Weather effects was opened (clouds, fog, rain, snow) now moves at its speed and direction at once, and moves again after switching back from another window.
 - **A popped-out window stays in front of the table**: clicking the table no longer hides a window of its own (the Party Sheet, the tracker, a sheet) behind it, so things can be dragged onto it. Its ⤓ button brings it back into the table.
 - **The GM can speak as their own characters**: the chat's Speak as lists the characters the GM made (and no player has taken).
 

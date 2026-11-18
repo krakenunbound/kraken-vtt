@@ -80,6 +80,23 @@ assert(text.includes('data-page="inn"') && text.includes('data-file="images/keep
   assert(fitsRuleset({ ruleset: "2E" }, "AD&D 2E") && fitsRuleset({ kraken: "2E", ruleset: "2E" }, "AD&D 2E") && fitsRuleset({ kraken: "AD&D 2E", ruleset: "2E" }, "AD&D 2E") && !fitsRuleset({ kraken: "2E", ruleset: "2E" }, "Worldbuilding") && !fitsRuleset({ ruleset: "2E" }, "D&D 3.5E"), "AD&D 2E's books are on the AD&D 2E shelf");
   assert(fits("Castles & Crusades") === "Not A Book,Test Handbook,Test Keep", `C&C: its own and any game's (${fits("Castles & Crusades")})`);
 }
+// A world's book brings its calendar: made active, Mystara sets the campaign's to the Thyatian (the GM may still choose another).
+{
+  const { mkdtempSync, writeFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { zipSync, strToU8 } = await import("fflate");
+  const { settingCalendar } = require("../shared/calendars.mjs");
+  assert(settingCalendar({ title: "Mystara - The Known World" }) === "mystara" && settingCalendar({ title: "World of Greyhawk Folio" }) === "greyhawk" && settingCalendar({ title: "Sword Coast Adventurer's Guide" }) === "harptos" && settingCalendar({ title: "Anything", calendar: "golarion" }) === "golarion" && settingCalendar({ title: "B1 In Search of the Unknown" }) === null, "a book's world calendar, by its pack or its name");
+  const dir = mkdtempSync(path.join(tmpdir(), "kraken-world-"));
+  writeFileSync(path.join(dir, "Mystara.mod"), zipSync({ "definition.xml": strToU8("<root><name>Mystara - The Known World</name><category>Worlds</category><ruleset>CnCRPG</ruleset></root>"), "db.xml": strToU8("<root></root>") }));
+  const world = createTableServer({ books: createBookShelf({ folder: dir }), ruleset: "Castles & Crusades" });
+  assert(world.persisted().calendar.id === "greyhawk", `C&C starts on Greyhawk's (${world.persisted().calendar.id})`);
+  await world.agent.activateBook("Mystara - The Known World");
+  const now = world.persisted().calendar;
+  assert(now.id === "mystara" && now.year === 1000, `made active, the world's book sets the Thyatian calendar, 1000 AC (${JSON.stringify(now)})`);
+  const { calendarOf, dateWords } = require("../shared/calendars.mjs");
+  assert(dateWords(calendarOf("mystara"), 1000, 0) === "Lunadain, 1st Nuwmont, 1000 AC" && dateWords(calendarOf("mystara"), 1000, 335) === "Soladain, 28th Kaldmont, 1000 AC", "the Thyatian year: twelve months of 28 days, each starting on Lunadain");
+}
 const server = createTableServer({ books, ruleset: "Castles & Crusades" });
 const tool = async (name, args) => JSON.parse((await callTool(name, args, { table: () => server })).content[0].text);
 function connect(port, join) {

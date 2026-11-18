@@ -159,6 +159,8 @@ window.KrakenWeather = (() => {
   }
   function render() {
     const box = $('#weatherPanel'); if (!box) return;
+    // An effect added (or shown again) after the panel opened empty moves too.
+    startAnimation();
     const e = selected();
     const kinds = Object.entries(TYPES).map(([id, t]) =>
       `<button class="los-type" data-fx-add="${id}" title="${esc(t[2])}"><i style="border-top:3px solid ${t[1]}"></i>${esc(t[0])}</button>`).join('');
@@ -505,6 +507,8 @@ window.KrakenWeather = (() => {
     timer = setTimeout(() => requestAnimationFrame(tick), Math.max(40, lastCost * 3));
   }
   function startAnimation() { if (!timer && animate) timer = setTimeout(() => requestAnimationFrame(tick), 40); }
+  // Back from another window or tab: moving again.
+  document.addEventListener?.('visibilitychange', () => { if (!document.hidden) startAnimation(); });
   function trace(ctx, polys) { ctx.beginPath(); for (const q of polys) { for (let i = 0; i < q.length; i += 2) ctx[i ? 'lineTo' : 'moveTo'](q[i], q[i + 1]); ctx.closePath(); } }
   function draw(ctx, zoom) {
     const p = S().project;
