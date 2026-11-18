@@ -800,7 +800,7 @@ export function ChatDock({ session }: { session: Session }) {
     }
     setThrow({ x, y, vx, vy });
   };
-  // The hand follows the pointer; the next click says where the dice go.
+  // The hand follows the pointer; letting go of the button says where the dice go.
   useEffect(() => {
     if (!held) return;
     const view = dock.current?.ownerDocument.defaultView ?? window;
@@ -827,7 +827,18 @@ export function ChatDock({ session }: { session: Session }) {
       setHeld(null);
       setGhost(null);
     };
+    // Pressing the button grips the dice and does nothing else; letting go
+    // throws them (FG), as fast and as far as the hand was swinging then.
+    let gripped = -1;
     const down = (event: PointerEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      gripped = event.button;
+    };
+    const up = (event: PointerEvent) => {
+      // Only the release of a press made while holding them (not the menu's own click).
+      if (gripped !== event.button) return;
+      gripped = -1;
       event.preventDefault();
       event.stopPropagation();
       done();
@@ -836,7 +847,6 @@ export function ChatDock({ session }: { session: Session }) {
       const slot = slotAt(view, event.clientX, event.clientY);
       if (slot >= 0) return keepOnSlot(slot, held);
       if (overTower(event.clientX, event.clientY)) return rollDice(held, true, { x: event.clientX, y: event.clientY });
-      // Clicked as the hand swings: the dice leave it that fast, that way.
       const { vx, vy } = handSpeed(samples, event.screenX, event.screenY);
       throwFrom(view, event.screenX, event.screenY, event.clientX, event.clientY, vx, vy);
       rollDice(held, tower, { x: event.clientX, y: event.clientY });
@@ -850,6 +860,7 @@ export function ChatDock({ session }: { session: Session }) {
     };
     view.addEventListener("pointermove", move, true);
     view.addEventListener("pointerdown", down, true);
+    view.addEventListener("pointerup", up, true);
     view.addEventListener("click", swallow, true);
     view.addEventListener("contextmenu", swallow, true);
     view.addEventListener("keydown", key);
@@ -857,6 +868,7 @@ export function ChatDock({ session }: { session: Session }) {
       if (frame) view.cancelAnimationFrame(frame);
       view.removeEventListener("pointermove", move, true);
       view.removeEventListener("pointerdown", down, true);
+      view.removeEventListener("pointerup", up, true);
       view.removeEventListener("keydown", key);
       // The click (or right-click) that put them down goes by first.
       view.setTimeout(() => {
