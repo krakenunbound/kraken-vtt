@@ -209,9 +209,100 @@ with a campaign hosted. Never write a pack by hand.
 
 Things that stop a conversion:
 
-- a module Fantasy Grounds keeps encrypted (a store vault module that Fantasy
-  Grounds unlocks itself) cannot be read, so no pack can be made from it;
-- a file that is not a Fantasy Grounds module (no `definition.xml`).
+- a file that is not a Fantasy Grounds module (no `definition.xml`);
+- a module Fantasy Grounds keeps encrypted (a store book in FG's `vault`
+  folder, a `.dat` file such as `WOTC2EPHB.dat`). `kraken_packs` does not list
+  it and no file reader can open it. Read it through Fantasy Grounds instead
+  (next section). Never try to decrypt or unzip vault files.
+
+## Books FG keeps encrypted: read them through the Agent Bridge
+
+A store book that FG has loaded is readable in the running FG, record by
+record, through the Kraken Agent Bridge (the `fgu` tools). This is how the
+AD&D 2E core books (PHB, DMG, Monstrous Manual, the Complete handbooks) were
+made into packs. The scripts are in `scripts/fg-bridge-export/`.
+
+**You need:**
+
+- FG open with a campaign of the book's ruleset, the book **loaded** in it
+  (`Module.getModuleInfo` says `loaded: true`; load it with
+  `Module.activate` after telling the GM), and `fgu_status` connected;
+- the bridge's `db_xml` command (added to `KrakenAgentBridge/scripts/bridge.lua`
+  on 2026-11-18). After changing `bridge.lua`, `fgu_reload` reloads it in the
+  same FG: it does not start another FG;
+- Python with Pillow, and Node (the scripts call Maelstrom's own pack maker
+  from this repository).
+
+**Run it:**
+
+```text
+python scripts/fg-bridge-export/export_book.py "AD&D 2E Players Handbook"
+python scripts/fg-bridge-export/export_book.py --list books.json
+```
+
+The book's name is its FG module name (`Module.getModules`), not a file
+name. Each book becomes its own pack, `<book name>.kpack`, in the packs
+folder. The script prints one JSON line per book: records, pictures, any
+pictures that failed, and `count_mismatch`, every section whose record count
+differs from FG's own (empty when it is right). Its staging folder,
+`<FG data>/kraken_exports/<book>/`, is outside FG's `modules` folder, so the
+rebuilt module never collides with the store book in FG.
+
+**How it works, and what it learned:**
+
+- **Records:** `DB.getRoot(<book>)` gives the book's top-level nodes
+  (`reference`, `image`, `library`, `list`, `effects`, `modifiers`...).
+  `db_get` is not enough for a book: it returns `string` and `formattedtext`
+  alike, drops categories and pictures, and stops at `max` nodes. `db_xml`
+  writes a node as FG's own XML instead: every field with its real type,
+  formatted text as it is (`<b>`, `<i>`, `<u>`, `<list>`, `<table>`,
+  `<frame>`, `<linklist>`, `<h>`), links as `windowreference`s, and each
+  record in its `<category name>`. FG reports the book's own name as the
+  category of any node that has none, so only other names become categories.
+  A whole PHB (9.6 MB of XML) takes about 4 seconds.
+- **`DB.export` refuses module nodes** ("Only non-module database nodes can
+  be exported"). Don't copy module records into the campaign to get around
+  that. `db_xml` reads them where they are.
+- **2E keeps its records in `reference.*data` sections**: `spelldata`,
+  `classdata`, `racedata`, `skilldata`, `npcdata`, `equipmentdata`,
+  `magicitemdata`, story in `encounters`, the "Story Reference" entries in
+  `hiddenstory` (the 2E ruleset's `aDataMap`s in
+  `scripts/data_library_adnd.lua`). The converter reads each record there as
+  a record of its type, in its category, under the path pages link to
+  (`reference.spelldata.id-00012@<book>`). `scripts/check-reference-sections.mjs`
+  checks it.
+- **Pictures can't be read from scripts.** An `image` field has no value in
+  FG's Lua, so `db_xml` writes it empty. The script captures each one
+  instead:
+  - it opens the image record's `imagewindow` and asks its `image` control
+    for `getImageSize`;
+  - it sizes the window to fit (`setSize`, about 24×100 px of frame around
+    the control) and sets each view with `setViewpoint(x, y, 1)` for 1:1;
+  - **a picture's view coordinates start either at its top left corner or at
+    its centre**, depending on the picture. Don't assume either one. Call
+    `zoomToFit` first: `getViewpoint` then gives the picture's centre in its
+    own coordinates, and every 1:1 view is set relative to that. Assuming the
+    top left corner pushes the centre-based pictures off centre;
+  - it captures FG's window with PrintWindow, which reads FG's own drawing,
+    so windows on top don't matter. Screen grabs from a background shell
+    fail with "screen grab failed";
+  - pictures bigger than the window are captured in tiles and stitched;
+  - each capture is compared with FG's own `zoomToFit` view. A capture
+    that differs (mean difference above 12 per channel) is refused and
+    listed in `failed`, not saved. A good capture scores 0 to 8, a shifted
+    one well over 100;
+  - each is saved as WebP, quality 85, method 6.
+
+  `images.json` in the staging folder ties each picture record's path to its
+  file, name, size and grid, so the pictures are never lost. Page blocks link
+  to their picture record through `imagelink`, so the same file fills the
+  record and every block that shows it. FG's windows move while this runs.
+- **Check against FG:** the script compares every section's record count with
+  `DB.getChildCount` in FG. For the PHB: 1,007 pages, 551 spells, 319 items,
+  89 skills, 16 classes, 6 races, 20 tables, 54 pictures, all equal. Then
+  activate the book in a Maelstrom campaign and compare a page in FG and in
+  Books (`kraken_books` `page`). Bold, italics, tables with column spans,
+  frames and links should all match.
 
 ## Rules versus books
 

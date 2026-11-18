@@ -52,5 +52,10 @@ pack is made again.
   the record and picture counts after making one.
 - A pack's `ruleset` must be a Maelstrom game, or it shows in no campaign.
 - Do not hand-edit a pack while Maelstrom is open. Make a new one instead.
-- Encrypted store modules cannot be made into packs.
+- Encrypted store modules (FG's `vault` `.dat` files) are not listed and
+  cannot be read as files. Never try to decrypt them. A store book that FG
+  has loaded is read through the Kraken Agent Bridge instead, with
+  `scripts/fg-bridge-export/export_book.py` in the Maelstrom repository: its
+  records, with their formatting, plus its pictures captured from FG. See
+  "Books FG keeps encrypted" in `docs/kraken-pack-format.md`.
 - Packs are often licensed books: never upload or share them.

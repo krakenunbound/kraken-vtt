@@ -8,6 +8,9 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **Fantasy Grounds store books become packs too**: a book FG keeps encrypted (its store books, such as the AD&D 2E Player's Handbook, Dungeon Master Guide and Monstrous Manual) is read from FG while FG has it loaded, through the Kraken Agent Bridge: every page, record, table and link with its formatting, and its pictures captured from FG. One pack per book (`scripts/fg-bridge-export`).
+- **AD&D 2E books keep all their spells, gear, skills and story**: records a 2E book keeps by category (armor, weapons, gear...) were lost, all but the last category.
+
 - **Read aloud in a window**: the bubble's window button opens a Read aloud window, listing this session's read-alouds newest first. Move it, tuck it away or pop it out to another screen like any window; while it is open, read-alouds go there instead of a bubble.
 - **Read-aloud bubbles close with an ×** on their frame, and **Read aloud on screen** (Settings > You at the table) keeps them to the chat for anyone who prefers that. That setting and **Whose turn it is** are now kept with each person's other settings (before, they could switch themselves back on).
 - **Write your own adventure pages**: a story entry's pages can now be text, two columns, a heading, a picture alone or on the left or right of text, or a separator (scrollwork, knot, double rule, stars). Each page has a frame (parchment, read-aloud boxes, sidebar, note, warning, stone, gilded) and any background colour; read-aloud frames send their words to chat and over the map. Books' own framed boxes are drawn in their frames too.

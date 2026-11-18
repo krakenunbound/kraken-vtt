@@ -134,6 +134,14 @@ function rootRecords(root) {
           if (page.tagName === "category") for (const inner of elements(page)) out.push({ node: inner, category: page.getAttribute("name") || "", type: "refpage", parent: "reference.refmanualdata" });
           else out.push({ node: page, category: "", type: "refpage", parent: "reference.refmanualdata" });
         }
+      } else if (REFERENCE_TYPES[container.tagName]) {
+        // A section of records of one type (reference.spelldata), by category: each record on its own, in its group.
+        const parent = `reference.${container.tagName}`;
+        const type = REFERENCE_TYPES[container.tagName];
+        for (const record of elements(container)) {
+          if (record.tagName === "category") for (const inner of elements(record)) out.push({ node: inner, category: record.getAttribute("name") || "", type, parent });
+          else out.push({ node: record, category: "", type, parent });
+        }
       } else out.push({ node: container, category: "", type: "refindex", parent: "reference" });
     }
     return out;
@@ -372,8 +380,16 @@ function prepareModule(nameOrPath) {
 // skills, spells and gear under <reference> (reference.classes, by category),
 // not as records of their own: each becomes a record of its type here
 // (reference.classes.id-00001, type "class"), as a 5E book's are, so a
-// campaign's activation and the 3.5E rules find them.
-const REFERENCE_TYPES = { classes: "class", races: "race", feats: "feat", skills: "skill", spells: "spell", equipment: "item", tables: "table" };
+// campaign's activation and the 3.5E rules find them. FG's 2E books do the
+// same in the "...data" sections its ruleset maps (reference.spelldata,
+// reference.classdata...), and keep story text in reference.encounters and
+// their "Story Reference" entries in reference.hiddenstory.
+const REFERENCE_TYPES = {
+  classes: "class", races: "race", feats: "feat", skills: "skill", spells: "spell", equipment: "item", tables: "table",
+  classdata: "class", racedata: "race", skilldata: "skill", spelldata: "spell", npcdata: "npc", equipmentdata: "item", magicitemdata: "item", magicrefitemdata: "item",
+  backgrounddata: "background", questdata: "quest", encounters: "encounter", hiddenstory: "hiddenstory",
+};
+const REFERENCE_SECTION = new RegExp(String.raw`<reference[\s>][\s\S]*?<(${Object.keys(REFERENCE_TYPES).join("|")})[\s>]`);
 function spreadReference(records) {
   const out = [];
   for (const record of records) {
@@ -429,7 +445,7 @@ function parseModule(file, only) {
     if (!bytes) continue;
     const text = strFromU8(bytes);
     // A 3.5E book keeps its classes, races, gear... under <reference>: that section too, when they are wanted.
-    const wanted = only && [...only].some((type) => Object.values(REFERENCE_TYPES).includes(type)) && /<reference[\s>][\s\S]*?<(classes|races|equipment|feats|skills|spells|tables)[\s>]/.test(text) ? new Set([...only, "reference"]) : only;
+    const wanted = only && [...only].some((type) => Object.values(REFERENCE_TYPES).includes(type)) && REFERENCE_SECTION.test(text) ? new Set([...only, "reference"]) : only;
     const root = parseXml(wanted ? pickRoots(text, wanted) : text);
     for (const typeNode of elements(root)) {
       const type = typeNode.tagName.toLowerCase();
