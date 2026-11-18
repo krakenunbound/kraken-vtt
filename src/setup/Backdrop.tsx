@@ -295,11 +295,40 @@ export function Backdrop({ theme: index }: { theme: number }) {
   );
 }
 
-// The dots at the bottom: one for each scene; the current one lit.
+// How long each scene shows before the next, as a demo would.
+export const SCENE_SECONDS = 12;
+
+// The dots at the bottom: one for each scene; the current one lit. The scenes
+// go round by themselves (not while the pointer or focus is on the dots, nor
+// for those who asked for less motion); the wheel over the dots steps them.
 export function BackdropDots({ theme, onPick }: { theme: number; onPick: (index: number) => void }) {
   const [hover, setHover] = useState<number | null>(null);
+  const [held, setHeld] = useState(false);
+  const wheelAt = useRef(0);
+  const step = (by: number) => onPick((theme + by + THEMES.length) % THEMES.length);
+  useEffect(() => {
+    if (held || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // A new scene (by the timer or by hand) gets its full time.
+    const timer = window.setTimeout(() => onPick((theme + 1) % THEMES.length), SCENE_SECONDS * 1000);
+    return () => window.clearTimeout(timer);
+  }, [theme, held, onPick]);
   return (
-    <nav className="backdrop-dots" aria-label="Backgrounds">
+    <nav
+      className="backdrop-dots"
+      aria-label="Backgrounds"
+      data-cycling={held ? "paused" : "on"}
+      onMouseEnter={() => setHeld(true)}
+      onMouseLeave={() => setHeld(false)}
+      onFocus={() => setHeld(true)}
+      onBlur={() => setHeld(false)}
+      onWheel={(event) => {
+        // One scene a notch (a fast wheel or a touchpad sends many at once).
+        const now = performance.now();
+        if (event.deltaY === 0 || now - wheelAt.current < 180) return;
+        wheelAt.current = now;
+        step(event.deltaY > 0 ? 1 : -1);
+      }}
+    >
       {THEMES.map((item, index) => (
         <button
           key={item.id}

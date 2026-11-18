@@ -33,6 +33,23 @@ try {
     await page.screenshot({ path: shot });
     shots.push(shot);
   }
+  // The scenes go round by themselves (a demo), paused while the pointer is on the dots;
+  // the wheel over the dots steps them.
+  const shown = () => page.getAttribute("[data-backdrop]", "data-backdrop");
+  const next = (id, by = 1) => dots[(dots.indexOf(id) + by + dots.length) % dots.length];
+  const bar = await page.locator(".backdrop-dots").boundingBox();
+  const still = await shown();
+  await page.waitForTimeout(13500);
+  assert((await shown()) === still, `held while the pointer is on the dots (${still}, now ${await shown()})`);
+  await page.mouse.wheel(0, 120);
+  await page.waitForSelector(`[data-backdrop="${next(still)}"]`);
+  await page.waitForTimeout(400);
+  await page.mouse.wheel(0, -120);
+  await page.waitForSelector(`[data-backdrop="${still}"]`);
+  await page.mouse.move(bar.x + bar.width / 2, Math.max(2, bar.y - 300));
+  const before = await shown();
+  await page.waitForSelector(`[data-backdrop="${next(before)}"]`, { timeout: 15000 });
+  const cycled = `${before} → ${next(before)} by itself after 12 s; held under the pointer; the wheel steps forward and back`;
   // Opened again, a different scene.
   await app.close();
   app = await launch();
@@ -41,7 +58,7 @@ try {
   const second = await page.getAttribute("[data-backdrop]", "data-backdrop");
   assert(second !== first, `a different scene the next time: ${first} then ${second}`);
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok backdrops: six scenes (${dots.join(", ")}), each with its lights; opened with ${first}, then ${second}; ${shots[0]} ...`);
+  console.log(`ok backdrops: six scenes (${dots.join(", ")}), each with its lights; ${cycled}; opened with ${first}, then ${second}; ${shots[0]} ...`);
 } finally {
   await app.close();
 }
