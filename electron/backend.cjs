@@ -454,7 +454,7 @@ async function studioUrl() {
       ddFolders: studioSettings().dungeondraftFolders,
       packFolders: studioSettings().packFolders,
     };
-    options.kraken = { open: studioOpen, save: studioSave };
+    options.kraken = { open: studioOpen, save: studioSave, pick: studioPick };
     studioServer = createStudioServer({ ...options, port: 47821 }).catch(() => createStudioServer({ ...options, port: 0 }));
     studioServer.catch(() => {
       studioServer = null;
@@ -483,6 +483,26 @@ async function studioOpenImage({ sceneId, name, picture }) {
   const asset = await studio.imageImport(Buffer.from(picture), String(name || view.scene.name || "Map picture"));
   const token = bridge().openSession({ sceneId: view.scene.id, name: String(name || view.scene.name || ""), pictureId: asset.id, size: { width: asset.width, height: asset.height }, campaignId: hosted.id });
   return { url: `${url}/?kraken=${token}` };
+}
+// Where Map Studio's Open dialogs start: the hosted campaign's own maps folder,
+// Documents/Kraken VTT/Campaigns/<campaign>/Maps (made when first asked for);
+// with no campaign hosted, Documents/Kraken VTT/Maps.
+function campaignMapsFolder() {
+  const found = hosted ? campaigns.read(campaignFile()).find((item) => item.id === hosted.id) : null;
+  const name = String(found?.name ?? "").replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_").replace(/[. ]+$/, "").trim().slice(0, 80);
+  kraken.ready?.();
+  const folder = name ? path.join(kraken.root(), "Campaigns", name, "Maps") : path.join(kraken.root(), "Maps");
+  fs.mkdirSync(folder, { recursive: true });
+  return folder;
+}
+// Map Studio asks for a file (a map picture, or a project): Maelstrom's own dialog,
+// opened in that folder (a web page's file picker starts wherever it last was).
+async function studioPick(kind) {
+  const filters = kind === "project" ? [{ name: "Map Studio project", extensions: ["json", "zip"] }] : [{ name: "Map picture", extensions: ["png", "jpg", "jpeg", "webp"] }];
+  // The dialog is the app window's (this process has none); the GM may take their time.
+  const file = await ask("pick", { title: kind === "project" ? "Open a project file" : "Open a map picture", defaultPath: campaignMapsFolder(), filters }, 30 * 60000);
+  if (!file) return null;
+  return { name: path.basename(file), bytes: fs.readFileSync(file) };
 }
 async function studioOpen(token) {
   const found = bridge().session(token);

@@ -111,6 +111,17 @@ async function handleGet(req, res, url, webRoot) {
     await assets.whenReady();
     return json(res, await kraken.open(url.searchParams.get("token") || ""));
   }
+  // A file picked in Maelstrom's own dialog (it starts in the campaign's maps folder): its bytes, or 204 if none.
+  if (url.pathname === "/api/kraken/pick") {
+    if (!kraken?.pick) return json(res, { error: "Map Studio is not running inside Maelstrom." }, 400);
+    const picked = await kraken.pick(url.searchParams.get("kind") === "project" ? "project" : "picture");
+    if (!picked) {
+      res.writeHead(204);
+      return res.end();
+    }
+    res.writeHead(200, { "Content-Type": "application/octet-stream", "X-File-Name": encodeURIComponent(picked.name), "Cache-Control": "no-store" });
+    return res.end(picked.bytes);
+  }
   const pathname = decodeURIComponent(url.pathname);
   const q = query(url);
   if (pathname.startsWith("/api/")) await assets.whenReady();

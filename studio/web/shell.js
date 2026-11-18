@@ -244,11 +244,31 @@ window.KrakenShell = (() => {
     if (!e.target.closest('.menu')) document.querySelectorAll('.menu').forEach(m => { m.open = false; });
   });
   $('#closeMapBtn').onclick = $('#viewCloseBtn').onclick = () => { if (active >= 0 && $('#startScreen').hidden) close(active); else S.toast('No map is open.'); };
-  document.querySelectorAll('.open-picture').forEach(b => { b.onclick = () => $('#mapPictureInput').click(); });
+  // Inside Maelstrom, Open asks Maelstrom: its own dialog starts in the campaign's maps folder
+  // (Documents/Kraken VTT/Campaigns/<campaign>/Maps), where a web page's file picker would start
+  // wherever it last was. On its own (no Maelstrom), the page's picker.
+  const pickFile = async (kind, input) => {
+    let response = null;
+    try { response = await fetch('/api/kraken/pick?kind=' + kind, {cache: 'no-store'}); } catch { response = null; }
+    if (!response || response.status === 400) return input.click();
+    if (response.status === 204) return;
+    if (!response.ok) return S.toast('Could not open that file.');
+    const name = decodeURIComponent(response.headers.get('X-File-Name') || 'map');
+    const file = new File([await response.arrayBuffer()], name);
+    if (kind === 'picture') return openPicture(file);
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    input.dispatchEvent(new Event('change', {bubbles: true}));
+  };
+  const pickPicture = () => pickFile('picture', $('#mapPictureInput'));
+  const pickProject = () => pickFile('project', $('#fileInput'));
+  document.querySelectorAll('.open-picture').forEach(b => { b.onclick = pickPicture; });
+  $('#openBtn').onclick = pickProject;
   $('#mapPictureInput').onchange = e => { openPicture(e.target.files[0]); e.target.value = ''; };
-  const startActions = {picture: () => $('#mapPictureInput').click(), 
+  const startActions = {picture: pickPicture,
     generate: () => $('#layoutBtn').click(), blank: newBlank, project: () => $('#projectsBtn').click(),
-    file: () => $('#openBtn').click()};
+    file: pickProject};
   document.querySelectorAll('[data-start]').forEach(b => { b.onclick = () => startActions[b.dataset.start](); });
 
   let dragDepth = 0;

@@ -91,6 +91,36 @@ try {
   assert(!(await plain.$("#exportBtn")) && !(await plain.$("#exportFoundryBtn")) && !(await plain.$("#fgOpenBtn")), "no Fantasy Grounds or Foundry export in Kraken's Map Studio");
   report.push(`Map Studio opens from the sidebar with ${library.length} assets of its packs; no FG or Foundry export`);
 
+  // Open a map picture: Maelstrom's own dialog, starting in the campaign's maps folder
+  // (Documents/Kraken VTT/Campaigns/Studio/Maps; here the test's own tree). The dialog
+  // is stood in for: it records where it was asked to start and picks a picture there.
+  const mapsFolder = path.join(profile, "Campaigns", "Studio", "Maps");
+  const pngBytes = await (await import("sharp")).default({ create: { width: 320, height: 200, channels: 3, background: "#335577" } }).png().toBuffer();
+  const cellar = path.join(profile, "Cellar.png");
+  writeFileSync(cellar, pngBytes);
+  await app.evaluate(({ dialog }, file) => {
+    dialog.showOpenDialog = async (_window, options) => {
+      globalThis.lastPick = options;
+      return { canceled: false, filePaths: [file] };
+    };
+  }, cellar);
+  const started = await plain.evaluate(async () => {
+    const response = await fetch("/api/kraken/pick?kind=picture", { cache: "no-store" });
+    const body = await response.arrayBuffer(); return { status: response.status, name: decodeURIComponent(response.headers.get("X-File-Name") || ""), size: body.byteLength, text: response.status === 200 ? "" : new TextDecoder().decode(body) };
+  });
+  assert(started.status === 200 && started.name === "Cellar.png" && started.size === pngBytes.length, `Maelstrom hands Map Studio the picked file (${JSON.stringify(started)})`);
+  await plain.click('[data-start="picture"]');
+  // Map Studio asks the map's name and square size (its own dialog); accepted as offered.
+  await plain.waitForSelector("#pictureDialog[open]");
+  await plain.evaluate(() => document.querySelector("#pictureForm").requestSubmit());
+  await plain.waitForFunction(() => window.KrakenStudio?.project?.width === 320, null, { timeout: 15000 }).catch(async (error) => {
+    throw new Error(`the picked picture did not open: ${JSON.stringify(await plain.evaluate(() => ({ w: window.KrakenStudio?.project?.width, h: window.KrakenStudio?.project?.height, name: window.KrakenStudio?.project?.name, start: !document.querySelector("#startScreen")?.hidden, toast: document.querySelector(".toast")?.textContent ?? "" })))} (${error.message.split("\n")[0]})`);
+  });
+  const asked = await app.evaluate(() => globalThis.lastPick);
+  assert(path.resolve(asked.defaultPath) === path.resolve(mapsFolder), `the dialog starts in the campaign's maps folder (${asked.defaultPath}, not ${mapsFolder})`);
+  assert(existsSync(mapsFolder), "the campaign's maps folder is made");
+  report.push(`Open a map picture: Maelstrom's dialog starts in Campaigns/Studio/Maps (made for it); the picked picture opens`);
+
   // Settings > Map Studio art: the GM points it at a folder of art packs (nothing assumed); the art is read.
   const require = createRequire(import.meta.url);
   const { zipSync, strToU8 } = require("fflate");

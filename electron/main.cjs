@@ -121,10 +121,18 @@ async function onBackend(child, message) {
     else if (message.op === "updater") answer(true, await updaterOp(message.payload));
     else if (message.op === "studio") answer(true, await studioOp(message.payload));
     else if (message.op === "shell") answer(true, await shellOp(message.payload ?? {}));
+    else if (message.op === "pick") answer(true, await pickOp(message.payload ?? {}));
     else answer(false, `No such request: ${message.op}`);
   } catch (error) {
     answer(false, error instanceof Error ? error.message : String(error));
   }
+}
+
+// A file picked in the app's own dialog, for the backend (Map Studio's Open, starting in
+// the campaign's maps folder): its path, or null when the GM cancels.
+async function pickOp({ title, defaultPath, filters }) {
+  const picked = await dialog.showOpenDialog(mainWindow, { title: String(title ?? "Open"), defaultPath: String(defaultPath ?? ""), properties: ["openFile"], filters: Array.isArray(filters) ? filters : [] });
+  return picked.canceled || picked.filePaths.length === 0 ? null : picked.filePaths[0];
 }
 
 // The agent's view of the updater (kraken_updates): the same as the start screen's buttons.
