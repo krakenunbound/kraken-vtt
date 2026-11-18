@@ -167,6 +167,32 @@ try {
   assert(after.length > before && after.at(-1).roll?.formula === "3d6", "the 4 key rolls slot 4's dice");
   report.push("right-click a d6, pick up 3, click a slot: 3d6 kept; a click and the 4 key roll it");
 
+  // Dice in the hand thrown with the hand's swing (FG): a slow swing rolls them
+  // gently, a hard one fast. The click comes as the hand moves.
+  const swing = async (pixels, ms) => {
+    await page.click('.tray-die[aria-label="d20"]', { button: "right" });
+    await page.click('[data-many="5"]');
+    const startX = 700;
+    const startY = 500;
+    await page.mouse.move(startX, startY, { steps: 2 });
+    await page.waitForSelector('.dice-ghost.held[data-held="5d20"]');
+    const rolls = (await tool("kraken_chat_log", { count: 50 })).length;
+    for (let step = 1; step <= 10; step++) {
+      await page.mouse.move(startX + (pixels * step) / 10, startY - (pixels * step) / 30);
+      await settle(ms / 10);
+    }
+    await page.mouse.down();
+    await page.mouse.up();
+    for (let tries = 0; (await tool("kraken_chat_log", { count: 50 })).length === rolls && tries < 20; tries++) await settle(200);
+    await settle(3500);
+    return Number(await page.evaluate(() => document.documentElement.dataset.lastThrow ?? "0"));
+  };
+  const gentle = await swing(120, 500);
+  const hard = await swing(700, 120);
+  assert(hard > gentle * 4, `a hard swing throws much faster than a gentle one (gentle ${gentle}, hard ${hard} screens a second)`);
+  assert(gentle > 0.05 && gentle < 0.6 && hard > 1, `the speeds are the hand's (gentle ${gentle}, hard ${hard})`);
+  report.push(`5d20 in the hand thrown with the hand's swing: gentle ${gentle}, hard ${hard} screens a second`);
+
   // Picked up and put back with a right-click: no roll, nothing kept.
   const quiet = (await tool("kraken_chat_log", { count: 50 })).length;
   await page.click('.tray-die[aria-label="d8"]', { button: "right" });

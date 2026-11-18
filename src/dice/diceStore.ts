@@ -279,6 +279,8 @@ if (typeof window !== "undefined") {
 // A die dragged from the tray and let go: thrown the way the hand moved.
 export function setThrow(value: DiceThrow) {
   explicitThrow = { value, at: performance.now() };
+  // How hard (screens a second), for checks.
+  if (typeof document !== "undefined") document.documentElement.dataset.lastThrow = Math.hypot(value.vx, value.vy).toFixed(2);
 }
 
 function clamp(value: number, low: number, high: number) {
