@@ -212,7 +212,7 @@
     const target=S.project,payload=clone(target),thumbnail=thumb();
     saveChain=saveChain.catch(()=>{}).then(async()=>{
       const r=await fetch('/api/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({project:payload,thumbnail,id:target.projectId})});if(!r.ok)throw Error((await r.json()).error);
-      const data=await r.json();if(S.project===target){target.projectId=data.id;lastDocument=JSON.stringify(target);localStorage.setItem('kraken-map-autosave',lastDocument);$('#savedState').textContent='RECOVERY SAVED'}if(manual){S.toast('Project saved. Find it again under Open > Saved project.');S.markSaved()}
+      const data=await r.json();target.projectId=data.id;/* kept on the map even when another tab is in front, or its next save would start a second project */if(S.project===target){lastDocument=JSON.stringify(target);localStorage.setItem('kraken-map-autosave',lastDocument);$('#savedState').textContent='RECOVERY SAVED'}if(manual){S.toast('Project saved. Find it again under Open > Saved project.');S.markSaved()}
     }).catch(e=>{if(manual)S.toast('Save failed: '+e.message,true)});return saveChain;
   }
   function scheduleRecovery(p){
