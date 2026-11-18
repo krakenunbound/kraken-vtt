@@ -310,6 +310,7 @@
 									<id type="string">15</id>
 									<points type="string">700,-600,800,-600</points>
 									<toggleable type="number">1</toggleable>
+									<hidden type="number">1</hidden>
 								</occluder>
 								<occluder>
 									<id type="string">16</id>

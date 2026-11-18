@@ -15,7 +15,9 @@ const TYPES = {
   wall: ["Wall", []],
   terrain: ["Terrain", ["toggleable", "hidden", "single_sided", "terrain", "allow_move", "closed", "counterclockwise"]],
   door: ["Door", ["toggleable"]],
-  secret: ["Toggleable Wall", ["toggleable", "hidden"]],
+  secret: ["Secret Door", ["toggleable", "hidden"]],
+  // FG has one preset for both (toggleable + hidden); Maelstrom keeps them apart by type.
+  toggle: ["Toggleable Wall", ["toggleable", "hidden"]],
   window: ["Window", ["toggleable", "allow_vision"]],
   invisible: ["Invisible Wall", ["allow_vision"]],
   illusion: ["Illusionary Wall", ["allow_move"]],

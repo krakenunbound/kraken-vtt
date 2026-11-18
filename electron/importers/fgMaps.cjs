@@ -106,7 +106,9 @@ function imageScene(record, moduleName, sceneId, label = moduleName) {
     for (const occluder of list(layer.occluders?.occluder)) {
       const points = nums(occluder.points);
       if (occluder.closed && points.length >= 6) points.push(points[0], points[1]);
-      const door = occluder.toggleable ? 1 : 0;
+      // A toggleable occluder is a door; hidden too (FG's Toggleable Wall), a secret one the players do not see.
+      const secret = occluder.hidden && !occluder.allow_vision && !occluder.terrain && !occluder.pit;
+      const door = occluder.toggleable ? (secret ? 2 : 1) : 0;
       const vision = Boolean(occluder.allow_vision);
       const move = occluder.allow_move ? 0 : 20;
       const dir = occluder.single_sided ? (occluder.counterclockwise ? 2 : 1) : 0;

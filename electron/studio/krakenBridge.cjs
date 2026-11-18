@@ -29,12 +29,13 @@ const uid = (prefix) => `${prefix}-${crypto.randomBytes(6).toString("hex")}`;
 // --- walls --------------------------------------------------------------------
 
 // Kraken's wall kinds as Map Studio's types (its own default flags for each).
-const STUDIO_TYPE = { wall: "wall", terrain: "terrain", door: "door", secret: "secret", toggle: "secret", window: "window", invisible: "invisible", illusion: "illusion", ethereal: "illusion", shadow: "shadow" };
+const STUDIO_TYPE = { wall: "wall", terrain: "terrain", door: "door", secret: "secret", toggle: "toggle", window: "window", invisible: "invisible", illusion: "illusion", ethereal: "illusion", shadow: "shadow" };
 const TYPE_FLAGS = {
   wall: [],
   terrain: ["terrain"],
   door: ["toggleable"],
   secret: ["toggleable", "hidden"],
+  toggle: ["toggleable", "hidden"],
   window: ["toggleable", "allow_vision"],
   invisible: ["allow_vision"],
   illusion: ["allow_move"],
@@ -60,14 +61,14 @@ function krakenWalls(walls, origin) {
     if (flags.has("closed") && points.length >= 6) points.push(points[0], points[1]);
     const type = wall.type;
     // Map Studio's types Kraken keeps as they are; a pit (Kraken has none) stops movement only.
-    const kind = { wall: "wall", terrain: "terrain", door: "door", secret: "secret", window: "window", invisible: "invisible", illusion: "illusion", shadow: "shadow", pit: "invisible" }[type] ?? (flags.has("toggleable") ? "door" : "wall");
+    const kind = { wall: "wall", terrain: "terrain", door: "door", secret: "secret", toggle: "toggle", window: "window", invisible: "invisible", illusion: "illusion", shadow: "shadow", pit: "invisible" }[type] ?? (flags.has("toggleable") ? "door" : "wall");
     const door = kind === "door" ? 1 : kind === "secret" ? 2 : 0;
     const ds = door ? (flags.has("locked") ? 2 : flags.has("open") ? 1 : 0) : 0;
     const dir = flags.has("single_sided") ? (flags.has("counterclockwise") ? 2 : 1) : 0;
     for (let i = 0; i + 3 < points.length; i += 2) {
       const [x1, y1, x2, y2] = [points[i] + origin.x, points[i + 1] + origin.y, points[i + 2] + origin.x, points[i + 3] + origin.y];
       if (x1 === x2 && y1 === y2) continue;
-      out.push({ id: `${String(wall.id ?? uid("w")).slice(0, 60)}-${i / 2}`, x1: round(x1), y1: round(y1), x2: round(x2), y2: round(y2), kind, door, ds, dir, ...(flags.has("hidden") && kind !== "secret" ? { hidden: true } : {}) });
+      out.push({ id: `${String(wall.id ?? uid("w")).slice(0, 60)}-${i / 2}`, x1: round(x1), y1: round(y1), x2: round(x2), y2: round(y2), kind, door, ds, dir, ...(flags.has("hidden") && kind !== "secret" && kind !== "toggle" ? { hidden: true } : {}) });
     }
   }
   return out;

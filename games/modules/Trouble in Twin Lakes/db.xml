@@ -595,16 +595,19 @@
 									<id type="string">19</id>
 									<points type="string">-1350,-50,-1350,-150</points>
 									<toggleable type="number">1</toggleable>
+									<hidden type="number">1</hidden>
 								</occluder>
 								<occluder>
 									<id type="string">20</id>
 									<points type="string">-1350,550,-1350,450</points>
 									<toggleable type="number">1</toggleable>
+									<hidden type="number">1</hidden>
 								</occluder>
 								<occluder>
 									<id type="string">21</id>
 									<points type="string">-650,650,-650,550</points>
 									<toggleable type="number">1</toggleable>
+									<hidden type="number">1</hidden>
 								</occluder>
 								<occluder>
 									<id type="string">22</id>

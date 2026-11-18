@@ -388,7 +388,11 @@ async function portedTests(nodeResults) {
   }
 
   // occluders.py: each FG type's flags read back as that type.
-  for (const [type, [, flags]] of Object.entries(occluders.TYPES)) assert(occluders.typeFromFlags(flags) === type, `${type}'s flags read in as ${type}`);
+  // FG saves only flags: a Toggleable Wall (Maelstrom's toggle) has a secret door's, and reads in as one.
+  for (const [type, [, flags]] of Object.entries(occluders.TYPES)) {
+    const expected = type === "toggle" ? "secret" : type;
+    assert(occluders.typeFromFlags(flags) === expected, `${type}'s flags read in as ${expected}`);
+  }
 
   // test_fg_maps.py (reading)
   const fg = nodeResults.fg;

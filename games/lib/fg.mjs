@@ -94,7 +94,8 @@ function referenceManual(moduleName, chapters) {
 
 // An image record (a map or a handout): picture path inside the module, its
 // grid, and walls/doors given in picture pixels (top-left origin, y down), as
-// [{ points: [x1, y1, x2, y2, ...], door?, secret?, closed? }].
+// [{ points: [x1, y1, x2, y2, ...], door?, secret?, closed? }]. A secret door is
+// FG's toggleable and hidden occluder (its handle hidden from the players).
 export function imageRecord({ name, file, width, height, grid = 70, walls = [], category = "" }) {
   // FG's points: from the picture's centre, y up.
   const fg = (points) => {
@@ -105,7 +106,8 @@ export function imageRecord({ name, file, width, height, grid = 70, walls = [], 
   const occluder = walls.map((wall, index) => ({
     id: String(index),
     points: fg(wall.points),
-    ...(wall.door ? { toggleable: true } : {}),
+    ...(wall.door || wall.secret ? { toggleable: true } : {}),
+    ...(wall.secret ? { hidden: true } : {}),
     ...(wall.closed ? { closed: true } : {}),
   }));
   return {

@@ -22,7 +22,7 @@ function assert(condition, message) {
 const scene = { id: "fg-test-yard", name: "Yard", width: 1400, height: 1000, padding: 0.25, grid: { size: 70, distance: 5 } };
 const origin = bridge.originOf(scene);
 assert(origin.x === 350 && origin.y === 280, `the grid's origin with padding (${JSON.stringify(origin)})`);
-const kinds = ["wall", "terrain", "door", "secret", "window", "invisible", "illusion", "shadow"];
+const kinds = ["wall", "terrain", "door", "secret", "window", "invisible", "illusion", "shadow", "toggle"];
 const walls = kinds.map((kind, i) => ({ id: `w${i}`, x1: origin.x + 10 * i, y1: origin.y + 5, x2: origin.x + 10 * i + 40, y2: origin.y + 60, kind, door: kind === "door" ? 1 : kind === "secret" ? 2 : 0, ds: kind === "door" ? 1 : kind === "secret" ? 2 : 0, dir: i === 0 ? 2 : 0 }));
 const lights = [{ id: "l1", x: origin.x + 100, y: origin.y + 200, bright: 20, dim: 40, color: "#FFAA33", on: true, animation: "flicker", speed: 0.5 }];
 const fx = [{ id: "f1", name: "Rain", type: "rain", intensity: 0.4, speed: 0.6, direction: 90, mask: { use: true, mode: "inside", polygons: [[origin.x, origin.y, origin.x + 200, origin.y, origin.x + 200, origin.y + 200]] }, shown: true }];
@@ -30,6 +30,14 @@ const view = { scene, walls, lights, fx, studio: null };
 const project = bridge.projectFor({ view, pictureId: picture.id, size: { width: picture.width, height: picture.height }, name: "Yard" });
 assert(project.walls.length === kinds.length && project.walls[2].type === "door" && project.walls[2].flags.includes("open"), "walls as Map Studio's");
 assert(project.walls[3].type === "secret" && project.walls[3].flags.includes("locked"), "a locked secret door");
+assert(project.walls[8].type === "toggle", `a toggleable wall stays a toggleable wall, not a secret door (${project.walls[8].type})`);
+// A book's secret door (games/lib/fg.mjs) is FG's hidden toggleable occluder, and reads back as secret.
+{
+  const { imageRecord } = await import("../games/lib/fg.mjs");
+  const record = imageRecord({ name: "M", file: "m.webp", width: 100, height: 100, walls: [{ points: [0, 0, 50, 0], door: true, secret: true }, { points: [0, 10, 50, 10], door: true }] });
+  const [hidden, plain] = record.image.layers.layer[0].occluders.occluder;
+  assert(hidden.toggleable && hidden.hidden && plain.toggleable && !plain.hidden, `a book keeps its secret door hidden (${JSON.stringify([hidden, plain])})`);
+}
 assert(project.walls[0].flags.includes("single_sided") && project.walls[0].flags.includes("counterclockwise"), "a one-sided wall");
 assert(project.walls[0].points[0] === 0 && project.walls[0].points[1] === 5, "points from the picture's corner");
 // Map Studio's own checks accept it (with the picture known).
