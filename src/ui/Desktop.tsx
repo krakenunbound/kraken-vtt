@@ -12,7 +12,7 @@ import { BookRecordWindow, listOf, RecordsWindow, RecordWindow, sidebarLists } f
 import { shareDrop, UndoToast } from "../books/RecordEditor";
 import { CombatTracker } from "../combat/CombatTracker";
 import { PartySheet } from "../party/PartySheet";
-import { savedSignIn, type Session } from "../session/useSession";
+import { savedSignIn, type QuickSlot, type Session } from "../session/useSession";
 import { diceStore } from "../dice/diceStore";
 import { agentCommands } from "./agentCommands";
 import { ChatDock } from "./ChatDock";
@@ -41,7 +41,7 @@ import { StudioWindow } from "../studio/StudioWindow";
 import { mapWindow, studioOpener } from "../table/imageWindow";
 import { Icon } from "./icons";
 import { sound } from "../sound/soundEngine";
-import { FloatingWindow, useWindows, WindowTray } from "./Windows";
+import { FloatingWindow, useWindows, WindowTray, type OpenWindow } from "./Windows";
 import { AssistantWindow } from "./AssistantWindow";
 import { CardsWindow } from "../cards/CardsWindow";
 import { cardsStore } from "../cards/cardsStore";
@@ -430,6 +430,22 @@ export function Desktop({
   ];
   const launchers = [...tools, ...groups.flatMap((group) => group.entries)];
   const entryOpen = (entry: SidebarEntry) => windows.windows.some((item) => item.key === (entry.payload ? `${entry.kind}:${entry.payload}` : entry.kind));
+  // The link a record's window carries (its anchor, top left): what it shows, to drag anywhere.
+  const linkOf = (item: OpenWindow): QuickSlot | null => {
+    const id = item.payload ?? "";
+    if (!id) return null;
+    const label = item.title;
+    if (item.kind === "sheet") return { kind: "sheet", record: id, label };
+    if (item.kind === "note") return { kind: "note", record: id, label };
+    if (item.kind === "record") {
+      const type = session.records[id]?.type;
+      return type === "character" ? { kind: "sheet", record: id, label } : type === "note" ? { kind: "note", record: id, label } : { kind: "record", record: id, label };
+    }
+    if (item.kind === "bookrecord") return { kind: "record", record: id, label };
+    if (item.kind === "picture" && id.includes("|")) return { kind: "picture", book: id.split("|")[0], file: id.split("|").slice(1).join("|"), label };
+    if (item.kind === "book") return { kind: "book", book: id, label };
+    return null;
+  };
   const launch = (entry: SidebarEntry) => (entry.openOnly ? windows.open(entry.kind, entry.title, entry.payload) : windows.toggle(entry.kind, entry.title, entry.payload));
   // The Character Wizard, a new one each time, in a window of its own (which shows the new sheet when it
   // is done); one still open closes first.
@@ -756,7 +772,7 @@ export function Desktop({
                 )}
               </FloatingWindow>
             ) : (
-            <FloatingWindow key={item.key} item={item}>
+            <FloatingWindow key={item.key} item={item} link={linkOf(item)}>
               {item.kind === "characters" ? <CharacterPanel session={session} create={String(item.payload ?? "").startsWith("new")} onTitle={(title) => windows.open("characters", title, item.payload)} /> : null}
               {item.kind === "records" ? <RecordsWindow session={session} only={item.payload} onOpen={(record) => windows.open("record", record.name, record.id)} /> : null}
               {item.kind === "adventure" && item.payload && gm ? <AdventureList session={session} kind={item.payload as AdventureKind} onStory={(path, name) => windows.open("story", name, path)} /> : null}

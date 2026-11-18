@@ -409,6 +409,9 @@ li.empty-state { list-style: none; }
 .window-title span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .window-close { padding: 2px 4px; background: transparent; border-color: transparent; color: var(--muted); }
 .window-close:hover { color: var(--text); border-color: var(--panel-edge); }
+/* A record's anchor (FG's link icon), top left of its window: dragged to link the record anywhere. */
+.window-anchor { width: 20px; height: 20px; margin-right: 6px; flex: none; cursor: grab; border-radius: 50%; filter: drop-shadow(0 0 3px rgba(80, 200, 255, 0.5)); }
+.window-anchor:active { cursor: grabbing; }
 /* Minimized windows: chips in a row just above the quick slots, each bringing its window back. */
 .window-tray { position: absolute; left: 50%; bottom: 74px; transform: translateX(-50%); z-index: 520; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 999px; background: rgba(12, 16, 22, 0.6); max-width: min(900px, 70vw); pointer-events: auto; }
 .window-tray.moved { bottom: auto; transform: none; }

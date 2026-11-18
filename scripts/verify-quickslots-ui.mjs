@@ -217,6 +217,39 @@ try {
   assert(gentle > 0.05 && gentle < 0.6 && hard > 1, `the speeds are the hand's (gentle ${gentle}, hard ${hard})`);
   report.push(`5d20 in the hand: pressing grips them (no roll), letting go mid-swing throws them that fast: gentle ${gentle}, hard ${hard} screens a second`);
 
+  // A record's anchor (FG's link icon, top left of its window): a sheet's onto a quick slot, an NPC's onto the combat tracker.
+  const linked = await tool("kraken_record_create", { type: "character", name: "Anchored Hero", data: { level: 1, hp: { total: 8, wounds: 0 } } });
+  await tool("kraken_windows", { action: "open", kind: "sheet", record: linked.id });
+  const sheetAnchor = page.locator(`[data-window-anchor="sheet:${linked.id}"]`);
+  await sheetAnchor.waitFor();
+  await sheetAnchor.dragTo(page.locator(slot(6)));
+  for (let wait = 0; wait < 20 && (await slots())[6]?.record !== linked.id; wait++) await settle(150);
+  const kept6 = (await slots())[6];
+  assert(kept6?.kind === "sheet" && kept6.record === linked.id, `the sheet's anchor onto slot 7 keeps a link to it (${JSON.stringify(kept6)})`);
+  await tool("kraken_windows", { action: "close", kind: "sheet", record: linked.id });
+  const goblin = await tool("kraken_record_create", { type: "npc", name: "Anchor Goblin", data: { hp: 7, ac: 15 } });
+  await tool("kraken_windows", { action: "open", kind: "combat" });
+  await tool("kraken_windows", { action: "open", kind: "record", record: goblin.id });
+  const npcAnchor = page.locator(`[data-window-anchor="record:${goblin.id}"]`);
+  await npcAnchor.waitFor();
+  // The record window opened over the tracker: move it aside by its title bar, as a GM would.
+  {
+    const bar = await page.locator('.window[data-window="record"] .window-title').boundingBox();
+    const tracker = await page.locator('.window[data-window="combat"]').boundingBox();
+    await page.mouse.move(bar.x + 60, bar.y + bar.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(tracker.x + tracker.width + 80, bar.y + bar.height / 2, { steps: 8 });
+    await page.mouse.up();
+  }
+  await npcAnchor.dragTo(page.locator('.window[data-window="combat"] .window-body'));
+  let onTracker = false;
+  for (let wait = 0; wait < 20 && !onTracker; wait++) {
+    onTracker = (await tool("kraken_combat", { action: "view" })).entries.some((entry) => entry.name.startsWith("Anchor Goblin"));
+    if (!onTracker) await settle(150);
+  }
+  assert(onTracker, "the NPC's anchor onto the combat tracker adds it to the fight");
+  report.push("a record's anchor (top left of its window) dragged: a sheet onto a quick slot keeps its link; an NPC onto the combat tracker joins the fight");
+
   // Picked up and put back with a right-click: no roll, nothing kept.
   const quiet = (await tool("kraken_chat_log", { count: 50 })).length;
   await page.click('.tray-die[aria-label="d8"]', { button: "right" });

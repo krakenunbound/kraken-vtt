@@ -28,8 +28,9 @@ export function slotDrag(slot: QuickSlot) {
       event.dataTransfer.setData(SLOT_DRAG, JSON.stringify(slot));
       // A sound goes into a book's story as well.
       if (slot.kind === "sound") event.dataTransfer.setData("text/kraken-sound", JSON.stringify({ sound: slot.sound, kind: slot.soundKind, label: slot.label }));
-      // A character goes onto the combat tracker or the map as well.
-      if (slot.kind === "sheet") event.dataTransfer.setData("application/x-kraken-record", slot.record);
+      // A character (or an NPC, a campaign record) goes onto the combat tracker, the party sheet or the map as well.
+      // (A book's own record, "book|path", is not the campaign's: it does not.)
+      if ((slot.kind === "sheet" || slot.kind === "record") && !slot.record.includes("|")) event.dataTransfer.setData("application/x-kraken-record", slot.record);
       event.dataTransfer.effectAllowed = "copyMove";
     },
   };
@@ -63,7 +64,8 @@ export function useOpenLink(session: Session) {
     else if (link.kind === "picture") openPicture({ book: link.book, file: link.file, name: link.label });
     else if (link.kind === "sheet") windows.open("sheet", link.label, link.record);
     else if (link.kind === "note") windows.open("note", link.label, link.record);
-    else if (link.kind === "record") windows.open("record", link.label, link.record);
+    // A book's own record ("book|path"): its window in the book; a campaign record: its own.
+    else if (link.kind === "record") windows.open(link.record.includes("|") ? "bookrecord" : "record", link.label, link.record);
     // Dice and macros run as the chat would run them (who speaks, the tower).
     else if (link.kind === "dice") {
       if (chatRunner.run) chatRunner.run(`/roll ${link.formula}`);

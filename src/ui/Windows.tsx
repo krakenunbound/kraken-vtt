@@ -1,4 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import anchorMark from "../assets/maelstrom-mark.webp";
+import type { QuickSlot } from "../session/useSession";
+import { slotDrag } from "./QuickSlots";
 import { BRAND } from "../../shared/brand.mjs";
 import { Icon } from "./icons";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
@@ -331,7 +334,8 @@ function fitToScreen(place: Placement): Placement {
 // One window's frame: a title bar to drag, pop-out and close buttons, a resize
 // corner. Dragged past the edge of the main window it pops out, and keeps
 // following the pointer until it is let go.
-export function FloatingWindow({ item, children }: { item: OpenWindow; children: ReactNode }) {
+// The anchor a record's window carries (FG's link icon): dragged anywhere that takes a link.
+export function FloatingWindow({ item, children, link }: { item: OpenWindow; children: ReactNode; link?: QuickSlot | null }) {
   const { focus, move, close, popOut, dockBack, popup, minimize } = useWindows();
   const drag = useRef<{ mode: "move" | "size"; startX: number; startY: number; grabX: number; grabY: number; place: Placement } | null>(null);
   const live = useRef({ item, move, popOut, popup });
@@ -464,6 +468,17 @@ export function FloatingWindow({ item, children }: { item: OpenWindow; children:
       onPointerDown={() => focus(item.key)}
     >
       <header className="window-title" onPointerDown={begin("move")} onDoubleClick={() => move(item.key, fitToScreen(firstPlace(item.kind)))}>
+        {link ? (
+          <img
+            className="window-anchor"
+            src={anchorMark}
+            alt=""
+            data-window-anchor={item.key}
+            title={`${link.label}: drag this to link it anywhere (a quick slot, the party sheet, the combat tracker, a note, a story entry, chat)`}
+            onPointerDown={(event) => event.stopPropagation()}
+            {...slotDrag(link)}
+          />
+        ) : null}
         <span>{item.title}</span>
         <div className="window-tools" ref={setSlot} onPointerDown={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()} />
         {item.kind === "map" ? (
