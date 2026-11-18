@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Picture } from "../characters/ArtPicker";
 import { Icon } from "../ui/icons";
-import { hasLink, linkFrom } from "../ui/QuickSlots";
+import { hasLink, linkFrom, TOKEN_DRAG } from "../ui/QuickSlots";
 import type { Session } from "../session/useSession";
 import { CrewSheet } from "./CrewSheet";
 import { carriesCreatureDrop, dropOnCreature } from "../effects/drops";
@@ -178,6 +178,14 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                 <li
                   key={member.id}
                   data-member={member.id}
+                  // Dragged onto a map (the table's, or Map Studio's Play test), the character's token goes there.
+                  draggable={gm}
+                  onDragStart={(event) => {
+                    if (!gm || (event.target as HTMLElement).closest("input, button, select")) return;
+                    event.dataTransfer.setData("application/x-kraken-record", member.id);
+                    event.dataTransfer.setData(TOKEN_DRAG, JSON.stringify({ name: member.name, record: member.id }));
+                    event.dataTransfer.effectAllowed = "copy";
+                  }}
                   // An effect or a roll dropped on a member lands on that character (its token or tracker entry).
                   onDragOver={(event) => {
                     if (carriesCreatureDrop([...event.dataTransfer.types])) event.preventDefault();

@@ -41,7 +41,9 @@ window.KrakenPlay = (() => {
     devil: ['Devil\'s sight 120 ft (sees in any darkness)', 120, 'devil'],
   };
   const st = {token: null, light: 'torch', vision: 'normal', darkness: 0.85, sky: '', tint: null, snap: true, collide: true, showWalls: false,
-    facing: 0, doors: {}, drag: null, project: null};
+    facing: 0, doors: {}, drag: null, project: null,
+    // Characters dragged in from Maelstrom (the Party Sheet, the tracker): tokens of their own; who: the one whose eyes the test uses.
+    party: [], who: null};
   const active = () => S().mode === 'play';
 
   // --- the map's grid -------------------------------------------------------
@@ -128,6 +130,20 @@ window.KrakenPlay = (() => {
     }
     if (Math.hypot(to.x - from.x, to.y - from.y) > 1) st.facing = Math.atan2(to.y - from.y, to.x - from.x);
     st.token = to;
+    if (st.who) Object.assign(st.who, {x: to.x, y: to.y, facing: st.facing});
+  }
+  // A character on the test map (dropped from the Party Sheet or the tracker, or the agent's render): its own token, and the test sees with it.
+  function addCharacter(p, {name, record}, at) {
+    const q = st.snap ? snapCentre(p, at) : at;
+    let one = st.party.find(c => record && c.record === record);
+    if (!one) { one = {name: String(name || 'Character').slice(0, 40), record: record || null, x: q.x, y: q.y, facing: 0}; st.party.push(one); }
+    else Object.assign(one, {x: q.x, y: q.y});
+    lookWith(one);
+    return one;
+  }
+  function lookWith(one) {
+    if (st.who) Object.assign(st.who, {x: st.token.x, y: st.token.y, facing: st.facing});
+    st.who = one; st.token = {x: one.x, y: one.y}; st.facing = one.facing || 0;
   }
 
   // --- doors ------------------------------------------------------------------
@@ -165,6 +181,12 @@ window.KrakenPlay = (() => {
     return poly;
   }
   let wallKey = '';
+  const keyOfWalls = p => JSON.stringify([p.walls.length, p.walls.map(w => w.points.length + w.points[0] + w.points.at(-1)).join(','), st.doors, p.walls.filter(w => (w.flags || []).includes('open')).length]);
+  // What a light reaches past the walls (the editor's light preview too): kept until the walls or the light move.
+  function lightPolygon(p, l, radius) {
+    wallKey = keyOfWalls(p);
+    return shape('light', l, radius, lightWalls(p, l));
+  }
   function trace(ctx, poly) { poly.forEach((v, i) => i ? ctx.lineTo(v.x, v.y) : ctx.moveTo(v.x, v.y)); ctx.closePath(); }
   function cone(ctx, l) {
     if (l.cone >= 360) return;
@@ -176,14 +198,14 @@ window.KrakenPlay = (() => {
   function render(ctx, zoom) {
     if (!active()) return;
     const p = S().project;
-    if (p !== st.project) { st.project = p; st.doors = {}; st.token = null; }
+    if (p !== st.project) { st.project = p; st.doors = {}; st.token = null; st.party = []; st.who = null; }
     if (!st.token) st.token = snapCentre(p, {x: p.width / 2, y: p.height / 2});
     const scale = Math.min(1, 2400 / Math.max(p.width, p.height));
     layer ||= document.createElement('canvas');
     layer.width = Math.ceil(p.width * scale); layer.height = Math.ceil(p.height * scale);
     const g = layer.getContext('2d');
     g.setTransform(scale, 0, 0, scale, 0, 0);
-    wallKey = JSON.stringify([p.walls.length, p.walls.map(w => w.points.length + w.points[0] + w.points.at(-1)).join(','), st.doors, p.walls.filter(w => (w.flags || []).includes('open')).length]);
+    wallKey = keyOfWalls(p);
     const v = VISION[st.vision], sight = shape('sight', st.token, Math.hypot(p.width, p.height), sightWalls(p));
     const dark = st.darkness;
     // 0. The outdoor light's colour over the map (dawn's warmth, moonlight's blue).
@@ -265,8 +287,19 @@ window.KrakenPlay = (() => {
       ctx.fillText(locked ? '🔒' : open ? '⇄' : '▮', c.x, c.y + 1 / zoom);
       ctx.restore();
     }
+    // The other characters, where they were left; a click looks through their eyes.
+    const tr = p.grid * 0.38;
+    ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (const c of st.party) {
+      if (c === st.who) continue;
+      ctx.fillStyle = '#6b7280'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2 / zoom;
+      ctx.beginPath(); ctx.arc(c.x, c.y, tr, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      label(ctx, c.name, c.x, c.y + tr + 3 / zoom, zoom);
+    }
+    if (st.who) label(ctx, st.who.name, st.token.x, st.token.y + tr + 3 / zoom, zoom);
+    ctx.restore();
     // The token, with its facing.
-    const t = st.token, tr = p.grid * 0.38;
+    const t = st.token;
     ctx.save();
     ctx.fillStyle = '#2c7be5'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3 / zoom;
     ctx.beginPath(); ctx.arc(t.x, t.y, tr, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
@@ -275,6 +308,11 @@ window.KrakenPlay = (() => {
     ctx.lineTo(t.x + Math.cos(st.facing - 2.5) * tr * 0.6, t.y + Math.sin(st.facing - 2.5) * tr * 0.6); ctx.closePath();
     ctx.fillStyle = '#fff'; ctx.fill();
     ctx.restore();
+  }
+
+  function label(ctx, text, x, y, zoom) {
+    ctx.font = `bold ${Math.max(11, 13 / zoom)}px sans-serif`; ctx.lineWidth = 3 / zoom; ctx.strokeStyle = '#000'; ctx.fillStyle = '#fff';
+    ctx.strokeText(text, x, y); ctx.fillText(text, x, y);
   }
 
   // --- input ------------------------------------------------------------------
@@ -289,6 +327,8 @@ window.KrakenPlay = (() => {
       else cur.open = !cur.open;
       st.doors[d.id] = cur; S().draw(); return true;
     }
+    const other = st.party.find(c => c !== st.who && Math.hypot(q.x - c.x, q.y - c.y) <= p.grid * 0.6);
+    if (other) { lookWith(other); S().draw(); return true; }
     if (st.token && Math.hypot(q.x - st.token.x, q.y - st.token.y) <= p.grid * 0.6) {
       st.drag = true; $('#mapCanvas').setPointerCapture(e.pointerId); return true;
     }
@@ -365,7 +405,39 @@ window.KrakenPlay = (() => {
   }
   // While testing, the editor's own wall lines, light markers and trap outlines are hidden (players never see them).
   const hidesEditing = () => active() && !st.showWalls;
-  return {render, pointerDown, pointerMove, pointerUp, keyDown, modeChanged, hidesEditing, LIGHTS, VISION, _state: st,
+  // A character dragged in from Maelstrom (its Party Sheet, its tracker) onto the map: Play test starts, with them on that spot.
+  const CHARACTER = ['application/x-kraken-token', 'text/kraken-slot', 'application/x-kraken-record', 'application/x-kraken-ct'];
+  const carries = ev => [...(ev.dataTransfer?.types || [])].some(type => CHARACTER.includes(type));
+  function who(ev) {
+    const d = ev.dataTransfer, read = type => { try { return JSON.parse(d.getData(type) || 'null'); } catch { return null; } };
+    const token = read('application/x-kraken-token');
+    if (token) return {name: token.name, record: token.record || token.ct || null};
+    const slot = read('text/kraken-slot');
+    if (slot && (slot.kind === 'sheet' || slot.kind === 'record')) return {name: slot.label, record: slot.record};
+    const id = d.getData('application/x-kraken-record') || d.getData('application/x-kraken-ct');
+    return id ? {name: 'Character', record: id} : null;
+  }
+  document.addEventListener('dragover', ev => { if (carries(ev) && ev.target?.closest?.('#viewport')) { ev.preventDefault(); ev.dataTransfer.dropEffect = 'copy'; } });
+  document.addEventListener('drop', ev => {
+    if (!carries(ev) || !ev.target?.closest?.('#viewport')) return;
+    const one = who(ev);
+    if (!one) return;
+    ev.preventDefault();
+    if (!active()) S().switchMode('play');
+    addCharacter(S().project, one, S().point(ev));
+    S().draw();
+    S().toast(`${st.who.name} is on the map: the test sees with them. Click another character to look through their eyes.`);
+  });
+  // The same, handed over by Maelstrom (its drop zone over Map Studio: a browser carries no drag into another site's frame).
+  window.addEventListener('message', ev => {
+    if (ev.source !== window.parent || ev.data?.kind !== 'kraken-token-drop' || !S()?.project) return;
+    const {token, x, y} = ev.data;
+    if (!active()) S().switchMode('play');
+    addCharacter(S().project, {name: token?.name, record: token?.record}, S().point({clientX: Number(x), clientY: Number(y)}));
+    S().draw();
+    S().toast(`${st.who.name} is on the map: the test sees with them. Click another character to look through their eyes.`);
+  });
+  return {render, lightPolygon, addCharacter, pointerDown, pointerMove, pointerUp, keyDown, modeChanged, hidesEditing, LIGHTS, VISION, _state: st,
     // for test_play.js
     _test: {sightWalls, lightWalls, moveWalls, blocked, moveTo, px, snapCentre, isOpen, isLocked, doors, doorPoint, lightsFor, feetPerSquare}};
 })();

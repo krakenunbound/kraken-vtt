@@ -246,7 +246,12 @@ window.KrakenLighting = (() => {
     if (dim <= 0) return;
     const k = (l.strength ?? 100) / 100 * a.k, g = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, dim);
     for (const [pos, v] of profile(l, bright, dim)) g.addColorStop(Math.min(1, Math.max(0, pos)), l.inverse ? rgba('#000000', 0.85 * v * k) : rgba(l.color, 0.67 * v * k));
+    // Only as far as it reaches past the walls (as at the table and in Play test).
+    const reach = l.dim * grid / 5, poly = reach > 0 ? window.KrakenPlay?.lightPolygon?.(S().project, l, reach) : null;
+    ctx.save();
+    if (poly?.length > 2) { ctx.beginPath(); poly.forEach((v, i) => i ? ctx.lineTo(v.x, v.y) : ctx.moveTo(v.x, v.y)); ctx.closePath(); ctx.clip(); }
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(l.x, l.y, dim, 0, 7); ctx.fill();
+    ctx.restore();
   }
   // Animated lights redraw the map on their own (the weather moves on its own canvas).
   let timer = 0, cost = 0;

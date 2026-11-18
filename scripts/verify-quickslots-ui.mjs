@@ -307,6 +307,18 @@ try {
   const kept = await tool("kraken_quickslots");
   assert((kept.slots ?? kept)[6]?.text === "/roll 2d20kh1", "the host keeps a macro slot");
   report.push("/roll 4d6k3 dragged from the chat's entry: a click, the 6 key and kraken_quickslots press run it");
+  // The grip, docked: grabbed and moved a little, the bar moves with the pointer (no jump to the side).
+  const grip = await page.locator('[data-action="quickslots-move"]').boundingBox();
+  const barAt = async () => (await page.locator(".quick-slots").boundingBox()).x;
+  const docked = await barAt();
+  await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(grip.x + grip.width / 2 + 30, grip.y + grip.height / 2 - 40, { steps: 4 });
+  const moved = await barAt();
+  await page.mouse.up();
+  assert(Math.abs(moved - docked - 30) < 3, `the bar follows its grip from the dock (${docked} -> ${moved}, moved 30)`);
+  await page.dblclick('[data-action="quickslots-move"]');
+  report.push("the quick slots' grip takes the bar off the dock without a jump");
 
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok quickslots ui:\n  ${report.join("\n  ")}`);

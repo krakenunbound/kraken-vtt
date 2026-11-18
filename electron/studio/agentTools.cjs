@@ -38,7 +38,7 @@ const DESCRIPTION = [
   "update (id, and at, size, scale, rotation, opacity, layer, name, hidden for art; light fields; type, points, open, locked for walls; settings for weather; name, note for regions);",
   "remove (ids); undo; redo;",
   "map (detail: the map read back: size, layers, art, walls, doors, lights, effects, regions, in squares); check (the skill's quality rules: doors on wall lines, lights on light-source art, rooms with props...);",
-  "render (view picture (what Kraken shows) | editor (walls, grid, lighting preview) | play (the play test: token [x, y], light, vision, darkness 0-1); region (a box in squares to look at closely); scale; file (a .png path; default in Kraken's data); inline: also return the picture). Render at full size and LOOK at it;",
+  "render (view picture (what Kraken shows) | editor (walls, grid, lighting preview) | play (the play test: token [x, y], party [{name, at}] (characters on the map, as dragged in from the Party Sheet or the tracker; the last one's eyes), light, vision, darkness 0-1); region (a box in squares to look at closely); scale; file (a .png path; default in Kraken's data); inline: also return the picture). Render at full size and LOOK at it;",
   "save (Map Studio's Save project); projects (saved projects); open (saved: a project id, file: a .json or portable .kraken.zip, or demo: the example map); tabs (the open maps; select: an index to switch to, close: an index to close, discard: drop its unsaved changes); grid (Grid & map size: width, height in squares, size px per square, offsetX, offsetY, distance feet per square, background, name); layer (id or name of a layer, or walls, lights, effects, regions: hidden, locked, rename, move up|down, active: where new art goes);",
   "export (folder, name: the picture as name.webp, its walls, doors and lights as name.walls.json (the shape a Kraken book's map takes), the project as name.kraken.zip with its art);",
   "kraken (Save to Kraken: into open (default: the image open in Kraken's image window or on the table) or new (a new scene on the table from this map): its picture, walls, doors, windows, lights and weather).",
@@ -86,6 +86,7 @@ const inputSchema = {
     scale: { description: "place, update: size factor; scatter: [min, max]; render: picture scale", type: ["number", "array"] },
     rotation: { description: "Degrees; scatter: [min, max]", type: ["number", "array"] },
     at: point,
+    party: { type: "array", items: { type: "object", properties: { name: { type: "string" }, at: point, record: { type: "string" } } }, description: "render play: characters on the map, {name, at [x, y]}; the test sees with the last" },
     opacity: { type: "number" },
     light: { description: "place: a light preset or light fields for a light on the art; render play: the token's light", type: ["string", "object"] },
     items: { type: "array", items: { type: "object" }, description: "place, light: many at once (each with the same fields)" },
@@ -207,7 +208,7 @@ async function run(args, ctx) {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, png);
     const meta = await sharp()(png).metadata();
-    const answer = { file, width: meta.width, height: meta.height, view: rest.view ?? "picture", ...(made.token ? { token: made.token } : {}) };
+    const answer = { file, width: meta.width, height: meta.height, view: rest.view ?? "picture", ...(made.token ? { token: made.token } : {}), ...(made.party?.length ? { party: made.party } : {}) };
     if (!rest.inline) return out(answer);
     const small = meta.width > 1600 ? await sharp()(png).resize({ width: 1600 }).png().toBuffer() : png;
     return { content: [{ type: "text", text: JSON.stringify(answer) }, { type: "image", data: small.toString("base64"), mimeType: "image/png" }] };

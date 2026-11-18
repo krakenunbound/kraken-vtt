@@ -5,6 +5,7 @@ import { PANELS } from "../rulesets";
 import { Picture } from "../characters/ArtPicker";
 import type { CombatEntry, Session } from "../session/useSession";
 import { Icon } from "../ui/icons";
+import { TOKEN_DRAG } from "../ui/QuickSlots";
 import { FateLine } from "./FateLine";
 import { CreatureDetails } from "./CreatureDetails";
 import { BuffBar } from "../effects/BuffBar";
@@ -106,6 +107,7 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
       onDragStart={(event) => {
         if (!gm || (event.target as HTMLElement).closest("input, button:not(.ct-face)")) return;
         event.dataTransfer.setData("application/x-kraken-ct", entry.id);
+        event.dataTransfer.setData(TOKEN_DRAG, JSON.stringify({ name: entry.name, record: entry.recordId ?? null, ct: entry.id }));
         event.dataTransfer.effectAllowed = "copyMove";
       }}
       // A damage or healing roll from chat dropped here applies to this creature (FG's drop on the tracker).

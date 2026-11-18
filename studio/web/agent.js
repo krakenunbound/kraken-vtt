@@ -387,7 +387,7 @@ window.KrakenStudioAgent = (() => {
     // A picture of the map at full size: picture (what Kraken shows: the art alone), editor (with the
     // walls, grid and the lighting preview, as the editor draws it) or play (the play test: a test token
     // at token, carrying light, seeing with vision, the map's darkness or darkness 0..1).
-    async render({view = 'picture', grid = true, walls = true, lighting = true, token, light = 'torch', vision = 'normal', darkness}) {
+    async render({view = 'picture', grid = true, walls = true, lighting = true, token, party, light = 'torch', vision = 'normal', darkness}) {
       const s = S();
       if (view === 'picture') { await s.loaded(); return {image: await s.flat(), width: s.project.width, height: s.project.height}; }
       if (view === 'editor') return {image: await s.capture({grid, walls, lighting}), width: s.project.width, height: s.project.height};
@@ -395,13 +395,19 @@ window.KrakenStudioAgent = (() => {
       const P = window.KrakenPlay, before = s.mode;
       s.switchMode('play');
       try {
+        // Characters on the map (as dragged in from the Party Sheet or the tracker): the last one is whose eyes the test uses.
+        if (party !== undefined) {
+          if (!Array.isArray(party)) throw Error('party is a list of {name, at}.');
+          P._state.party = []; P._state.who = null;
+          for (const c of party.slice(0, 40)) P.addCharacter(s.project, {name: c?.name, record: c?.record}, pt(c?.at, `${c?.name || 'A character'}'s place`));
+        }
         if (token) P._state.token = pt(token, 'token');
         if (!P.LIGHTS[light]) throw Error('light is one of ' + Object.keys(P.LIGHTS).join(', ') + '.');
         if (!P.VISION[vision]) throw Error('vision is one of ' + Object.keys(P.VISION).join(', ') + '.');
         Object.assign(P._state, {light, vision, showWalls: false});
         if (darkness !== undefined) P._state.darkness = Math.max(0, Math.min(1, Number(darkness)));
         return {image: await s.capture({grid: !!grid, walls: false, lighting: false}), width: s.project.width, height: s.project.height,
-          token: [sq(P._state.token.x), sq(P._state.token.y)]};
+          token: [sq(P._state.token.x), sq(P._state.token.y)], party: P._state.party.map(c => ({name: c.name, at: [sq(c.x), sq(c.y)], looking: c === P._state.who}))};
       } finally { s.switchMode(before === 'play' ? 'view' : before); }
     },
     // Map Studio's Save project (Open > Saved project finds it again).

@@ -17,6 +17,9 @@ import { agentCommands } from "./agentCommands";
 export const SLOT_DRAG = "text/kraken-slot";
 // A random table's result dragged from its window (into the chat's entry, its words).
 export const TABLE_RESULT_DRAG = "application/x-kraken-table-result";
+// A character or creature as a token (from the Party Sheet, the tracker): {name, record, ct}. Map Studio's
+// Play test reads it (it cannot look the record up), and puts that token where it is dropped.
+export const TOKEN_DRAG = "application/x-kraken-token";
 
 // What a thing gives a drag, so it can be dropped on a quick slot, into a
 // note or a story: the same link everywhere.
@@ -191,7 +194,9 @@ export function QuickSlots({ session }: { session: Session }) {
     const element = bar.current;
     if (!element || event.button !== 0) return;
     event.preventDefault();
-    const start = { x: event.clientX, y: event.clientY, left: element.offsetLeft, top: element.offsetTop };
+    // Where it is on screen (docked, it is centred by a transform that offsetLeft leaves out), so it stays under the pointer.
+    const box = element.getBoundingClientRect(), parent = (element.offsetParent as HTMLElement | null)?.getBoundingClientRect() ?? { left: 0, top: 0 };
+    const start = { x: event.clientX, y: event.clientY, left: box.left - parent.left, top: box.top - parent.top };
     let moved: Place = null;
     const move = (next: PointerEvent) => {
       moved = clamp(start.left + next.clientX - start.x, start.top + next.clientY - start.y);

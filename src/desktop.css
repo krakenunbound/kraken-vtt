@@ -1979,6 +1979,9 @@ textarea.cc-field.tall { min-height: 220px; }
 .images-maps-only { display: flex; align-items: center; gap: 5px; font-size: 0.82rem; color: var(--muted); white-space: nowrap; }
 /* Map Studio, in a window of its own: its editor fills the window. */
 .studio-frame { display: block; width: 100%; height: 100%; border: 0; background: #0d1014; }
+.studio-host { position: relative; width: 100%; height: 100%; }
+/* A character on its way to Map Studio's map: drop it anywhere over it. */
+.studio-catch { position: absolute; inset: 0; z-index: 2; background: rgba(214, 170, 92, 0.06); outline: 2px dashed var(--brass); outline-offset: -6px; }
 [data-window="studio"] .window-body { padding: 0; overflow: hidden; }
 /* Settings > Map Studio art: the GM's folders of asset packs. */
 .studio-folder { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px 2px 8px; border: 1px solid var(--panel-edge); border-radius: 6px; font-size: 0.8rem; }
