@@ -157,12 +157,22 @@ function HelpLinks() {
   );
 }
 
-function CopyAddress({ label, value }: { label: string; value: string }) {
+// The link a player clicks (pasted into Discord or an email): it opens the table in their browser.
+// IPv6 goes in brackets; a link-local one (fe80::) needs this computer's own zone and does not work as a link.
+export function tableLink(address: string, port: number | string) {
+  if (!address) return "";
+  if (address.includes(":")) return /^fe80:/i.test(address) ? "" : `http://[${address}]:${port}/`;
+  return `http://${address}:${port}/`;
+}
+
+function CopyAddress({ label, value, port }: { label: string; value: string; port?: number | string }) {
   const [state, setState] = useState<"" | "copied" | "failed">("");
   const timer = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(timer.current), []);
+  const link = port ? tableLink(value, port) : "";
+  const shown = link || value;
   const copy = async () => {
-    const ok = await copyText(value);
+    const ok = await copyText(shown);
     setState(ok ? "copied" : "failed");
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setState(""), 1800);
@@ -172,8 +182,8 @@ function CopyAddress({ label, value }: { label: string; value: string }) {
       <span className="addr-label">{label}</span>
       {value ? (
         <>
-          <span className="secret">{value}</span>
-          <button type="button" className={state ? `addr-copy ${state}` : "addr-copy"} aria-label={`Copy ${label} ${value}`} aria-live="polite" onClick={() => void copy()}>
+          <span className="secret" data-link={link || undefined}>{shown}</span>
+          <button type="button" className={state ? `addr-copy ${state}` : "addr-copy"} title={link ? "Copy the link: pasted into Discord or an email, a click opens the table in a browser" : undefined} aria-label={`Copy ${label} ${shown}`} aria-live="polite" onClick={() => void copy()}>
             {state === "copied" ? "Copied" : state === "failed" ? "Couldn't copy" : "Copy"}
           </button>
         </>
@@ -296,6 +306,9 @@ export function SetupScreen({
     .filter((campaign) => campaign.name.toLowerCase().includes(query.trim().toLowerCase()))
     .sort((a, b) => (b.playedAt ?? b.createdAt) - (a.playedAt ?? a.createdAt));
   const selected = rows.find((campaign) => campaign.id === selectedId) ?? null;
+  // The port in the host form (the links to give players carry it).
+  const [hostPort, setHostPort] = useState<string>("");
+  useEffect(() => setHostPort(String(selected?.port ?? "")), [selected?.id, selected?.port]);
   const alert = localError || error;
 
   // "New campaign": the form comes into view (below the list in a narrow
@@ -662,7 +675,7 @@ export function SetupScreen({
                   </label>
                   <label className="field port">
                     <span>Port</span>
-                    <input name="port" type="number" min={1} max={65535} defaultValue={selected.port} required />
+                    <input name="port" type="number" min={1} max={65535} defaultValue={selected.port} required onChange={(event) => setHostPort(event.target.value)} />
                   </label>
                 </div>
                 <label className="field">
@@ -695,15 +708,15 @@ export function SetupScreen({
                   <p className="addr-heading">On your network</p>
                   {network.v4.length === 0 ? <CopyAddress label="IPv4" value="" /> : null}
                   {network.v4.map((address) => (
-                    <CopyAddress key={address} label="IPv4" value={address} />
+                    <CopyAddress key={address} label="IPv4" value={address} port={hostPort} />
                   ))}
                   {network.v6.map((address) => (
-                    <CopyAddress key={address} label="IPv6" value={address} />
+                    <CopyAddress key={address} label="IPv6" value={address} port={hostPort} />
                   ))}
                   <p className="addr-heading">On the internet</p>
-                  <CopyAddress label="IPv4" value={network.externalV4} />
-                  <CopyAddress label="IPv6" value={network.externalV6} />
-                  <p className="hint">On this computer: 127.0.0.1. Players add the port, as http://address:port.</p>
+                  <CopyAddress label="IPv4" value={network.externalV4} port={hostPort} />
+                  <CopyAddress label="IPv6" value={network.externalV6} port={hostPort} />
+                  <p className="hint">Copy gives a link: paste it into Discord or an email, and a click opens the table in your players' browsers. On this computer: {tableLink("127.0.0.1", hostPort)}</p>
                 </details>
                 <div className="play-row">
                   {!canHost ? <p className="hint">Hosting runs in the Maelstrom VTT app.</p> : null}

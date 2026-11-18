@@ -8,6 +8,8 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **Copy gives your players a link.** The host screen's addresses show and copy a full link (http://address:port/): paste it into Discord or an email and a click opens the table in their browser.
+
 - **Roll keys that conflict no longer stand together**: +2 or -2 (pressing one turns the other off), and Crit, Max or Half, one at a time. Each game keeps its own keys.
 
 - **Changed your mind about a roll?** Let the dice go with a still hand (no swing), or drop them back on the chat, and nothing is rolled, as in Fantasy Grounds. A right-click still puts dice in the hand back too.

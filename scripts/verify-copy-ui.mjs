@@ -37,8 +37,20 @@ try {
   }
   assert(copied === address, `the clipboard holds ${address}: ${JSON.stringify(copied)} ${failures.join(" | ")}`);
   assert((await button.textContent()).trim() === "Copied", `the button says Copied: ${await button.textContent()}`);
+  // A link, not a bare address: pasted into Discord or an email, a click opens the table in a browser.
+  const port = await page.inputValue('form[data-form="play"] input[name="port"]');
+  assert(/^http:\/\/[\d.]+:\d+\/$/.test(copied) && copied.endsWith(`:${port}/`), `the copy is a link with the port: ${copied}`);
+  // Another port: the links follow it.
+  await page.fill('form[data-form="play"] input[name="port"]', "47999");
+  await button.click();
+  let moved = "";
+  for (let wait = 0; wait < 20 && !moved.endsWith(":47999/"); wait++) {
+    moved = await app.evaluate(({ clipboard }) => clipboard.readText());
+    if (!moved.endsWith(":47999/")) await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  assert(moved.endsWith(":47999/") && (await page.locator(".addr .secret").first().textContent()).endsWith(":47999/"), `the link follows the port: ${moved}`);
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok copy ui: Copy puts ${address} on the clipboard and the button says Copied`);
+  console.log(`ok copy ui: Copy puts the link ${address} on the clipboard (the button says Copied), and the link follows the port`);
 } finally {
   await app.close();
 }
