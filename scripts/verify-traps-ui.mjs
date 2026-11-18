@@ -142,6 +142,21 @@ try {
   assert(entry && Number(entry.wounds ?? 0) === 4, `half the damage on a save: 4 wounds (${JSON.stringify(entry)})`);
   report.push("the GM's Save and Apply: the save made, half of the damage (4 of 9) through the tracker, the token goes on");
 
+  // A torch from the Effects list dragged onto Wren's token on the GM's map: Wren carries it.
+  await page.click('.sidebar [data-launch="effects"]');
+  await page.waitForSelector('[data-effect-preset="torch"]');
+  // Moved aside by its title bar, off the token.
+  const bar = await page.locator('.window[data-window="effects"] .window-title').boundingBox();
+  await page.mouse.move(bar.x + 60, bar.y + bar.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(bar.x + 1400, bar.y + bar.height / 2 + 300, { steps: 10 });
+  await page.mouse.up();
+  await page.locator('[data-effect-preset="torch"]').scrollIntoViewIfNeeded();
+  await page.locator('[data-effect-preset="torch"]').dragTo(page.locator(`.window[data-window="map"] [data-token="${heroToken.id}"]`));
+  await until(async () => ((await tool("kraken_effects", { action: "on", to: { tokenId: heroToken.id } })).effects ?? []).some((effect) => /Torch/.test(effect.label)), "the torch on Wren's token");
+  await page.click('.sidebar [data-launch="effects"]');
+  report.push("a torch from the Effects list dropped on a token on the table's map is that creature's");
+
   // 5. The trap's eye: shown to the player (its outline), then hidden again.
   await page.click(`[data-region-reveal="${trap.id}"]`);
   await seat.waitForSelector(`${seatMap} [data-revealed-trap="${trap.id}"]`, { timeout: 5000 });

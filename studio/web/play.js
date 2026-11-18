@@ -168,9 +168,17 @@ window.KrakenPlay = (() => {
     lookWith(one);
     return one;
   }
+  // The light of the one whose eyes the test uses, as the panel's list has them: [name, bright, dim, cone, colour].
+  function lightNow() {
+    const c = st.light === 'carried' ? (st.who ?? st).carried : null;
+    return c ? [c.name, c.bright, c.dim, 360, c.color] : (LIGHTS[st.light] ?? LIGHTS.none);
+  }
   function lookWith(one) {
-    if (st.who) Object.assign(st.who, {x: st.token.x, y: st.token.y, facing: st.facing});
+    if (st.who) Object.assign(st.who, {x: st.token.x, y: st.token.y, facing: st.facing, light: st.light});
+    else st.ownLight = st.light;
     st.who = one; st.token = {x: one.x, y: one.y}; st.facing = one.facing || 0;
+    st.light = one.light || 'none';
+    renderPanel();
   }
 
   // --- doors ------------------------------------------------------------------
@@ -198,8 +206,14 @@ window.KrakenPlay = (() => {
       list.push({x: l.x, y: l.y, bright: px(p, Number(l.bright) || 0) * k * a.r, dim: px(p, Number(l.dim) || 0) * k * a.r, reach: px(p, Number(l.dim) || 0) * k, color: l.color || '#ffbb66', cone: 360,
         strength: (l.strength ?? 100) / 100 * a.k, falloff: l.falloff, dimFalloff: l.dimFalloff, inverse: !!l.inverse, key: `${l.x},${l.y},${l.bright},${l.dim}`});
     }
-    const t = LIGHTS[st.light];
-    if (st.token && t[2] > 0) list.push({x: st.token.x, y: st.token.y, bright: px(p, t[1]) * k, dim: px(p, t[2]) * k, color: t[4], cone: t[3], strength: 1});
+    // What each token carries: the one whose eyes the test uses, the panel's Light source; the others, their own.
+    const carried = (holder, id, at, facing) => {
+      const c = id === 'carried' ? holder?.carried : null, t = c ? null : LIGHTS[id];
+      if (c && c.dim > 0) list.push({x: at.x, y: at.y, bright: px(p, c.bright) * k, dim: px(p, c.dim) * k, color: c.color, cone: 360, strength: 1});
+      else if (t && t[2] > 0) list.push({x: at.x, y: at.y, bright: px(p, t[1]) * k, dim: px(p, t[2]) * k, color: t[4], cone: t[3], strength: 1, facing});
+    };
+    if (st.token) carried(st.who ?? st, st.light, st.token, st.facing);
+    for (const c of st.party) if (c !== st.who) carried(c, c.light, c, c.facing || 0);
     return list;
   }
   // Shapes are kept until the walls, doors or the source move: redrawing on pan or zoom costs nothing.
@@ -225,7 +239,8 @@ window.KrakenPlay = (() => {
   function cone(ctx, l) {
     if (l.cone >= 360) return;
     const half = l.cone * Math.PI / 360;
-    ctx.beginPath(); ctx.moveTo(l.x, l.y); ctx.arc(l.x, l.y, l.dim + 2, st.facing - half, st.facing + half); ctx.closePath(); ctx.clip();
+    const facing = l.facing ?? st.facing;
+    ctx.beginPath(); ctx.moveTo(l.x, l.y); ctx.arc(l.x, l.y, l.dim + 2, facing - half, facing + half); ctx.closePath(); ctx.clip();
   }
 
   let layer = null;
@@ -329,7 +344,7 @@ window.KrakenPlay = (() => {
       ctx.restore();
     }
     // The characters: their own token pictures, where they were left; a click looks through their eyes.
-    const tr = p.grid * 0.47, aimed = LIGHTS[st.light][3] < 360;
+    const tr = p.grid * 0.47, aimed = lightNow()[3] < 360;
     for (const c of st.party) if (c !== st.who) token(ctx, c, c, tr, zoom, false);
     token(ctx, st.who, st.token, tr, zoom, true);
     // Which way they face, only for a cone of light (a bullseye lantern: Q and E turn it).
@@ -412,7 +427,7 @@ window.KrakenPlay = (() => {
 
   // --- the panel ----------------------------------------------------------------
   function describe(p) {
-    const t = LIGHTS[st.light], fs = feetPerSquare(p), sq = f => (f / fs).toFixed(1).replace('.0', '');
+    const t = lightNow(), fs = feetPerSquare(p), sq = f => (f / fs).toFixed(1).replace('.0', '');
     const light = t[2] > 0 ? `${t[0]}: bright ${t[1]} ft (${sq(t[1])} squares, ${Math.round(px(p, t[1]))} px), dim to ${t[2]} ft (${sq(t[2])} squares, ${Math.round(px(p, t[2]))} px)${t[3] < 360 ? `, a ${t[3]}° cone (Q and E turn it)` : ''}.` : 'No light of your own.';
     const v = VISION[st.vision];
     const sight = v[1] ? ` ${v[0].split(' (')[0]}: ${v[1]} ft (${sq(v[1])} squares).` : v[2] === 'lowlight' ? ' Low-light vision: every light reaches twice as far.' : '';
@@ -424,7 +439,7 @@ window.KrakenPlay = (() => {
     box.innerHTML = `
       <div class="los-title">Play test</div>
       <p class="los-help">Drag a character from the Party Sheet or the tracker onto the map to test with their token; click another to look through their eyes. Drag the token, click where to walk, or use the arrow keys / WASD. Click a door or window to open or close it; Shift-click locks or unlocks. Nothing here changes the map.</p>
-      <label class="play-row">Light source <select id="playLight">${Object.entries(LIGHTS).map(([id, l]) => `<option value="${id}" ${id === st.light ? 'selected' : ''}>${esc(l[0])}${l[2] ? ` (${l[1]}/${l[2]} ft)` : ''}</option>`).join('')}</select></label>
+      <label class="play-row">Light source${st.who ? ` (${esc(st.who.name)})` : ''} <select id="playLight">${(st.who ?? st).carried ? `<option value="carried" ${st.light === 'carried' ? 'selected' : ''}>${esc((st.who ?? st).carried.name)} (${(st.who ?? st).carried.bright}/${(st.who ?? st).carried.dim} ft)</option>` : ''}${Object.entries(LIGHTS).map(([id, l]) => `<option value="${id}" ${id === st.light ? 'selected' : ''}>${esc(l[0])}${l[2] ? ` (${l[1]}/${l[2]} ft)` : ''}</option>`).join('')}</select></label>
       <label class="play-row">Vision <select id="playVision">${Object.entries(VISION).map(([id, v]) => `<option value="${id}" ${id === st.vision ? 'selected' : ''}>${esc(v[0])}</option>`).join('')}</select></label>
       <label class="play-row">Time of day <select id="playSky"><option value="">The map's own (${esc(skyName(p))})</option>${Object.entries(window.KrakenLighting?.AMBIENT || {}).filter(([id]) => id !== 'custom').map(([id, a]) => `<option value="${id}" ${id === st.sky ? 'selected' : ''}>${esc(a.label)}</option>`).join('')}</select></label>
       <label class="play-row">Darkness <span class="play-dark"><span>Day</span><input id="playDark" type="range" min="0" max="1" step="0.05" value="${st.darkness}"><span>Night</span></span></label>
@@ -487,6 +502,23 @@ window.KrakenPlay = (() => {
     addCharacter(S().project, one, S().point(ev));
     S().draw();
     S().toast(`${st.who.name} is on the map: the test sees with them. Click another character to look through their eyes.`);
+  });
+  // An effect from Maelstrom's Effects list dropped on a token: a light is that token's to carry (a torch for Bardo).
+  window.addEventListener('message', ev => {
+    if (ev.source !== window.parent || ev.data?.kind !== 'kraken-effect-drop' || !S()?.project) return;
+    const {effect, x, y} = ev.data, p = S().project, q = S().point({clientX: Number(x), clientY: Number(y)});
+    if (!active()) { S().toast('Drop it on a token in Play test.'); return; }
+    const near = (c) => Math.hypot(q.x - c.x, q.y - c.y) <= p.grid * 0.6;
+    const on = st.party.find(c => c !== st.who && near(c)) ?? (st.token && near(st.token) ? (st.who ?? st) : null);
+    if (!on) { S().toast(`Drop ${effect?.name || 'it'} on a token.`); return; }
+    const who = on === st ? 'The test token' : on.name;
+    const light = effect?.light;
+    if (!light || !(Number(light.dim) > 0)) { S().toast(`${effect?.name || 'That'} is not a light: Play test shows what lights do (it goes on the creature at the table).`); return; }
+    on.carried = {name: String(effect.name).slice(0, 40), bright: Number(light.bright) || 0, dim: Number(light.dim), color: /^#[0-9a-f]{6}$/i.test(light.color) ? light.color : '#ffb35c'};
+    on.light = 'carried';
+    if (on === st || on === st.who) st.light = 'carried';
+    renderPanel(); S().draw();
+    S().toast(`${who} carries a ${on.carried.name.toLowerCase()} (${on.carried.bright}/${on.carried.dim} ft).`);
   });
   // The same, handed over by Maelstrom (its drop zone over Map Studio: a browser carries no drag into another site's frame).
   window.addEventListener('message', ev => {

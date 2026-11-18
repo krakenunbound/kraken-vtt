@@ -105,6 +105,7 @@ try {
   await page.evaluate(() => { const set = DataTransfer.prototype.setData; DataTransfer.prototype.setData = function (type, value) { (window.__carried ||= {})[type] = value; return set.call(this, type, value); }; });
   const drag = async (selector, to) => {
     await page.evaluate(() => { window.__carried = {}; });
+    await page.locator(selector).first().scrollIntoViewIfNeeded();
     const from = await page.locator(selector).first().boundingBox();
     await page.mouse.move(from.x + 30, from.y + from.height / 2);
     await page.mouse.down();
@@ -142,7 +143,19 @@ try {
   await settle(300);
   state = await play();
   assert(state.who === "Aldra", `a click on another character's token looks through their eyes (${JSON.stringify(state)})`);
-  report.push("Aldra (her own token picture) dragged from the Party Sheet and the Goblin from the tracker onto Map Studio's map: Play test starts with their tokens, a click switches whose eyes it uses");
+  // A torch from the Effects list dropped on Aldra's token: she carries it (her own light, 20/40 ft), lighting the test.
+  await tool("kraken_windows", { action: "close", kind: "combat" });
+  await page.click('.sidebar [data-launch="effects"]');
+  await page.waitForSelector('[data-effect-preset="torch"]');
+  const torchAt = await frame.evaluate(() => { const c = window.KrakenPlay._state.party.find((item) => item.name === "Aldra"); const r = document.querySelector("#mapCanvas").getBoundingClientRect(), z = window.KrakenStudio.getDocument().view.z; return { x: r.left + c.x * z, y: r.top + c.y * z }; });
+  const studioBox = await page.locator(".studio-frame").boundingBox();
+  const target = { x: studioBox.x + torchAt.x, y: studioBox.y + torchAt.y };
+  assert(await page.evaluate(([x, y]) => Boolean(document.elementFromPoint(x, y)?.closest(".studio-frame")), [target.x, target.y]), "Aldra's token is not covered by a window");
+  await drag('[data-effect-preset="torch"]', target);
+  const torch = await frame.evaluate(() => { const s = window.KrakenPlay._state, c = s.party.find((item) => item.name === "Aldra"); return { carried: c.carried ?? null, light: s.who === c ? s.light : c.light, panel: document.querySelector("#playLight")?.selectedOptions?.[0]?.textContent ?? "" }; });
+  assert(torch.carried?.bright === 20 && torch.carried.dim === 40 && torch.light === "carried" && /Torch/.test(torch.panel), `a torch dropped on Aldra is hers to carry, in the panel as her light (${JSON.stringify(torch)})`);
+  await tool("kraken_windows", { action: "close", kind: "effects" });
+  report.push("Aldra (her own token picture) dragged from the Party Sheet and the Goblin from the tracker onto Map Studio's map: Play test starts with their tokens, a click switches whose eyes it uses; a torch from the Effects list dropped on Aldra is her light (20/40 ft)");
 
   // Play test's doors: the whole door is the target (a click near its end opens it); a secret door is not there
   // until it is found. A trap on the way stops the token on its first square and says what it does.

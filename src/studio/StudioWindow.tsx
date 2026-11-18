@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { SLOT_DRAG, TOKEN_DRAG } from "../ui/QuickSlots";
+import { EFFECT_DRAG } from "../effects/drops";
+import { lightOf } from "../../shared/actions/effects.mjs";
 
 // What a drag may carry onto Map Studio's map: a character or creature (the Party Sheet, the tracker, Character Selection).
-const CARRIED = [TOKEN_DRAG, "application/x-kraken-record", "application/x-kraken-ct"];
+// An effect from the Effects list too (a torch onto a token in Play test).
+const CARRIED = [TOKEN_DRAG, "application/x-kraken-record", "application/x-kraken-ct", EFFECT_DRAG];
 const carried = (event: { dataTransfer: DataTransfer | null }) => [...(event.dataTransfer?.types ?? [])].some((type) => CARRIED.includes(type));
 
 // Kraken Map Studio in a window of Kraken's own: the map maker (art, walls,
@@ -46,6 +49,13 @@ export function StudioWindow({ project: page }: { project?: string }) {
     const target = frame.current;
     if (!target?.contentWindow || !url) return;
     const read = (type: string) => { try { return JSON.parse(event.dataTransfer.getData(type) || "null"); } catch { return null; } };
+    if (event.dataTransfer.types.includes(EFFECT_DRAG)) {
+      // Its words (the Effects list puts them on the drag) and the light they carry, if any: Play test's tokens carry lights.
+      const words = String(read(EFFECT_DRAG)?.effect?.label ?? event.dataTransfer.getData("text/plain") ?? "");
+      const at = target.getBoundingClientRect();
+      target.contentWindow.postMessage({ kind: "kraken-effect-drop", effect: { name: words.split(";")[0].trim() || "Effect", light: lightOf(words) }, x: event.clientX - at.left, y: event.clientY - at.top }, url);
+      return;
+    }
     const slot = read(SLOT_DRAG);
     const token = read(TOKEN_DRAG) ?? (slot && (slot.kind === "sheet" || slot.kind === "record") ? { name: slot.label, record: slot.record } : null) ?? { name: "Character", record: event.dataTransfer.getData("application/x-kraken-record") || null };
     const box = target.getBoundingClientRect(), x = event.clientX - box.left, y = event.clientY - box.top;
