@@ -192,6 +192,16 @@ try {
   await page.waitForSelector('.decal-picker[data-kind="tower"] [data-decal="obsidian"] svg[data-tower-style="obsidian"]');
   assert((await page.$$('.decal-picker[data-kind="tower"] .decal-tile')).length === 6 + listed.pictures.length && listed.pictures.length >= 6, "the picker shows the six drawn looks and the tower pictures (the lighthouse and Kraken's five)");
   if (process.env.SHOT) await page.locator('.decal-picker[data-kind="tower"]').screenshot({ path: process.env.SHOT.replace(".png", "-looks.png") });
+  // Clicked, a look is tried at once on this screen; the table keeps its own until OK. Cancel puts it back.
+  const tried = listed.drawn.find((look) => look !== "stone" && look !== "obsidian");
+  await page.click(`.decal-picker[data-kind="tower"] [data-decal="${tried}"]`);
+  await page.waitForSelector(`.tower-external svg[data-tower-style="${tried}"]`);
+  assert((await tool("kraken_table_options")).towerStyle === "stone", "only tried: the table's look is still stone");
+  await page.click('.decal-picker[data-kind="tower"] >> text=Cancel');
+  await page.waitForSelector('.tower-external svg[data-tower-style="stone"]');
+  report.push(`a look clicked in the picker shows at once on the GM's screen (${tried}), the table's unchanged; Cancel puts stone back`);
+  await page.click(".tower-external", { button: "right" });
+  await page.click('.tower-menu [data-action="tower-look"]');
   await page.dblclick('.decal-picker[data-kind="tower"] [data-decal="obsidian"]');
   await page.waitForSelector('.tower-external svg[data-tower-style="obsidian"]');
   assert((await tool("kraken_table_options")).towerStyle === "obsidian", "the table keeps the look");

@@ -1,4 +1,5 @@
 import { ShipsWindow } from "../ships/ShipsWindow";
+import { usePreviewed } from "./pickerPreview";
 import { BRAND } from "../../shared/brand.mjs";
 import { SessionLogWindow } from "../notes/SessionLog";
 import { DelveWindow, OraclesWindow } from "../ironsworn/IronswornWindows";
@@ -238,7 +239,8 @@ function AccountsPanel({ session }: { session: Session }) {
 // desktop) shows at its own size, so the repeat hardly shows and a grid keeps
 // its scale.
 function useWallpaperStyle(session: Session) {
-  const url = session.options.wallpaper ? session.decalUrl(session.options.wallpaper, "wallpaper") : "";
+  const wallpaper = usePreviewed("wallpaper", session.options.wallpaper);
+  const url = wallpaper ? session.decalUrl(wallpaper, "wallpaper") : "";
   const [big, setBig] = useState<Record<string, boolean>>({});
   useEffect(() => {
     if (!url || url in big) return;

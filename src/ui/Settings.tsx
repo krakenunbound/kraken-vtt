@@ -1,8 +1,9 @@
 import type { StudioSettings } from "../kraken";
+import { pickerPreview, usePreviewed, type PreviewKey } from "./pickerPreview";
 import { diceStore } from "../dice/diceStore";
 import { PALETTE } from "../dice/DiceWindow";
 import { TOWER_LOOKS, TowerArt, towerLook } from "./TowerArt";
-import { useEffect, useMemo, useState, useSyncExternalStore, type DragEvent } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore, type DragEvent, useRef } from "react";
 import { cardsStore } from "../cards/cardsStore";
 import type { DecalItem, PictureKind, Session } from "../session/useSession";
 import { Emblem } from "./Emblem";
@@ -354,7 +355,7 @@ function CardsSetting() {
 
 // The picture on the table's background, for every seat: FG's desktop decal.
 export function TableDecal({ session }: { session: Session }) {
-  const id = session.options.decal;
+  const id = usePreviewed("decal", session.options.decal);
   if (id === "") return null;
   if (id === "kraken") return <Emblem />;
   const url = session.decalUrl(id);
@@ -398,6 +399,21 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
   const [group, setGroup] = useState("");
   const [chosen, setChosen] = useState(current);
   const [dropping, setDropping] = useState(false);
+  // Tried on this screen as it is clicked (pickerPreview); OK makes it the table's, Cancel or closing puts back what was.
+  const previewKey: PreviewKey = wallpaper ? "wallpaper" : gmIcon ? "gmIcon" : tower ? "towerStyle" : "decal";
+  const kept = useRef(false);
+  const choose = (id: string) => {
+    setChosen(id);
+    pickerPreview.set(previewKey, tower ? id || "stone" : id);
+  };
+  useEffect(
+    () => () => {
+      // Kept: the preview stays until the table's own setting has come back, so nothing flickers to the old one.
+      if (kept.current) window.setTimeout(() => pickerPreview.clear(previewKey), 1500);
+      else pickerPreview.clear(previewKey);
+    },
+    [previewKey],
+  );
   const kraken = window.kraken;
   const ruleset = useCampaignRuleset(session);
 
@@ -431,13 +447,15 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
   }, [all, group, search, ruleset]);
 
   function apply(id: string) {
+    pickerPreview.set(previewKey, tower ? id || "stone" : id);
+    kept.current = true;
     session.setTableOptions(wallpaper ? { wallpaper: id } : gmIcon ? { gmIcon: id } : tower ? { towerStyle: id || "stone" } : { decal: id });
     onClose();
   }
 
   function added(item: DecalItem) {
     setItems((list) => [item, ...(list ?? []).filter((other) => other.id !== item.id)]);
-    setChosen(item.id);
+    choose(item.id);
     setSearch("");
     setGroup("");
   }
@@ -501,7 +519,7 @@ export function DecalPicker({ session, kind = "decal", onClose }: { session: Ses
             className={chosen === item.id ? "decal-tile on" : "decal-tile"}
             data-decal={item.id}
             title={`${item.group}\n${item.name}`}
-            onClick={() => setChosen(item.id)}
+            onClick={() => choose(item.id)}
             onDoubleClick={() => apply(item.id)}
           >
             {wallpaper ? (

@@ -1,4 +1,5 @@
 import { createPortal } from "react-dom";
+import { usePreviewed } from "./pickerPreview";
 import { BRAND } from "../../shared/brand.mjs";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ChatLine, DamageCard, RollResult, Session } from "../session/useSession";
@@ -407,7 +408,7 @@ function ExternalTower({ session, on, drop, title, towerRef, onToggle }: { sessi
   const [at, setAt] = useState({ x: "", y: "" });
   const windows = useWindows();
   const gm = session.role === "dm";
-  const style = session.options.towerStyle || "stone";
+  const style = usePreviewed("towerStyle", session.options.towerStyle) || "stone";
   const picture = towerLook(style) ? "" : session.decalUrl(style, "tower");
   const litPicture = picture ? session.decalUrl(style.replace(/(\.[a-z0-9]+)$/i, " lit$1"), "tower") : "";
   const placeRef = useRef(place);
@@ -602,7 +603,8 @@ export function ChatDock({ session }: { session: Session }) {
   // This seat's own set, on the tray's dice (the GM's too).
   const diceSettings = useSyncExternalStore(diceStore.subscribe, diceStore.settings);
   // The GM's chat picture, beside everything the GM says.
-  const gmIconUrl = session.options.gmIcon ? session.decalUrl(session.options.gmIcon, "gmicon") : "";
+  const gmIcon = usePreviewed("gmIcon", session.options.gmIcon);
+  const gmIconUrl = gmIcon ? session.decalUrl(gmIcon, "gmicon") : "";
   // Speaking as one of my characters: its own dice (the character tier), if it has them.
   const speaking = speakAs && session.role !== "dm" ? Object.values(session.records).find((record) => record.type === "character" && record.owner === me && record.name === speakAs) : undefined;
   const mine = characterDice(speaking)?.look ?? diceSettings.look;
