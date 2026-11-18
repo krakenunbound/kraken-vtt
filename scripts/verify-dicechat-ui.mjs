@@ -268,8 +268,26 @@ try {
   assert(kept === "<p>Each torch burns [[1d6]] hours.</p>", `the note keeps its words: ${kept}`);
 
   // 5. The party's group roll asked of the players.
-  await page.click('.sidebar [data-launch="party"]');
+  await page.click('.sidebar-tools [data-launch="party"]');
   await page.waitForSelector(".party-group");
+  // FG's party sheet: a character dragged from Character Selection joins the party (both windows in view).
+  const brienne = await tool("kraken_record_create", { type: "character", name: "Brienne", data: { ruleset: "dnd5e", level: 3, hp: { total: 20, wounds: 0 } } });
+  await page.click('.sidebar [data-launch="characters"]');
+  const card = page.locator(`[data-charselect="${brienne.id}"]`);
+  await card.waitFor();
+  assert(await page.locator(".party-sheet").isVisible(), "the Party Sheet stays in view beside Character Selection");
+  await card.dragTo(page.locator(".party-sheet"));
+  await page.waitForSelector(`[data-member="${brienne.id}"]`);
+  // Party from who's here: the connected player's Hagar (taken out) comes back, a character whose player is gone leaves, Brienne (no player's) stays.
+  const wanderer = await tool("kraken_record_create", { type: "character", name: "Wanderer", owner: "Someone gone", visibility: "all", data: { ruleset: "dnd5e", level: 1, hp: { total: 8, wounds: 0 } } });
+  await page.locator(`[data-charselect="${wanderer.id}"]`).dragTo(page.locator(".party-sheet"));
+  await page.waitForSelector(`[data-member="${wanderer.id}"]`);
+  await page.click(`[data-member="${hero.id}"] .party-remove`);
+  await page.waitForSelector(`[data-member="${hero.id}"]`, { state: "detached" });
+  await page.click('[data-action="party-from-here"]');
+  await page.waitForSelector(`[data-member="${hero.id}"]`);
+  await page.waitForSelector(`[data-member="${wanderer.id}"]`, { state: "detached" });
+  assert(await page.$(`[data-member="${brienne.id}"]`), "Brienne (no player's) stays");
   // FG's party sheet main tab: the HP bar and each ability with its bonus.
   await page.waitForSelector(`[data-member="${hero.id}"] .party-meter.meter-hp[aria-valuenow="24"]`);
   assert((await page.$$(`[data-party-abilities="${hero.id}"] .party-ability`)).length === 6, "Hagar's six abilities on the party sheet");

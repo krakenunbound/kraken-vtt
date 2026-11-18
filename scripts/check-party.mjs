@@ -73,6 +73,9 @@ try {
   const player = await join("Ann");
   sockets.push(player.ws);
 
+  // Party from who's here: Ann alone is at the table, so Aldric (hers) is the party; Borin and Cyra (their players away) are not.
+  const here = await tool("kraken_party_edit", { fromHere: true });
+  assert(here.members.map((m) => m.name).join() === "Aldric", `who's here: ${here.members.map((m) => m.name)}`);
   const view = await tool("kraken_party_edit", { allPlayers: true });
   assert(view.members.map((m) => m.name).join() === "Aldric,Borin,Cyra", `members ${view.members.map((m) => m.name)}`);
 

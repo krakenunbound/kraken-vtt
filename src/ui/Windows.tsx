@@ -38,7 +38,8 @@ const DEFAULTS: Record<WindowKind, Placement> = {
   ships: { x: 220, y: 60, w: 720, h: 720 },
   oracles: { x: 260, y: 70, w: 560, h: 680 },
   delve: { x: 300, y: 80, w: 560, h: 620 },
-  charselect: { x: 380, y: 140, w: 560, h: 420 },
+  // Beside the Party Sheet (characters are dragged from here onto it), not over it.
+  charselect: { x: 960, y: 70, w: 560, h: 420 },
   records: { x: 260, y: 70, w: 420, h: 640 },
   adventure: { x: 300, y: 80, w: 420, h: 620 },
   story: { x: 480, y: 90, w: 560, h: 640 },

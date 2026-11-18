@@ -352,9 +352,15 @@ export function Desktop({
   const combatTool: SidebarEntry = game.combatLabel ? { kind: "combat", label: game.combatLabel, icon: "combat", title: game.combatLabel } : { kind: "combat", label: "Combat", icon: "combat", title: "Combat Tracker", badge: combatBadge };
   // The game's own windows (starships, oracles, Delve's sites), each only where its feature is on.
   const gameWindows: SidebarEntry[] = (game.windows ?? []).filter((item) => (!item.gm || gm) && (!item.feature || has(game, item.feature))).map((item) => ({ kind: item.kind as SidebarEntry["kind"], label: item.label, icon: item.icon, title: item.title ?? item.label }));
+  // FG's Party Sheet sits with the Combat Tracker, for the GM and players alike.
+  const partyTool: SidebarEntry = { kind: "party", label: "Party", icon: "party", title: "Party Sheet" };
+  // And the Calendar, with the system's tools along the top.
+  const calendarTool: SidebarEntry = { kind: "calendar", label: "Calendar", icon: "calendar", title: "Calendar" };
   const tools: SidebarEntry[] = gm
     ? [
         combatTool,
+        partyTool,
+        calendarTool,
         { kind: "assistant", label: "Assistant", icon: "sparkle", title: "DM Assistant" },
         { kind: "studio", label: "Map Studio", icon: "pen", title: "Map Studio" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
@@ -363,6 +369,8 @@ export function Desktop({
     : [
         ...mapTool,
         combatTool,
+        partyTool,
+        calendarTool,
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
       ];
   // FG's Characters button opens Character Selection, for the GM (every character) and a player alike;
@@ -388,11 +396,9 @@ export function Desktop({
         ...(hasPackages ? [listEntry("siegepackage", "Packages", "package")] : []),
         // Ability cards, for whoever turned them on in Settings (this browser's choice).
         ...(cardsOn ? [{ kind: "cards" as const, label: "Cards", icon: "wand", title: "Cards" }] : []),
-        { kind: "party", label: "Party", icon: "party", title: "Party Sheet" },
         // The game's own windows: starships in the 2d6 games, Ironsworn's oracles and Delve's sites.
         ...gameWindows,
         { kind: "notes", label: gm ? "Notes" : "Player Notes", icon: "chat", title: gm ? "Notes" : "Player Notes" },
-        { kind: "calendar", label: "Calendar", icon: "calendar", title: "Calendar" },
         // FG's Effects window: conditions, buffs, lights and the GM's own, each dragged onto a creature.
         { kind: "effects", label: "Effects", icon: "flask", title: "Effects" },
         // Progress clocks: a game with the clocks feature (Forged in the Dark), or any game that has some.

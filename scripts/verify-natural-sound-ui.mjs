@@ -108,6 +108,38 @@ try {
   const plays = async (where) => Number((await sound(where)).split(":")[3] ?? 0);
   assert((await plays(page)) === gmLow, `20d20 with a 1 and a 20 among them plays nothing on the GM's screen (${await sound(page)}, was ${gmLow})`);
   assert((await plays(seat)) === seatLow, `nor on the player's (${await sound(seat)}, was ${seatLow})`);
+  // The sound pack's volumes really change what is heard: a loop measured at the GM's output with Everything at 100%, then 10%.
+  await tool("kraken_sound", { action: "ambience", do: "add", id: "ambience/Tavern" });
+  await page.click('.sidebar [data-launch="sound"]');
+  const setVolume = async (label, value) => {
+    await page.click('.sound-window [data-tab="volume"]');
+    await page.locator(`input[aria-label="${label}"]`).evaluate((input, to) => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(input, String(to));
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    }, value);
+  };
+  const peak = async () => {
+    let best = 0;
+    for (let i = 0; i < 25; i++) {
+      best = Math.max(best, await page.evaluate(() => window.maelstromSoundPeak?.() ?? 0));
+      await new Promise((resolve) => setTimeout(resolve, 40));
+    }
+    return best;
+  };
+  await setVolume("Everything volume", 1);
+  await setVolume("Ambience volume", 1);
+  await new Promise((resolve) => setTimeout(resolve, 2500));
+  const loud = await peak();
+  await setVolume("Everything volume", 0.1);
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  const quiet = await peak();
+  await setVolume("Everything volume", 1);
+  await setVolume("Ambience volume", 0.1);
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  const quietLoop = await peak();
+  // As the ear hears it (the level squared): at 10% a hundredth of the sound, near silence.
+  assert(loud > 0.05 && quiet < loud * 0.03 && quietLoop < loud * 0.03, `the volumes lower the loop to near silence at 10% (100%: ${loud.toFixed(3)}, Everything 10%: ${quiet.toFixed(3)}, Ambience 10%: ${quietLoop.toFixed(3)})`);
+  await tool("kraken_sound", { action: "ambience", do: "clear" });
   const levels = [await sound(page), await sound(seat)];
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok natural sound ui: a natural 20 plays the fanfare and a natural 1 the sad trombone on the GM's screen and a test player's, each with its audio running and its meter reading the sound (GM ${levels[0]}, player ${levels[1]}; plays ${gmLow}, ${seatLow})`);

@@ -135,7 +135,20 @@ export function PartySheet({ session, compact = false }: { session: Session; com
   const cl = !declared && !ladder;
 
   return (
-    <section className={compact ? "party-sheet compact" : "party-sheet"} data-party-members={party.members.length}>
+    <section
+      className={compact ? "party-sheet compact" : "party-sheet"}
+      data-party-members={party.members.length}
+      // FG's party sheet: a character dragged in (from Character Selection, the Characters list, a portrait) joins the party.
+      onDragOver={(event) => {
+        if (gm && event.dataTransfer.types.includes("application/x-kraken-record")) event.preventDefault();
+      }}
+      onDrop={(event) => {
+        const id = event.dataTransfer.getData("application/x-kraken-record");
+        if (!gm || !id || session.records[id]?.type !== "character" || party.members.some((member) => member.id === id)) return;
+        event.preventDefault();
+        patch({ members: [...party.members.map((item) => item.id), id] });
+      }}
+    >
       <nav className="party-tabs" role="tablist">
         {visibleTabs.map((item) => (
           <button key={item.id} type="button" role="tab" aria-selected={tab === item.id} onClick={() => setTab(item.id)}>
@@ -151,7 +164,11 @@ export function PartySheet({ session, compact = false }: { session: Session; com
           {party.members.length === 0 ? (
             <p className="hint empty-state">
               <b>No one is in the party yet</b>
-              {gm ? "Add a character below: their hit points, armour and coins gather here." : "The GM adds characters to the party."}
+              {gm
+                ? characters.length
+                  ? "Drag a character here from Character Selection (Characters in the sidebar), or choose one below: their hit points, armour and coins gather here."
+                  : "There are no characters yet: make them in Character Selection (Characters in the sidebar), then drag them here."
+                : "The GM adds characters to the party."}
             </p>
           ) : null}
           <ul className="party-members">
@@ -248,6 +265,24 @@ export function PartySheet({ session, compact = false }: { session: Session; com
           </ul>
           {gm ? (
             <div className="party-controls">
+              {/* Who is here tonight: every character of a player at the table joins; one whose player is not here leaves.
+                  Characters no player owns (the GM's, or not yet taken) stay as they are. */}
+              <button
+                type="button"
+                data-action="party-from-here"
+                title="Add every character of the players at the table now, and take out those whose player is not here (characters no player owns stay)"
+                onClick={() => {
+                  const here = new Set(session.players.filter((seat) => seat.role === "player" && !seat.lost).map((seat) => seat.name));
+                  const keep = party.members.filter((member) => {
+                    const owner = session.records[member.id]?.owner;
+                    return !owner || here.has(owner);
+                  });
+                  const joining = characters.filter((record) => record.owner && here.has(record.owner) && !keep.some((member) => member.id === record.id));
+                  patch({ members: [...keep.map((member) => member.id), ...joining.map((record) => record.id)] });
+                }}
+              >
+                Party from who's here
+              </button>
               {nonMembers.length > 0 ? (
                 <select
                   aria-label="Add to the party"

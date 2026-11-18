@@ -93,7 +93,7 @@ try {
 
   // FG's categories under the tools; Character empty until a book is active.
   for (const group of ["library", "player", "campaign"]) await page.waitForSelector(`.sidebar [data-sidebar-group="${group}"]`);
-  for (const button of ["combat", "players", "settings"]) assert(await page.$(`.sidebar-tools [data-launch="${button}"]`), `the ${button} tool is along the top`);
+  for (const button of ["combat", "party", "players", "settings"]) assert(await page.$(`.sidebar-tools [data-launch="${button}"]`), `the ${button} tool is along the top`);
   for (const button of ["books:activation", "books", "sound", "characters", "party", "notes", "adventure:battle", "library", "records:item", "records:npc", "adventure:parcel", "adventure:table"]) assert(await page.$(`.sidebar [data-launch="${button}"]`), `the sidebar has ${button}`);
   assert(!(await page.$('.sidebar [data-sidebar-group="character"]')), "no Character category before a book is active");
 

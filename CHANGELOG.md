@@ -8,6 +8,10 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **Party Sheet and Calendar sit with the Combat Tracker** in the sidebar's tools (as in Fantasy Grounds), no longer under Player. Drag a character from Character Selection onto the Party Sheet to add them, and **Party from who's here** adds every connected player's characters and takes out those whose player is away. Character Selection opens beside the party sheet, not over it.
+- **The sound volumes follow your ears**: a slider halfway sounds about half as loud, and turned well down it is quiet (before, a loud sound pack stayed loud until nearly zero). The dice keep their own volume.
+- **The GM can speak as their own characters**: the chat's Speak as lists the characters the GM made (and no player has taken).
+
 - **Copy gives your players a link.** The host screen's addresses show and copy a full link (http://address:port/): paste it into Discord or an email and a click opens the table in their browser.
 
 - **Roll keys that conflict no longer stand together**: +2 or -2 (pressing one turns the other off), and Crit, Max or Half, one at a time. Each game keeps its own keys.

@@ -1351,10 +1351,11 @@ const TOOLS = [
   {
     name: "kraken_party_edit",
     description:
-      "Change the party sheet. members: the character ids in party order (or allPlayers: every character a player owns). parcel coins: { GP: 30, SP: 12 } (amounts to hand out). parcelItem: add an item to the parcel {name, count, assign: \"Name, Name\", itemId: an item record to copy}. quest / encounter: add {name, xp}. marching: character ids front to back.",
+      "Change the party sheet. members: the character ids in party order (or allPlayers: every character a player owns; or fromHere: as the sheet's Party from who's here button, every character of a player at the table now joins and one whose player is not here leaves, characters no player owns staying). parcel coins: { GP: 30, SP: 12 } (amounts to hand out). parcelItem: add an item to the parcel {name, count, assign: \"Name, Name\", itemId: an item record to copy}. quest / encounter: add {name, xp}. marching: character ids front to back.",
     inputSchema: object({
       members: { type: "array", items: { type: "string" } },
       allPlayers: { type: "boolean" },
+      fromHere: { type: "boolean" },
       coins: { type: "object", additionalProperties: { type: "number" } },
       parcelItem: { type: "object", properties: { name: { type: "string" }, count: { type: "number" }, assign: { type: "string" }, itemId: { type: "string" } }, additionalProperties: false },
       quest: { type: "object", properties: { name: { type: "string" }, xp: { type: "number" } }, additionalProperties: false },
@@ -1372,6 +1373,15 @@ const TOOLS = [
           .filter((item) => item.owner)
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((item) => item.id);
+      }
+      if (args.fromHere) {
+        const here = new Set(agent.players().filter((seat) => seat.role === "player" && !seat.lost).map((seat) => seat.name));
+        const kept = (record.data?.members ?? []).filter((id) => {
+          const owner = agent.records.get(id)?.owner;
+          return agent.records.get(id) && (!owner || here.has(owner));
+        });
+        const joining = agent.records.list({ type: "character" }).filter((item) => item.owner && here.has(item.owner) && !kept.includes(item.id));
+        patch.members = [...kept, ...joining.map((item) => item.id)];
       }
       if (args.members) patch.members = args.members.filter((id) => agent.records.get(id)?.type === "character");
       if (args.coins) patch.parcel = { ...(patch.parcel ?? {}), coins: args.coins };

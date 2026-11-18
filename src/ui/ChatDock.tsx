@@ -574,7 +574,11 @@ export function ChatDock({ session }: { session: Session }) {
   // chat), or as themselves; taking a character makes it who they speak as.
   const [speakAs, setSpeakAs] = useState("");
   const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
-  const myCharacters = session.role === "dm" ? [] : Object.values(session.records).filter((record) => record.type === "character" && record.owner === me).map((record) => record.name).sort();
+  // Who this seat speaks as: a player's own characters; the GM's, the characters no player has taken (made by the GM).
+  const myCharacters = Object.values(session.records)
+    .filter((record) => record.type === "character" && (session.role === "dm" ? !record.owner || record.owner === me : record.owner === me))
+    .map((record) => record.name)
+    .sort();
   const mineKey = myCharacters.join("|");
   const known = useRef<string[]>([]);
   useEffect(() => {

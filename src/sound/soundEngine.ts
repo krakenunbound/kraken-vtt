@@ -56,7 +56,18 @@ function graph() {
   if (!Context) return null;
   context = new Context();
   master = context.createGain();
-  master.connect(context.destination);
+  // A meter on what leaves this screen, for checks (window.maelstromSoundPeak: the loudest sample just now).
+  const meter = context.createAnalyser();
+  meter.fftSize = 2048;
+  master.connect(meter);
+  meter.connect(context.destination);
+  const samples = new Float32Array(meter.fftSize);
+  (window as unknown as { maelstromSoundPeak?: () => number }).maelstromSoundPeak = () => {
+    meter.getFloatTimeDomainData(samples);
+    let peak = 0;
+    for (const value of samples) peak = Math.max(peak, Math.abs(value));
+    return peak;
+  };
   for (const { id } of KINDS) {
     const bus = context.createGain();
     bus.connect(master);
@@ -66,10 +77,13 @@ function graph() {
   return context;
 }
 
+// A slider's place as loudness, as the ear hears it: the level squared, so halfway sounds about
+// half as loud and "way down" is quiet (a straight line left a loud set loud until nearly 0).
+const heard = (slider: number) => Math.max(0, Math.min(1, slider)) ** 2;
 function applyVolumes() {
   if (!context || !master) return;
-  master.gain.setTargetAtTime(volumes.muted ? 0 : volumes.master, context.currentTime, 0.05);
-  for (const { id } of KINDS) buses.get(id)?.gain.setTargetAtTime(volumes[id], context.currentTime, 0.05);
+  master.gain.setTargetAtTime(volumes.muted ? 0 : heard(volumes.master), context.currentTime, 0.05);
+  for (const { id } of KINDS) buses.get(id)?.gain.setTargetAtTime(heard(volumes[id]), context.currentTime, 0.05);
 }
 
 // Browsers let a page play sound only after a click or key: the first one
