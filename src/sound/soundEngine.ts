@@ -54,6 +54,8 @@ function seekTo(element: HTMLAudioElement, elapsedMs: number, received: number) 
   else element.addEventListener("loadedmetadata", go, { once: true });
 }
 let musicDone: (() => void) | null = null;
+// How long a playlist's tracks overlap as one gives way to the next.
+const CROSSFADE_SECONDS = 4;
 // The one-shots and effects playing here, by the sound's id (so a play
 // button can show it is playing, and stop just that one).
 const playing = new Map<AudioBufferSourceNode, string>();
@@ -311,7 +313,18 @@ export const sound = {
     const gain = ctx.createGain();
     gain.gain.value = 0;
     source.connect(gain).connect(buses.get("music")!);
-    element.addEventListener("ended", () => musicDone?.());
+    // A playlist's next track is asked for a few seconds before this one ends, so the two cross-fade (the old fades
+    // out as the new fades in, below); "ended" stays for a track too short to have been caught.
+    let asked = false;
+    const next = () => {
+      if (asked) return;
+      asked = true;
+      musicDone?.();
+    };
+    element.addEventListener("timeupdate", () => {
+      if (!element.loop && Number.isFinite(element.duration) && element.duration > CROSSFADE_SECONDS * 2 && element.duration - element.currentTime <= CROSSFADE_SECONDS) next();
+    });
+    element.addEventListener("ended", next);
     music = { id: track.id, startedAt: track.startedAt ?? 0, element, source, gain };
     playingChanged();
     // Joined after the track began (a late seat, a reload): in at the same bar as everyone else.
