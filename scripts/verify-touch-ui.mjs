@@ -125,6 +125,18 @@ try {
   results.push(`pinch on a token x${(out.width / beforeOut.width).toFixed(2)}, token at ${where.col},${where.row}`);
   assert(Math.abs(out.width / beforeOut.width - 0.5) < 0.05 && where.col === 8 && where.row === 5, `a finger on a token still pinches, and the token stays: ${results.at(-1)}`);
 
+  // A touch screen's targets: the map's tools and the window buttons 44 px or more (measured unzoomed, CSS pixels).
+  const small = await seat.evaluate(() => {
+    if (!matchMedia("(pointer: coarse)").matches) return ["not a coarse pointer"];
+    const zoom = Number.parseFloat(document.documentElement.style.zoom) || 1;
+    return [...document.querySelectorAll('.window[data-window="map"] .map-toolbar .tool, .window-close')]
+      .filter((element) => element.offsetParent)
+      .map((element) => element.getBoundingClientRect())
+      .filter((box) => box.width / zoom < 43.5 || box.height / zoom < 43.5)
+      .map((box) => `${Math.round(box.width / zoom)}x${Math.round(box.height / zoom)}`);
+  });
+  results.push(`touch targets under 44 px: ${small.length}`);
+  assert(small.length === 0, `every map tool and window button is 44 px or more on a touch screen: ${small.join(", ")}`);
   await seat.screenshot({ path: path.join(tmpdir(), "kraken-touch-player.png") });
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok touch: a full-screen touch player pans the map with one finger and pinch-zooms with two about their midpoint, a finger on a token included (${results.join("; ")}). ${path.join(tmpdir(), "kraken-touch-player.png")}`);

@@ -2731,3 +2731,16 @@ label.set-row { cursor: pointer; }
 .read-aloud-entry p { margin: 0; }
 .read-aloud-entry.newest { background: linear-gradient(#f6ead0, #ead7ae); color: #2a1a08; border-color: #a07a3c; }
 .read-aloud-entry.newest .read-aloud-title { color: #7a5320; }
+
+/* A touch screen (docs/feature-parity.md S10): taps get 44 px targets (WCAG 2.5.5) on what a tablet player taps most;
+   a mouse keeps the compact sizes. */
+@media (pointer: coarse) {
+  .map-toolbar .tool, .window-tools .map-toolbar .tool, .window-tools .map-corner .tool { width: 44px; height: 44px; }
+  .map-toolbar .tool:has(.tool-label) { height: 44px; }
+  /* Bigger tools in a window's title bar wrap onto a second row rather than run off a tablet's screen. */
+  .window-tools .map-controls.map-toolbar { flex-wrap: wrap; row-gap: 4px; }
+  .window-close { min-width: 44px; min-height: 44px; }
+  .token-menu :is(button, [role="menuitem"]) { min-height: 44px; }
+  .sidebar-entry { min-height: 44px; }
+  .quick-slot { min-height: 44px; }
+}
