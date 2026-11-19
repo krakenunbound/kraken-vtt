@@ -380,7 +380,8 @@ export const sound = {
     void sound.play(`sfx/Effects/Turn/${scifi ? "turn-console" : "turn-chime"}.mp3`, "sfx");
   },
   // For tests and the Sound window: what is playing here.
-  playingHere: () => ({ ambience: [...ambience.keys()], music: music?.id ?? null, effects: playing.size, running: context?.state === "running" }),
+  // musicAt: where the music is in its track (seconds), to see a seat joined in time.
+  playingHere: () => ({ ambience: [...ambience.keys()], music: music?.id ?? null, musicAt: music ? music.element.currentTime : null, effects: playing.size, running: context?.state === "running" }),
 };
 
 // Tests and the agent's eyes (kraken_ui_eval) can see what plays on this screen.

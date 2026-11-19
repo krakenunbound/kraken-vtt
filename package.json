@@ -120,6 +120,7 @@
     "uvtt-map-ui": "node scripts/verify-uvtt-map-ui.mjs",
     "ui-scale-ui": "node scripts/verify-ui-scale-ui.mjs",
     "touch-ui": "node scripts/verify-touch-ui.mjs",
+    "music-sync-ui": "node scripts/verify-music-sync-ui.mjs",
     "copy-ui": "node scripts/verify-copy-ui.mjs",
     "lan-join-ui": "node scripts/verify-lan-join-ui.mjs",
     "charselect-ui": "node scripts/verify-charselect-ui.mjs",
