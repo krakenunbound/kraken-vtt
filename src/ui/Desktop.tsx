@@ -457,6 +457,12 @@ export function Desktop({
   // Action links in text know this game's checks, saves and skills.
   setActionRolls((manifestOf(session.ruleset).party?.groupCheck || undefined)?.rolls);
   const dice =useSyncExternalStore(diceStore.subscribe, diceStore.settings);
+  // A folder of music plays track after track: the GM's screen asks for the next, whether or not the Sound window is open.
+  useEffect(() => {
+    if (!gm) return;
+    sound.onMusicEnded(() => session.soundCommand({ type: "music", action: "next" }));
+    return () => sound.onMusicEnded(null);
+  }, [gm, session.soundCommand]);
   // A sheet whose character this seat may no longer see (the GM took it back) closes.
   useEffect(() => {
     for (const item of windows.windows) if (item.kind === "sheet" && item.payload && !session.records[item.payload]) windows.close(item.key);

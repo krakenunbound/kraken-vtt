@@ -78,8 +78,23 @@ try {
   const table = (Date.now() - startedAt) / 1000;
   assert(heard?.music === track.id, `the player hears the table's track: ${JSON.stringify(heard)}`);
   assert(Math.abs(heard.musicAt - table) < 2, `the player joins at the table's moment: theirs ${heard.musicAt.toFixed(1)} s, the table's ${table.toFixed(1)} s`);
+  // A folder's playlist, in order, with the Sound window closed: near the end of a track the next one is asked for
+  // (the GM's screen) and comes in while the old one is still playing out, a crossfade, not a gap.
+  // All the music as one playlist (the shipped folders hold one track each, and one alone just loops).
+  const folder = "music";
+  assert(listed.groups.filter((group) => group.id.startsWith("music/")).length > 1, `more than one track to play: ${JSON.stringify(listed.groups)}`);
+  await tool("kraken_sound", { action: "music", do: "play", id: folder, order: "order", repeat: true });
+  await page.waitForFunction((want) => window.__krakenSound?.playingHere().music?.startsWith(`${want}/`) && window.__krakenSound.musicLength() > 10, folder, { timeout: 20000 });
+  const first = await page.evaluate(() => window.__krakenSound.playingHere().music);
+  const length = await page.evaluate(() => window.__krakenSound.musicLength());
+  await page.evaluate((at) => window.__krakenSound.musicSeek(at), length - 5);
+  const switched = Date.now();
+  await page.waitForFunction((was) => window.__krakenSound.playingHere().music !== was, first, { timeout: 8000 });
+  const after = (Date.now() - switched) / 1000;
+  const second = await page.evaluate(() => window.__krakenSound.playingHere().music);
+  assert(after < 4.5, `the next track came in before the old one ended (${after.toFixed(1)} s after jumping to 5 s from the end): ${first} -> ${second}`);
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
-  console.log(`ok music sync: a player joining ${table.toFixed(1)} s into ${track.id} hears it from ${heard.musicAt.toFixed(1)} s, not from the top.`);
+  console.log(`ok music sync: a player joining ${table.toFixed(1)} s into ${track.id} hears it from ${heard.musicAt.toFixed(1)} s, not from the top; with the Sound window closed, ${first} gives way to ${second} ${after.toFixed(1)} s after jumping to 5 s from its end (a crossfade, no gap).`);
 } finally {
   await browser?.close();
   child.kill();

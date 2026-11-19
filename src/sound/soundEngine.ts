@@ -393,6 +393,11 @@ export const sound = {
     void sound.play(`sfx/Effects/Turn/${scifi ? "turn-console" : "turn-chime"}.mp3`, "sfx");
   },
   // For tests and the Sound window: what is playing here.
+  // For tests and the agent's eyes: the music's track length, and a jump to near its end (to hear the crossfade).
+  musicLength: () => (music && Number.isFinite(music.element.duration) ? music.element.duration : null),
+  musicSeek: (seconds: number) => {
+    if (music) music.element.currentTime = Math.max(0, seconds);
+  },
   // musicAt: where the music is in its track (seconds), to see a seat joined in time.
   playingHere: () => ({ ambience: [...ambience.keys()], music: music?.id ?? null, musicAt: music ? music.element.currentTime : null, effects: playing.size, running: context?.state === "running" }),
 };

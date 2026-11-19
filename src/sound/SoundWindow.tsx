@@ -430,12 +430,6 @@ export function SoundWindow({ session }: { session: Session }) {
     if (gm) session.soundList().then(setLibrary).catch(() => setLibrary({ sounds: [], groups: [], folder: "" }));
   };
   useEffect(reload, [gm]);
-  // A folder of music plays track after track: the GM's screen asks for the next.
-  useEffect(() => {
-    if (!gm) return;
-    sound.onMusicEnded(() => session.soundCommand({ type: "music", action: "next" }));
-    return () => sound.onMusicEnded(null);
-  }, [gm, session.soundCommand]);
   const empty = library && library.sounds.length === 0;
   return (
     <div className="sound-window">
