@@ -14,7 +14,7 @@ const ALL_SKILLS: [string, string][] = Object.entries(SKILLS).flatMap(([key, [na
 
 // "Scout 3 (rank 2), Marine 2 (Lieutenant)", or "-".
 export const mgt2Careers = (data: Row) =>
-  (Array.isArray(data.careers) ? (data.careers as Row[]) : []).map((career) => `${String(career.name)} ${num(career.terms)}${career.title ? ` (${String(career.title)})` : num(career.rank) ? ` (rank ${num(career.rank)})` : ""}`).join(", ") || "-";
+  (Array.isArray(data.careers) ? (data.careers as Row[]) : []).map((career) => `${String(career.name)}${career.assignment ? ` (${String(career.assignment)})` : ""} ${num(career.terms)}${career.title ? ` (${String(career.title)})` : num(career.rank) ? ` (rank ${num(career.rank)})` : ""}`).join(", ") || "-";
 
 // A skill's task DM: its level and its characteristic's DM as that characteristic is now (a wounded one is weaker).
 export const mgt2SkillTotal = (row: Row, _key?: string, data: Row = {}) => {

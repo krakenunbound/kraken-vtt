@@ -82,7 +82,7 @@ async function editMgt2(table, record, changes, seat) {
     if (named && !/^[a-z0-9-]+$/.test(named[1])) key = `skills.${rules.skillKey(named[1]).key}.level`;
     if (key === "name") name = String(value ?? "").trim().slice(0, 120) || record.name;
     else if (TEXT.some((pattern) => pattern.test(key))) data[key] = String(value ?? "").slice(0, 8000);
-    else if (key === "careers") data.careers = (Array.isArray(value) ? value : []).slice(0, 12).map((item) => ({ name: String(item?.name ?? "").slice(0, 60), terms: Math.max(0, Math.round(Number(item?.terms) || 0)), rank: Math.max(0, Math.round(Number(item?.rank) || 0)) }));
+    else if (key === "careers") data.careers = (Array.isArray(value) ? value : []).slice(0, 12).map((item) => ({ name: String(item?.name ?? "").slice(0, 60), terms: Math.max(0, Math.round(Number(item?.terms) || 0)), rank: Math.max(0, Math.round(Number(item?.rank) || 0)), ...(item?.assignment ? { assignment: String(item.assignment).slice(0, 60) } : {}), ...(item?.title ? { title: String(item.title).slice(0, 60) } : {}) }));
     else if (/^skills\.[a-z0-9-]+$/.test(key) && value === null) delete data.skills?.[key.split(".")[1]];
     else if (NUMBERS.some((pattern) => pattern.test(key))) {
       const n = Math.round(Number(value));

@@ -47,7 +47,7 @@ const sheet = {
       parts: [
         {
           part: "row",
-          className: "cc-main-grid five-main",
+          className: "cc-main-grid five-main mgt2-main",
           parts: [
             {
               part: "statBlock",
@@ -62,15 +62,20 @@ const sheet = {
             },
             {
               part: "derived",
+              className: "mgt2-combat",
               boxes: [
                 {
-                  label: "Damage",
+                  // END + STR + DEX left of their scores, with a bar; damage comes off them in that order.
+                  label: "Physical",
                   title: "Damage comes off Endurance, then Strength, then Dexterity",
-                  show: "text",
-                  path: "hp.wounds",
+                  show: "remaining",
+                  path: "characteristics.end.score",
+                  sum: ["characteristics.str.score", "characteristics.dex.score"],
+                  minus: "hp.wounds",
                   hook: "hp",
-                  text: ["END ", "{characteristics.end.now|0}", " · STR ", "{characteristics.str.now|0}", " · DEX ", "{characteristics.dex.now|0}"],
+                  danger: true,
                   dangerWhen: DOWN,
+                  note: "END {characteristics.end.now|0} · STR {characteristics.str.now|0} · DEX {characteristics.dex.now|0}",
                   fields: [{ path: "hp.wounds", label: "Damage taken", kind: "number", before: "Taken" }],
                   warn: { when: DOWN, text: { if: { is: { path: "hp.state", values: ["Dead"] } }, then: "Dead", else: "Unconscious" }, attr: { name: "down", value: "true" } },
                 },
@@ -78,6 +83,8 @@ const sheet = {
                 { label: "Initiative", title: "2d6 + the better of DEX and INT DM", show: "value", path: "initiative.total", hook: "init", format: "signed" },
               ],
             },
+            // The people a Traveller knows, on the front.
+            { part: "notes", section: { className: "cc-panel mgt2-contacts", aria: "Allies and contacts" }, fields: [{ path: "contacts", label: "Allies, contacts, rivals and enemies", kind: "textarea" }] },
           ],
         },
       ],
@@ -144,7 +151,6 @@ const sheet = {
         {
           part: "notes",
           fields: [
-            { path: "contacts", label: "Allies, contacts, rivals and enemies", kind: "text" },
             { path: "gender", label: "Gender", kind: "text" },
             { path: "appearance", label: "Appearance and background", kind: "textarea", bare: true },
             { path: "notes", label: "Notes", kind: "textarea", bare: true },

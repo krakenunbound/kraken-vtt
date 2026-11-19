@@ -149,7 +149,8 @@ function StepButton({ spec, scope }: { spec: StepSpec; scope?: Scope }) {
 }
 
 function RollButton({ roll, scope, className: base }: { roll: RollSpec; scope: Scope; className?: string }) {
-  const className = roll.className ?? base;
+  // cc-roll: a small die on the corner of every roll button that shows its number (docs/core-ui-design.md 8.1).
+  const className = `${roll.className ?? base ?? ""} cc-roll`.trim();
   const sheet = useSheet();
   const key = String(scope.extra?.key ?? "");
   // What goes as the roll's key: the row's key, or (send) a skill's name.
@@ -432,7 +433,7 @@ function DerivedBox({ box }: { box: BoxSpec }) {
           {box.suffix}
         </span>
       ) : (
-        <span {...hook} style={{ color: box.danger && shown <= 0 ? "#c0392b" : undefined }}>
+        <span {...hook} style={{ color: (box.danger && shown <= 0) || (box.dangerWhen && holds(box.dangerWhen, scope, sheet)) ? "#c0392b" : undefined }}>
           {box.show === "remaining" ? (
             <>
               {shown} / {value}

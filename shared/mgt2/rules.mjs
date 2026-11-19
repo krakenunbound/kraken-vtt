@@ -330,7 +330,7 @@ export function derive(input) {
     data.attacks[key] = weaponAttack(data, item);
   }
   data.attacks.unarmed = weaponAttack(data, { name: "Unarmed", damage: "1D", skill: "Melee (Unarmed)", range: "Melee" });
-  const careers = Array.isArray(input.careers) ? input.careers.filter((item) => item && item.name).map((item) => ({ name: String(item.name), terms: Math.max(0, Math.round(num(item.terms, 1))), rank: Math.max(0, Math.round(num(item.rank, 0))) })) : [];
+  const careers = Array.isArray(input.careers) ? input.careers.filter((item) => item && item.name).map((item) => ({ name: String(item.name), terms: Math.max(0, Math.round(num(item.terms, 1))), rank: Math.max(0, Math.round(num(item.rank, 0))), ...(item.assignment ? { assignment: String(item.assignment).slice(0, 60) } : {}), ...(item.title ? { title: String(item.title).slice(0, 60) } : {}) })) : [];
   data.careers = careers;
   data.terms = careers.reduce((sum, item) => sum + item.terms, 0);
   data.age = Math.round(num(input.age, 18 + 4 * data.terms));
@@ -447,7 +447,5 @@ export function buildFromSpec(spec, lib = {}) {
     gender: String(spec?.gender ?? ""),
     exp: 0,
   });
-  // A career's rank title, kept with it.
-  data.careers = data.careers.map((career, index) => ({ ...career, title: String(careers[index]?.title ?? "") }));
   return { name: String(spec?.name ?? "").trim() || "Traveller", data, problems };
 }
