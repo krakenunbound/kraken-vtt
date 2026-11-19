@@ -91,6 +91,7 @@ export interface BoxSpec {
   // remaining: path (+ plus) less minus, "/ path" (HP); text: a template (text); field: a field in the box (field)
   show: "value" | "remaining" | "shield" | "text" | "field";
   path: Path;
+  sum?: Path[]; // value: path plus these (3.5E's melee: base attack + Strength + size)
   minus?: Path;
   plus?: Path;
   text?: Nodes; // a list: one text node each ("END ", "8", " · STR ", ...)

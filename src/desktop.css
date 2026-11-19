@@ -1885,6 +1885,29 @@ textarea.cc-field.tall { min-height: 220px; }
 .sheet-35 .five-defence { grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; }
 .sheet-35 .five-defence > .five-big:nth-child(-n + 2) { grid-column: 1 / -1; }
 .sheet-35 .five-big .cc-inline { flex-wrap: wrap; justify-content: center; }
+/* 3.5E's Main tab: the abilities, the saves in a column beside them, the combat boxes under the abilities
+   (AC and hit points, then initiative, melee, ranged, speed, size); stacked in a narrow window. */
+.sheet-35 .d35-main { grid-template-columns: minmax(0, 1fr); grid-template-areas: "abilities" "saves" "combat"; align-items: start; }
+.sheet-35 .d35-main > [aria-label="Abilities"] { grid-area: abilities; }
+.sheet-35 .d35-main > .d35-saves { grid-area: saves; margin-top: 0; padding-top: 8px; border-top: 1px solid rgba(214, 170, 92, 0.3); }
+.sheet-35 .d35-main > .d35-combat { grid-area: combat; }
+@container (min-width: 700px) {
+  .sheet-35 .d35-main { grid-template-columns: minmax(0, 1fr) minmax(220px, 0.62fr); grid-template-areas: "abilities saves" "combat combat"; }
+  .sheet-35 .d35-main > .d35-saves { align-self: stretch; }
+}
+.sheet-35 .d35-main .d35-ability { padding: 3px 0; border-bottom: 1px solid rgba(214, 170, 92, 0.12); }
+.sheet-35 .d35-main .d35-ability, .sheet-35 .d35-main .d35-ability-head { grid-template-columns: minmax(7rem, 9rem) 3.4rem 3rem; justify-content: start; column-gap: 14px; }
+.sheet-35 .d35-main .d35-save { padding: 6px 0; border-bottom: 1px solid rgba(214, 170, 92, 0.12); }
+.sheet-35 .d35-main .d35-save .cc-save { justify-self: center; min-width: 2.6rem; padding: 3px 0; text-align: center; font-size: 0.95rem; border: 1px solid rgba(214, 170, 92, 0.5); border-radius: 4px; background: rgba(0, 0, 0, 0.3); }
+.sheet-35 .five-defence.d35-combat { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.sheet-35 .five-defence.d35-combat > .five-big { grid-column: span 2; }
+.sheet-35 .five-defence.d35-combat > .five-big:nth-child(-n + 2) { grid-column: span 3; }
+.sheet-35 .five-defence.d35-combat > .five-big:nth-child(n + 6) { grid-column: span 3; }
+@container (min-width: 700px) {
+  .sheet-35 .five-defence.d35-combat { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+  .sheet-35 .five-defence.d35-combat > .five-big:nth-child(-n + 2) { grid-column: span 5; }
+  .sheet-35 .five-defence.d35-combat > .five-big:nth-child(n + 3) { grid-column: span 2; }
+}
 /* The AD&D 2E sheet: each ability with its table's boxes beside the score, the saves in a column beside the
    abilities, the combat boxes in a row under both; stacked in a narrow window (a player's small screen). */
 .sheet-2e .d2e-main { grid-template-columns: minmax(0, 1fr); grid-template-areas: "abilities" "saves" "combat"; align-items: start; }

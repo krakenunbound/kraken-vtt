@@ -8,6 +8,7 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release (alpha to beta).
 
+- **D&D 3.5E's character sheet laid out the same way**: the saving throws in a column beside the abilities, Armor Class and hit points under them, and initiative, melee and ranged attack, speed and size in a row, all without scrolling. Melee and ranged attack bonuses are new on the sheet.
 - **An easier character sheet, AD&D 2E first**: each ability shows its table's values in small boxes beside the score (Hit, Dmg, Allow, Doors, Bars...) in place of a sentence; the saving throws sit in a column beside the abilities, with Armor Class, hit points, initiative and movement under them, so the whole Main tab fits without scrolling. The ability checks are a die you click. Every game's sheet gains a health bar under its hit points, easier-to-read tabs and a wider window.
 - **Fantasy Grounds store books become packs too**: a book FG keeps encrypted (its store books, such as the AD&D 2E Player's Handbook, Dungeon Master Guide and Monstrous Manual) is read from FG while FG has it loaded, through the Kraken Agent Bridge: every page, record, table and link with its formatting, and its pictures captured from FG. One pack per book (`scripts/fg-bridge-export`).
 - **AD&D 2E books keep all their spells, gear, skills and story**: records a 2E book keeps by category (armor, weapons, gear...) were lost, all but the last category.

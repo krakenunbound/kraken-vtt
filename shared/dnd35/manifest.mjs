@@ -62,7 +62,7 @@ export default {
         parts: [
           {
             part: "row",
-            className: "cc-main-grid five-main",
+            className: "cc-main-grid five-main d35-main",
             parts: [
               {
                 part: "statBlock",
@@ -76,24 +76,26 @@ export default {
                   { label: "Score", path: "abilities.{key}.score", field: { kind: "number", label: "{key} score" } },
                   { label: "Mod", roll: { action: roll("check"), hook: "roll-check", label: "{abilities.{key}.bonus|signed}", title: "Roll a {key} check", aria: "{key} check" } },
                 ],
-                // Fortitude, Reflex and Will, under the abilities they come from.
-                inner: {
-                  label: "Saving throws",
-                  hook: "save",
-                  base: "d35-saves",
-                  head: false,
-                  plain: true,
-                  rowClass: "five-ability d35-save",
-                  rowTitle: "Base {saves.{key}.base|signed}, ability {saves.{key}.ability|signed}, misc {saves.{key}.misc|signed}",
-                  rows: Object.keys(SAVES).map((key) => ({ key, label: SAVE_WORDS[key] })),
-                  columns: [
-                    { label: "Misc", path: "saves.{key}.misc", field: { kind: "number", label: "{key} misc" } },
-                    { label: "Save", roll: { action: roll("save", { fight: true }), hook: "roll-save", className: "cc-save", label: "{saves.{key}.total|signed}", title: "Roll a {key} save", aria: "{key} save" } },
-                  ],
-                },
+              },
+              // Fortitude, Reflex and Will in a column beside the abilities.
+              {
+                part: "statBlock",
+                label: "Saving throws",
+                hook: "save",
+                base: "cc-panel d35-saves",
+                heading: { text: "Saving throws", hint: "misc · roll" },
+                plain: true,
+                rowClass: "five-ability d35-save",
+                rowTitle: "Base {saves.{key}.base|signed}, ability {saves.{key}.ability|signed}, misc {saves.{key}.misc|signed}",
+                rows: Object.keys(SAVES).map((key) => ({ key, label: SAVE_WORDS[key] })),
+                columns: [
+                  { label: "Misc", path: "saves.{key}.misc", field: { kind: "number", label: "{key} misc" } },
+                  { label: "Save", roll: { action: roll("save", { fight: true }), hook: "roll-save", className: "cc-save", label: "{saves.{key}.total|signed}", title: "Roll a {key} save", aria: "{key} save" } },
+                ],
               },
               {
                 part: "derived",
+                className: "d35-combat",
                 boxes: [
                   {
                     label: "Armor Class",
@@ -126,6 +128,8 @@ export default {
                     ],
                   },
                   { label: "Initiative", show: "value", path: "initiative.total", hook: "init", format: "signed" },
+                  { label: "Melee", show: "value", path: "bab", sum: ["abilities.strength.bonus", "ac.size"], hook: "melee", format: "signed", title: "Base attack + Strength + size, before a weapon" },
+                  { label: "Ranged", show: "value", path: "bab", sum: ["abilities.dexterity.bonus", "ac.size"], hook: "ranged", format: "signed", title: "Base attack + Dexterity + size, before a weapon" },
                   { label: "Speed", show: "field", path: "speed", field: { path: "speed", kind: "number", label: "Speed" }, suffix: " ft." },
                   { label: "Size", show: "text", path: "size", text: "{size|medium|titled}" },
                 ],

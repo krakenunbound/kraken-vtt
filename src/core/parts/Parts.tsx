@@ -409,7 +409,7 @@ function Derived({ spec, custom }: { spec: Extract<Part, { part: "derived" }>; c
 function DerivedBox({ box }: { box: BoxSpec }) {
   const sheet = useSheet();
   const scope: Scope = { data: sheet.data };
-  const value = num(at(sheet.data, box.path));
+  const value = num(at(sheet.data, box.path)) + (box.sum ?? []).reduce((total, path) => total + num(at(sheet.data, path)), 0);
   const shown = box.show === "remaining" ? value + (box.plus ? num(at(sheet.data, box.plus)) : 0) - num(at(sheet.data, box.minus ?? "")) : value;
   const warn = box.warn && (box.warn.atZero ? shown <= 0 : holds(box.warn.when, scope, sheet));
   const hook = box.hook ? { "data-stat": box.hook } : {};
