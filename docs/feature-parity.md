@@ -8,16 +8,16 @@ CoreRPG/5E source, Foundry's core source and Kraken's code; IDs below are used
 in commits and PLAN.md. Keep it current: when a gap closes, mark it Done with
 the release.
 
-Status of the work (2026-11-15):
+Status of the work (2026-11-19):
 
-| Area | Being built | Queued |
+| Area | Done | Open |
 |---|---|---|
-| Targeting, attacks, damage, effects, conditions, token effect visuals, light-source effects, area templates | targeting agent (docs/targeting-actions-design.md) | |
-| Session and platform | S1 reconnect, S2 hosting/invites, S4 pause, S5 player controls, S6 pull view, S8 campaign management | S3 (with R4), S7, S9, S10 |
-| Maps and tokens | M1-M10 | M11-M13 |
-| Records and content | R1-R7, R9 (R4 = S3) | R8 (= S8), R10 |
-| Resource tracking (GM's ask) | Done (unreleased): bookkeeping (ammunition, consumables, rations and water, light from the pack, encumbrance and bag space, each with a GM switch) and D5 rest | |
-| Dice, chat and combat | Done (D5 rest with the resources work) | D1-D4, D6-D10 and the smaller items |
+| Targeting, attacks, damage, effects, conditions, token effect visuals, light-source effects, area templates | Done (alpha.91): the targeting work (docs/targeting-actions-design.md) | |
+| Session and platform | S1 reconnect, S2 hosting/invites, S4 pause, S5 player controls, S6 pull view, S8 campaign management (alpha.91) | S3 and S7 partly; S9, S10 |
+| Maps and tokens | M1-M10 (alpha.91) | M11 partly; M12, M13 |
+| Records and content | R1-R7 (alpha.91; R4 = S3) | R8 (= S8), R9, R10 partly |
+| Resource tracking (GM's ask) | Done (alpha.91): bookkeeping (ammunition, consumables, rations and water, light from the pack, encumbrance and bag space, each with a GM switch) and D5 rest | |
+| Dice, chat and combat | D1-D10 (alpha.91) | the smaller items still open |
 
 ## Asked by the GM (2026-11-15): Done (unreleased)
 - Resource tracking, each with a GM option to turn it off ("fun mode", Settings > Bookkeeping, `kraken_table_options bookkeeping`):
@@ -34,17 +34,17 @@ Kraken already at or ahead: map windows with pop-out and Share, square and hex g
 
 | # | Gap | Kraken today | Best solution | Priority |
 |---|---|---|---|---|
-| M1 | Shared ruler, waypoints, diagonal rule | right-drag ruler local only; diagonal fixed at 1 (MapView.tsx:846) | ruler message to all in the measurer's colour, click for waypoints with leg and total labels, scene option 1 / 1.5 / raw | High |
-| M2 | Who sees names and health | dot only, health and real names sent to every seat (mapState.cjs:690-704) | FG's options (GM/NPC/PC: bar, bar on hover, dot, off; names off/hover/always) filtered in publicToken; per-token unidentified name | High |
-| M3 | Explored fog on the host | localStorage per browser | per scene per player in map state, saved, GM "Reset explored" | High |
-| M4 | Senses beyond darkvision | none | parse blindsight, tremorsense, truesight, devil's sight; apply in viewFor | High |
-| M5 | Undo a move, path this turn | none | per-token move list, Ctrl+Z own last move, GM any; faint path and sum | High |
-| M6 | Pull players' view | none | Shift+ping pulls (with session agent: S6) | High |
-| M7 | GM approval of locked moves | locked = refused | request with path, GM Accept/Cancel strip | Medium |
-| M8 | Elevation | none | elevation in feet, Alt+wheel, badge, 3D distance | Medium |
-| M9 | Map Studio regions at the table | bridge sends regions: [] | traps/pits pause and tell the GM, difficult terrain cost, teleport | Medium |
-| M10 | Map sound sources, animated (webm) maps | one sound per scene; img only | positional sounds muffled by walls (Web Audio); video background for .webm | Medium |
-| M11 | Drag path cost and speed colouring | straight line | path with cost, coloured by the sheet's speed (warn) | Medium |
+| M1 | Shared ruler, waypoints, diagonal rule | right-drag ruler local only; diagonal fixed at 1 (MapView.tsx:846) | ruler message to all in the measurer's colour, click for waypoints with leg and total labels, scene option 1 / 1.5 / raw | Done (alpha.91), High |
+| M2 | Who sees names and health | dot only, health and real names sent to every seat (mapState.cjs:690-704) | FG's options (GM/NPC/PC: bar, bar on hover, dot, off; names off/hover/always) filtered in publicToken; per-token unidentified name | Done (alpha.91), High |
+| M3 | Explored fog on the host | localStorage per browser | per scene per player in map state, saved, GM "Reset explored" | Done (alpha.91), High |
+| M4 | Senses beyond darkvision | none | parse blindsight, tremorsense, truesight, devil's sight; apply in viewFor | Done (alpha.91), High |
+| M5 | Undo a move, path this turn | none | per-token move list, Ctrl+Z own last move, GM any; faint path and sum | Done (alpha.91), High |
+| M6 | Pull players' view | none | Shift+ping pulls (with session agent: S6) | Done (alpha.91), High |
+| M7 | GM approval of locked moves | locked = refused | request with path, GM Accept/Cancel strip | Done (alpha.91), Medium |
+| M8 | Elevation | none | elevation in feet, Alt+wheel, badge, 3D distance | Done (alpha.91), Medium |
+| M9 | Map Studio regions at the table | bridge sends regions: [] | traps/pits pause and tell the GM, difficult terrain cost, teleport | Done (alpha.91), Medium |
+| M10 | Map sound sources, animated (webm) maps | one sound per scene; img only | positional sounds muffled by walls (Web Audio); video background for .webm | Done (alpha.91), Medium |
+| M11 | Drag path cost and speed colouring | straight line | path with cost, coloured by the sheet's speed (warn) | Partly: the drag measures a straight line, not a routed path; Medium |
 | M12 | Token vision panel | dark-sight distance only | sight on/off, angle, mode | Medium |
 | M13 | Preload scene, players on different maps, Universal VTT (.dd2vtt) import | none | Foundry preload; per-player map; UVTT reader | Medium |
 
@@ -58,16 +58,16 @@ The big gap: beyond characters, notes and the party sheet, every record is read-
 
 | # | Gap | Kraken today | Best solution | Priority |
 |---|---|---|---|---|
-| R1 | Edit, duplicate, delete records in the UI | RecordWindow displays only; New is dead | FG's lock pencil; fields from the manifest's record schema or a generic editor; Duplicate, Delete with undo, Copy to campaign for book records | High |
-| R2 | Campaign story and one rich text editor | module story read-only; notes are a textarea | story records with pages (text, image, book page); one contenteditable editor (headings, lists, tables, boxed read-aloud, image and link drop) saved in FG's tag set; used for notes too | High |
-| R3 | Random tables done properly | adventure tables only, one level | shared engine from FG: inline [2d6], [Nx], nested tables, columns, secret rolls, link results as cards; Roll on every table; editor and paste import | High |
-| R4 | Share with one or chosen players (= S3) | gm/owner/all; pictures to all | visibility = gm / all / list of names; eye menu; drop on a portrait; pictures and story too | High |
-| R5 | Item identification | fields hidden | Identified toggle; players get nonid name/notes, stripped on the host | High |
-| R6 | Encounter builder, placement, random encounters | module encounters only | campaign battle records (NPCs, counts, faction), XP/CR total, Place on this map, dice counts, End encounter awards XP | High |
-| R7 | Links everywhere (record text, chat) (= D3) | links dead in campaign records; no chat drop | follow links in every record; drop a link in chat posts a card | High |
-| R8 | Campaign backup, restore, export (= S8) | one .bak | dated snapshots, Restore, Export/Import .zip, export records as .kpack | Medium |
-| R9 | Parcels as records, quests, locations | typed parcel names; quests are XP rows | parcel records with full item links and coins; quest records dropped on the XP tab; locations as story with a map pin | Medium |
-| R10 | Campaign options from manifests, session log | a few table options; 2000-line chat | Options tab from each manifest's option list; per-session chat archive with search | Medium |
+| R1 | Edit, duplicate, delete records in the UI | RecordWindow displays only; New is dead | FG's lock pencil; fields from the manifest's record schema or a generic editor; Duplicate, Delete with undo, Copy to campaign for book records | Done (alpha.91), High |
+| R2 | Campaign story and one rich text editor | module story read-only; notes are a textarea | story records with pages (text, image, book page); one contenteditable editor (headings, lists, tables, boxed read-aloud, image and link drop) saved in FG's tag set; used for notes too | Done (alpha.91), High |
+| R3 | Random tables done properly | adventure tables only, one level | shared engine from FG: inline [2d6], [Nx], nested tables, columns, secret rolls, link results as cards; Roll on every table; editor and paste import | Done (alpha.91), High |
+| R4 | Share with one or chosen players (= S3) | gm/owner/all; pictures to all | visibility = gm / all / list of names; eye menu; drop on a portrait; pictures and story too | Done (alpha.91), High |
+| R5 | Item identification | fields hidden | Identified toggle; players get nonid name/notes, stripped on the host | Done (alpha.91), High |
+| R6 | Encounter builder, placement, random encounters | module encounters only | campaign battle records (NPCs, counts, faction), XP/CR total, Place on this map, dice counts, End encounter awards XP | Done (alpha.91), High |
+| R7 | Links everywhere (record text, chat) (= D3) | links dead in campaign records; no chat drop | follow links in every record; drop a link in chat posts a card | Done (alpha.91), High |
+| R8 | Campaign backup, restore, export (= S8) | one .bak | dated snapshots, Restore, Export/Import .zip, export records as .kpack | Partly: no import of a campaign .zip, no records exported as .kpack; Medium |
+| R9 | Parcels as records, quests, locations | typed parcel names; quests are XP rows | parcel records with full item links and coins; quest records dropped on the XP tab; locations as story with a map pin | Partly: locations have no map pin; Medium |
+| R10 | Campaign options from manifests, session log | a few table options; 2000-line chat | Options tab from each manifest's option list; per-session chat archive with search | Partly: no Options tab from the manifests (session log done); Medium |
 
 Lower: full-text search across books, GM's own handout images (drop a file on Images), Foundry JSON import, shop, story templates, PDF pages, category editing.
 
@@ -77,16 +77,16 @@ Kraken already at or ahead: seeded host dice engine, 3D dice, tray with right-cl
 
 | # | Gap | Kraken today | Best solution | Priority |
 |---|---|---|---|---|
-| D1 | Modifier stack every roll reads | one number in ChatDock local state; sheet and tracker rolls ignore it | per-seat host stack (6 labelled slots + total), applied to every roll the seat starts, listed in the card | High |
-| D2 | ADV / DIS / +2 / -2 and ruleset presets | 5E sheet select only | toggle chips beside the modifier box, each used once; presets per manifest (5E cover, crit, max, half) | High |
-| D3 | Links in chat | none | link {kind,id,name} on chat lines; drop any record or picture into chat; click opens, drag carries | High |
-| D4 | Speaker portraits in chat | GM icon only | stamp recordId when speaking as a character/NPC, draw its portrait, drag opens the sheet | High |
-| D5 | Rest per ruleset | Done (unreleased): `kraken_rest`, each game's `bookkeeping.mjs` rest (5E Hit Point Dice, HP, half the dice back, slots, death saves, Exhaustion, concentration, effects that end on a rest, a ration; 3.5E/2E/BF/C&C natural healing and spells; Traveller 1D + END; Cairn's rest and sleep), on the sheet, the party sheet, the tracker after End and the Cards window | short/long rest hooks per ruleset (hit dice, HP, slots, effects ending), on sheet, party sheet and tracker | High |
-| D6 | Party rolls with skills, ask the players | attributes only, host rolls | checks/saves/skills; "roll for them" or "ask the players" prompt cards; summary line | High |
-| D7 | Group initiative | each entry rolls | option each / by kind: one roll per NPC kind | High |
-| D8 | Roll tables to chat, /rollon | adventure tables, always GM-only | /rollon with visibility, nested tables, campaign and pack tables, roll button | Medium |
-| D9 | Inline rolls in text | none | [[1d20+3]] and NdS+M chips in books, story, notes, chat | Medium |
-| D10 | Combat options | hard-coded | NPC health to players (off/status/bar/numbers), skip the dead, NPC numbering, Delay/Act now | Medium |
+| D1 | Modifier stack every roll reads | one number in ChatDock local state; sheet and tracker rolls ignore it | per-seat host stack (6 labelled slots + total), applied to every roll the seat starts, listed in the card | Done (alpha.91), High |
+| D2 | ADV / DIS / +2 / -2 and ruleset presets | 5E sheet select only | toggle chips beside the modifier box, each used once; presets per manifest (5E cover, crit, max, half) | Done (alpha.91), High |
+| D3 | Links in chat | none | link {kind,id,name} on chat lines; drop any record or picture into chat; click opens, drag carries | Done (alpha.91), High |
+| D4 | Speaker portraits in chat | GM icon only | stamp recordId when speaking as a character/NPC, draw its portrait, drag opens the sheet | Done (alpha.91), High |
+| D5 | Rest per ruleset | Done (unreleased): `kraken_rest`, each game's `bookkeeping.mjs` rest (5E Hit Point Dice, HP, half the dice back, slots, death saves, Exhaustion, concentration, effects that end on a rest, a ration; 3.5E/2E/BF/C&C natural healing and spells; Traveller 1D + END; Cairn's rest and sleep), on the sheet, the party sheet, the tracker after End and the Cards window | short/long rest hooks per ruleset (hit dice, HP, slots, effects ending), on sheet, party sheet and tracker | Done (alpha.91), High |
+| D6 | Party rolls with skills, ask the players | attributes only, host rolls | checks/saves/skills; "roll for them" or "ask the players" prompt cards; summary line | Done (alpha.91), High |
+| D7 | Group initiative | each entry rolls | option each / by kind: one roll per NPC kind | Done (alpha.91), High |
+| D8 | Roll tables to chat, /rollon | adventure tables, always GM-only | /rollon with visibility, nested tables, campaign and pack tables, roll button | Done (alpha.91), Medium |
+| D9 | Inline rolls in text | none | [[1d20+3]] and NdS+M chips in books, story, notes, chat | Done (alpha.91), Medium |
+| D10 | Combat options | hard-coded | NPC health to players (off/status/bar/numbers), skip the dead, NPC numbering, Delay/Act now | Done (alpha.91), Medium |
 | D1 | Modifier stack every roll reads | one number in ChatDock local state; sheet and tracker rolls ignore it | per-seat host stack (6 labelled slots + total), applied to every roll the seat starts, listed in the card | High. Done: electron/modifiers.cjs, each seat's stack kept by the host (6 labelled slots and the total; a number, a chat roll or an effect dropped on the box, right-click takes one off, /mod), read by every roll the seat starts in one request (FG's lock: a full attack's rolls all read it), then cleared; the card lists it; kraken_modifiers; check-modifiers |
 | D2 | ADV / DIS / +2 / -2 and ruleset presets | 5E sheet select only | toggle chips beside the modifier box, each used once; presets per manifest (5E cover, crit, max, half) | High. Done: the game's keys as chips under the tray (shared/rulesets/modifiers.mjs; a manifest's dice.modifiers lists them: 5E ADV, DIS, +2, -2, Opp, Cover, S. cover, Crit, Max, Half; Traveller and Apeira Astra Boon, Bane...), each used once by the next roll that reads it; ADV and DIS cancel; the 5E sheet's advantage select removed |
 | D3 | Links in chat | none | link {kind,id,name} on chat lines; drop any record or picture into chat; click opens, drag carries | High. Done: link on chat lines (the quick slot link shape), dropped into the chat's entry; a chip that opens only what the seat may see, drags on; unidentified items by their unidentified name; the GM's Share posts the record's words as the players know it; kraken_chat_send link, share |
@@ -105,14 +105,14 @@ Kraken already at or ahead: accounts with lockout, pop-outs and remembered windo
 
 | # | Gap | Kraken today | Best solution | Priority |
 |---|---|---|---|---|
-| S1 | Automatic reconnect | onclose resets to the join screen (useSession.ts:619) | retry with backoff, "Reconnecting..." banner, reuse the account token; 30-60 s grace on the host before "away" | High |
-| S2 | Internet hosting without router setup, invite links | addresses + forwarded port | UPnP/NAT-PMP option, invite link with password in the URL fragment, copy + QR | High |
-| S3 | Per-player sharing and permissions | visibility gm/owner/all; pictures to all only | {default, users:{name:level}}; "Share with..." menu; drop a window on a portrait to share with that player; showImage/map-share to chosen players | High |
-| S4 | Pause the game | none | GM button and /pause: players' veil, host refuses moves/rolls | High |
-| S5 | Players-window controls | /kick only, no ban | right-click Kick, Ban (kept per campaign), Ring bell, Share, View as; /afk and idle dim | Medium-High |
-| S6 | Pull players to my view | sharing opens the window only | view-pull with centre/zoom, Shift-ping, scene-title card | Medium |
-| S7 | Settings for this screen | /scaleui only | UI scale and text size sliders, global reduced motion, colour-blind-safe palette with letter marks, rebindable shortcuts (Controls panel) | Medium |
-| S8 | Campaign management, backups, logs | create/pick only; one .bak | rename, duplicate, export zip, delete to recycle bin, open folder; rolling backups + Restore; rotating log + Open logs | Medium |
+| S1 | Automatic reconnect | onclose resets to the join screen (useSession.ts:619) | retry with backoff, "Reconnecting..." banner, reuse the account token; 30-60 s grace on the host before "away" | Done (alpha.91), High |
+| S2 | Internet hosting without router setup, invite links | addresses + forwarded port | UPnP/NAT-PMP option, invite link with password in the URL fragment, copy + QR | Done (alpha.91), High |
+| S3 | Per-player sharing and permissions | visibility gm/owner/all; pictures to all only | {default, users:{name:level}}; "Share with..." menu; drop a window on a portrait to share with that player; showImage/map-share to chosen players | Partly: no per-player levels, and a shared map still goes to everyone; High |
+| S4 | Pause the game | none | GM button and /pause: players' veil, host refuses moves/rolls | Done (alpha.91), High |
+| S5 | Players-window controls | /kick only, no ban | right-click Kick, Ban (kept per campaign), Ring bell, Share, View as; /afk and idle dim | Done (alpha.91), Medium-High |
+| S6 | Pull players to my view | sharing opens the window only | view-pull with centre/zoom, Shift-ping, scene-title card | Done (alpha.91), Medium |
+| S7 | Settings for this screen | /scaleui only | UI scale and text size sliders, global reduced motion, colour-blind-safe palette with letter marks, rebindable shortcuts (Controls panel) | Partly: UI scale only (unreleased), no text size, reduced motion, colour-blind palette or shortcuts; Medium |
+| S8 | Campaign management, backups, logs | create/pick only; one .bak | rename, duplicate, export zip, delete to recycle bin, open folder; rolling backups + Restore; rotating log + Open logs | Done (alpha.91), Medium |
 | S9 | Playlists and synced music | folder plays randomly, unsynced | playlist record (order/shuffle/repeat/crossfade), startedAt so late joiners hear the same bar, Now playing | Medium |
 | S10 | Mobile and tablet players | no touch handling | pointer pan, pinch zoom, long-press menu, 44 px targets, narrow tabbed layout | Medium |
 
