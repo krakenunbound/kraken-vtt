@@ -466,6 +466,9 @@ function MapViewInner({
   const [hint, setHint] = useState("");
   const viewport = useRef<HTMLDivElement>(null);
   const pan = useRef<{ id: number; x: number; y: number } | null>(null);
+  // Fingers on the map (CSS pixels), and a two-finger pinch: where it began and the camera then.
+  const touches = useRef(new Map<number, { x: number; y: number }>());
+  const pinch = useRef<{ distance: number; mid: { x: number; y: number }; camera: { x: number; y: number; scale: number } } | null>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
   const [measure, setMeasure] = useState<Measure | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -1333,6 +1336,52 @@ function MapViewInner({
       data-gm={gm ? "true" : "false"}
       data-sight={map.sight ? "on" : "off"}
       onContextMenu={(event) => event.preventDefault()}
+      // Touch (a tablet player, docs/feature-parity.md S10): one finger pans or drags a token as the mouse does;
+      // a second finger turns it into a pinch that zooms about the fingers' midpoint. Seen before any token's own
+      // handler, so a finger on a token still joins the pinch.
+      onPointerDownCapture={(event) => {
+        if (event.pointerType !== "touch") return;
+        touches.current.set(event.pointerId, { x: cssX(event.clientX), y: cssY(event.clientY) });
+        if (touches.current.size !== 2) return;
+        const element = viewport.current;
+        if (!element) return;
+        const rect = cssRect(element);
+        const [a, b] = [...touches.current.values()];
+        pinch.current = { distance: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)), mid: { x: (a.x + b.x) / 2 - rect.left, y: (a.y + b.y) / 2 - rect.top }, camera: cameraRef.current };
+        // The first finger's pan or token drag gives way to the pinch.
+        pan.current = null;
+        setPanning(false);
+        setDrag(null);
+        setMeasure(null);
+        capture(event.currentTarget, event.pointerId);
+        event.stopPropagation();
+      }}
+      onPointerMoveCapture={(event) => {
+        if (event.pointerType !== "touch" || !touches.current.has(event.pointerId)) return;
+        touches.current.set(event.pointerId, { x: cssX(event.clientX), y: cssY(event.clientY) });
+        const start = pinch.current;
+        const element = viewport.current;
+        if (!start || touches.current.size < 2 || !element) return;
+        event.stopPropagation();
+        const rect = cssRect(element);
+        const [a, b] = [...touches.current.values()];
+        const mid = { x: (a.x + b.x) / 2 - rect.left, y: (a.y + b.y) / 2 - rect.top };
+        const scale = clampScale(start.camera.scale * (Math.hypot(a.x - b.x, a.y - b.y) / start.distance));
+        // The map point under the fingers when the pinch began stays under them as they move apart and drag.
+        const worldX = (start.mid.x - start.camera.x) / start.camera.scale;
+        const worldY = (start.mid.y - start.camera.y) / start.camera.scale;
+        setCamera({ scale, x: mid.x - worldX * scale, y: mid.y - worldY * scale });
+      }}
+      onPointerUpCapture={(event) => {
+        if (event.pointerType !== "touch") return;
+        touches.current.delete(event.pointerId);
+        if (touches.current.size < 2) pinch.current = null;
+      }}
+      onPointerCancelCapture={(event) => {
+        if (event.pointerType !== "touch") return;
+        touches.current.delete(event.pointerId);
+        if (touches.current.size < 2) pinch.current = null;
+      }}
       onPointerDown={(event) => {
         if ((event.target as HTMLElement).closest(".map-controls, .map-corner, .map-nav, .legend, .token-tray, .token-menu, .scene-settings, .map-editor")) return;
         // A left click while measuring drops a waypoint there.
