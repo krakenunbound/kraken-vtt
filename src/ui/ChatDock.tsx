@@ -35,6 +35,7 @@ import "@fontsource/noto-sans-old-italic/old-italic-400.css";
 import "@fontsource/noto-sans-old-turkic/old-turkic-400.css";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
 import "../effects/effects.css";
+import { cssRect, cssX, cssY, pageZoom } from "./pageZoom";
 
 // Where chat last was in a window of its own (in this browser).
 function chatPlace(): ScreenPlace | null {
@@ -387,7 +388,8 @@ function formulaOf(dice: number[]) {
 // table), and whether it is locked there (it cannot be dragged).
 const TOWER_PLACE = "kraken-tower-place";
 type TowerPlace = { x: number; y: number; locked: boolean };
-const towerFits = (x: number, y: number) => ({ x: Math.round(Math.min(window.innerWidth - 80, Math.max(0, x))), y: Math.round(Math.min(window.innerHeight - 100, Math.max(0, y))) });
+// In CSS pixels: a player's UI scale (the page's zoom) makes the screen that many CSS pixels wider.
+const towerFits = (x: number, y: number) => ({ x: Math.round(Math.min(window.innerWidth / pageZoom() - 80, Math.max(0, x))), y: Math.round(Math.min(window.innerHeight / pageZoom() - 100, Math.max(0, y))) });
 function towerPlace(): TowerPlace {
   try {
     const saved = JSON.parse(window.localStorage.getItem(TOWER_PLACE) ?? "null");
@@ -395,7 +397,7 @@ function towerPlace(): TowerPlace {
   } catch {
     /* the default place */
   }
-  return { ...towerFits(window.innerWidth - 300, window.innerHeight - 190), locked: false };
+  return { ...towerFits(window.innerWidth / pageZoom() - 300, window.innerHeight / pageZoom() - 190), locked: false };
 }
 function keepTowerPlace(place: TowerPlace) {
   try {
@@ -466,16 +468,16 @@ function ExternalTower({ session, on, drop, title, towerRef, onToggle }: { sessi
   }, [menu]);
   const grab = (event: React.PointerEvent) => {
     if (event.button !== 0) return;
-    const start = { x: event.clientX, y: event.clientY, left: place.x, top: place.y };
+    const start = { x: cssX(event.clientX), y: cssY(event.clientY), left: place.x, top: place.y };
     let moved = false;
     let last = place;
     const move = (next: PointerEvent) => {
       // Locked: it stays where it is (a click still turns it on or off).
       if (place.locked) return;
-      if (!moved && Math.hypot(next.clientX - start.x, next.clientY - start.y) < 5) return;
+      if (!moved && Math.hypot(cssX(next.clientX) - start.x, cssY(next.clientY) - start.y) < 5) return;
       moved = true;
       setDragging(true);
-      last = { ...towerFits(start.left + next.clientX - start.x, start.top + next.clientY - start.y), locked: false };
+      last = { ...towerFits(start.left + cssX(next.clientX) - start.x, start.top + cssY(next.clientY) - start.y), locked: false };
       setPlaceState(last);
     };
     const up = () => {
@@ -493,7 +495,7 @@ function ExternalTower({ session, on, drop, title, towerRef, onToggle }: { sessi
     setAt({ x: String(place.x), y: String(place.y) });
     // Beside it: to its right, or to its left near the screen's right edge.
     const right = place.x + 96;
-    setMenu({ x: right + 230 > window.innerWidth ? Math.max(4, place.x - 236) : right, y: Math.min(window.innerHeight - 270, Math.max(4, place.y)) });
+    setMenu({ x: right + 230 > window.innerWidth / pageZoom() ? Math.max(4, place.x - 236) : right, y: Math.min(window.innerHeight / pageZoom() - 270, Math.max(4, place.y)) });
   };
   const fixAt = () => {
     const x = Number(at.x);
@@ -856,8 +858,8 @@ export function ChatDock({ session }: { session: Session }) {
       frame = 0;
       const element = ghostEl.current;
       if (element) {
-        element.style.left = `${last.x}px`;
-        element.style.top = `${last.y}px`;
+        element.style.left = `${cssX(last.x)}px`;
+        element.style.top = `${cssY(last.y)}px`;
       }
       const nowOver = overTower(last.x, last.y);
       setGhost((current) => (current && current.overTower !== nowOver ? { ...current, overTower: nowOver } : current));
@@ -950,8 +952,8 @@ export function ChatDock({ session }: { session: Session }) {
       frame = 0;
       const element = ghostEl.current;
       if (element) {
-        element.style.left = `${last.x}px`;
-        element.style.top = `${last.y}px`;
+        element.style.left = `${cssX(last.x)}px`;
+        element.style.top = `${cssY(last.y)}px`;
       }
       const nowOver = overTower(last.x, last.y);
       if (nowOver !== over) {
@@ -1004,11 +1006,12 @@ export function ChatDock({ session }: { session: Session }) {
   const stretch = (event: React.PointerEvent) => {
     if (event.button !== 0 || !dock.current) return;
     event.preventDefault();
-    const start = { x: event.clientX, y: event.clientY, w: dock.current.offsetWidth, h: dock.current.offsetHeight };
-    const room = dock.current.parentElement?.getBoundingClientRect();
+    // In CSS pixels (a player's UI scale zooms the page).
+    const start = { x: cssX(event.clientX), y: cssY(event.clientY), w: dock.current.offsetWidth, h: dock.current.offsetHeight };
+    const room = cssRect(dock.current.parentElement);
     const move = (moveEvent: PointerEvent) => {
-      const w = Math.round(Math.min((room?.width ?? window.innerWidth) - 24, Math.max(280, start.w + moveEvent.clientX - start.x)));
-      const h = Math.round(Math.min((room?.height ?? window.innerHeight) - 24, Math.max(220, start.h - (moveEvent.clientY - start.y))));
+      const w = Math.round(Math.min((room?.width ?? window.innerWidth / pageZoom()) - 24, Math.max(280, start.w + cssX(moveEvent.clientX) - start.x)));
+      const h = Math.round(Math.min((room?.height ?? window.innerHeight / pageZoom()) - 24, Math.max(220, start.h - (cssY(moveEvent.clientY) - start.y))));
       setSize({ w, h });
     };
     const up = () => {
@@ -1236,7 +1239,7 @@ export function ChatDock({ session }: { session: Session }) {
             }}
             onContextMenu={(event) => {
               event.preventDefault();
-              setMenu({ x: event.clientX, y: event.clientY, sides });
+              setMenu({ x: cssX(event.clientX), y: cssY(event.clientY), sides });
             }}
           >
             {trayDie(sides, traySize)}
@@ -1257,7 +1260,7 @@ export function ChatDock({ session }: { session: Session }) {
           )
         : null}
       {ghost ? (
-        <span ref={ghostEl} className={["dice-ghost", ghost.overTower ? "over-tower" : "", ghost.held ? "held" : ""].filter(Boolean).join(" ")} style={{ left: ghost.x, top: ghost.y }} aria-hidden="true" data-held={ghost.held ? formulaOf(ghost.held) : undefined}>
+        <span ref={ghostEl} className={["dice-ghost", ghost.overTower ? "over-tower" : "", ghost.held ? "held" : ""].filter(Boolean).join(" ")} style={{ left: cssX(ghost.x), top: cssY(ghost.y) }} aria-hidden="true" data-held={ghost.held ? formulaOf(ghost.held) : undefined}>
           {(ghost.held ?? (ghost.sides ? [...pool, ghost.sides] : pool)).slice(-6).map((sides, index) => (
             <span key={index}>{trayDie(sides, 46)}</span>
           ))}

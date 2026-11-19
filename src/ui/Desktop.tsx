@@ -47,6 +47,7 @@ import { CardsWindow } from "../cards/CardsWindow";
 import { cardsStore } from "../cards/cardsStore";
 import { entryId, Sidebar, type SidebarEntry, type SidebarGroup } from "./Sidebar";
 import { TurnCard } from "../combat/TurnCard";
+import { cssRect } from "./pageZoom";
 
 // The 3D dice (three.js and cannon) load when the table first shows them.
 const DiceLayer = lazy(() => import("../dice/DiceLayer"));
@@ -322,7 +323,7 @@ export function Desktop({
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     for (const chip of strip.querySelectorAll<HTMLElement>("[data-portrait]")) {
       const id = chip.dataset.portrait ?? "";
-      const left = chip.getBoundingClientRect().left;
+      const left = cssRect(chip).left;
       const before = chipPlaces.current.get(id);
       chipPlaces.current.set(id, left);
       if (before !== undefined && Math.abs(before - left) > 1 && !still) chip.animate([{ transform: `translateX(${before - left}px)` }, { transform: "none" }], { duration: 450, easing: "cubic-bezier(.2,.8,.2,1)" });

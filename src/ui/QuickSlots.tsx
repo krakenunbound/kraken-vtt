@@ -6,6 +6,7 @@ import { useBookWindows } from "../books/Books";
 import { sound } from "../sound/soundEngine";
 import { chatRunner } from "./chatRunner";
 import { agentCommands } from "./agentCommands";
+import { cssRect, cssX, cssY } from "./pageZoom";
 
 // Quick slots: a bar along the bottom of the table, ten things this seat
 // keeps at hand (a book, or a page of one; a picture or map; a character's
@@ -195,11 +196,12 @@ export function QuickSlots({ session }: { session: Session }) {
     if (!element || event.button !== 0) return;
     event.preventDefault();
     // Where it is on screen (docked, it is centred by a transform that offsetLeft leaves out), so it stays under the pointer.
-    const box = element.getBoundingClientRect(), parent = (element.offsetParent as HTMLElement | null)?.getBoundingClientRect() ?? { left: 0, top: 0 };
-    const start = { x: event.clientX, y: event.clientY, left: box.left - parent.left, top: box.top - parent.top };
+    // In CSS pixels (a player's UI scale zooms the page).
+    const box = cssRect(element), parent = cssRect(element.offsetParent) ?? { left: 0, top: 0 };
+    const start = { x: cssX(event.clientX), y: cssY(event.clientY), left: box.left - parent.left, top: box.top - parent.top };
     let moved: Place = null;
     const move = (next: PointerEvent) => {
-      moved = clamp(start.left + next.clientX - start.x, start.top + next.clientY - start.y);
+      moved = clamp(start.left + cssX(next.clientX) - start.x, start.top + cssY(next.clientY) - start.y);
       setPlace(moved);
     };
     const up = () => {
@@ -233,7 +235,7 @@ export function QuickSlots({ session }: { session: Session }) {
           onClick={() => slot && open(slot)}
           onContextMenu={(event) => {
             event.preventDefault();
-            if (slot) setMenu({ index, x: event.clientX, y: event.clientY });
+            if (slot) setMenu({ index, x: cssX(event.clientX), y: cssY(event.clientY) });
           }}
           onDragOver={(event) => {
             const types = [...event.dataTransfer.types];

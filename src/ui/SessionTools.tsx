@@ -4,6 +4,7 @@ import type { Seat, Session } from "../session/useSession";
 import { sound } from "../sound/soundEngine";
 import { Icon } from "./icons";
 import "./session.css";
+import { cssRect, cssX, cssY, pageZoom } from "./pageZoom";
 
 // The session's own controls, apart from the game: the connection coming back,
 // the GM's pause, a bell rung for a player and a hand raised to the GM, the
@@ -278,10 +279,11 @@ export function usePlayerMenu() {
   const [state, setState] = useState<PlayerMenuState>(null);
   const open = (name: string, event: ReactMouseEvent) => {
     event.preventDefault();
-    const box = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    // In CSS pixels (a player's UI scale zooms the page).
+    const box = cssRect(event.currentTarget as HTMLElement);
     // A click from the keyboard (detail 0) opens it under the element; a pointer at the pointer.
     const keyboard = event.detail === 0 && event.type === "click";
-    setState({ name, x: keyboard ? box.left : event.clientX, y: keyboard ? box.bottom : event.clientY, keyboard });
+    setState({ name, x: keyboard ? box.left : cssX(event.clientX), y: keyboard ? box.bottom : cssY(event.clientY), keyboard });
   };
   return { state, open, close: () => setState(null) };
 }
@@ -293,8 +295,8 @@ export function PlayerMenu({ session, menu, onClose }: { session: Session; menu:
     const element = ref.current;
     if (!element || !menu) return;
     opener.current = document.activeElement;
-    element.style.left = `${Math.max(4, Math.min(menu.x, window.innerWidth - 220))}px`;
-    element.style.top = `${Math.max(4, Math.min(menu.y, window.innerHeight - 220))}px`;
+    element.style.left = `${Math.max(4, Math.min(menu.x, window.innerWidth / pageZoom() - 220))}px`;
+    element.style.top = `${Math.max(4, Math.min(menu.y, window.innerHeight / pageZoom() - 220))}px`;
     if (!element.matches(":popover-open")) element.showPopover();
     const first = element.querySelector<HTMLButtonElement>("button:not(:disabled)");
     if (menu.keyboard) first?.focus();

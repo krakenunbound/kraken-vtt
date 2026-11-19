@@ -5,7 +5,7 @@ import { slotDrag } from "./QuickSlots";
 import { BRAND } from "../../shared/brand.mjs";
 import { Icon } from "./icons";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
-import { cssRect } from "./pageZoom";
+import { cssRect, cssX, cssY, pageZoom } from "./pageZoom";
 
 // Floating windows over the desktop, as FG's: opened from the sidebar, moved
 // by the title bar, resized from the corner, brought forward on a click.
@@ -76,7 +76,7 @@ const AT_BACK: WindowKind[] = [];
 // Where a kind opens the first time: the map fills the desktop between the menu bar and the sidebar.
 function firstPlace(kind: WindowKind): Placement {
   if (kind === "map" && typeof document !== "undefined") {
-    const surface = document.querySelector(".desktop-surface")?.getBoundingClientRect();
+    const surface = cssRect(document.querySelector(".desktop-surface"));
     if (surface && surface.width > 200 && surface.height > 200) return { x: Math.round(surface.left + 6), y: Math.round(surface.top + 6), w: Math.round(surface.width - 12), h: Math.round(surface.height - 12) };
   }
   return DEFAULTS[kind];
@@ -327,8 +327,9 @@ function showPopOut(child: Window | undefined) {
 }
 
 function fitToScreen(place: Placement): Placement {
-  const width = typeof window === "undefined" ? 1400 : window.innerWidth;
-  const height = typeof window === "undefined" ? 900 : window.innerHeight;
+  // In CSS pixels: a player's UI scale (the page's zoom) makes the screen that many CSS pixels wider.
+  const width = typeof window === "undefined" ? 1400 : window.innerWidth / pageZoom();
+  const height = typeof window === "undefined" ? 900 : window.innerHeight / pageZoom();
   const w = Math.min(place.w, Math.max(320, width - 40));
   const h = Math.min(place.h, Math.max(240, height - 80));
   return { w, h, x: Math.min(Math.max(0, place.x), Math.max(0, width - w - 10)), y: Math.min(Math.max(48, place.y), Math.max(48, height - h - 10)) };
@@ -376,7 +377,7 @@ export function FloatingWindow({ item, children, link }: { item: OpenWindow; chi
       if (!current) return;
       const { item: now, move: moveTo, popOut: out, popup: child } = live.current;
       if (current.mode === "size") {
-        moveTo(now.key, { w: Math.max(320, current.place.w + moveEvent.clientX - current.startX), h: Math.max(220, current.place.h + moveEvent.clientY - current.startY) });
+        moveTo(now.key, { w: Math.max(320, current.place.w + cssX(moveEvent.clientX - current.startX)), h: Math.max(220, current.place.h + cssY(moveEvent.clientY - current.startY)) });
         return;
       }
       if (now.popped) {
@@ -387,8 +388,9 @@ export function FloatingWindow({ item, children, link }: { item: OpenWindow; chi
       if (outside && out(now.key, { sx: moveEvent.screenX - current.grabX, sy: moveEvent.screenY - current.grabY, w: now.w, h: Math.max(200, now.h - TITLE) })) return;
       // Not held inside the main window: only the title bar has to stay in reach.
       moveTo(now.key, {
-        x: Math.min(Math.max(80 - now.w, current.place.x + moveEvent.clientX - current.startX), window.innerWidth - 80),
-        y: Math.min(Math.max(0, current.place.y + moveEvent.clientY - current.startY), window.innerHeight - 40),
+        // The pointer's travel and the screen in CSS pixels (a player's UI scale zooms the page).
+        x: Math.min(Math.max(80 - now.w, current.place.x + cssX(moveEvent.clientX - current.startX)), window.innerWidth / pageZoom() - 80),
+        y: Math.min(Math.max(0, current.place.y + cssY(moveEvent.clientY - current.startY)), window.innerHeight / pageZoom() - 40),
       });
     };
     const finish = () => {
@@ -539,13 +541,14 @@ export function WindowTray() {
   const grab = (event: React.PointerEvent) => {
     if (event.button !== 0 || !tray.current) return;
     event.preventDefault();
-    const box = tray.current.getBoundingClientRect();
-    const parent = tray.current.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
-    const grip = { x: event.clientX - box.left, y: event.clientY - box.top };
+    // All in CSS pixels (a player's UI scale zooms the page).
+    const box = cssRect(tray.current);
+    const parent = cssRect(tray.current.offsetParent) ?? { left: 0, top: 0, width: window.innerWidth / pageZoom(), height: window.innerHeight / pageZoom() };
+    const grip = { x: cssX(event.clientX) - box.left, y: cssY(event.clientY) - box.top };
     const at = (x: number, y: number) => ({ x: Math.round(Math.min(Math.max(0, x - parent.left - grip.x), parent.width - 60)), y: Math.round(Math.min(Math.max(0, y - parent.top - grip.y), parent.height - 30)) });
-    let last = at(event.clientX, event.clientY);
+    let last = at(cssX(event.clientX), cssY(event.clientY));
     const move = (moveEvent: PointerEvent) => {
-      last = at(moveEvent.clientX, moveEvent.clientY);
+      last = at(cssX(moveEvent.clientX), cssY(moveEvent.clientY));
       setPlace(last);
     };
     const up = () => {
