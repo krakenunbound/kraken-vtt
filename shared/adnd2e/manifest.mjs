@@ -155,6 +155,7 @@ export default {
                     path: "hp.total",
                     plus: "hp.temp",
                     minus: "hp.wounds",
+                    quick: true,
                     hook: "hp",
                     danger: true,
                     lines: [{ items: [{ before: "Wounds", field: { path: "hp.wounds", kind: "number", label: "Wounds" } }, { before: "Temp", field: { path: "hp.temp", kind: "number", label: "Temporary hit points" } }] }],

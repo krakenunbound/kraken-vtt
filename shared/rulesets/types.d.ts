@@ -51,6 +51,7 @@ export interface FieldSpec {
   when?: Cond;
   show?: Nodes; // shown: this template instead of the path's value ("{className} {level}"); a list: one text node each
   lines?: boolean; // a textarea of a list: one item a line
+  plain?: boolean; // a textarea of a book's formatted text: shown without its tags (saved as plain text)
   zeroIsEmpty?: boolean; // 0 shows the default too (a count of 0 shows 1, as the hand-made sheets did)
   format?: Ref; // shown: a formatter's text from the record (a class worked out from its packages)
   join?: { item: string; sep: string }; // shown: the path's rows, each as item, joined ("Fighter 3 / Thief 2")
@@ -109,6 +110,7 @@ export interface BoxSpec {
   format?: "signed"; // +2
   suffix?: string; // after the number (movement's ')
   note?: Text; // a small hint under the number
+  quick?: boolean; // remaining: an amount with Damage (onto minus, plus first) and Heal (off minus) under it, for the owner
 }
 export interface ListAction {
   hook: Hook;

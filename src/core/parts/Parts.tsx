@@ -407,6 +407,33 @@ function Derived({ spec, custom }: { spec: Extract<Part, { part: "derived" }>; c
     </section>
   );
 }
+// Damage or healing in one step under the hit points (docs/core-ui-design.md 8.1): an amount, then Damage (onto the
+// wounds, temporary points first) or Heal (off the wounds, not below none). Each is an edit through the host's whitelist.
+function QuickHp({ minus, plus }: { minus: Path; plus?: Path }) {
+  const sheet = useSheet();
+  const [amount, setAmount] = useState("");
+  const n = Math.max(0, Math.round(Number(amount) || 0));
+  const apply = (damage: boolean) => {
+    if (!n) return;
+    const wounds = num(at(sheet.data, minus));
+    const temp = plus ? num(at(sheet.data, plus)) : 0;
+    const absorbed = damage ? Math.min(temp, n) : 0;
+    const changes = damage ? [...(absorbed && plus ? [{ path: plus, value: temp - absorbed }] : []), ...(n > absorbed ? [{ path: minus, value: wounds + n - absorbed }] : [])] : [{ path: minus, value: Math.max(0, wounds - n) }];
+    void sheet.session.editCharacter(sheet.record.id, changes);
+    setAmount("");
+  };
+  return (
+    <span className="cc-inline cc-quick-hp">
+      <input className="cc-field number" type="number" min={0} inputMode="numeric" aria-label="Damage or healing" placeholder="0" value={amount} onChange={(event) => setAmount(event.target.value)} onKeyDown={(event) => event.key === "Enter" && !event.nativeEvent.isComposing && apply(true)} />
+      <button type="button" data-action="hp-damage" disabled={!n} title="Take this much damage" onClick={() => apply(true)}>
+        Damage
+      </button>
+      <button type="button" data-action="hp-heal" disabled={!n} title="Heal this much" onClick={() => apply(false)}>
+        Heal
+      </button>
+    </span>
+  );
+}
 function DerivedBox({ box }: { box: BoxSpec }) {
   const sheet = useSheet();
   const scope: Scope = { data: sheet.data };
@@ -464,6 +491,7 @@ function DerivedBox({ box }: { box: BoxSpec }) {
           ))}
         </span>
       ) : null}
+      {box.quick && box.show === "remaining" && box.minus && sheet.editable ? <QuickHp minus={box.minus} plus={box.plus} /> : null}
       {(box.lines ?? []).map((line, index) => (
         <span key={index} className="cc-inline">
           {line.items.map((item, place) => (

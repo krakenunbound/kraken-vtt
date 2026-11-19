@@ -100,6 +100,7 @@ export default {
                     show: "remaining",
                     path: "hp.total",
                     minus: "hp.wounds",
+                    quick: true,
                     hook: "hp",
                     danger: true,
                     lines: [{ items: [{ before: "Wounds", field: { path: "hp.wounds", kind: "number", label: "Wounds" } }] }, { items: [{ before: "Temp", field: { path: "hp.temp", kind: "number", label: "Temporary {@hpLower}" } }] }],

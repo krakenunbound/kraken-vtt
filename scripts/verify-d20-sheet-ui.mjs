@@ -15,12 +15,13 @@
 //     level-up
 // Run it on two builds and compare the folders with shot-sheets.mjs diff.
 //
-//   node scripts/verify-d20-sheet-ui.mjs <dnd5e|descending|dnd35|adnd2e> <out>
+//   node scripts/verify-d20-sheet-ui.mjs <dnd5e|descending|dnd35|adnd2e|cnc|...> <out>
 //
 // Windows open on the left monitor (KRAKEN_WINDOW_AT) and are closed at the end.
 import "./loopback.mjs";
 import { spawn } from "node:child_process";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import readline from "node:readline";
@@ -103,6 +104,28 @@ const GAMES = {
     ],
   },
 };
+
+// Castles & Crusades (the sheet template's second pass, docs/core-ui-design.md 8): two of the GM's pregens from their
+// FG data folder (cc-conversion/pregens, not in the repository), a fighter and a cleric, with the GM's C&C books.
+const { fgDataFolder } = createRequire(import.meta.url)("../electron/importers/fgModule.cjs");
+const pregen = (key) => {
+  const file = path.join(fgDataFolder(), "cc-conversion", "pregens", "specs", `${key}.json`);
+  return existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : { name: key };
+};
+Object.assign(GAMES, {
+  cnc: {
+    ruleset: "Castles & Crusades",
+    books: ["SC C&C Player's Handbook", "SC C&C Adventurer's Backpack", "SC C&C Monsters & Treasure"],
+    tabs: "main,combat,abilities,inventory,spells,notes",
+    specs: [pregen("garrick-3"), pregen("edric-3")],
+    fight: ["Garrick Thorne"],
+    states: [
+      { who: "Garrick Thorne", label: "wounded", changes: (data) => [{ path: "hp.wounds", value: Math.floor(data.hp.total / 2) }] },
+      { who: "Garrick Thorne", label: "down", changes: (data) => [{ path: "hp.wounds", value: data.hp.total + 2 }] },
+      { who: "Garrick Thorne", label: "healed", changes: () => [{ path: "hp.wounds", value: 0 }] },
+    ],
+  },
+});
 
 // The 2d6 games (stage 4, docs/core-ui-design.md 7.15): no books (Traveller's kit is Kraken's own; Astra's from its shipped books).
 const TRAVELLER_STATS = (str, dex, end, int, edu, soc) => ({ str, dex, end, int, edu, soc });

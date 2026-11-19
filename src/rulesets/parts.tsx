@@ -5,6 +5,7 @@ import { CairnRest, cairnBackgroundGold, cairnBackgroundOfRoll, cairnBuild, cair
 import { Dnd5eDeathSaves, Dnd5eDread, Dnd5eDying, Dnd5eSpells, dnd5eClassName } from "./dnd5e";
 import { adnd2eClassKey } from "./adnd2e";
 import { Mgt2SkillPickers, mgt2Careers, mgt2SkillTotal } from "./mgt2";
+import { CncAbilities, CncPlayer, CncClassButton, CncClassPanel, CncInventory, CncLanguages, CncLoad, CncSpells, CncWeapons, cncClasses, cncRace } from "./cnc";
 import { AstraMarks, AstraSkillPickers, AstraTrickNotes, astraSkillTotal } from "./astra";
 import { SpellCasts } from "../core/parts/SpellCasts";
 import { FateCompels, FateHarm, FateLastRoll, FateMilestones, FateProblem, FateRollBar, FateSkills, FateStunts } from "./fate";
@@ -17,6 +18,15 @@ import { IronAssets, IronCarryLine, IronControl, IronDebilities, IronLastRoll, I
 // Ref a manifest names is one of these (or a component in index.tsx).
 export const CUSTOM_PARTS: Record<string, CustomPart> = {
   "cairn.restStrip": CairnRest,
+  "cnc.player": CncPlayer,
+  "cnc.classButton": CncClassButton,
+  "cnc.classPanel": CncClassPanel,
+  "cnc.weapons": CncWeapons,
+  "cnc.abilities": CncAbilities,
+  "cnc.inventory": CncInventory,
+  "cnc.load": CncLoad,
+  "cnc.spells": CncSpells,
+  "cnc.languages": CncLanguages,
   "bfrpg.turnUndead": BfTurnUndead,
   "dnd5e.spells": Dnd5eSpells,
   // The core's: each known spell with Cast (the games whose spells the host reads from their words).
@@ -53,6 +63,8 @@ export const CUSTOM_PARTS: Record<string, CustomPart> = {
 };
 export const FORMATS: Record<string, Format> = {
   "cairn.itemSlots": cairnItemSlots,
+  "cnc.classes": cncClasses,
+  "cnc.race": cncRace,
   "dnd5e.className": dnd5eClassName,
   "adnd2e.classKey": adnd2eClassKey,
   "mgt2.careers": mgt2Careers,

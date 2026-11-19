@@ -56,7 +56,7 @@ try {
   await tool("kraken_host", { campaignId: campaign.id, port: 47392, password: "" });
   await tool("kraken_import_fg_module", { module: "C&C Player's Handbook" });
 
-  await page.click('[data-launch="characters"]');
+  await page.dispatchEvent('[data-launch="characters"]', "click");
   await page.click('[data-action="new-character"]');
 
   // Abilities: 3d6 x 6, fixed: 15, 12, 16, 9, 13, 6; then swap STR and CON.
@@ -159,7 +159,7 @@ try {
   // A second character: an Elf Wizard started at level 3, so the class sets
   // three hit point rolls and spells, then dropped to level 2 to see the
   // spells trimmed, as FG's wizard does.
-  await page.click('[data-launch="characters"]'); // Character Selection in front (the sidebar brings it forward)
+  await page.dispatchEvent('[data-launch="characters"]', "click"); // Character Selection in front (the sidebar brings it forward; the window may lie over it)
   await page.click('[data-action="new-character"]');
   await page.waitForSelector(".ccw");
   // STR 9, DEX 14, CON 13, INT 17, WIS 10, CHA 11.
@@ -257,7 +257,7 @@ try {
   }
 
   // A paladin: only lawful good.
-  await page.click('[data-launch="characters"]'); // Character Selection in front (the sidebar brings it forward)
+  await page.dispatchEvent('[data-launch="characters"]', "click"); // Character Selection in front (the sidebar brings it forward; the window may lie over it)
   await page.click('[data-action="new-character"]');
   await page.click('[data-wizard-tab="race"]');
   await page.click('[data-race="Human"]');
@@ -275,7 +275,7 @@ try {
   assert(String(unfinished.notes).includes("Unfinished in the character wizard (finish with your Castle Keeper): Abilities, Primes, Hit Points, Equipment, Alignment."), `notes: ${unfinished.notes}`);
 
   // Combining classes: a Human Fighter/Wizard (multi-class) at level 2 with a Rogue plus.
-  await page.click('[data-launch="characters"]'); // Character Selection in front (the sidebar brings it forward)
+  await page.dispatchEvent('[data-launch="characters"]', "click"); // Character Selection in front (the sidebar brings it forward; the window may lie over it)
   await page.click('[data-action="new-character"]');
   await tool("kraken_dice_clear");
   await tool("kraken_dice_force", { values: [4, 5, 5, 4, 4, 4, 4, 3, 3, 5, 5, 4, 4, 4, 4, 3, 3, 4] });
@@ -338,7 +338,7 @@ try {
   // Borin (Dwarf Fighter, Constitution prime) dual-classes into Barbarian ([S] for a dwarf).
   // (The other characters' windows closed first, then Borin's card in Character Selection opens his sheet.)
   for (const close of await page.$$('.window:has([data-character]) button[aria-label^="Close"]')) await close.click().catch(() => undefined);
-  await page.click('[data-launch="characters"]');
+  await page.dispatchEvent('[data-launch="characters"]', "click");
   await page.locator(".charselect-card", { hasText: "Borin Stonefist" }).first().click();
   await page.waitForFunction(() => document.querySelector('[data-character] .cc-name')?.value === "Borin Stonefist");
   if (!(await page.locator(".cc-classlevel").count())) await page.click('[data-action="class-level"]');
@@ -372,7 +372,7 @@ try {
     } else assert(copy.level === 3 && copy.hp.total === 31 && copy.race === "Dwarf", `Thorin ${copy.race} ${copy.level} ${copy.hp.total}`);
   }
   // Export, as FG's: Character Selection's edit mode puts it on each card.
-  await page.click('[data-launch="characters"]');
+  await page.dispatchEvent('[data-launch="characters"]', "click");
   await page.click('[data-action="charselect-edit"]');
   const borinCard = page.locator(".charselect-item", { hasText: "Borin Stonefist" }).first();
   await borinCard.locator('[data-action="export-character"]').click();

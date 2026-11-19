@@ -65,14 +65,16 @@ async function siegeCheck(table, record, { attribute, cl = 0, bonus = 0, addLeve
   const add = addLevel ?? String(options.SIEGE_ADD_LEVEL).toLowerCase() === "on";
   const modifier = engine.abilityBonus(row.score, game) + (add ? level : 0) + (Number(bonus) || 0);
   const formula = `1d20${modifier >= 0 ? "+" : ""}${modifier}`;
-  const name = label || `${attribute[0].toUpperCase()}${attribute.slice(1)} check`;
+  // A roll from the core sheet's parts sends its kind and the strip's CL as dc; the old C&C sheet sent cl and a save's label.
+  const challenge = Number(cl) || Number(dc) || 0;
+  const name = label || `${attribute[0].toUpperCase()}${attribute.slice(1)} ${kind === "save" ? "save" : "check"}`;
   const roll = table.roll(formula, `${record.name}: ${name}`, from || record.name);
   // The kept die, and the modifier box's numbers in the verdict as on the card.
   const term = roll.terms[0];
   const d20 = term.kept ? term.rolls.find((_, i) => term.kept[i]) : term.rolls[0];
   const added = (roll.mods ?? []).reduce((sum, mod) => sum + (Number(mod.value) || 0), 0);
-  const result = engine.check({ d20, score: row.score, prime, level, addLevel: add, cl: Number(cl) || 0, bonus: (Number(bonus) || 0) + added }, game);
-  table.say(`${name}: ${result.total} vs CC ${result.cc} (${prime ? "prime" : "secondary"} ${result.cb} + CL ${Number(cl) || 0}) — ${result.success ? "SUCCESS" : "FAILURE"}`, from || record.name);
+  const result = engine.check({ d20, score: row.score, prime, level, addLevel: add, cl: challenge, bonus: (Number(bonus) || 0) + added }, game);
+  table.say(`${name}: ${result.total} vs CC ${result.cc} (${prime ? "prime" : "secondary"} ${result.cb} + CL ${challenge}) — ${result.success ? "SUCCESS" : "FAILURE"}`, from || record.name);
   return { d20, ...result };
 }
 

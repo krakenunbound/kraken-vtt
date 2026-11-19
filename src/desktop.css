@@ -1160,6 +1160,43 @@ textarea.cc-field.tall { min-height: 220px; }
 .cc-save:hover:not(:disabled), .cc-ability-name:hover { color: var(--brass); }
 .cc-prime { width: 15px; height: 15px; accent-color: #7cc4ef; }
 .cc-attr-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 0.8rem; }
+/* Castles & Crusades on the core parts (docs/core-ui-design.md 8): the attributes (score, check, prime) and the
+   saves beside them, Armor Class, hit points, initiative, melee, ranged and move under both, then the defenses and
+   senses; stacked in a narrow window. */
+.sheet-cnc .cnc-main { grid-template-columns: minmax(0, 1fr); grid-template-areas: "attrs" "saves" "combat" "more"; align-items: start; }
+.sheet-cnc .cnc-main > [aria-label="Attributes"] { grid-area: attrs; }
+.sheet-cnc .cnc-main > .cnc-saves { grid-area: saves; }
+.sheet-cnc .cnc-main > .cnc-combat { grid-area: combat; }
+.sheet-cnc .cnc-main > .cnc-more { grid-area: more; }
+@container (min-width: 700px) {
+  .sheet-cnc .cnc-main { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); grid-template-areas: "attrs saves" "combat combat" "more more"; }
+  .sheet-cnc .cnc-main > .cnc-saves { align-self: stretch; }
+}
+.sheet-cnc .cnc-attributes :is(.five-ability-head, .five-ability) { grid-template-columns: minmax(6.5rem, 8rem) 3.4rem 3.4rem 2.6rem; justify-content: start; column-gap: 12px; }
+.sheet-cnc .cnc-attributes .five-ability { margin: 0; padding: 3px 0; border-bottom: 1px solid rgba(214, 170, 92, 0.12); }
+.sheet-cnc .cnc-attributes .five-ability > input[type="checkbox"] { justify-self: center; }
+.sheet-cnc .cnc-saves .cnc-save { grid-template-columns: 2.6rem minmax(0, 1fr); margin: 0; padding: 2px 0; border-bottom: 1px solid rgba(214, 170, 92, 0.12); }
+.sheet-cnc .cnc-saves .cc-save { padding: 4px 22px 4px 8px; font-size: 0.82rem; border: 1px solid rgba(214, 170, 92, 0.35); border-radius: 4px; background: rgba(0, 0, 0, 0.25); }
+.sheet-cnc .five-defence.cnc-combat { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.sheet-cnc .five-defence.cnc-combat > * { grid-column: 1 / -1; }
+.sheet-cnc .five-defence.cnc-combat > .five-big { grid-column: span 6; }
+.sheet-cnc .five-defence.cnc-combat > .five-big:nth-child(2) { grid-column: span 6; }
+@container (min-width: 700px) {
+  .sheet-cnc .five-defence.cnc-combat > .five-big:first-child { grid-column: span 4; }
+  .sheet-cnc .five-defence.cnc-combat > .five-big:nth-child(2) { grid-column: span 8; }
+  .sheet-cnc .five-defence.cnc-combat > .five-big:nth-child(n + 3) { grid-column: span 3; }
+}
+.sheet-cnc .cnc-more { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+.sheet-cnc .cnc-more textarea, .sheet-cnc .cnc-notes textarea { width: 100%; }
+.sheet-cnc .cnc-notes textarea { min-height: 12rem; }
+.sheet-cnc .cnc-combat-tab { grid-template-columns: minmax(0, 1fr); }
+.sheet-cnc .five-defence.cnc-ac { grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; }
+.sheet-cnc .five-defence.cnc-ac > .five-big:first-child { grid-column: 1 / -1; }
+.sheet-cnc .five-big > .cc-inline { flex-wrap: wrap; justify-content: center; row-gap: 4px; }
+@container (min-width: 700px) { .sheet-cnc .cnc-combat-tab { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.sheet-cnc .cnc-tohit :is(.five-ability-head, .five-ability) { grid-template-columns: minmax(5rem, 7rem) 3.2rem 3.2rem 3.4rem; justify-content: start; column-gap: 12px; }
+.sheet-cnc .five-defence.cnc-bth { display: flex; gap: 8px; margin-top: 8px; }
+.sheet-cnc .five-defence.cnc-bth > .five-big { flex: 1; }
 .cc-ac, .cc-quick { display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .cc-shield { display: grid; place-items: center; width: 44px; height: 50px; font-size: 1.15rem; font-weight: 700; color: #e8e2d4; background: radial-gradient(circle at 50% 30%, #2d3a48, #141b23); border: 2px solid rgba(214, 170, 92, 0.6); border-radius: 6px 6px 22px 22px; }
 .cc-shield.big { width: 60px; height: 68px; font-size: 1.5rem; }
@@ -1169,6 +1206,9 @@ textarea.cc-field.tall { min-height: 220px; }
 .cc-hp-bar i { display: block; height: 100%; background: #56b33f; }
 .cc-hp-bar.low i { background: #c0392b; }
 .five-big > .cc-hp-bar { align-self: stretch; margin: 2px 6px 4px; height: 5px; }
+.cc-quick-hp { gap: 4px; margin-top: 4px; }
+.cc-quick-hp input { width: 3.4em; }
+.cc-quick-hp button { padding: 1px 8px; font-size: 0.78rem; }
 /* A roll drawn as a die (RollSpec.icon): the die, its words for screen readers only. */
 .cc-bonus:has(> .icon:only-child), .cc-bonus:has(> .sr-only) { display: inline-grid; place-items: center; min-width: 30px; padding: 2px 4px; color: var(--brass); }
 .cc-bonus:has(> .sr-only):hover:not(:disabled) { color: #f0d9a8; background: rgba(210, 161, 90, 0.14); }

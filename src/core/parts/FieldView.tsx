@@ -24,7 +24,7 @@ export function FieldView({ spec, scope, base = "" }: { spec: FieldSpec; scope: 
     case "text":
       return <Field value={String(value ?? "")} editable={typing} label={label} className={spec.fieldClass} onSave={(text) => save(text)} />;
     case "textarea":
-      return <Field value={spec.lines ? (Array.isArray(value) ? value.map(String).join("\n") : "") : String(value ?? "")} area editable={typing} label={label} onSave={(text) => save(text)} />;
+      return <Field value={spec.lines ? (Array.isArray(value) ? value.map(String).join("\n") : "") : spec.plain ? String(value ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() : String(value ?? "")} area editable={typing} label={label} onSave={(text) => save(text)} />;
     case "select":
       return (
         <select className="cc-field" value={spec.number ? num(value) : String(value ?? "")} disabled={!typing} aria-label={label} title={title} onChange={(event) => save(spec.number ? Number(event.target.value) : event.target.value)}>

@@ -2,7 +2,6 @@ import type { ComponentType } from "react";
 import type { Session, TableRecord } from "../session/useSession";
 import type { RulesetManifest } from "../../shared/rulesets/types";
 import { rulesetFor, rulesetOfRecord } from "../../shared/rulesets/registry.mjs";
-import { CCSheet } from "../characters/CCSheet";
 import { Wizard } from "../characters/Wizard";
 import { Wizard5e } from "../characters/Wizard5e";
 import { Wizard35 } from "../characters/Wizard35";
@@ -29,9 +28,9 @@ type SheetProps = { record: TableRecord; session: Session };
 type WizardProps = { session: Session; onDone: (id: string | null) => void };
 type SessionProps = { session: Session };
 
-export const SHEETS: Record<string, ComponentType<SheetProps>> = {
-  "cnc.sheet": CCSheet,
-};
+// Every game's sheet is now its manifest's (C&C's moved onto the core parts, docs/core-ui-design.md 8); a Ref here
+// would be a game's own whole sheet.
+export const SHEETS: Record<string, ComponentType<SheetProps>> = {};
 export const WIZARDS: Record<string, ComponentType<WizardProps>> = {
   "cnc.wizard": Wizard,
   "dnd5e.wizard": Wizard5e,
@@ -66,7 +65,7 @@ function ManifestSheet({ record, session }: SheetProps) {
 export function sheetFor(record: TableRecord): ComponentType<SheetProps> {
   const spec = rulesetOfRecord(record.data.ruleset).sheet;
   if (typeof spec !== "string") return ManifestSheet;
-  return SHEETS[spec] ?? CCSheet;
+  return SHEETS[spec] ?? ManifestSheet;
 }
 // The character wizard of the campaign's game.
 export function wizardFor(ruleset: string): ComponentType<WizardProps> {

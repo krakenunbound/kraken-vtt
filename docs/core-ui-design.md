@@ -1289,3 +1289,23 @@ full-screen before / after shots (2560x1440, 90% UI scale) and the player's
 view in Chrome: AD&D 2E (the pilot), D&D 3.5E, D&D 5E, Traveller, then Castles
 & Crusades moved off its own sheet onto the core parts. The other games get
 phase 1 and are checked.
+
+### 8.2 Castles & Crusades on the core parts
+
+C&C was the last hand-made sheet (`CCSheet.tsx`, the fallback for a record
+with no `data.ruleset`). Its manifest now lays it out like the others: the
+header (race, class, the player's name, the Class & Level button), the strip
+(level and level-up, experience, the CL every check and save reads), and on
+Main the attributes (score, check, prime) with the saves beside them, then
+Armor Class, hit points (with quick Damage and Heal), initiative, melee,
+ranged and move, then special defenses and senses. Combat is the Armor Class
+breakdown, the bonus-to-hit table and the weapons. Its own parts
+(`src/rulesets/cnc.tsx`) are those no core part fits: the weapons (drag an
+attack onto a creature), the class and race abilities (a check that adds the
+level), the inventory's carried / worn switch (right-click: left behind), the
+load, spells and powers, languages and the Class & Level panel. A record
+with no ruleset, or Worldbuilding's, gets this sheet. The core's roll sends
+the CL as `dc`; the host's C&C check reads it as the CL and names a save a
+save from the roll's kind. `verify-d20-sheet-ui cnc` presses every control
+on two of the GM's pregens (a fighter and a cleric) on the old and the new
+sheet; the chat lines and changed fields are compared by effect.

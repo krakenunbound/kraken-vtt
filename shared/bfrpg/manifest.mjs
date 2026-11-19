@@ -95,7 +95,7 @@ export default {
                 part: "derived",
                 boxes: [
                   { label: "Armor Class", show: "shield", path: "ac.total", hook: "ac", title: "Armor {ac.armor|0}[ ({ac.worn})], shield +{ac.shield|0}, Dexterity {ac.dex|signed}, misc {ac.misc|signed}", fields: [{ before: "Misc", path: "ac.misc", kind: "number", label: "AC misc" }] },
-                  { label: "Hit Points", show: "remaining", path: "hp.total", minus: "hp.wounds", hook: "hp", danger: true, fields: [{ before: "Damage", path: "hp.wounds", kind: "number", label: "Damage taken" }], warn: { atZero: true, attr: { name: "status", value: "Dead" }, text: "At 0 hit points a character is dead (the book's rule; the GM may use an optional one)." } },
+                  { label: "Hit Points", show: "remaining", path: "hp.total", minus: "hp.wounds", quick: true, hook: "hp", danger: true, fields: [{ before: "Damage", path: "hp.wounds", kind: "number", label: "Damage taken" }], warn: { atZero: true, attr: { name: "status", value: "Dead" }, text: "At 0 hit points a character is dead (the book's rule; the GM may use an optional one)." } },
                   { label: "Initiative", show: "value", path: "initiative.total", hook: "init", format: "signed", title: "d6 + this, the highest acts first" },
                   { label: "Movement", show: "value", path: "movement", hook: "movement", suffix: "'", note: "{encumbrance}", title: "{encumbrance}: {load|0} lb. carried (light to {loads.light|0}, heavy to {loads.heavy|0})" },
                 ],

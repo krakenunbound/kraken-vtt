@@ -114,6 +114,7 @@ export default {
                     path: "hp.total",
                     plus: "hp.temp",
                     minus: "hp.wounds",
+                    quick: true,
                     hook: "hp",
                     danger: true,
                     lines: [
