@@ -68,6 +68,7 @@ export interface RollSpec {
   hook: string; // the data-* attribute the button carries the row's key in: "roll-save" -> data-roll-save="str"
   column?: string; // its column's heading in a stat block ("Save")
   className?: string; // default "cc-bonus"
+  icon?: "die"; // a die drawn in place of the label (the label stays its accessible name when no aria)
 }
 export interface StepSpec {
   hook?: Hook; // data-action (none: no data-action)
@@ -182,11 +183,21 @@ export interface StatBlockSpec {
   rowClass?: string;
   rowTitle?: Text;
   rowNote?: { format: Ref; className: string; row: Path /* the row's data: "abilities.{key}" */ };
+  // Small labelled boxes after each row, read from the row's data (2E's Hit, Dmg, Allow... beside Strength).
+  rowBoxes?: { row: Path /* "abilities.{key}" */; boxes: Record<string /* a row's key */, DetailBox[]> };
   // A small inside the row's name, after it, while when holds (Traveller's "now 5" on a wounded characteristic).
   nameSmall?: { text: Nodes; className: string; attr?: string /* data-<attr>="{key}" */; when: Cond };
   plain?: boolean;
   notes?: Path;
   inner?: StatBlockSpec;
+}
+// One small read-only box: its label above, the row's value under it (data-detail="{path}"), its title on hover.
+// format: signed +2; percent 13%; all 99 and over as "All"; dash 0 as "—"; text as written.
+export interface DetailBox {
+  label: string;
+  path: Path;
+  title?: string;
+  format?: "signed" | "percent" | "all" | "dash" | "text";
 }
 export interface ListSmall {
   text: Nodes;

@@ -18,6 +18,44 @@ const titled = (/** @type {string} */ word) => word[0].toUpperCase() + word.slic
 const roll = (roll, more = {}) => ({ roll, bonus: "mod", ...more });
 /** @type {Record<string, string>} */
 const SAVE_WORDS = SAVE_NAMES;
+// What each ability's table gives at its score, as small boxes beside it (the Player's Handbook's tables).
+/** @type {Record<string, import("../rulesets/types").DetailBox[]>} */
+const ABILITY_BOXES = {
+  strength: [
+    { label: "Hit", path: "hitadj", format: "signed", title: "Hit probability adjustment" },
+    { label: "Dmg", path: "dmgadj", format: "signed", title: "Damage adjustment" },
+    { label: "Allow", path: "weightallow", title: "Weight allowance (lb.)" },
+    { label: "Doors", path: "opendoors", format: "text", title: "Open doors (locked doors in brackets)" },
+    { label: "Bars", path: "bendbars", format: "percent", title: "Bend bars / lift gates" },
+  ],
+  dexterity: [
+    { label: "Reaction", path: "reactionadj", format: "signed", title: "Reaction adjustment (surprise)" },
+    { label: "Missile", path: "missileadj", format: "signed", title: "Missile attack adjustment" },
+    { label: "Defense", path: "defenseadj", format: "signed", title: "Defensive adjustment (to Armor Class)" },
+  ],
+  constitution: [
+    { label: "HP", path: "hitpointadj", format: "signed", title: "Hit point adjustment a level" },
+    { label: "Warrior", path: "warriorhpadj", format: "signed", title: "Hit point adjustment a level for warriors" },
+    { label: "Shock", path: "systemshock", format: "percent", title: "System shock" },
+    { label: "Res.", path: "resurrectionsurvival", format: "percent", title: "Resurrection survival" },
+  ],
+  intelligence: [
+    { label: "Lang.", path: "languages", title: "Number of languages" },
+    { label: "Spell lvl", path: "spelllevel", format: "dash", title: "Highest spell level (wizards)" },
+    { label: "Learn", path: "learn", format: "percent", title: "Chance to learn a spell" },
+    { label: "Max", path: "maxspells", format: "all", title: "Most spells known a level" },
+  ],
+  wisdom: [
+    { label: "Magic def.", path: "magicdefenseadj", format: "signed", title: "Magical defense adjustment" },
+    { label: "Bonus", path: "spellbonus", format: "text", title: "Bonus spells (priests)" },
+    { label: "Failure", path: "failure", format: "percent", title: "Chance of spell failure (priests)" },
+  ],
+  charisma: [
+    { label: "Hench.", path: "maxhench", title: "Most henchmen" },
+    { label: "Loyalty", path: "loyalty", format: "signed", title: "Loyalty base" },
+    { label: "Reaction", path: "reaction", format: "signed", title: "Reaction adjustment" },
+  ],
+};
 const ORDINAL = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th"];
 
 /** @type {import("../rulesets/types").RulesetManifest} */
@@ -57,7 +95,7 @@ export default {
         parts: [
           {
             part: "row",
-            className: "cc-main-grid five-main",
+            className: "cc-main-grid five-main d2e-main",
             parts: [
               {
                 part: "statBlock",
@@ -80,13 +118,29 @@ export default {
                       field: { path: "abilities.strength.percent", kind: "number", label: "Exceptional strength" },
                     },
                   },
-                  { label: "Check", roll: { action: roll("check"), hook: "roll-check", label: "d20", title: "Roll a {key} check: d20 at or under {abilities.{key}.score|0}", aria: "{key} check" } },
+                  { label: "Check", roll: { action: roll("check"), hook: "roll-check", label: "d20", icon: "die", title: "Roll a {key} check: d20 at or under {abilities.{key}.score|0}", aria: "{key} check" } },
                 ],
-                rowNote: { format: "adnd2e.abilityNote", className: "hint d2e-note", row: "abilities.{key}" },
+                // What each ability's table gives at this score, as small boxes beside it.
+                rowBoxes: { row: "abilities.{key}", boxes: ABILITY_BOXES },
               },
               {
-                part: "derived",
-                boxes: [
+                part: "statBlock",
+                label: "Saving throws",
+                hook: "save",
+                base: "cc-panel d2e-saves",
+                heading: { text: "Saving throws", hint: "misc · roll d20 at or above" },
+                rowClass: "five-ability d35-save",
+                rowTitle: "Base {saves.{key}.base|0}[, racial -{saves.{key}.racial}][, misc -{saves.{key}.misc}]",
+                plain: true,
+                rows: SAVES.map((key) => ({ key, label: SAVE_WORDS[key] })),
+                columns: [{ label: "Misc", path: "saves.{key}.misc", field: { kind: "number", label: "{key} misc" } }],
+                roll: { action: roll("save", { fight: true }), hook: "roll-save", className: "cc-save", label: "{saves.{key}.total|0}", title: "Roll a save: d20 at or above {saves.{key}.total|0}", aria: "{key} save" },
+                notes: "savenotes",
+              },
+          {
+            part: "derived",
+            className: "d2e-combat",
+            boxes: [
                   {
                     label: "Armor Class",
                     show: "shield",
@@ -112,23 +166,9 @@ export default {
                   },
                   { label: "Initiative", show: "value", path: "initiative.total", hook: "init", format: "signed", title: "d10 + this, lowest acts first" },
                   { label: "Movement", show: "field", path: "movement", field: { path: "movement", kind: "number", label: "Movement" } },
-                ],
-              },
             ],
           },
-          {
-            part: "statBlock",
-            label: "Saving throws",
-            hook: "save",
-            base: "cc-panel d2e-saves",
-            heading: { text: "Saving throws", hint: "d20 at or above the number" },
-            rowClass: "five-ability d35-save",
-            rowTitle: "Base {saves.{key}.base|0}[, racial -{saves.{key}.racial}][, misc -{saves.{key}.misc}]",
-            plain: true,
-            rows: SAVES.map((key) => ({ key, label: SAVE_WORDS[key] })),
-            columns: [{ label: "Misc", path: "saves.{key}.misc", field: { kind: "number", label: "{key} misc" } }],
-            roll: { action: roll("save", { fight: true }), hook: "roll-save", className: "cc-save", label: "{saves.{key}.total|0}", title: "Roll a save: d20 at or above {saves.{key}.total|0}", aria: "{key} save" },
-            notes: "savenotes",
+            ],
           },
         ],
       },

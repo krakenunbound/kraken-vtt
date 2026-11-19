@@ -183,7 +183,7 @@ try {
   assert(hero.data.profs.weapon.includes("Long sword") && hero.data.profs.nonweapon.includes("Survival [2]") && hero.data.languages.includes("Orcish") && hero.data.gender && hero.data.weight, `proficiencies, languages and details: ${JSON.stringify({ profs: hero.data.profs, languages: hero.data.languages })}`);
   const sheetText = async (stat) => (await seat.textContent(`.sheet-2e [data-stat="${stat}"]`))?.trim();
   assert((await sheetText("thaco")) === "20" && (await sheetText("ac")) === "2" && (await sheetText("init")) === "-1", "the sheet: THAC0 20, AC 2, initiative -1");
-  assert((await seat.textContent('.sheet-2e [data-roll-save="paralyzation"]'))?.trim() === "14" && (await seat.textContent('.sheet-2e [data-ability="strength"] .d2e-note'))?.includes("Hit +2, damage +4"), "Paralyzation 14; 18/76's hit +2, damage +4");
+  assert((await seat.textContent('.sheet-2e [data-roll-save="paralyzation"]'))?.trim() === "14" && (await seat.textContent('.sheet-2e [data-ability="strength"] [data-detail="hitadj"]'))?.trim() === "+2" && (await seat.textContent('.sheet-2e [data-ability="strength"] [data-detail="dmgadj"]'))?.trim() === "+4", "Paralyzation 14; 18/76's Hit +2 and Dmg +4 boxes");
 
   // An ability check and a save from the sheet, both in the GM's chat.
   await seat.click('[data-roll-check="strength"]');

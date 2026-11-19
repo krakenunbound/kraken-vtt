@@ -3,7 +3,7 @@ import type { WizardFunctions } from "../core/wizard/Steps";
 import { BfTurnUndead } from "./bfrpg";
 import { CairnRest, cairnBackgroundGold, cairnBackgroundOfRoll, cairnBuild, cairnItemSlots } from "./cairn";
 import { Dnd5eDeathSaves, Dnd5eDread, Dnd5eDying, Dnd5eSpells, dnd5eClassName } from "./dnd5e";
-import { adnd2eAbilityNote, adnd2eClassKey } from "./adnd2e";
+import { adnd2eClassKey } from "./adnd2e";
 import { Mgt2SkillPickers, mgt2Careers, mgt2SkillTotal } from "./mgt2";
 import { AstraMarks, AstraSkillPickers, AstraTrickNotes, astraSkillTotal } from "./astra";
 import { SpellCasts } from "../core/parts/SpellCasts";
@@ -54,7 +54,6 @@ export const CUSTOM_PARTS: Record<string, CustomPart> = {
 export const FORMATS: Record<string, Format> = {
   "cairn.itemSlots": cairnItemSlots,
   "dnd5e.className": dnd5eClassName,
-  "adnd2e.abilityNote": adnd2eAbilityNote,
   "adnd2e.classKey": adnd2eClassKey,
   "mgt2.careers": mgt2Careers,
   "mgt2.skillTotal": mgt2SkillTotal,

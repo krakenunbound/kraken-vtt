@@ -1250,3 +1250,42 @@ All pass. **Ruleset checks** (the 3.1 grep): src 0; electron 128 after the merge
 - Castles & Crusades (the sheet, then its wizard), from merged main.
 - The wizards' pages onto the core's step kinds, the d20 wizards first, each page with its own before/after run.
 - Step 12, once `combat.cjs`'s roll paths have settled.
+
+## 8. The sheet template, second pass (the user's request, 2026-11-18)
+
+The user compared our 2E sheet with D&D Beyond's and Fantasy Grounds' and
+found ours the hardest to read: a small portrait, wordy ability rows, an
+empty lower half, "d20" text buttons, saves whose numbers were unclear, and a
+tab rail hard to read. Five FG rulesets' sheets (5E, 3.5E, 2E, C&C,
+Traveller) were opened in fresh campaigns and every tab looked at. They share
+one template, which we take as ours (the look stays our own):
+
+- The header on every tab: the portrait (large in ours; the user plays FG with
+  a big-portrait extension for them) and the name, with the
+  identity boxes the ruleset fills.
+- Tabs down the right edge, nearly always Main, Combat or Skills, Abilities,
+  Inventory, Notes, Actions.
+- Thin-framed panels, each one group, with a caption title.
+- Number boxes with their label above; rollable ones carry a die on a corner.
+- AC as a shield; hit points as current / max with wounds and temporary.
+- Lists with column heads and add / edit buttons at the right.
+- Inventory: the list, then encumbrance and coins side by side. Notes: a strip
+  of details (gender, age, height, weight, alignment, deity), then sections.
+  Actions: weapons and spells, the mode choice at the bottom.
+- Main tabs differ most per game; detail values as small labelled boxes (2E's
+  Hit, Dmg, Allow, Press, Doors, Bars beside Strength), never as a sentence.
+
+### 8.1 The plan (agreed 2026-11-18)
+
+Phase 1, the core (every game): the header built round a 150 px square
+portrait; one panel style; number boxes with a die icon on rollable ones
+(`RollSpec.icon`); small labelled detail boxes in a stat block's rows
+(`StatBlockSpec.rowBoxes`); hit points with a health bar; main tabs laid out
+in regions that pack (container queries: columns in a wide window, stacked in
+a narrow one); a readable tab rail; one skeleton for the other tabs.
+
+Phase 2, each game's main tab on it, one at a time, each with its tests,
+full-screen before / after shots (2560x1440, 90% UI scale) and the player's
+view in Chrome: AD&D 2E (the pilot), D&D 3.5E, D&D 5E, Traveller, then Castles
+& Crusades moved off its own sheet onto the core parts. The other games get
+phase 1 and are checked.

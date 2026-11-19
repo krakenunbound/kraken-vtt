@@ -1,5 +1,5 @@
 import { Fragment, type ComponentType } from "react";
-import type { BoxSpec, Part, Path, RollSpec, StatBlockSpec, StepSpec } from "../../../shared/rulesets/types";
+import type { BoxSpec, DetailBox, Part, Path, RollSpec, StatBlockSpec, StepSpec } from "../../../shared/rulesets/types";
 import { Icon } from "../../ui/icons";
 import { Field } from "../fields/Field";
 import { at, fill, holds, nodesOf, num, rows, signed, textOf, useSheet, type Format, type Row, type Scope } from "../sheet/context";
@@ -165,7 +165,14 @@ function RollButton({ roll, scope, className: base }: { roll: RollSpec; scope: S
       {...{ [`data-${roll.hook}`]: key }}
       onClick={() => sheet.editable && sheet.act(roll.action, { key: sent })}
     >
-      {nodesOf(roll.label, scope, sheet.modifiers)}
+      {roll.icon === "die" ? (
+        <>
+          <Icon name="d20" size={16} />
+          {roll.aria ? null : <span className="sr-only">{nodesOf(roll.label, scope, sheet.modifiers)}</span>}
+        </>
+      ) : (
+        nodesOf(roll.label, scope, sheet.modifiers)
+      )}
     </button>
   );
 }
@@ -239,6 +246,7 @@ function StatRows({ spec }: { spec: StatBlockSpec }) {
             })}
             {spec.roll ? <RollButton roll={spec.roll} scope={scope} className="cc-bonus" /> : null}
             {spec.rowNote ? <small className={spec.rowNote.className}>{sheet.formats[spec.rowNote.format]?.((at(sheet.data, spec.rowNote.row.replace("{key}", row.key)) ?? {}) as Row, row.key)}</small> : null}
+            {spec.rowBoxes?.boxes[row.key]?.length ? <DetailBoxes boxes={spec.rowBoxes.boxes[row.key]} row={(at(sheet.data, spec.rowBoxes.row.replace("{key}", row.key)) ?? {}) as Row} /> : null}
           </div>
         );
       })}
@@ -255,6 +263,29 @@ function StatRows({ spec }: { spec: StatBlockSpec }) {
           ))
         : null}
     </>
+  );
+}
+
+// A row's small read-only boxes (2E's Hit, Dmg, Allow beside Strength): the label above, the value under it.
+function detailText(value: unknown, format: DetailBox["format"]) {
+  if (format === "text") return String(value ?? "") || "—";
+  const n = num(value);
+  if (format === "signed") return signed(n);
+  if (format === "percent") return `${n}%`;
+  if (format === "all") return n >= 99 ? "All" : String(n);
+  if (format === "dash") return n ? String(n) : "—";
+  return String(n);
+}
+function DetailBoxes({ boxes, row }: { boxes: DetailBox[]; row: Row }) {
+  return (
+    <span className="cc-details">
+      {boxes.map((box) => (
+        <span key={box.path} className="cc-detail" title={box.title ?? box.label}>
+          <small>{box.label}</small>
+          <b data-detail={box.path}>{detailText(at(row, box.path), box.format)}</b>
+        </span>
+      ))}
+    </span>
   );
 }
 
@@ -418,6 +449,12 @@ function DerivedBox({ box }: { box: BoxSpec }) {
           )}
         </span>
       )}
+      {box.show === "remaining" && value > 0 ? (
+        // A health bar under current / max (the number above says it; the bar is for the eye).
+        <span className={`cc-hp-bar${shown <= value / 4 ? " low" : ""}`} aria-hidden="true">
+          <i style={{ inlineSize: `${Math.max(0, Math.min(100, (shown / value) * 100))}%` }} />
+        </span>
+      ) : null}
       {box.note ? <small className="hint">{textOf(box.note, scope, sheet.modifiers)}</small> : null}
       {box.fields?.length ? (
         <span className="cc-inline">
