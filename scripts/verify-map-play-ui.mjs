@@ -72,10 +72,18 @@ const until = async (check, what, tries = 60) => {
   }
   throw new Error(`waited for ${what}`);
 };
+// Where an element's centre is once it holds still (a map window fits its map when it opens: zoom and pan move it).
 const centre = async (where, selector) => {
-  const box = await where.locator(selector).first().boundingBox();
-  if (!box) throw new Error(`no ${selector}`);
-  return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  let last = null;
+  for (let tries = 0; tries < 40; tries++) {
+    const box = await where.locator(selector).first().boundingBox();
+    if (!box) throw new Error(`no ${selector}`);
+    const at = { x: box.x + box.width / 2, y: box.y + box.height / 2, w: box.width };
+    if (last && Math.abs(at.x - last.x) < 0.5 && Math.abs(at.y - last.y) < 0.5 && Math.abs(at.w - last.w) < 0.5) return { x: at.x, y: at.y };
+    last = at;
+    await new Promise((resolve) => setTimeout(resolve, 150));
+  }
+  return { x: last.x, y: last.y };
 };
 try {
   for (let tries = 0; ; tries++) {
@@ -128,7 +136,11 @@ try {
   await seat.mouse.down({ button: "left" });
   await seat.mouse.up({ button: "left" });
   await seat.mouse.move(from.x + 400, from.y + 150, { steps: 8 });
-  await seat.waitForSelector(`${seatMap} .ruler-leg`, { timeout: 5000 });
+  await seat.waitForSelector(`${seatMap} .ruler-leg`, { timeout: 5000 }).catch(async (error) => {
+    // What the player saw when the ruler did not show.
+    await seat.screenshot({ path: path.join(SHOTS, "kraken-ruler-player-failed.png") });
+    throw error;
+  });
   const seen = await page.waitForSelector('[data-ruler="A test player"]', { timeout: 5000 });
   const total = Number(await seen.getAttribute("data-ruler-total"));
   assert(total > 0 && (await page.locator(".ruler-leg").count()) >= 1, `the GM sees the player's ruler leg by leg (${total})`);
