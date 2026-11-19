@@ -54,7 +54,7 @@ try {
   await page.waitForSelector("text=Hosting");
 
   browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
-  const seat = await browser.newPage({ viewport: { width: 1600, height: 900 } });
+  const seat = await browser.newPage({ viewport: { width: 2560, height: 1440 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
   await seat.goto(`http://127.0.0.1:${port}/`);
   await seat.fill('input[name="name"]', "A test player");
