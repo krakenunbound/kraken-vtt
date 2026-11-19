@@ -448,6 +448,29 @@ try {
     await big.stop();
   }
 
+  // The token vision panel (docs/feature-parity.md M12): a sight cone on the token's facing, and a token that gives no sight.
+  {
+    await tool("kraken_scene_settings", { darkness: 0 });
+    await tool("kraken_line_of_sight", { on: true });
+    await tool("kraken_token_update", { id: annToken.id, senses: "", elevation: 0 });
+    await tool("kraken_token_move", { id: annToken.id, col: 1, row: 2 });
+    await tool("kraken_token_move", { id: gob.id, col: 3, row: 2 });
+    const sees = () => server.agent.viewFor("Ann").tokens.some((t) => t.id === gob.id);
+    assert(sees(), "all round, she sees the goblin to her east");
+    await tool("kraken_token_update", { id: annToken.id, facing: 90, sightAngle: 90 });
+    assert(sees(), "a 90-degree cone facing east sees the goblin");
+    await tool("kraken_token_update", { id: annToken.id, facing: 270 });
+    assert(!sees(), "turned west, the goblin behind her is out of her cone");
+    await tool("kraken_token_update", { id: annToken.id, sightAngle: 360, facing: null });
+    assert(sees(), "all round again");
+    await tool("kraken_token_update", { id: annToken.id, noSight: true });
+    const blind = server.agent.viewFor("Ann");
+    assert(!blind.tokens.some((t) => t.id === gob.id) && blind.tokens.some((t) => t.id === annToken.id) && Array.isArray(blind.vision) && blind.vision.length === 0, "a token with no sight shows her nothing but itself");
+    await latest(dm, "map", (m) => m.tokens?.find((t) => t.id === annToken.id)?.noSight === true, "the GM sees the token's sight is off");
+    await tool("kraken_token_update", { id: annToken.id, noSight: false });
+    assert(sees(), "its sight back on");
+    console.log("ok token vision");
+  }
   console.log("MAP_PLAY_OK");
 } finally {
   for (const ws of sockets) ws.close();

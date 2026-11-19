@@ -1192,6 +1192,8 @@ const TOOLS = [
       unidentified: string("The name players see instead of its real one until it is known (FG's unidentified name; \"\" for its own)"),
       elevation: number("How high it is, in the scene's units (feet): flying, on a ledge; negative below"),
       senses: string("Its own senses line, over its character's: Darkvision 60 ft, Blindsight 10 ft, Tremorsense 30 ft, Truesight 120 ft, Devil's Sight (\"\": the record's)"),
+      noSight: { type: "boolean", description: "true: it gives its owner no sight on a line-of-sight scene (a mount, a statue the player moves); false: it sees again" },
+      sightAngle: number("Its sight as a cone this many degrees wide (10-360) centred on its facing; 360: all round"),
     }, ["id"]),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);

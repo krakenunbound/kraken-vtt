@@ -2,7 +2,7 @@ import { useState } from "react";
 import { parseSenses } from "../../shared/map/geometry.mjs";
 import type { MapToken } from "../session/useSession";
 
-type Patch = { unidentified?: string; senses?: string; elevation?: number };
+type Patch = { unidentified?: string; senses?: string; elevation?: number; noSight?: boolean; sightAngle?: number };
 
 // A text field that sends its value on Enter or when it loses focus (never
 // mid-word in a Chinese, Japanese or Korean input method).
@@ -42,6 +42,20 @@ export function TokenMenuExtras({ token, gm, recordSenses, units, update, undo }
     <>
       {gm ? <CommitField label="Players call it" value={token.unidentified ?? ""} placeholder={token.name} onCommit={(value) => update({ unidentified: value })} /> : null}
       {gm ? <CommitField label="Senses" value={token.senses ?? ""} placeholder={recordSenses || "Darkvision 60 ft"} onCommit={(value) => update({ senses: value })} /> : null}
+      {gm ? (
+        // Its sight (the token vision panel): whether it shows its owner anything, and a cone on its facing.
+        <label className="token-menu-row">
+          <input type="checkbox" checked={!token.noSight} aria-label="Gives sight" data-field="token-sight" onChange={(event) => update({ noSight: !event.target.checked })} />
+          Gives sight
+        </label>
+      ) : null}
+      {gm && !token.noSight ? (
+        <label className="token-menu-row" title="How wide it sees, centred on the way it faces (360: all round)">
+          Sight angle
+          <input type="number" min={10} max={360} step={15} value={token.sightAngle ?? 360} onChange={(event) => update({ sightAngle: Number(event.target.value) || 360 })} style={{ width: "4.5rem" }} aria-label="Sight angle" data-field="token-sight-angle" />
+          °
+        </label>
+      ) : null}
       {known.length ? (
         <p className="token-menu-note" data-senses={known.map(([key, feet]) => `${key}:${feet}`).join(",")}>
           {known.map(([key, feet]) => `${names[key]} ${feet} ${units}`).join(" · ")}

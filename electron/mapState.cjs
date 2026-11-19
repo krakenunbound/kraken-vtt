@@ -90,9 +90,19 @@ function cleanToken(raw) {
     elevation: Math.round(Math.min(100000, Math.max(-100000, num(raw.elevation, 0))) * 10) / 10,
     // Its own senses line, over its character's ("Darkvision 60 ft, Blindsight 10 ft"); "": the record's.
     senses: text(raw.senses, "").slice(0, 200),
+    // Its sight (docs/feature-parity.md M12): noSight, it shows its owner nothing (a mount, a statue the
+    // player moves); sightAngle, a cone that wide centred on its facing (360 or none: all round).
+    ...(raw.noSight ? { noSight: true } : {}),
+    ...(sightAngleOf(raw.sightAngle) < 360 ? { sightAngle: sightAngleOf(raw.sightAngle) } : {}),
     // Effects on a creature that is not on the combat tracker (they move onto its entry when it joins).
     ...(Array.isArray(raw.effects) && raw.effects.length ? { effects: raw.effects.map(cleanEffect).filter(Boolean).slice(0, 30) } : {}),
   };
+}
+
+// A sight cone's width in degrees, 10 to 360 (360: all round).
+function sightAngleOf(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.min(360, Math.max(10, Math.round(n))) : 360;
 }
 
 // An area template on a scene (a Fireball's sphere): shape, its origin in
@@ -1087,7 +1097,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       elevation: token.elevation ?? 0,
       // Held by a trap: it waits for the GM (its player sees so).
       ...(token.held ? { held: true } : {}),
-      ...(seat.role === "dm" ? { unidentified: token.unidentified ?? "", senses: token.senses ?? "" } : {}),
+      ...(seat.role === "dm" ? { unidentified: token.unidentified ?? "", senses: token.senses ?? "", noSight: Boolean(token.noSight), sightAngle: token.sightAngle ?? 360 } : {}),
       x: token.x,
       y: token.y,
       squares: token.squares,
@@ -1128,10 +1138,13 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
 
   function polygonFor(token) {
     const doors = doorsHere();
-    const key = `${scene.id}|${token.x}|${token.y}|${token.squares}`;
+    // A sight cone on its facing (degrees clockwise from up; the cone's start measured clockwise from east).
+    const angle = token.sightAngle && token.sightAngle < 360 ? token.sightAngle : 360;
+    const cone = angle < 360 ? { angle, from: (((token.facing ?? 0) - 90 - angle / 2) * Math.PI) / 180 } : null;
+    const key = `${scene.id}|${token.x}|${token.y}|${token.squares}|${angle}|${cone ? (token.facing ?? 0) : ""}`;
     let polygon = visionCache.get(key);
     if (!polygon) {
-      polygon = geometry.sceneSight(scene, { x: token.x, y: token.y }, doors, (token.squares * geometry.gridSize(scene)) / 2);
+      polygon = geometry.sceneSight(scene, { x: token.x, y: token.y }, doors, (token.squares * geometry.gridSize(scene)) / 2, "sight", 0, cone);
       visionCache.set(key, polygon);
     }
     return polygon;
@@ -1186,7 +1199,9 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     const shown = all.filter((token) => !token.hidden && !invisibleTo(token, seat));
     // Player vision preview (the GM's): every player's tokens at once, as the table sees them.
     const mine = shown.filter((token) => token.owner === seat.name || (seat.everyone && token.owner && !token.owner.startsWith("@")));
-    const vision = sightOn() && mine.length > 0 ? mine.map(polygonFor) : null;
+    // The tokens that see for their player: a token with no sight shows them nothing (all of them blind: nothing but themselves).
+    const seers = mine.filter((token) => !token.noSight);
+    const vision = sightOn() && mine.length > 0 ? seers.map(polygonFor) : null;
     const slack = geometry.gridSize(scene) * 0.05;
     // A hidden token's light neither reaches a player nor lights anything for them.
     const shining = sources.filter((light) => !light.hidden);
@@ -1199,14 +1214,14 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     // Each token's senses: blindsight perceives what is near as darkvision does (and in
     // magical darkness); truesight and Devil's Sight see in magical darkness.
     const senses = new Map(mine.map((token) => [token.id, sensesOf(token)]));
-    const seeing = mine
+    const seeing = seers
       .map((token, index) => {
         // Darkvision (a bright light spoils it in C&C); blindsight, truesight and Devil's Sight see in the dark too.
         const sense = senses.get(token.id);
         return { x: token.x, y: token.y, radiusPx: Math.max(spoiled.includes(token.id) ? 0 : sense.darkvision, sense.blindsight, sense.truesight, sense.devilsight) * per, polygon: vision ? vision[index] : null };
       })
       .filter((item) => item.radiusPx > 0);
-    const trueSeeing = mine
+    const trueSeeing = seers
       .map((token, index) => {
         const sense = senses.get(token.id);
         return { x: token.x, y: token.y, radiusPx: Math.max(sense.truesight, sense.devilsight, sense.blindsight) * per, polygon: vision ? vision[index] : null };
@@ -1692,6 +1707,15 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (patch.elevation !== undefined) token.elevation = cleanToken({ x: 0, y: 0, elevation: patch.elevation }).elevation;
       if (patch.unidentified !== undefined) token.unidentified = text(patch.unidentified, "").slice(0, 48);
       if (patch.senses !== undefined) token.senses = text(patch.senses, "").slice(0, 200);
+      if (patch.noSight !== undefined) {
+        if (patch.noSight) token.noSight = true;
+        else delete token.noSight;
+      }
+      if (patch.sightAngle !== undefined) {
+        const angle = sightAngleOf(patch.sightAngle);
+        if (angle < 360) token.sightAngle = angle;
+        else delete token.sightAngle;
+      }
       if (patch.light !== undefined) token.light = typeof patch.light === "string" ? presetLight(patch.light, lightProfiles()) : cleanCarried(patch.light);
       if (patch.vision !== undefined) token.vision = patch.vision == null ? null : Math.min(1000, Math.max(0, num(patch.vision, 0)));
       if (patch.name !== undefined) token.name = text(patch.name, token.name).slice(0, 48);

@@ -171,3 +171,5 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
 
 - [ ] Foundry: the dnd5e system installed to study it is still in Foundry.
 - [ ] Merged agent worktrees under `.claude/worktrees/` can be cleaned up.
+
+- verify-map-play-ui fails waiting for the player's ruler leg (`.ruler-leg`, line 131) on d1cc136 and after, before the token vision work: the right-drag ruler in the player's Chrome is not drawn. check-map-play (the host side of the ruler) passes. (2026-11-19)

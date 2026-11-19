@@ -43,6 +43,8 @@ export type MapToken = {
   elevation?: number;
   // The GM's: the name players see instead, and the token's own senses line.
   unidentified?: string;
+  noSight?: boolean; // gives its owner no sight (the GM's)
+  sightAngle?: number; // its sight cone in degrees on its facing (360: all round; the GM's)
   senses?: string;
   // Felt by tremorsense alone (a player's view): its shape, not a sight of it.
   sensed?: boolean;

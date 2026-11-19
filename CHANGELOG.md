@@ -9,6 +9,7 @@ full log of the work is in [PLAN.md](PLAN.md).
 Collected here until the next major release (alpha to beta).
 
 - **Castles & Crusades' character sheet joins the others**: the attributes with their check and prime, the saving throws in a column beside them (click one to roll against the CL), and Armor Class, hit points, initiative, melee, ranged and move under them. The CL now sits in the line with level and experience and applies to every check, save and ability roll. Everything the sheet did before it still does: Class & Level, weapons you can drag onto a creature, the carried / worn switch, languages, spells.
+- **A token's sight in its menu** (the GM's): Gives sight (off for a mount or a statue a player moves: it shows its owner nothing) and Sight angle, a cone centred on the way the token faces.
 - **Open Universal VTT maps** (.dd2vtt from Dungeondraft, .df2vtt from DungeonFog, .uvtt): Open map, a drop on the table or the agent's kraken_open_adventure makes one scene with the file's picture, grid, walls, doors and lights, ready to play.
 - **Inventory lists have column heads** (Status, #, Item) in every game that keeps a carried state and a count, lined up over their columns.
 - **Damage and Heal under hit points** (D&D 5E, 3.5E, AD&D 2E, Basic Fantasy, Castles & Crusades): type an amount and press Damage (temporary hit points go first) or Heal.
