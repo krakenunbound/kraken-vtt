@@ -271,8 +271,38 @@ try {
     await settle();
     assert(player.events.filter((event) => event.type === "soundscape").at(-1).soundscape.music.id !== before, "the next track is never the one that just played");
   }
+  // A playlist (docs/feature-parity.md S9): in order by name, round again or stopping at its end; the track's
+  // start on the host's clock and how far in it is, so a later seat joins at the same bar.
+  sounds.add("music", "Battle", "test-3.wav", wav());
+  const lastScape = () => player.events.filter((event) => event.type === "soundscape").at(-1).soundscape.music;
+  gm.send({ type: "music", action: "play", id: "music/Battle", order: "order", repeat: true });
+  await settle();
+  const names = [lastScape().id];
+  for (let round = 0; round < 3; round++) {
+    gm.send({ type: "music", action: "next" });
+    await settle();
+    names.push(lastScape().id);
+  }
+  assert(names.join() === ["test-1", "test-2", "test-3", "test-1"].map((name) => `music/Battle/${name}.wav`).join() && lastScape().order === "order" && lastScape().repeat === true, `in order, and round again after the last: ${names.join(", ")}`);
+  gm.send({ type: "music", action: "playlist", repeat: false });
+  await settle();
+  assert(lastScape().id === "music/Battle/test-1.wav" && lastScape().repeat === false, "the playlist changed, the track playing goes on");
+  gm.send({ type: "music", action: "next" });
+  gm.send({ type: "music", action: "next" });
+  await settle();
+  assert(lastScape().id === "music/Battle/test-3.wav", "on to the last track");
+  gm.send({ type: "music", action: "next" });
+  await settle();
+  assert(lastScape() === null, "no repeat: after the last track the music stops");
+  gm.send({ type: "music", action: "play", id: "music/Battle", order: "order", repeat: true });
+  await settle();
+  const started = lastScape();
+  assert(started.startedAt > 0 && started.elapsed >= 0 && started.elapsed < 1000, `a new track starts now: ${JSON.stringify(started)}`);
+  await new Promise((resolve) => setTimeout(resolve, 700));
   const late = await connect(port, { name: "Cal" });
   assert(late.ok.soundscape.ambience.length === 2 && late.ok.soundscape.music, "a seat that joins later hears what is playing");
+  const joined = late.ok.soundscape.music;
+  assert(joined.startedAt === started.startedAt && joined.elapsed >= 600, `a later seat is told how far in the track is, to join at the same bar: ${joined.elapsed} ms`);
   gm.send({ type: "ambience", action: "clear" });
   gm.send({ type: "music", action: "stop" });
   await settle();
@@ -285,7 +315,7 @@ try {
   assert(file.status === 206 && (await file.arrayBuffer()).byteLength === 40, "a player gets a range of a sound");
   assert((await fetch(`${base}/sound/list?token=${player.you.assetToken}`)).status === 404, "a player does not get the list");
   const list = await (await fetch(`${base}/sound/list?token=${gm.you.assetToken}`)).json();
-  assert(list.sounds.length === made.size + 1 && list.triggers.length === triggers.length, "the GM gets the list and the triggers");
+  assert(list.sounds.length === made.size + 2 && list.triggers.length === triggers.length, "the GM gets the list and the triggers (two more music tracks added above)");
 
   // Triggers turned off play nothing; Kraken's come back.
   gm.send({ type: "sound-triggers", triggers: agent.triggers().map((trigger) => (trigger.on === "attack" ? { ...trigger, enabled: false } : trigger)) });

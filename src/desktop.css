@@ -916,6 +916,7 @@ span.ct-init { display: inline-block; }
 .sound-now > b { color: var(--brass); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .sound-now-row { display: flex; align-items: center; gap: 8px; }
 .sound-now-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sound-repeat { display: inline-flex; align-items: center; gap: 4px; font-size: 0.85rem; }
 .sound-now-row input[type="range"] { width: 120px; }
 .sound-stop { align-self: flex-start; }
 .sound-add { display: flex; gap: 6px; }

@@ -618,7 +618,9 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     const level = (item) => Math.min(1, Math.max(0, Number(item?.volume ?? 1)));
     return {
       ambience: (Array.isArray(scape.ambience) ? scape.ambience : []).filter((item) => typeof item?.id === "string").slice(0, 8).map((item) => ({ id: item.id.slice(0, 300), volume: level(item) })),
-      music: scape.music && typeof scape.music.id === "string" ? { id: scape.music.id.slice(0, 300), volume: level(scape.music), loop: scape.music.loop !== false, group: typeof scape.music.group === "string" ? scape.music.group.slice(0, 300) : null } : null,
+      // When the track started (the host's clock), so every seat hears the same bar; a folder's playlist plays in
+      // order or shuffled, and repeats or stops at its end (docs/feature-parity.md S9).
+      music: scape.music && typeof scape.music.id === "string" ? { id: scape.music.id.slice(0, 300), volume: level(scape.music), loop: scape.music.loop !== false, group: typeof scape.music.group === "string" ? scape.music.group.slice(0, 300) : null, startedAt: Number.isFinite(Number(scape.music.startedAt)) ? Number(scape.music.startedAt) : Date.now(), order: scape.music.order === "order" ? "order" : "shuffle", repeat: scape.music.repeat !== false } : null,
     };
   };
   let soundscape = cleanScape(saved.sound);
@@ -641,7 +643,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     else if (action === "clear") sceneSounds.delete(scene.id);
     else if (action === "play") {
       const kept = sceneSounds.get(scene.id);
-      if (kept) setSoundscape(kept);
+      if (kept) setSoundscape(freshScape(kept));
     } else throw new Error("Keep, clear, play or view the scene's sound.");
     onChange("table");
     sendSceneSound();
@@ -649,9 +651,13 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   }
   // When each folder last played (the same sound again only after a pause).
   const lastSound = new Map();
+  // What is sent: the music with how far into its track it is now (no seat's clock needed to join in time).
+  const scapeOut = () => (soundscape.music ? { ...soundscape, music: { ...soundscape.music, elapsed: Math.max(0, Date.now() - soundscape.music.startedAt) } } : soundscape);
+  // A kept soundscape (a scene's own) played again: its music from the top, now.
+  const freshScape = (kept) => (kept?.music ? { ...kept, music: { ...kept.music, startedAt: Date.now() } } : kept);
   function setSoundscape(next) {
     soundscape = cleanScape(next);
-    broadcast({ type: "soundscape", soundscape });
+    broadcast({ type: "soundscape", soundscape: scapeOut() });
     onChange("table");
     return soundscape;
   }
@@ -2200,7 +2206,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
           clocks: clocks.view(seatOf(client)),
           chat: forPlayer(client, chatFor(client)),
           options,
-          soundscape,
+          soundscape: scapeOut(),
           books: shelfView(client),
           quickSlots: slotsFor(client),
           modifiers: modifiers.view(clearKey(client)),
@@ -3490,7 +3496,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
         const opened = scene?.id !== next.id;
         scene = next;
         // A scene with its own sound starts it (the soundscape goes on otherwise).
-        if (opened && sceneSounds.has(next.id)) setSoundscape(sceneSounds.get(next.id));
+        if (opened && sceneSounds.has(next.id)) setSoundscape(freshScape(sceneSounds.get(next.id)));
         if (opened) sendSceneSound();
         // A bundle's tiles (Foundry's), placed the first time the scene opens.
         if (Array.isArray(msg.scene?.tiles) && msg.scene.tiles.length) map.seed(next.id, { tiles: storeTiles(msg.scene.tiles.slice(0, 300)) });
@@ -3705,7 +3711,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     stopSounds: () => (broadcast({ type: "sound-stop" }), { stopped: true }),
     ambience,
     music,
-    soundscape: () => soundscape,
+    soundscape: () => scapeOut(),
     sceneSound,
     storeTiles,
     // Books: what there is, a book's contents and pages, and sharing.
@@ -3803,14 +3809,27 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   function music(action, idOrGroup, extra = {}) {
     if (action === "stop") return setSoundscape({ ...soundscape, music: null });
     if (action === "volume" && soundscape.music) return setSoundscape({ ...soundscape, music: { ...soundscape.music, volume: extra.volume } });
-    const wanted = String((action === "next" ? soundscape.music?.group : idOrGroup) ?? idOrGroup ?? "");
+    // The playlist's order and repeat: as asked, else as it was.
+    const current = soundscape.music;
+    if (action === "playlist" && current) return setSoundscape({ ...soundscape, music: { ...current, ...(extra.order ? { order: extra.order } : {}), ...(typeof extra.repeat === "boolean" ? { repeat: extra.repeat } : {}) } });
+    const order = extra.order === "order" || extra.order === "shuffle" ? extra.order : (current?.order ?? "shuffle");
+    const repeat = typeof extra.repeat === "boolean" ? extra.repeat : (current?.repeat ?? true);
+    const wanted = String((action === "next" ? current?.group : idOrGroup) ?? idOrGroup ?? "");
     const fromFolder = sounds?.has(wanted) ? null : wanted;
-    const inFolder = fromFolder ? sounds.list("music").filter((item) => `music/${item.group}` === fromFolder || `music/${item.group}`.startsWith(`${fromFolder}/`)) : [];
-    let picked = sounds?.pick(wanted);
-    for (let tries = 0; picked && inFolder.length > 1 && picked.id === soundscape.music?.id && tries < 8; tries++) picked = sounds.pick(wanted);
+    const inFolder = fromFolder ? sounds.list("music").filter((item) => `music/${item.group}` === fromFolder || `music/${item.group}`.startsWith(`${fromFolder}/`)).sort((a, b) => a.id.localeCompare(b.id)) : [];
+    let picked;
+    if (fromFolder && order === "order" && inFolder.length) {
+      // In order: the first track, or the one after the current; past the last, from the top again or stop.
+      const at = action === "next" ? inFolder.findIndex((item) => item.id === current?.id) + 1 : 0;
+      if (at >= inFolder.length && !repeat) return setSoundscape({ ...soundscape, music: null });
+      picked = inFolder[at % inFolder.length];
+    } else {
+      picked = sounds?.pick(wanted);
+      for (let tries = 0; picked && inFolder.length > 1 && picked.id === current?.id && tries < 8; tries++) picked = sounds.pick(wanted);
+    }
     if (!picked) throw new Error(`No music "${wanted}".`);
     const loop = extra.loop !== false && (!fromFolder || inFolder.length <= 1);
-    return setSoundscape({ ...soundscape, music: { id: picked.id, volume: extra.volume ?? soundscape.music?.volume ?? 0.7, loop, group: fromFolder } });
+    return setSoundscape({ ...soundscape, music: { id: picked.id, volume: extra.volume ?? current?.volume ?? 0.7, loop, group: fromFolder, startedAt: Date.now(), order, repeat } });
   }
   function setTriggers(list) {
     const cleaned = list === "default" ? defaultTriggers() : cleanTriggers(list);

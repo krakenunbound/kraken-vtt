@@ -1004,8 +1004,10 @@ const TOOLS = [
       search: string("Part of a name or folder (list)"),
       id: string("A sound's id, or a folder"),
       volume: number("0 to 1"),
-      do: { type: "string", enum: ["add", "remove", "volume", "clear", "play", "next", "stop", "keep", "view"], description: "For ambience, music and scene" },
+      do: { type: "string", enum: ["add", "remove", "volume", "clear", "play", "next", "stop", "playlist", "keep", "view"], description: "For ambience, music and scene (music playlist: change order and repeat of the folder playing)" },
       loop: { type: "boolean", description: "Music: loop the track (default true)" },
+      order: { type: "string", enum: ["shuffle", "order"], description: "Music from a folder: shuffle (default) or in order by name" },
+      repeat: { type: "boolean", description: "Music from a folder: start again after the last track (default true); false stops there" },
       triggers: { description: "A list of { name, on: attack|spellattack|save|cast|heal|damage|roll|text, match, result: any|hit|miss|crit|fumble|success|failure, sound, enabled }, or \"default\"" },
     }),
     run(args, ctx) {
@@ -1023,7 +1025,7 @@ const TOOLS = [
         return out({ stopped: true, ...(agent.stopSounds ? agent.stopSounds() : {}) });
       }
       if (action === "ambience") return out(agent.ambience(args.do ?? "add", args.id, args.volume));
-      if (action === "music") return out(agent.music(args.do ?? "play", args.id, { volume: args.volume, loop: args.loop }));
+      if (action === "music") return out(agent.music(args.do ?? "play", args.id, { volume: args.volume, loop: args.loop, order: args.order, repeat: args.repeat }));
       if (action === "triggers") return out({ triggers: args.triggers !== undefined ? agent.setTriggers(args.triggers) : agent.triggers() });
       if (action === "scene") return out(agent.sceneSound(args.do ?? "view"));
       return out(agent.soundscape());

@@ -247,9 +247,20 @@ function Browser({ session, kind, library, reload }: { session: Session; kind: S
             <span>{leaf(scape.music.id.replace(/\.[^.]+$/, ""))}</span>
             <input type="range" min={0} max={1} step={0.05} value={scape.music.volume} aria-label="Music volume" onChange={(event) => session.soundCommand({ type: "music", action: "volume", volume: Number(event.target.value) })} />
             {scape.music.group ? (
-              <button type="button" onClick={() => session.soundCommand({ type: "music", action: "next" })}>
-                Next
-              </button>
+              <>
+                <button type="button" onClick={() => session.soundCommand({ type: "music", action: "next" })}>
+                  Next
+                </button>
+                {/* The folder's playlist: in order or shuffled, and round again at its end or stop. */}
+                <select aria-label="Playlist order" data-field="music-order" value={scape.music.order ?? "shuffle"} onChange={(event) => session.soundCommand({ type: "music", action: "playlist", order: event.target.value })}>
+                  <option value="shuffle">Shuffle</option>
+                  <option value="order">In order</option>
+                </select>
+                <label className="sound-repeat" title="When the last track ends, start the folder again (off: the music stops)">
+                  <input type="checkbox" data-field="music-repeat" checked={scape.music.repeat !== false} onChange={(event) => session.soundCommand({ type: "music", action: "playlist", repeat: event.target.checked })} />
+                  Repeat
+                </label>
+              </>
             ) : null}
             <button type="button" onClick={() => session.soundCommand({ type: "music", action: "stop" })}>
               Stop

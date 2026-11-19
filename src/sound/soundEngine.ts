@@ -9,7 +9,8 @@ import { rolling } from "../dice/diceStore";
 
 export type SoundKind = "oneshots" | "sfx" | "ambience" | "music";
 export type Volumes = { master: number; oneshots: number; sfx: number; ambience: number; music: number; muted: boolean };
-export type Soundscape = { ambience: { id: string; volume: number }[]; music: { id: string; volume: number; loop: boolean; group: string | null } | null };
+// music: startedAt on the host's clock; elapsed, how far into the track it was when the host sent it (a seat joins in time).
+export type Soundscape = { ambience: { id: string; volume: number }[]; music: { id: string; volume: number; loop: boolean; group: string | null; startedAt?: number; elapsed?: number; order?: "order" | "shuffle"; repeat?: boolean } | null };
 
 const DEFAULTS: Volumes = { master: 0.8, oneshots: 0.9, sfx: 0.8, ambience: 0.5, music: 0.45, muted: false };
 export const KINDS: { id: SoundKind; name: string }[] = [
@@ -39,7 +40,19 @@ const buses = new Map<SoundKind, GainNode>();
 let urlOf: (id: string) => string = () => "";
 const buffers = new Map<string, Promise<AudioBuffer>>();
 const ambience = new Map<string, { source: AudioBufferSourceNode; gain: GainNode }>();
-let music: { id: string; element: HTMLAudioElement; source: MediaElementAudioSourceNode; gain: GainNode } | null = null;
+let music: { id: string; startedAt: number; element: HTMLAudioElement; source: MediaElementAudioSourceNode; gain: GainNode } | null = null;
+// Where the track is meant to be now (seconds), from how far in the host said it was and when that arrived.
+function seekTo(element: HTMLAudioElement, elapsedMs: number, received: number) {
+  const go = () => {
+    const seconds = (elapsedMs + (performance.now() - received)) / 1000;
+    const length = element.duration;
+    if (!Number.isFinite(length) || length <= 0) return;
+    // A second or two late is in time enough; a loop (or a host that restarted) goes round.
+    if (seconds > 1.5) element.currentTime = seconds % length;
+  };
+  if (element.readyState >= 1) go();
+  else element.addEventListener("loadedmetadata", go, { once: true });
+}
 let musicDone: (() => void) | null = null;
 // The one-shots and effects playing here, by the sound's id (so a play
 // button can show it is playing, and stop just that one).
@@ -268,6 +281,14 @@ export const sound = {
       }
       return;
     }
+    const received = performance.now();
+    if (music?.id === track.id && music.startedAt !== (track.startedAt ?? music.startedAt)) {
+      // The same track started again (a folder of one, or played again): from where the host says it is now.
+      music.startedAt = track.startedAt ?? music.startedAt;
+      music.element.currentTime = 0;
+      seekTo(music.element, track.elapsed ?? 0, received);
+      void music.element.play().catch(() => undefined);
+    }
     if (music?.id === track.id) {
       music.gain.gain.setTargetAtTime(track.volume, ctx.currentTime, 0.3);
       music.element.loop = track.loop;
@@ -291,8 +312,10 @@ export const sound = {
     gain.gain.value = 0;
     source.connect(gain).connect(buses.get("music")!);
     element.addEventListener("ended", () => musicDone?.());
-    music = { id: track.id, element, source, gain };
+    music = { id: track.id, startedAt: track.startedAt ?? 0, element, source, gain };
     playingChanged();
+    // Joined after the track began (a late seat, a reload): in at the same bar as everyone else.
+    seekTo(element, track.elapsed ?? 0, received);
     void element.play().catch(() => undefined);
     gain.gain.setTargetAtTime(track.volume, ctx.currentTime, 0.8);
   },
