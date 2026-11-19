@@ -62,7 +62,7 @@ export default {
         parts: [
           {
             part: "row",
-            className: "cc-main-grid five-main",
+            className: "cc-main-grid five-main d5e-main",
             parts: [
               {
                 part: "statBlock",
@@ -73,12 +73,26 @@ export default {
                 columns: [
                   { label: "Score", path: "abilities.{key}.score", field: { kind: "number", label: "{key} score" } },
                   { label: "Check", roll: { action: roll("check"), hook: "roll-check", label: "{abilities.{key}.bonus|signed}", title: "Roll a {key} check", aria: "{key} check" } },
+                ],
+              },
+              // The six saves in a column beside the abilities: proficient or not, and the roll.
+              {
+                part: "statBlock",
+                label: "Saving throws",
+                hook: "save",
+                base: "cc-panel d5e-saves",
+                heading: { text: "Saving throws", hint: "prof · roll" },
+                plain: true,
+                rowClass: "five-ability d5e-save",
+                rows: STATS.map((key) => ({ key, label: titled(key) })),
+                columns: [
                   { label: "Prof", path: "abilities.{key}.saveprof", field: { kind: "check", label: "{key} save proficiency", title: "Proficient in this saving throw" } },
                   { label: "Save", roll: { action: roll("save", { fight: true }), hook: "roll-save", className: "cc-save", label: "{abilities.{key}.save|signed}", title: "Roll a {key} saving throw", aria: "{key} save" } },
                 ],
               },
               {
                 part: "derived",
+                className: "d5e-combat",
                 boxes: [
                   { label: "{@ac}", show: "shield", path: "ac.total", hook: "ac", title: "{@acLong}[: {ac.armor}][ and a shield{?ac.shield}]" },
                   {

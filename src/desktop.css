@@ -1541,6 +1541,25 @@ textarea.cc-field.tall { min-height: 220px; }
 .sheet-5e .five-spells li p { flex-basis: 100%; margin: 0; }
 .sheet-5e .five-slots { display: flex; flex-wrap: wrap; gap: 12px; margin: 6px 0; }
 .sheet-5e .five-coins { display: flex; gap: 12px; margin-top: 8px; }
+/* 5E's Main tab: the abilities, the six saves in a column beside them, AC and hit points then initiative, speed,
+   passive Perception and Inspiration under the abilities (death saves and Dread across the row); stacked when narrow. */
+.sheet-5e .d5e-main { grid-template-columns: minmax(0, 1fr); grid-template-areas: "abilities" "saves" "combat"; align-items: start; }
+.sheet-5e .d5e-main > [aria-label="Abilities"] { grid-area: abilities; }
+.sheet-5e .d5e-main > .d5e-saves { grid-area: saves; }
+.sheet-5e .d5e-main > .d5e-combat { grid-area: combat; }
+@container (min-width: 700px) {
+  .sheet-5e .d5e-main { grid-template-columns: minmax(0, 1fr) minmax(220px, 0.62fr); grid-template-areas: "abilities saves" "combat combat"; }
+  .sheet-5e .d5e-main > .d5e-saves { align-self: stretch; }
+}
+.sheet-5e .d5e-main > [aria-label="Abilities"] :is(.five-ability-head, .five-ability) { grid-template-columns: minmax(7rem, 9rem) 3.4rem 3.4rem; justify-content: start; column-gap: 14px; }
+.sheet-5e .d5e-main > [aria-label="Abilities"] .five-ability { margin: 0; padding: 3px 0; border-bottom: 1px solid rgba(214, 170, 92, 0.12); }
+.sheet-5e .d5e-saves .d5e-save { grid-template-columns: minmax(0, 1fr) 2rem 3rem; margin: 0; padding: 4px 0; border-bottom: 1px solid rgba(214, 170, 92, 0.12); }
+.sheet-5e .d5e-saves .cc-save { justify-self: center; min-width: 2.6rem; padding: 3px 0; text-align: center; font-size: 0.95rem; border: 1px solid rgba(214, 170, 92, 0.5); border-radius: 4px; background: rgba(0, 0, 0, 0.3); }
+.sheet-5e .five-defence.d5e-combat { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.sheet-5e .five-defence.d5e-combat > * { grid-column: 1 / -1; }
+.sheet-5e .five-defence.d5e-combat > .five-big { grid-column: span 6; }
+.sheet-5e .five-defence.d5e-combat > .five-big:nth-child(n + 3) { grid-column: span 6; }
+@container (min-width: 700px) { .sheet-5e .five-defence.d5e-combat > .five-big:nth-child(n + 3) { grid-column: span 3; } }
 .wizard-5e { display: flex; flex-direction: column; gap: 8px; padding: 12px; overflow: auto; }
 .wizard-5e > * { flex-shrink: 0; }
 .wizard-5e[data-wizard="astra"] > header { position: sticky; top: -12px; z-index: 2; margin: -12px -12px 0; padding: 12px; background: var(--panel, #161b24); border-bottom: 1px solid var(--line, #2a3140); }
