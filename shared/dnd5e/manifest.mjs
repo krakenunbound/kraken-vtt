@@ -170,6 +170,7 @@ export default {
             select: { path: "carried", kind: "select", number: true, label: "{name} carried", title: "Equipped, carried or not carried", options: [{ value: "2", label: "Equipped" }, { value: "1", label: "Carried" }, { value: "0", label: "Not carried" }], default: 1 },
             fields: [{ path: "count", kind: "number", label: "{name} count", default: 1, zeroIsEmpty: true }],
             name: { path: "name" },
+            head: { select: "Status", fields: ["#"], name: "Item" },
             details: [{ text: "{subtype}", when: { not: { isNull: "subtype" } } }, { text: "{type}", when: { isNull: "subtype" } }],
             remove: { aria: "Drop {name}", title: "Drop it" },
           },

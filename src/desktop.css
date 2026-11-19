@@ -2586,6 +2586,13 @@ label.set-row { cursor: pointer; }
 .five-items li.drop-over { outline: 2px dashed var(--brass); outline-offset: 2px; background: var(--brass-soft); }
 .five-items li.in-container { padding-left: 14px; }
 .five-items li[draggable="true"] { cursor: grab; }
+/* A list's column heads (ListHead): the select and the count keep fixed widths so the words line up over them. */
+.has-head > li > select.cc-field, .has-head > li > .h-select { flex: none; inline-size: 7.5rem; }
+.has-head > li > input.cc-field.number, .has-head > li > .h-field { flex: none; inline-size: 3.2rem; text-align: center; }
+.has-head > li > .h-name { flex: 1 1 10rem; }
+.has-head > li > .h-end { margin-left: auto; }
+.has-head > li.cc-list-head { padding-block: 0 2px; border-bottom: 1px solid rgba(214, 170, 92, 0.35); }
+.has-head > li.cc-list-head small { font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted, #9a927f); }
 .in-bag { display: inline-flex; align-items: center; gap: 2px; padding: 0 6px; border-radius: 999px; background: var(--brass-soft); color: var(--brass); font-size: 0.72rem; }
 .in-bag button { padding: 0 3px; line-height: 1; }
 .bag-toggle { display: inline-flex; align-items: center; gap: 3px; font-size: 0.75rem; }

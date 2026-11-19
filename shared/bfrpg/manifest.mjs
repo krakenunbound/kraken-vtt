@@ -201,6 +201,7 @@ export default {
             select: { path: "carried", kind: "select", number: true, label: "{name} carried", title: "Ready (worn or in hand), carried or left behind", options: [{ value: "2", label: "Ready" }, { value: "1", label: "Carried" }, { value: "0", label: "Left behind" }] },
             fields: [{ path: "count", kind: "number", label: "{name} count", default: 1, zeroIsEmpty: true }],
             name: { path: "name" },
+            head: { select: "Status", fields: ["#"], name: "Item" },
             details: [{ text: "{type}" }, { text: "{damage}" }, { text: "AC {ac}", when: { has: "ac" } }, { text: "AC +{acbonus}", when: { has: "acbonus" } }, { text: "{weight} lb.", when: { has: "weight" } }],
             remove: { aria: "Drop {name}", title: "Drop it" },
           },

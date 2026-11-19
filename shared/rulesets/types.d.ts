@@ -135,7 +135,7 @@ export type Part = (
   | ({ part: "statBlock" } & StatBlockSpec)
   // A box may be a game's own (custom: a Ref); hint: a line under the boxes.
   | { part: "derived"; className?: string; boxes: (BoxSpec | { custom: Ref; when?: Cond })[]; hint?: Text }
-  | { part: "list"; label?: string; path: Path; hook?: string /* no data-* on a row without */; count?: string; className?: string; select?: FieldSpec; check?: FieldSpec; name: { path: Path; else?: string; bold?: boolean; title?: Path[]; flat?: boolean /* the name and details straight in the row, not in a span */; after?: Text /* words right after the name (" ×3") */ }; details?: { text?: string; format?: Ref; when?: Cond }[]; sep?: string; hideEmpty?: boolean /* no details line when none */; fields?: FieldSpec[] /* typed into, after the select */; small?: Text[] /* the details as text nodes, in place of details */; smalls?: ListSmall[]; rowActions?: ListAction[]; remove?: { aria: Text; title?: string; action?: ActionCall }; add?: { label: string; note: string; action: ActionCall }; modifier?: Modifier; empty?: string }
+  | { part: "list"; label?: string; path: Path; hook?: string /* no data-* on a row without */; count?: string; className?: string; select?: FieldSpec; check?: FieldSpec; name: { path: Path; else?: string; bold?: boolean; title?: Path[]; flat?: boolean /* the name and details straight in the row, not in a span */; after?: Text /* words right after the name (" ×3") */ }; details?: { text?: string; format?: Ref; when?: Cond }[]; sep?: string; hideEmpty?: boolean /* no details line when none */; fields?: FieldSpec[] /* typed into, after the select */; small?: Text[] /* the details as text nodes, in place of details */; smalls?: ListSmall[]; rowActions?: ListAction[]; remove?: { aria: Text; title?: string; action?: ActionCall }; add?: { label: string; note: string; action: ActionCall }; modifier?: Modifier; empty?: string; head?: ListHead }
   // word: a fixed word in place of the coin's name ("credits"); before: the word goes before the field ("Cr 2500").
   | { part: "coins"; path: Path; className?: string; none?: { text: string; unless: string }; aria?: Text /* default "{name} coins" */; upper?: boolean /* the coin's name in capitals */; word?: string; before?: boolean }
   | { part: "load"; mode: "slots"; hook: string; used: Path; total: number; text: string }
@@ -201,6 +201,14 @@ export interface DetailBox {
   path: Path;
   title?: string;
   format?: "signed" | "percent" | "all" | "dash" | "text";
+}
+// Column heads over a list (docs/core-ui-design.md 8.1): a word over its select, each field, the name and the end
+// (the buttons); the select and fields then keep fixed widths so the heads line up.
+export interface ListHead {
+  select?: string;
+  fields?: string[];
+  name: string;
+  end?: string;
 }
 export interface ListSmall {
   text: Nodes;

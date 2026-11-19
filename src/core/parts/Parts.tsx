@@ -555,7 +555,19 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
     <>
       {spec.label ? <h4>{spec.label}</h4> : null}
       {modifier && spec.modifier?.place === "top" ? modifier : null}
-      <ul className={spec.className ?? "five-items"} {...(spec.count ? { [`data-${spec.count}`]: items.length } : {})}>
+      <ul className={`${spec.className ?? "five-items"}${spec.head && items.length ? " has-head" : ""}`} {...(spec.count ? { [`data-${spec.count}`]: items.length } : {})}>
+        {spec.head && items.length ? (
+          <li className="cc-list-head" aria-hidden="true">
+            {spec.select ? <small className="h-select">{spec.head.select ?? ""}</small> : null}
+            {(spec.fields ?? []).map((field, index) => (
+              <small key={field.path} className="h-field">
+                {spec.head?.fields?.[index] ?? ""}
+              </small>
+            ))}
+            <small className="h-name">{spec.head.name}</small>
+            {spec.head.end ? <small className="h-end">{spec.head.end}</small> : null}
+          </li>
+        ) : null}
         {items.map(([key, item]) => {
           const scope: Scope = { row: item, extra: { key }, data: sheet.data };
           const name = String(at(item, spec.name.path) ?? spec.name.else ?? "");
@@ -627,12 +639,12 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
           return (
             <li key={key} {...(spec.hook ? { [`data-${spec.hook}`]: key } : {})} {...bag} className={[container ? "is-container" : "", over === key ? "drop-over" : "", inside ? "in-container" : ""].filter(Boolean).join(" ") || undefined} {...(container ? { "data-container": name } : {})}>
               {spec.select ? <FieldView spec={spec.select} scope={scope} base={`${spec.path}.${key}`} /> : null}
-              {spec.path === "inventorylist" && typeof item.picture === "string" && item.picture ? <img className="item-thumb" src={sheet.session.recordArtUrl(sheet.record.id, "portrait", key)} alt="" loading="lazy" draggable={false} onError={(event) => (event.currentTarget.style.display = "none")} /> : null}
               {(spec.fields ?? [])
                 .filter((field) => holds(field.when, own, sheet))
                 .map((field) => (
                   <FieldView key={field.path} spec={field} scope={scope} base={`${spec.path}.${key}`} />
                 ))}
+              {spec.path === "inventorylist" && typeof item.picture === "string" && item.picture ? <img className="item-thumb" src={sheet.session.recordArtUrl(sheet.record.id, "portrait", key)} alt="" loading="lazy" draggable={false} onError={(event) => (event.currentTarget.style.display = "none")} /> : null}
               {spec.check ? (
                 <label className="cc-inline">
                   <FieldView spec={spec.check} scope={scope} base={`${spec.path}.${key}`} /> {words}

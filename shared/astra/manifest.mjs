@@ -126,6 +126,7 @@ const sheet = {
           select: { path: "carried", label: "{name} carried", kind: "select", number: true, default: 1, zeroIsEmpty: true, title: "Ready (worn or in hand), carried or stowed", options: [{ value: "2", label: "Ready" }, { value: "1", label: "Carried" }, { value: "0", label: "Stowed" }] },
           fields: [{ path: "count", label: "{name} count", kind: "number", default: 1, zeroIsEmpty: true }],
           name: { path: "name" },
+          head: { select: "Status", fields: ["#"], name: "Item" },
           small: [{ if: { defined: "subtype" }, then: "{subtype}", else: "{type}" }, { if: { has: "protection" }, then: " · protection {protection}", else: "" }, { if: { has: "damage" }, then: " · {damage}", else: "" }],
           remove: { aria: "Drop {name}", title: "Drop it" },
         },

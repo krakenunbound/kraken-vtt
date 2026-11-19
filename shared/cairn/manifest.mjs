@@ -231,6 +231,7 @@ export default {
               ],
             },
             name: { path: "name", title: ["text", "note"] },
+            head: { select: "Where", name: "Item" },
             details: [{ text: "{damage}", when: { has: "damage" } }, { text: "{armor} Armor", when: { positive: "armor" } }, { text: "{uses} uses", when: { defined: "uses" } }, { text: "{charges} charges", when: { defined: "charges" } }, { format: "cairn.itemSlots" }, { text: "{kind}", when: { has: "kind" } }],
             rowActions: [
               // A spellbook, a scroll or a relic: cast it (in danger or deprived, a WIL save first).
