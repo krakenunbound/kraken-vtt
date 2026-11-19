@@ -289,13 +289,13 @@ export function inspectZip(bytes: Uint8Array): ImportCandidate[] {
 // lights, text. Its scene id follows the picture's bytes, so the same picture
 // opened again finds the walls and tokens already made for it.
 export const PICTURE = /\.(png|jpe?g|webp|gif)$/i;
-export function pictureBundle(bytes: Uint8Array, fileName: string, size: { width: number; height: number }): Uint8Array {
+export function pictureBundle(bytes: Uint8Array, fileName: string, size: { width: number; height: number }, given: { walls?: unknown[]; lights?: unknown[]; grid?: number; name?: string; ext?: string } = {}): Uint8Array {
   let hash = 2166136261;
   const step = Math.max(1, Math.floor(bytes.length / 4096));
   for (let index = 0; index < bytes.length; index += step) hash = Math.imul(hash ^ bytes[index], 16777619) >>> 0;
   hash = Math.imul(hash ^ bytes.length, 16777619) >>> 0;
-  const name = baseName(fileName).replace(PICTURE, "").replace(/[_-]+/g, " ").trim() || "Map";
-  const file = `map${(PICTURE.exec(fileName)?.[0] ?? ".png").toLowerCase()}`;
+  const name = given.name ?? (baseName(fileName).replace(PICTURE, "").replace(/[_-]+/g, " ").trim() || "Map");
+  const file = `map${given.ext ?? (PICTURE.exec(fileName)?.[0] ?? ".png").toLowerCase()}`;
   const scene = {
     _id: `pic-${hash.toString(36)}`,
     name,
@@ -304,12 +304,62 @@ export function pictureBundle(bytes: Uint8Array, fileName: string, size: { width
     padding: 0,
     backgroundColor: "#000000",
     // A square grid to start with (FG's default 50 px is small on most battle maps): the Grid tab fits it to the picture.
-    grid: { size: 100, type: 1, distance: 5, units: "ft", color: "#000000", alpha: 0.25 },
+    grid: { size: given.grid ?? 100, type: 1, distance: 5, units: "ft", color: "#000000", alpha: 0.25 },
     background: { src: file },
-    walls: [],
-    lights: [],
+    walls: given.walls ?? [],
+    lights: given.lights ?? [],
     tokens: [],
     notes: [],
   };
   return zipSync({ "bundle.json": strToU8(JSON.stringify({ adventureData: { name, scenes: [scene] } })), [file]: bytes }, { level: 0 });
+}
+
+// A Universal VTT map (.dd2vtt from Dungeondraft, .df2vtt from DungeonFog, .uvtt): its picture with its grid, walls,
+// doors and lights, as a one-scene bundle like a bare picture's (docs/feature-parity.md M13). Points are in grid squares
+// from map_origin; a portal is a door (open or closed); a light's range is in squares (five feet each).
+export const UVTT = /\.(dd2vtt|df2vtt|uvtt)$/i;
+type UvttPoint = { x: number; y: number };
+export function uvttBundle(bytes: Uint8Array, fileName: string): Uint8Array {
+  let data: { resolution?: { map_origin?: UvttPoint; map_size?: UvttPoint; pixels_per_grid?: number }; line_of_sight?: UvttPoint[][]; objects_line_of_sight?: UvttPoint[][]; portals?: { bounds?: UvttPoint[]; closed?: boolean }[]; lights?: { position?: UvttPoint; range?: number; color?: string; intensity?: number }[]; image?: string };
+  try {
+    data = JSON.parse(strFromU8(bytes));
+  } catch {
+    throw new Error(`${fileName} is not a Universal VTT map (it is not JSON).`);
+  }
+  if (typeof data.image !== "string" || !data.image) throw new Error(`${fileName} has no map picture in it.`);
+  const grid = Number(data.resolution?.pixels_per_grid) || 70;
+  const origin = { x: Number(data.resolution?.map_origin?.x) || 0, y: Number(data.resolution?.map_origin?.y) || 0 };
+  const squares = { x: Number(data.resolution?.map_size?.x) || 0, y: Number(data.resolution?.map_size?.y) || 0 };
+  const binary = atob(data.image.replace(/^data:[^,]*,/, ""));
+  const picture = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) picture[index] = binary.charCodeAt(index);
+  // The picture's kind from its first bytes (Dungeondraft writes PNG or WebP).
+  const ext = picture[0] === 0x89 && picture[1] === 0x50 ? ".png" : picture[8] === 0x57 && picture[9] === 0x45 ? ".webp" : picture[0] === 0xff && picture[1] === 0xd8 ? ".jpg" : ".png";
+  const at = (point: UvttPoint) => [Math.round((Number(point.x) - origin.x) * grid * 10) / 10, Math.round((Number(point.y) - origin.y) * grid * 10) / 10];
+  const walls: unknown[] = [];
+  let n = 0;
+  for (const line of [...(data.line_of_sight ?? []), ...(data.objects_line_of_sight ?? [])]) {
+    if (!Array.isArray(line)) continue;
+    for (let index = 0; index + 1 < line.length; index += 1) {
+      const [x1, y1] = at(line[index]);
+      const [x2, y2] = at(line[index + 1]);
+      if (x1 === x2 && y1 === y2) continue;
+      walls.push({ _id: `uv-${n++}`, c: [x1, y1, x2, y2], sight: 20, light: 20, sound: 20, move: 20, dir: 0, door: 0, ds: 0 });
+    }
+  }
+  (data.portals ?? []).forEach((portal, index) => {
+    const [a, b] = portal.bounds ?? [];
+    if (!a || !b) return;
+    walls.push({ _id: `uv-door-${index}`, c: [...at(a), ...at(b)], sight: 20, light: 20, sound: 20, move: 20, dir: 0, door: 1, ds: portal.closed === false ? 1 : 0 });
+  });
+  const lights = (data.lights ?? []).flatMap((light, index) => {
+    if (!light.position) return [];
+    const [x, y] = at(light.position);
+    const range = Math.max(0, Number(light.range) || 0);
+    // Colours are written AARRGGBB (or RRGGBB).
+    const color = /^#?(?:[0-9a-f]{2})?([0-9a-f]{6})$/i.exec(String(light.color ?? ""))?.[1];
+    return [{ _id: `uv-light-${index}`, x, y, hidden: false, config: { bright: Math.round(range * 2.5), dim: range * 5, color: color ? `#${color}` : "#FFB347" } }];
+  });
+  const name = baseName(fileName).replace(UVTT, "").replace(/[_-]+/g, " ").trim() || "Map";
+  return pictureBundle(picture, `${name}${ext}`, { width: squares.x * grid, height: squares.y * grid }, { walls, lights, grid, name, ext });
 }

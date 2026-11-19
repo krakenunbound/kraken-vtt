@@ -46,7 +46,7 @@ Kraken already at or ahead: map windows with pop-out and Share, square and hex g
 | M10 | Map sound sources, animated (webm) maps | one sound per scene; img only | positional sounds muffled by walls (Web Audio); video background for .webm | Done (alpha.91), Medium |
 | M11 | Drag path cost and speed colouring | straight line | path with cost, coloured by the sheet's speed (warn) | Partly: the drag measures a straight line, not a routed path; Medium |
 | M12 | Token vision panel | dark-sight distance only | sight on/off, angle, mode | Medium |
-| M13 | Preload scene, players on different maps, Universal VTT (.dd2vtt) import | none | Foundry preload; per-player map; UVTT reader | Medium |
+| M13 | Preload scene, players on different maps, Universal VTT (.dd2vtt) import | none | Foundry preload; per-player map; UVTT reader | Partly: Universal VTT import done (unreleased: .dd2vtt, .df2vtt, .uvtt with walls, doors, lights and grid; `scripts/verify-uvtt-map-ui.mjs`); preloading and players on different maps still open; Medium |
 
 Smaller: random token images, width/height/scale tokens, hex snapping for big tokens, act on several tokens at once, darkness lights, grid alignment tool, follow-token camera, scene levels.
 

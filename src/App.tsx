@@ -6,7 +6,7 @@ import { Icon } from "./ui/icons";
 import { imageWindow, mapWindow, studioOpener, type ImageRef } from "./table/imageWindow";
 import { gridLabel, preferredCandidateIndex, preferredSceneIndex } from "./foundry/geometry";
 import { withGrid } from "../shared/map/geometry.mjs";
-import { imageMime, inspectZip, PICTURE, pictureBundle, type ImportCandidate, type LoadedAdventure } from "./foundry/importBundle";
+import { imageMime, inspectZip, PICTURE, pictureBundle, UVTT, uvttBundle, type ImportCandidate, type LoadedAdventure } from "./foundry/importBundle";
 import { useSession } from "./session/useSession";
 import { SetupScreen } from "./setup/SetupScreen";
 import { forgetView, MapView, type MapScene } from "./table/MapView";
@@ -362,6 +362,8 @@ export function App() {
         bytes = pictureBundle(bytes, name, { width: picture.width, height: picture.height });
         picture.close();
       }
+      // A Universal VTT map (Dungeondraft, DungeonFog): its picture with its walls, doors and lights.
+      else if (UVTT.test(name)) bytes = uvttBundle(bytes, name);
       const found = inspectZip(bytes);
       if (found.length === 0) throw new Error(`No prepared map bundle was in ${name}.`);
       const index = preferredCandidateIndex(found);
@@ -684,7 +686,7 @@ export function App() {
                   ref={fileInput}
                   className="file-input"
                   type="file"
-                  accept=".zip,application/zip,.png,.jpg,.jpeg,.webp,.gif,image/*"
+                  accept=".zip,application/zip,.png,.jpg,.jpeg,.webp,.gif,image/*,.dd2vtt,.df2vtt,.uvtt"
                   aria-label="Map bundle or picture"
                   onChange={(event) => {
                     const file = event.target.files?.[0];

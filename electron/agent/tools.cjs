@@ -2251,13 +2251,13 @@ const TOOLS = [
   },
   {
     name: "kraken_open_adventure",
-    description: "Open a map on the table, as the GM's Open map button: a prepared map bundle (an adventure .zip on this computer, with scenes, walls, lights and tokens), or a bare picture (.png, .jpg, .webp, .gif: one scene with a 100 px square grid and nothing on it, built up with kraken_scene_settings grid, kraken_wall, kraken_light, kraken_label, kraken_tile...; the same picture opened again keeps what was made for it). It is saved with the campaign; kraken_scenes lists and switches its scenes.",
+    description: "Open a map on the table, as the GM's Open map button: a prepared map bundle (an adventure .zip on this computer, with scenes, walls, lights and tokens), or a Universal VTT map (.dd2vtt from Dungeondraft, .df2vtt, .uvtt: one scene with its picture, grid, walls, doors and lights), or a bare picture (.png, .jpg, .webp, .gif: one scene with a 100 px square grid and nothing on it, built up with kraken_scene_settings grid, kraken_wall, kraken_light, kraken_label, kraken_tile...; the same picture opened again keeps what was made for it). It is saved with the campaign; kraken_scenes lists and switches its scenes.",
     inputSchema: object({ path: string("Full path of the .zip or picture") }, ["path"]),
     async run(args, ctx) {
       needTable(ctx);
       const fs = require("fs");
       const file = String(args.path ?? "");
-      if (!/\.(zip|png|jpe?g|webp|gif)$/i.test(file) || !fs.existsSync(file)) throw new Error("No .zip or picture at that path.");
+      if (!/\.(zip|png|jpe?g|webp|gif|dd2vtt|df2vtt|uvtt)$/i.test(file) || !fs.existsSync(file)) throw new Error("No .zip, picture or Universal VTT map at that path.");
       return out(await ctx.ui({ kind: "open-adventure", name: require("path").basename(file), bytes: new Uint8Array(fs.readFileSync(file)) }, 60000));
     },
   },

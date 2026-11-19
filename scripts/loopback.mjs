@@ -3,3 +3,5 @@
 // network and Windows Firewall never asks about it. The app itself listens on
 // every network, for LAN and internet players.
 process.env.KRAKEN_BIND ??= "127.0.0.1";
+// Test windows open on the GM's left monitor, out of the way of the screen in use (a test sets its own to override).
+process.env.KRAKEN_WINDOW_AT ??= "-2500,40";
