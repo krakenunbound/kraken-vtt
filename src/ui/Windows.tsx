@@ -5,6 +5,7 @@ import { slotDrag } from "./QuickSlots";
 import { BRAND } from "../../shared/brand.mjs";
 import { Icon } from "./icons";
 import { openPopOut, PopOutWindow, screenOffset, type ScreenPlace } from "./PopOut";
+import { cssRect } from "./pageZoom";
 
 // Floating windows over the desktop, as FG's: opened from the sidebar, moved
 // by the title bar, resized from the corner, brought forward on a click.
@@ -407,7 +408,8 @@ export function FloatingWindow({ item, children, link }: { item: OpenWindow; chi
   useLayoutEffect(() => {
     if (!backdrop) return;
     const measure = () => {
-      const box = document.querySelector(".desktop-surface")?.getBoundingClientRect();
+      // In CSS pixels: a player's UI scale is the page's zoom (the box is measured zoomed, the window's sizes are not).
+      const box = cssRect(document.querySelector(".desktop-surface"));
       if (box && box.width > 100) setSurface({ x: box.left, y: box.top, w: box.width, h: box.height });
     };
     measure();

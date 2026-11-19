@@ -203,9 +203,9 @@ try {
   const filled = await seat.evaluate(() => {
     const map = document.querySelector('.window[data-window="map"]').getBoundingClientRect();
     const table = document.querySelector(".desktop-surface").getBoundingClientRect();
-    return Math.abs(map.width - table.width) < 2 && Math.abs(map.height - table.height) < 2;
+    return { ok: Math.abs(map.width - table.width) < 2 && Math.abs(map.height - table.height) < 2, map: [map.x, map.y, map.width, map.height].map(Math.round), table: [table.x, table.y, table.width, table.height].map(Math.round) };
   });
-  assert(filled, "the map fills the table area behind the windows");
+  assert(filled.ok, `the map fills the table area behind the windows: ${JSON.stringify(filled)}`);
   await seat.screenshot({ path: path.join(SHOTS, "kraken-map-backdrop-player.png") });
   await seat.click('.window[data-window="map"] [data-action="map-window"]');
   await seat.waitForSelector('.window[data-window="map"] .window-title', { timeout: 5000 });

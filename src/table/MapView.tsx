@@ -1,4 +1,5 @@
 import { Icon } from "../ui/icons";
+import { cssRect, cssX, cssY } from "../ui/pageZoom";
 import { tilesInView, watchTiles, type MapTile as PictureTile, type TileSet } from "./mapTiles";
 import { lazy, memo, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { diceStore } from "../dice/diceStore";
@@ -493,9 +494,9 @@ function MapViewInner({
     const element = viewport.current;
     if (!element) return;
     const onMove = (event: PointerEvent) => {
-      const box = element.getBoundingClientRect();
+      const box = cssRect(element);
       const current = cameraRef.current;
-      pointerWorld.current = { x: (event.clientX - box.left - current.x) / current.scale, y: (event.clientY - box.top - current.y) / current.scale };
+      pointerWorld.current = { x: (cssX(event.clientX) - box.left - current.x) / current.scale, y: (cssY(event.clientY) - box.top - current.y) / current.scale };
       pointerOver.current = true;
     };
     const onLeave = () => (pointerOver.current = false);
@@ -629,7 +630,7 @@ function MapViewInner({
     const element = viewport.current;
     if (!element) return;
     const apply = () => {
-      const rect = element.getBoundingClientRect();
+      const rect = cssRect(element);
       if (rect.width < 10 || rect.height < 10) return;
       const own = mine[0];
       const key = `${scene.id}|${own ? "token" : "fit"}`;
@@ -674,9 +675,9 @@ function MapViewInner({
         const turn = Math.sign(event.deltaY || event.deltaX);
         if (over && turn && turnRef.current(over, turn, event.ctrlKey || event.altKey)) return;
       }
-      const rect = element.getBoundingClientRect();
-      const pointerX = event.clientX - rect.left;
-      const pointerY = event.clientY - rect.top;
+      const rect = cssRect(element);
+      const pointerX = cssX(event.clientX) - rect.left;
+      const pointerY = cssY(event.clientY) - rect.top;
       // Proportional to the wheel, so a mouse notch and a trackpad both feel right.
       const delta = event.deltaMode === 1 ? event.deltaY * 33 : event.deltaY;
       const factor = Math.exp(-Math.max(-300, Math.min(300, delta)) * 0.0022);
@@ -739,7 +740,7 @@ function MapViewInner({
       }
       // + and - zoom about the middle of the view (Foundry's Zoom In / Zoom Out).
       if (!mod && (event.key === "+" || event.key === "=" || event.key === "-")) {
-        const box = viewport.current?.getBoundingClientRect();
+        const box = cssRect(viewport.current);
         if (!box) return;
         event.preventDefault();
         const factor = event.key === "-" ? 1 / 1.25 : 1.25;
@@ -798,7 +799,7 @@ function MapViewInner({
   function zoomAboutCenter(factor: number) {
     const element = viewport.current;
     if (!element) return;
-    const rect = element.getBoundingClientRect();
+    const rect = cssRect(element);
     setCamera((current) => {
       const scale = clampScale(current.scale * factor);
       const worldX = (rect.width / 2 - current.x) / current.scale;
@@ -813,7 +814,7 @@ function MapViewInner({
   function pullHere(point?: Point) {
     const element = viewport.current;
     if (!element || !canPull) return;
-    const rect = element.getBoundingClientRect();
+    const rect = cssRect(element);
     const width = rect.width / camera.scale;
     const height = rect.height / camera.scale;
     const centre = point ?? { x: (rect.width / 2 - camera.x) / camera.scale, y: (rect.height / 2 - camera.y) / camera.scale };
@@ -827,7 +828,7 @@ function MapViewInner({
   function glideTo(pull: import("../session/useSession").ViewPull) {
     const element = viewport.current;
     if (!element) return;
-    const rect = element.getBoundingClientRect();
+    const rect = cssRect(element);
     const scale = Math.max(0.02, Math.min(rect.width / pull.width, rect.height / pull.height));
     const target = { x: rect.width / 2 - pull.x * scale, y: rect.height / 2 - pull.y * scale, scale };
     const start = cameraRef.current;
@@ -858,14 +859,14 @@ function MapViewInner({
   function panBy(dx: number, dy: number) {
     const element = viewport.current;
     if (!element) return;
-    const rect = element.getBoundingClientRect();
+    const rect = cssRect(element);
     setCamera((current) => ({ ...current, x: current.x - dx * rect.width * 0.2, y: current.y - dy * rect.height * 0.2 }));
   }
 
   function fit() {
     const element = viewport.current;
     if (!element) return;
-    const rect = element.getBoundingClientRect();
+    const rect = cssRect(element);
     setCamera(fitCamera(rect.width, rect.height, frame, scene.width, scene.height));
   }
 
@@ -874,7 +875,7 @@ function MapViewInner({
     if (!element) return;
     setSelected(token.id);
     // Found from the toolbar: close in (a square about 110 px), so a lost player sees just where they are.
-    setCamera((current) => centeredOn(element.getBoundingClientRect(), token, close ? 110 / size : Math.max(current.scale, PLAYER_SQUARE_PX / size)));
+    setCamera((current) => centeredOn(cssRect(element), token, close ? 110 / size : Math.max(current.scale, PLAYER_SQUARE_PX / size)));
     if (close) {
       setFound({ id: token.id, at: Date.now() });
       window.setTimeout(() => setFound((current) => (current && Date.now() - current.at >= 1900 ? null : current)), 2000);
@@ -961,7 +962,7 @@ function MapViewInner({
                   if (event.button !== 0) return;
                   event.stopPropagation();
                   setSelectedTile(tile.id);
-                  const point = worldAt(event.clientX, event.clientY);
+                  const point = worldAt(cssX(event.clientX), cssY(event.clientY));
                   if (!point || tile.locked) return;
                   capture(event.currentTarget, event.pointerId);
                   tileDrag.current = { pointerId: event.pointerId, id: tile.id, mode: "move", start: point, tile: shown };
@@ -978,7 +979,7 @@ function MapViewInner({
               onPointerDown={(event) => {
                 if (event.button !== 0) return;
                 event.stopPropagation();
-                const point = worldAt(event.clientX, event.clientY);
+                const point = worldAt(cssX(event.clientX), cssY(event.clientY));
                 if (!point) return;
                 capture(event.currentTarget, event.pointerId);
                 tileDrag.current = { pointerId: event.pointerId, id: tile.id, mode: "resize", start: point, tile: shown };
@@ -994,10 +995,10 @@ function MapViewInner({
   function grabLabel(event: React.PointerEvent, label: { id: string; x: number; y: number }) {
     event.stopPropagation();
     if (!gm || !actions.label || event.button !== 0) return;
-    const start = worldAt(event.clientX, event.clientY);
+    const start = worldAt(cssX(event.clientX), cssY(event.clientY));
     if (!start) return;
     const offset = { x: label.x - start.x, y: label.y - start.y };
-    const from = { x: event.clientX, y: event.clientY };
+    const from = { x: cssX(event.clientX), y: cssY(event.clientY) };
     const view = event.currentTarget.ownerDocument.defaultView ?? window;
     let moved = false;
     const at = (clientX: number, clientY: number) => {
@@ -1005,9 +1006,9 @@ function MapViewInner({
       return point ? { x: Math.round(point.x + offset.x), y: Math.round(point.y + offset.y) } : null;
     };
     const move = (moveEvent: PointerEvent) => {
-      if (!moved && Math.hypot(moveEvent.clientX - from.x, moveEvent.clientY - from.y) < 5) return;
+      if (!moved && Math.hypot(cssX(moveEvent.clientX) - from.x, cssY(moveEvent.clientY) - from.y) < 5) return;
       moved = true;
-      const point = at(moveEvent.clientX, moveEvent.clientY);
+      const point = at(cssX(moveEvent.clientX), cssY(moveEvent.clientY));
       if (point) setLabelDrag({ id: label.id, ...point });
     };
     const up = (upEvent: PointerEvent) => {
@@ -1017,7 +1018,7 @@ function MapViewInner({
       if (!moved) return setLabelDrag(null);
       labelDragged.current = true;
       view.setTimeout(() => (labelDragged.current = false), 0);
-      const point = at(upEvent.clientX, upEvent.clientY);
+      const point = at(cssX(upEvent.clientX), cssY(upEvent.clientY));
       if (point) actions.label?.("update", { id: label.id, patch: point });
       // Kept where it was dropped until the table says so.
       view.setTimeout(() => setLabelDrag((current) => (current?.id === label.id ? null : current)), 600);
@@ -1030,7 +1031,7 @@ function MapViewInner({
   function worldAt(clientX: number, clientY: number): Point | null {
     const element = viewport.current;
     if (!element) return null;
-    const rect = element.getBoundingClientRect();
+    const rect = cssRect(element);
     const current = cameraRef.current;
     return { x: (clientX - rect.left - current.x) / current.scale, y: (clientY - rect.top - current.y) / current.scale };
   }
@@ -1038,7 +1039,7 @@ function MapViewInner({
   function viewCenter(): Point | null {
     const element = viewport.current;
     if (!element) return null;
-    const rect = element.getBoundingClientRect();
+    const rect = cssRect(element);
     return worldAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
   }
 
@@ -1336,7 +1337,8 @@ function MapViewInner({
         if ((event.target as HTMLElement).closest(".map-controls, .map-corner, .map-nav, .legend, .token-tray, .token-menu, .scene-settings, .map-editor")) return;
         // A left click while measuring drops a waypoint there.
         if (measure && event.button === 0) {
-          setMeasure({ ...measure, waypoints: [...measure.waypoints, measure.at].slice(0, 30) });
+          // From the ruler as it is now, not as this render saw it (two presses can come before a redraw).
+          setMeasure((current) => (current ? { ...current, waypoints: [...current.waypoints, current.at].slice(0, 30) } : current));
           return;
         }
         setMenu(null);
@@ -1361,7 +1363,7 @@ function MapViewInner({
             return;
           }
           // Right-drag measures, as FG's pointer does.
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (!point) return;
           capture(event.currentTarget, event.pointerId);
           setMeasure({ pointerId: event.pointerId, start: point, at: point, waypoints: [] });
@@ -1370,14 +1372,14 @@ function MapViewInner({
         if (event.button !== 0) return;
         if (templateAsk) {
           // The spell's template goes where it is aimed: the host targets everyone inside and casts.
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (point) actions.ct("cast", { ...(templateAsk.recordId ? { recordId: templateAsk.recordId } : { id: templateAsk.id }), power: templateAsk.power, template: { x: Math.round(point.x), y: Math.round(point.y) } });
           onTemplateDone();
           setAim(null);
           return;
         }
         if (tool === "template") {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (!point) return;
           capture(event.currentTarget, event.pointerId);
           setTplDrag({ pointerId: event.pointerId, start: point, at: point });
@@ -1386,7 +1388,7 @@ function MapViewInner({
         if (tool === "target") {
           // Target mode (FG's): a drag draws a box; every creature inside becomes a target
           // of the selected creature (else your own, the GM's: whose turn it is). Shift adds.
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (!point) return;
           capture(event.currentTarget, event.pointerId);
           setBox({ pointerId: event.pointerId, start: point, at: point, target: true });
@@ -1395,7 +1397,7 @@ function MapViewInner({
         setSelected(null);
         if (event.shiftKey && tool === "pan" && !(gm && editorOpen && editTool)) {
           // Shift+drag on the map: a box that picks the tokens in it (yours; the GM's: any).
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (!point) return;
           capture(event.currentTarget, event.pointerId);
           setBox({ pointerId: event.pointerId, start: point, at: point });
@@ -1406,7 +1408,7 @@ function MapViewInner({
           // The FX layer's mask: the GM paints its areas, as many as wanted:
           // a rectangle (two clicks), a shape (its corners, double-click to
           // close) or the brush (drag along a river, round a pond).
-          const raw = worldAt(event.clientX, event.clientY);
+          const raw = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (!raw) return;
           const point = { x: Math.round(raw.x), y: Math.round(raw.y) };
           if (editTool === "free") {
@@ -1424,7 +1426,7 @@ function MapViewInner({
         }
         if (gm && editorOpen && editTool && editTab === "paint" && actions.paint) {
           // The GM's paint: freehand by dragging; lines, rectangles, ellipses by two clicks; shapes by corners.
-          const raw = worldAt(event.clientX, event.clientY);
+          const raw = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (!raw) return;
           const point = { x: Math.round(raw.x), y: Math.round(raw.y) };
           const style = { color: paintStyle.color, width: paintStyle.width, alpha: paintStyle.alpha, ...(paintStyle.fill ? { fill: paintStyle.fill, fillAlpha: paintStyle.fillAlpha } : {}), ...(paintStyle.group ? { group: paintStyle.group } : {}) };
@@ -1442,7 +1444,7 @@ function MapViewInner({
         }
         if (gm && editorOpen && editTool && editTab === "text" && actions.label) {
           // Text: place it, drop the next number, or select a label.
-          const raw = worldAt(event.clientX, event.clientY);
+          const raw = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (!raw) return;
           if (editTool === "select") {
             const near = (map.labels ?? []).find((label) => Math.hypot(label.x - raw.x, label.y - raw.y) < Math.max(size * label.size * 0.6, 12 / camera.scale));
@@ -1456,7 +1458,7 @@ function MapViewInner({
         }
         if (gm && editorOpen && editTool && editTab === "mask" && actions.mask) {
           // The mask: a rectangle, a shape or whole squares, revealed or hidden again.
-          const raw = worldAt(event.clientX, event.clientY);
+          const raw = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (!raw) return;
           const point = snapPoint(raw, !event.shiftKey);
           if (editTool === "cell") {
@@ -1476,7 +1478,7 @@ function MapViewInner({
           return;
         }
         if (gm && editorOpen && editTool && actions.wall) {
-          const raw = worldAt(event.clientX, event.clientY);
+          const raw = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (!raw) return;
           const point = snapPoint(raw, !event.shiftKey);
           if (editTool === "select") {
@@ -1509,7 +1511,7 @@ function MapViewInner({
             } else {
               setPending([point.x, point.y]);
               capture(event.currentTarget, event.pointerId);
-              boxDrag.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+              boxDrag.current = { pointerId: event.pointerId, x: cssX(event.clientX), y: cssY(event.clientY) };
             }
           } else if (editTool === "poly") {
             setPending((current) => [...current, point.x, point.y]);
@@ -1517,7 +1519,7 @@ function MapViewInner({
           return;
         }
         if (tool !== "pan") {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (!point) return;
           if (tool === "ping") {
             actions.ping(point.x, point.y);
@@ -1537,26 +1539,26 @@ function MapViewInner({
           return;
         }
         capture(event.currentTarget, event.pointerId);
-        pan.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
+        pan.current = { id: event.pointerId, x: cssX(event.clientX), y: cssY(event.clientY) };
         setPanning(true);
       }}
       onPointerMove={(event) => {
         if (templateAsk) {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (point) setAim(point);
         }
         if (tplDrag && tplDrag.pointerId === event.pointerId) {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (point) setTplDrag({ ...tplDrag, at: point });
           return;
         }
         if (box && box.pointerId === event.pointerId) {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (point) setBox({ ...box, at: point });
           return;
         }
         if (tileDrag.current && tileDrag.current.pointerId === event.pointerId) {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (!point) return;
           const { start, tile, mode } = tileDrag.current;
           const dx = point.x - start.x;
@@ -1585,7 +1587,7 @@ function MapViewInner({
           return;
         }
         if (paintStroke.current && paintStroke.current.pointerId === event.pointerId) {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           const current = paintStroke.current;
           const [lastX, lastY] = current.points.slice(-2);
           if (point && Math.hypot(point.x - lastX, point.y - lastY) > 3 / camera.scale && current.points.length < 3990) {
@@ -1595,18 +1597,18 @@ function MapViewInner({
           return;
         }
         if (wallDrag && wallDrag.pointerId === event.pointerId) {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (point) setWallDrag({ ...wallDrag, at: point, moved: wallDrag.moved || Math.hypot(point.x - wallDrag.start.x, point.y - wallDrag.start.y) > 4 / camera.scale });
           return;
         }
         if (gm && editorOpen && (pending.length >= 2 || (editTab === "walls" && (editTool === "line" || editTool === "rect" || editTool === "poly")))) {
           // Where the next point goes (snapped), shown before it is placed.
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (point) setHover(snapPoint(point, !event.shiftKey));
         }
         if (lightDrag.current && lightDrag.current.pointerId === event.pointerId) return;
         if (drag && drag.pointerId === event.pointerId) {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (!point) return;
           // Pointer to pointer: a plain click on a big token (its centre away from the pointer) is not a move.
           const moved = drag.moved || Math.hypot(point.x - drag.grab.x, point.y - drag.grab.y) > size * 0.2;
@@ -1614,14 +1616,15 @@ function MapViewInner({
           return;
         }
         if (measure && measure.pointerId === event.pointerId) {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           // The left button pressed while the right is held comes as a move (one pointer): a waypoint.
           const left = (event.buttons & 1) === 1;
-          if (point) setMeasure({ ...measure, at: point, left, waypoints: left && !measure.left ? [...measure.waypoints, point].slice(0, 30) : measure.waypoints });
+          // From the ruler as it is now: the left press and its release can both come before a redraw.
+          if (point) setMeasure((current) => (current ? { ...current, at: point, left, waypoints: left && !current.left ? [...current.waypoints, point].slice(0, 30) : current.waypoints } : current));
           return;
         }
         if (resizing && resizing.pointerId === event.pointerId) {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (point) {
             const next = [...resizing.points];
             next[resizing.index * 2] = Math.round(point.x);
@@ -1631,22 +1634,22 @@ function MapViewInner({
           return;
         }
         if (stroke && stroke.pointerId === event.pointerId && stroke.shape && stroke.shape !== "free") {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (point) setStroke({ ...stroke, points: [stroke.points[0], stroke.points[1], Math.round(point.x), Math.round(point.y)] });
           return;
         }
         if (stroke && stroke.pointerId === event.pointerId) {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           const [lastX, lastY] = stroke.points.slice(-2);
           if (point && Math.hypot(point.x - lastX, point.y - lastY) > 3 / camera.scale && stroke.points.length < 3990) setStroke({ ...stroke, points: [...stroke.points, Math.round(point.x), Math.round(point.y)] });
           return;
         }
         const current = pan.current;
         if (!current || current.id !== event.pointerId) return;
-        const dx = event.clientX - current.x;
-        const dy = event.clientY - current.y;
-        current.x = event.clientX;
-        current.y = event.clientY;
+        const dx = cssX(event.clientX) - current.x;
+        const dy = cssY(event.clientY) - current.y;
+        current.x = cssX(event.clientX);
+        current.y = cssY(event.clientY);
         setCamera((camera) => ({ ...camera, x: camera.x + dx, y: camera.y + dy }));
       }}
       onPointerUp={(event) => {
@@ -1661,8 +1664,8 @@ function MapViewInner({
           const start = boxDrag.current;
           boxDrag.current = null;
           // Dragged far enough, the box is drawn where the drag ended; a click leaves its first corner for a second click.
-          if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 6 && pending.length >= 2 && actions.wall) {
-            const raw = worldAt(event.clientX, event.clientY);
+          if (Math.hypot(cssX(event.clientX) - start.x, cssY(event.clientY) - start.y) > 6 && pending.length >= 2 && actions.wall) {
+            const raw = worldAt(cssX(event.clientX), cssY(event.clientY));
             if (raw) {
               const point = snapPoint(raw, !event.shiftKey);
               const [x1, y1] = pending;
@@ -1722,7 +1725,7 @@ function MapViewInner({
           return;
         }
         if (lightDrag.current && lightDrag.current.pointerId === event.pointerId) {
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (point) actions.updateLight(lightDrag.current.id, { x: Math.round(point.x), y: Math.round(point.y) });
           lightDrag.current = null;
           return;
@@ -1742,7 +1745,7 @@ function MapViewInner({
         if (measure && measure.pointerId === event.pointerId) {
           // Letting go of the left button alone keeps measuring; the right ends it.
           if ((event.buttons & 2) === 2) {
-            setMeasure({ ...measure, left: false });
+            setMeasure((current) => (current ? { ...current, left: false } : current));
             return;
           }
           setMeasure(null);
@@ -1776,7 +1779,7 @@ function MapViewInner({
           finishShape();
           return;
         }
-        const point = worldAt(event.clientX, event.clientY);
+        const point = worldAt(cssX(event.clientX), cssY(event.clientY));
         if (point) actions.ping(point.x, point.y);
       }}
       onDragOver={(event) => {
@@ -1795,7 +1798,7 @@ function MapViewInner({
           // A picture file dropped on the map: into the tile library, then onto the map where it fell (not a new map).
           event.preventDefault();
           event.stopPropagation();
-          const point = worldAt(event.clientX, event.clientY);
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           for (const file of [...event.dataTransfer.files].slice(0, 10)) {
             void file
               .arrayBuffer()
@@ -1810,7 +1813,7 @@ function MapViewInner({
         if (carriesCreatureDrop([...event.dataTransfer.types])) {
           event.preventDefault();
           event.stopPropagation();
-          const hit = tokenAt(worldAt(event.clientX, event.clientY));
+          const hit = tokenAt(worldAt(cssX(event.clientX), cssY(event.clientY)));
           if (!hit) {
             setHint("Drop it on a creature's token.");
             return;
@@ -1822,7 +1825,7 @@ function MapViewInner({
         if (damage && gm) {
           event.preventDefault();
           event.stopPropagation();
-          const at = worldAt(event.clientX, event.clientY);
+          const at = worldAt(cssX(event.clientX), cssY(event.clientY));
           const hit = tokenAt(at);
           const entry = entryFor(hit);
           try {
@@ -1840,7 +1843,7 @@ function MapViewInner({
         if (card) {
           event.preventDefault();
           event.stopPropagation();
-          const at = worldAt(event.clientX, event.clientY);
+          const at = worldAt(cssX(event.clientX), cssY(event.clientY));
           const hit = tokenAt(at);
           const target = entryFor(hit);
           let used: { recordId: string; entryId: string; kind: string; name: string; weapon: string; id?: string };
@@ -1877,7 +1880,7 @@ function MapViewInner({
         if (entryId && gm) {
           event.preventDefault();
           event.stopPropagation();
-          const at = worldAt(event.clientX, event.clientY);
+          const at = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (at) actions.ct("place-token", { id: entryId, x: at.x, y: at.y });
           return;
         }
@@ -1885,7 +1888,7 @@ function MapViewInner({
         if (!recordId) return;
         event.preventDefault();
         event.stopPropagation();
-        const point = worldAt(event.clientX, event.clientY);
+        const point = worldAt(cssX(event.clientX), cssY(event.clientY));
         if (point) actions.placeToken(recordId, point.x, point.y);
       }}
     >
@@ -1904,7 +1907,7 @@ function MapViewInner({
             // The tiles in view, at the zoom's detail, over the whole map at its coarsest (no gaps while they decode).
             const bx = backdrop.width / tileSet.width;
             const by = backdrop.height / tileSet.height;
-            const rect = viewport.current?.getBoundingClientRect();
+            const rect = cssRect(viewport.current);
             const toPicture = (sx: number, sy: number) => ({ x: ((sx - camera.x) / camera.scale - backdrop.left) / bx, y: ((sy - camera.y) / camera.scale - backdrop.top) / by });
             const a = toPicture(0, 0);
             const b = toPicture(rect?.width ?? 4000, rect?.height ?? 4000);
@@ -2126,8 +2129,8 @@ function MapViewInner({
                   onContextMenu={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
-                    const rect = viewport.current?.getBoundingClientRect();
-                    if (rect) setLightMenu({ id: light.id, left: event.clientX - rect.left, top: event.clientY - rect.top });
+                    const rect = cssRect(viewport.current);
+                    if (rect) setLightMenu({ id: light.id, left: cssX(event.clientX) - rect.left, top: cssY(event.clientY) - rect.top });
                   }}
                 />
               );
@@ -2266,7 +2269,7 @@ function MapViewInner({
                 const group = picked.includes(token.id) ? tokens.filter((item) => item.id !== token.id && picked.includes(item.id) && (gm || item.mine)) : [];
                 if (!picked.includes(token.id)) setPicked([]);
                 if (event.button !== 0 || !canDrag) return;
-                const point = worldAt(event.clientX, event.clientY);
+                const point = worldAt(cssX(event.clientX), cssY(event.clientY));
                 if (!point) return;
                 if (viewport.current) capture(viewport.current, event.pointerId);
                 setDrag({ pointerId: event.pointerId, id: token.id, start: { x: token.x, y: token.y }, grab: point, at: point, moved: false, snap: !event.altKey, squares: token.squares, group: group.map((item) => ({ id: item.id, x: item.x, y: item.y, squares: item.squares })) });
@@ -2275,8 +2278,8 @@ function MapViewInner({
                 event.preventDefault();
                 event.stopPropagation();
                 if (!gm && !token.mine) return;
-                const rect = viewport.current?.getBoundingClientRect();
-                if (rect) setMenu({ id: token.id, left: event.clientX - rect.left, top: event.clientY - rect.top });
+                const rect = cssRect(viewport.current);
+                if (rect) setMenu({ id: token.id, left: cssX(event.clientX) - rect.left, top: cssY(event.clientY) - rect.top });
                 setSelected(token.id);
               }}
             >
