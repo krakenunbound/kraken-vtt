@@ -118,6 +118,7 @@
     "mapedit-ui": "node scripts/verify-mapedit-ui.mjs",
     "picture-map-ui": "node scripts/verify-picture-map-ui.mjs",
     "uvtt-map-ui": "node scripts/verify-uvtt-map-ui.mjs",
+    "ui-scale-ui": "node scripts/verify-ui-scale-ui.mjs",
     "copy-ui": "node scripts/verify-copy-ui.mjs",
     "lan-join-ui": "node scripts/verify-lan-join-ui.mjs",
     "charselect-ui": "node scripts/verify-charselect-ui.mjs",
