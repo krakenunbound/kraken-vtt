@@ -39,7 +39,7 @@ function list(moduleName, kind, search = "") {
     .map((record) => {
       const out = { path: record.data.fgPath, name: record.name, category: record.data.fgCategory ?? "" };
       if (kind === "battle") out.npcs = rows(record.data.npclist).map((row) => `${row.count ?? 1} ${row.name}`).join(", ");
-      if (kind === "npc") out.summary = [record.data.hdtext ? `HD ${record.data.hdtext}` : "", record.data.ac ? `AC ${record.data.ac.total}` : "", record.data.attackstext ?? ""].filter(Boolean).join(" · ");
+      if (kind === "npc") out.summary = [record.data.hdtext ? `HD ${record.data.hdtext}` : "", record.data.ac != null && record.data.ac !== "" ? `AC ${record.data.ac.total ?? record.data.ac}` : "", record.data.attackstext ?? ""].filter(Boolean).join(" · ");
       if (kind === "parcel") out.summary = [...rows(record.data.itemlist).map((item) => item.name), ...rows(record.data.coinlist).map((coin) => `${coin.amount} ${coin.description ?? coin.name ?? ""}`)].join(", ").slice(0, 200);
       if (kind === "image") {
         out.file = maps.mapPicture(record);
