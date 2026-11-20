@@ -54,7 +54,7 @@ try {
   // As FG's library: the kinds as tiles; one opened shows its books as covers by series; Back to the tiles.
   await page.waitForSelector(".books-kind-tile", { timeout: 60000 });
   const kinds = await page.$$eval(".books-kind-tile b", (nodes) => nodes.map((node) => node.textContent));
-  assert(kinds.length >= 2 && kinds.every((kind) => ["Rules", "Adventures", "Settings", "Maps & Tiles", "Tokens & Art", "Tables & Tools", "Other"].includes(kind)), `the kinds: ${kinds}`);
+  assert(kinds.length >= 2 && kinds.every((kind) => ["Rulesets", "Adventures", "Settings", "Maps & Tiles", "Tokens & Art", "Tables & Tools", "Other"].includes(kind)), `the kinds: ${kinds}`);
   await page.screenshot({ path: shots[0].replace(".png", "-kinds.png") });
   await page.click('.books-kind-tile[data-kind="adventure"]');
   await page.waitForSelector(".books-grid .books-tile");

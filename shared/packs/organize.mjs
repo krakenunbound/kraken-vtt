@@ -5,7 +5,7 @@
 // is the format's description, for people and agents.
 
 export const KINDS = [
-  { id: "rules", label: "Rules", icon: "book", hint: "Core rulebooks, supplements, handbooks, monsters, spells" },
+  { id: "rules", label: "Rulesets", icon: "book", hint: "Core rulebooks, supplements, handbooks, monsters, spells" },
   { id: "adventure", label: "Adventures", icon: "map", hint: "Modules and adventures, by series" },
   { id: "setting", label: "Settings", icon: "locate", hint: "Worlds and gazetteers" },
   { id: "maps", label: "Maps & Tiles", icon: "walls", hint: "Battle maps, map packs, tiles" },

@@ -96,7 +96,7 @@ try {
   await page.waitForSelector('.books-window [data-book="Test Keep"]');
   await page.waitForSelector('.books-kind-head[data-kind="adventure"]', { timeout: 10000 }).catch(() => undefined);
   const heads = await page.$$eval(".books-kind-head", (nodes) => nodes.map((node) => `${node.textContent.trim()}@${node.closest("[data-window]")?.getAttribute("data-window") ?? "?"}`));
-  assert(heads.map((head) => head.split("@")[0]).join() === "Rules,Adventures", `books by kind (shared/packs/organize.mjs): ${heads}`);
+  assert(heads.map((head) => head.split("@")[0]).join() === "Rulesets,Adventures", `books by kind (shared/packs/organize.mjs): ${heads}`);
   assert((await page.$('.books-window [data-book="Not A Book"]')) === null, "a module without a book is not under Books");
   await page.waitForFunction(() => {
     const img = document.querySelector('[data-book="Test Keep"] img');

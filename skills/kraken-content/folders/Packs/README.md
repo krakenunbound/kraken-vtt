@@ -36,7 +36,7 @@ thumbnail.webp     its icon in Modules and Books
 images/... etc.    its pictures, maps, tokens, sounds and video
 ```
 
-Modules files each pack by its `kind` (Rules, Adventures, Settings, Maps &
+Modules files each pack by its `kind` (Rulesets, Adventures, Settings, Maps &
 Tiles, Tokens & Art, Tables & Tools, Other), then its `group` (a series or
 line), then the book, then its parts. The full format, with how to make a pack
 from a PDF and check it, is `docs/kpack-format.md` in the Maelstrom

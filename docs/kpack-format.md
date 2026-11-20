@@ -113,7 +113,7 @@ it, or by its file name without `.kpack`. Name the file after the book.
 
 | `kind` | Shown as | For |
 |---|---|---|
-| `rules` | Rules | Core rulebooks, supplements, handbooks, monster books, spell books |
+| `rules` | Rulesets | Core rulebooks, supplements, handbooks, monster books, spell books |
 | `adventure` | Adventures | Modules and adventures; group them by series |
 | `setting` | Settings | Worlds, gazetteers, campaign settings |
 | `maps` | Maps & Tiles | Battle maps, map packs, tiles |
