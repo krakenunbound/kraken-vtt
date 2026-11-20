@@ -1672,7 +1672,10 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     let total = 0;
     const rollOne = async (target, crit) => {
       const base = baseFor(target);
-      const formula = crit ? Array(crit).fill(base).join("+") : base;
+      // A critical multiplies the weapon's damage and bonuses; extra dice from effects (a flaming weapon's 1d6) once.
+      const extra = effectDice(plan.entry, "DMG", target);
+      const core = extra && base.endsWith(extra) ? base.slice(0, -extra.length) : base;
+      const formula = crit ? `${Array(crit).fill(core).join("+")}${core === base ? "" : extra}` : base;
       const roll = table().roll(formula, `[DAMAGE]${kind} ${plan.name}${crit ? ` [CRITICAL x${crit}]` : ""}${plan.dmgtype ? ` [TYPE: ${plan.dmgtype}]` : ""}${target ? ` -> [at ${target.name}]` : ""}`, from, false, { by: plan.actor });
       const amount = Math.max(1, roll.total);
       total += amount;
@@ -2507,7 +2510,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     const picked = targetsOf(casterEntry);
     const targets = pickTargets(casterEntry, picked, parsed, { cap, name: spell.name, say, area: Boolean(castOpts.fromTemplate) });
     const out = [];
-    const minutes = (row) => Math.round(num(row?.durmod, 0) * (row?.durunit === "hour" ? 600 : row?.durunit === "minute" ? 10 : 1));
+    const minutes = (row) => Math.round(num(row?.durmod, 0) * (row?.durunit === "day" ? 14400 : row?.durunit === "hour" ? 600 : row?.durunit === "minute" ? 10 : 1));
     if (healRow) {
       const formula = diceOf(healRow.heallist, true);
       const card = newCard("heal", "", spell.name);
@@ -3623,9 +3626,10 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const results = [];
       const natural = (roll) => roll?.terms?.[0]?.rolls?.[0];
       // CKG Chapter 17: a natural 20 is a critical hit, a natural 1 a fumble.
-      const krit = async (roll, target) => {
+      // (A natural 20 that still misses the AC is no critical.)
+      const krit = async (roll, target, hit = true) => {
         const die = natural(roll);
-        if (die === 20 && target) return resolveKrit("crit", source, target, plan.type === "ranged", opts);
+        if (die === 20 && target && hit) return resolveKrit("crit", source, target, plan.type === "ranged", opts);
         if (die === 1) return resolveKrit("fumble", source, target, plan.type === "ranged", opts);
         return null;
       };
@@ -3640,7 +3644,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         const hit = rolled.total >= ac;
         const label = `[ATTACK]${kind} ${plan.name} [AC ${ac}] [${hit ? "HIT" : "MISS"} ${rolled.total} vs ${ac}] -> [at ${target.name}]`;
         table().postRoll(rolled, label, from, Boolean(target.hidden), { result: hit ? "HIT" : "MISS", by: plan.actor, against: ac, target: target.name });
-        const result = await krit(rolled, target);
+        const result = await krit(rolled, target, hit);
         results.push({ target: target.name, total: rolled.total, ac, hit, natural: natural(rolled), ...(result ? { krit: result } : {}) });
       }
       return results;
