@@ -51,14 +51,25 @@ try {
   await tool("kraken_host", { campaignId: campaign.id, port: 47418, password: "pw" });
   await page.waitForSelector("text=Hosting");
   await page.click('.sidebar [data-launch="books:activation"]');
-  await page.waitForSelector(".books-kind", { timeout: 60000 });
-  const kinds = await page.$$eval(".books-kind > summary span", (nodes) => nodes.map((node) => node.textContent));
+  // As FG's library: the kinds as tiles; one opened shows its books as covers by series; Back to the tiles.
+  await page.waitForSelector(".books-kind-tile", { timeout: 60000 });
+  const kinds = await page.$$eval(".books-kind-tile b", (nodes) => nodes.map((node) => node.textContent));
   assert(kinds.length >= 2 && kinds.every((kind) => ["Rules", "Adventures", "Settings", "Maps & Tiles", "Tokens & Art", "Tables & Tools", "Other"].includes(kind)), `the kinds: ${kinds}`);
-  const groups = await page.$$eval(".books-group", (nodes) => nodes.length);
-  const icons = await page.$$eval(".books-open img", (nodes) => nodes.length);
-  const rows = await page.$$eval(".books-row", (nodes) => nodes.length);
-  await page.$$eval(".books-group", (nodes) => nodes.slice(0, 6).forEach((node) => node.setAttribute("open", "")));
+  await page.screenshot({ path: shots[0].replace(".png", "-kinds.png") });
+  await page.click('.books-kind-tile[data-kind="adventure"]');
+  await page.waitForSelector(".books-grid .books-tile");
+  const groups = await page.$$eval(".books-series h4", (nodes) => nodes.map((node) => node.textContent));
+  const rows = await page.$$eval(".books-tile", (nodes) => nodes.length);
+  const icons = await page.$$eval(".books-tile img", (nodes) => nodes.length);
+  assert(rows > 0 && groups.length > 0, `adventures as covers by series: ${rows} in ${groups}`);
+  await page.waitForTimeout(1500);
   await page.screenshot({ path: shots[0] });
+  await page.click('[data-action="books-back"]');
+  await page.waitForSelector(".books-kind-tile");
+  // A search finds a book whatever its kind.
+  await page.fill(".books-search", "Monstrous");
+  await page.waitForSelector(".books-tile");
+  await page.fill(".books-search", "");
   // The GM's Folders window: its folders, then Refresh with the table running.
   await page.click('.sidebar [data-launch="folders"]');
   await page.waitForSelector('[data-folder="packs"]');
@@ -70,7 +81,7 @@ try {
   assert(/Read again/.test(note ?? ""), `refreshed: ${note}`);
   assert(await page.isVisible("text=Hosting"), "the table is still hosted");
   await page.screenshot({ path: shots[1] });
-  console.log(`ok modules tree: kinds ${kinds.join(", ")}; ${groups} groups, ${rows} books, ${icons} with an icon; Folders lists ${folders.join(", ")} and refreshes with the table up. ${shots.join(" ")}`);
+  console.log(`ok modules tree: kinds ${kinds.join(", ")}; adventures in ${groups.length} series (${groups.join(", ")}), ${rows} covers, ${icons} with a picture; Folders lists ${folders.join(", ")} and refreshes with the table up. ${shots.join(" ")}`);
 } finally {
   child.kill();
   await app.close();

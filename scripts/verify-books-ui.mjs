@@ -94,7 +94,9 @@ try {
   await page.click('.sidebar [data-launch="books:activation"]');
   await page.click('.sidebar [data-launch="books"]');
   await page.waitForSelector('.books-window [data-book="Test Keep"]');
-  assert((await page.$$eval(".books-category h3", (heads) => heads.map((head) => head.textContent))).join() === "Core Rules,Test Adventures", "books by category");
+  await page.waitForSelector('.books-kind-head[data-kind="adventure"]', { timeout: 10000 }).catch(() => undefined);
+  const heads = await page.$$eval(".books-kind-head", (nodes) => nodes.map((node) => `${node.textContent.trim()}@${node.closest("[data-window]")?.getAttribute("data-window") ?? "?"}`));
+  assert(heads.map((head) => head.split("@")[0]).join() === "Rules,Adventures", `books by kind (shared/packs/organize.mjs): ${heads}`);
   assert((await page.$('.books-window [data-book="Not A Book"]')) === null, "a module without a book is not under Books");
   await page.waitForFunction(() => {
     const img = document.querySelector('[data-book="Test Keep"] img');
@@ -214,7 +216,8 @@ try {
   await seat.fill('input[name="password"]', "pw");
   await seat.click('button[type="submit"]');
   await seat.waitForSelector(".sidebar");
-  await seat.click('.sidebar [data-launch="books"]');
+  // (Character selection opens as the player sits and may cover the sidebar: the button is pressed directly.)
+  await seat.$eval('.sidebar [data-launch="books"]', (button) => button.click());
   await seat.waitForSelector('.books-window [data-book="Test Handbook"]');
   assert((await seat.$('.books-window [data-book="Test Keep"]')) === null, "the player never has the adventure");
   assert((await seat.$(".books-window [data-share]")) === null && (await seat.$('.books-window [data-launch="adventure"]')) === null, "a player cannot share or open maps");

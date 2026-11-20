@@ -956,11 +956,31 @@ span.ct-init { display: inline-block; }
 .books-kind[open] > summary::before, .books-group[open] > summary::before, .books-parts[open] > summary::before { rotate: 90deg; }
 .books-kind > summary { margin: 10px 0 4px; padding: 6px 8px; border-radius: 6px; background: rgba(199, 154, 74, 0.12); color: var(--brass); font-size: 1.05rem; font-weight: 600; }
 .books-kind > summary small, .books-group > summary small { margin-left: auto; opacity: 0.7; font-weight: 400; font-size: 0.8rem; }
-.books-group { margin-left: 12px; }
+.books-group, .books-ungrouped { margin-left: 12px; }
 .books-group > summary { margin: 6px 0 2px; padding: 3px 6px; color: var(--brass); font-size: 0.95rem; }
 .books-parts { margin: 0 0 4px 34px; }
 .books-parts > summary { padding: 2px 4px; font-size: 0.82rem; opacity: 0.8; }
 .books-parts .books-row { padding-left: 6px; border-left: 1px solid var(--brass-dim); }
+/* Modules and Books as FG's library: kind tiles, then a book's cover grid by series. */
+.books-kinds { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; padding: 6px 2px; }
+.books-kind-tile { display: grid; justify-items: center; gap: 6px; padding: 16px 8px 12px; border: 1px solid var(--brass-dim); border-radius: 10px; background: rgba(199, 154, 74, 0.08); color: var(--brass); cursor: pointer; }
+.books-kind-tile:hover, .books-kind-tile:focus-visible { background: rgba(199, 154, 74, 0.2); border-color: var(--brass); }
+.books-kind-tile b { font-size: 0.95rem; text-align: center; }
+.books-kind-tile small { opacity: 0.7; }
+.books-shelf-top { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 10px; padding: 4px 0 6px; background: var(--panel, #12151b); }
+.books-shelf-top b { color: var(--brass); font-size: 1.05rem; }
+.books-kind-head { display: flex; align-items: center; gap: 8px; margin: 12px 2px 4px; color: var(--brass); font-size: 1.02rem; }
+.books-series h4 { margin: 10px 2px 6px; color: var(--brass); font-size: 0.9rem; font-weight: 600; border-bottom: 1px solid rgba(199, 154, 74, 0.25); padding-bottom: 3px; }
+.books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; }
+.books-tile { display: grid; gap: 4px; align-content: start; }
+.books-tile .books-open { display: grid; justify-items: center; gap: 4px; padding: 6px; border: 1px solid transparent; border-radius: 8px; background: none; color: inherit; cursor: pointer; text-align: center; }
+.books-tile .books-open:hover { border-color: var(--brass-dim); background: rgba(255, 255, 255, 0.04); }
+.books-tile .books-open img, .books-tile .books-open .books-cover-none { width: 84px; height: 108px; object-fit: cover; border-radius: 6px; display: grid; place-items: center; background: rgba(255, 255, 255, 0.04); }
+.books-tile.is-active img { outline: 2px solid var(--brass); outline-offset: 1px; }
+.books-tile.off img, .books-tile.off .books-cover-none { opacity: 0.55; }
+.books-tile.part .books-open { border-left: 2px solid var(--brass-dim); }
+.books-tile-name { font-size: 0.78rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.books-tile .books-ticks { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 8px; font-size: 0.72rem; }
 /* The GM's Folders window. */
 .folders-window { display: grid; gap: 8px; padding: 8px; }
 .folders-bar { display: flex; gap: 8px; }

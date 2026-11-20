@@ -285,6 +285,13 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
   }, [list, search, activation, gm]);
   // Filed as kind > group > book > its parts (shared/packs/organize.mjs), each kind with its icon.
   const tree = useMemo(() => shelfTree(shown) as ShelfKind[], [shown]);
+  // The kind opened (its books' covers), "" the kinds' tiles; a kind that no longer has books goes back to the tiles.
+  const [openKind, setOpenKind] = useState("");
+  // The covers straight away, no kind tiles: in Books (the campaign's active books), or a shelf of a dozen or fewer, or of one kind.
+  const direct = !activation || shown.length <= 12 || tree.length === 1;
+  useEffect(() => {
+    if (openKind && !tree.some((kind) => kind.id === openKind)) setOpenKind("");
+  }, [tree, openKind]);
   const empty = !gm
     ? "The GM has not shared any books yet."
     : search
@@ -323,83 +330,97 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
         {error ? <p className="hint">{error}</p> : null}
         {list && shown.length === 0 ? <p className="hint">{empty}</p> : null}
         {!list && !error ? <p className="hint">Gathering the books…</p> : null}
-        {tree.map((kind) => (
-          <details key={kind.id} className="books-kind" data-kind={kind.id} open>
-            <summary title={kind.hint}>
-              <Icon name={kind.icon} size={18} />
-              <span>{kind.label}</span>
-              <small>{kind.count}</small>
-            </summary>
-            {kind.groups.map((group) => (
-              // A group is open when it is the kind's only one, or a search is narrowing the list.
-              <details key={`${kind.id}/${group.name}`} className="books-group" data-group={group.name} open={Boolean(search) || kind.groups.length === 1 || undefined}>
-                <summary>
-                  <span>{group.name}</span>
-                  <small>{group.books.reduce((sum, book) => sum + 1 + book.parts.length, 0)}</small>
-                </summary>
-                {group.books.map((book) => (
-                  <Fragment key={book.item.id}>
-                    {row(book.item)}
-                    {book.parts.length ? (
-                      <details className="books-parts" open={Boolean(search) || undefined}>
-                        <summary>
-                          {book.parts.length} part{book.parts.length === 1 ? "" : "s"} of {book.item.title}
-                        </summary>
-                        {book.parts.map((part) => (
-                          <Fragment key={part.item.id}>{row(part.item)}</Fragment>
-                        ))}
-                      </details>
-                    ) : null}
-                  </Fragment>
-                ))}
-              </details>
+        {/* As FG's library: the kinds as tiles; a kind opened shows its books as covers, by series; a search shows
+            every book that matches, whatever its kind. */}
+        {list && shown.length > 0 && !search && !openKind && !direct ? (
+          <div className="books-kinds" role="list">
+            {tree.map((kind) => (
+              <button key={kind.id} type="button" role="listitem" className="books-kind-tile" data-kind={kind.id} title={kind.hint} onClick={() => setOpenKind(kind.id)}>
+                <Icon name={kind.icon} size={40} />
+                <b>{kind.label}</b>
+                <small>{kind.count}</small>
+              </button>
             ))}
-          </details>
-        ))}
+          </div>
+        ) : null}
+        {list && shown.length > 0 && (search || openKind || direct) ? (
+          <div className="books-shelf">
+            {!search && !direct ? (
+              <div className="books-shelf-top">
+                <button type="button" className="ghost" data-action="books-back" title="All kinds" onClick={() => setOpenKind("")}>
+                  <span aria-hidden="true">&#8249;</span> Back
+                </button>
+                <b>{tree.find((kind) => kind.id === openKind)?.label ?? ""}</b>
+              </div>
+            ) : null}
+            {tree
+              .filter((kind) => search || direct || kind.id === openKind)
+              .map((kind) => [
+                // With every kind on one page (Books, a short shelf, a search): each kind under its own heading.
+                search || direct ? (
+                  <h3 key={`${kind.id}-head`} className="books-kind-head" data-kind={kind.id}>
+                    <Icon name={kind.icon} size={18} /> {kind.label}
+                  </h3>
+                ) : null,
+                ...kind.groups.map((group) => (
+                  <section key={`${kind.id}/${group.name}`} className="books-series" data-group={group.name}>
+                    {group.name ? <h4>{group.name}</h4> : null}
+                    <div className="books-grid" role="list">
+                      {group.books.map((book) => (
+                        <Fragment key={book.item.id}>
+                          {tile(book.item, false)}
+                          {book.parts.map((part) => (
+                            <Fragment key={part.item.id}>{tile(part.item, true)}</Fragment>
+                          ))}
+                        </Fragment>
+                      ))}
+                    </div>
+                  </section>
+                )),
+              ])}
+          </div>
+        ) : null}
       </div>
       <input type="search" className="books-search" hidden={gm && tab === "packs"} placeholder="Search" aria-label="Search books" value={search} onChange={(event) => setSearch(event.target.value)} />
     </div>
   );
-  function row(item: BookInfo) {
+  // A book as FG's library shows it: its cover, its title under it, and (Activation) whether it is in use.
+  function tile(item: BookInfo, part: boolean) {
+    const off = activation && !item.active;
     return (
-                <div key={item.id} className={activation && !item.active ? "books-row off" : "books-row"} role="listitem">
-                  <button
-                    type="button"
-                    className={activation && !item.active ? "books-open inactive" : "books-open"}
-                    data-book={item.id}
-                    title={activation && !item.active ? `${item.title}: make it active to open it (an inactive book's pages, pictures and maps are off limits)` : item.author || item.title}
-                    onClick={() => (!activation || item.active) && openBook(item.id, item.title)}
-                    {...(!activation || item.active ? slotDrag({ kind: "book", book: item.id, label: item.title }) : {})}
-                  >
-                    {item.cover ? <img src={session.bookUrl("cover", item.id)} alt="" loading="lazy" /> : <span className="books-cover-none"><Icon name="book" size={22} /></span>}
-                    <span>
-                      <b>{item.title}</b>
-                      <small>
-                        {item.ruleset || "Any game"}
-                        {item.pack ? " · Maelstrom pack" : ""}
-                        {item.hasBook ? "" : " · no book (pictures, tokens)"}
-                      </small>
-                    </span>
-                  </button>
-                  {activation ? (
-                    <span className="books-ticks">
-                      <label title="Use it in this campaign">
-                        <input type="checkbox" checked={item.active} data-activate={item.id} onChange={(event) => session.activateBook(item.id, event.target.checked)} /> Active
-                      </label>
-                      {item.hasBook && !item.adventure ? (
-                        <label title={item.forPlayers ? "A players' book" : "The GM's book (it may hold spoilers)"}>
-                          <input type="checkbox" checked={item.shared} disabled={!item.active} data-players={item.id} onChange={(event) => session.shareBook(item.id, event.target.checked)} /> Players
-                        </label>
-                      ) : (
-                        <span className="books-gm-only" title={item.adventure ? "An adventure is the GM's alone; show the players its pictures and maps" : "No book to read"}>
-                          {item.adventure ? "GM only" : ""}
-                        </span>
-                      )}
-                    </span>
-                  ) : gm && item.shared ? (
-                    <span className="books-players" title="The players may read it (Activation)">Players</span>
-                  ) : null}
-                </div>
+      <div key={item.id} className={`books-tile${off ? " off" : ""}${part ? " part" : ""}${item.active ? " is-active" : ""}`} role="listitem">
+        <button
+          type="button"
+          className={off ? "books-open inactive" : "books-open"}
+          data-book={item.id}
+          title={off ? `${item.title}: make it active to open it (an inactive book's pages, pictures and maps are off limits)` : `${item.title}${item.author ? ` (${item.author})` : ""}${item.hasBook ? "" : ": no book to read, its pictures and tokens"}`}
+          onClick={() => (!activation || item.active) && openBook(item.id, item.title)}
+          {...(!activation || item.active ? slotDrag({ kind: "book", book: item.id, label: item.title }) : {})}
+        >
+          {item.cover ? <img src={session.bookUrl("cover", item.id)} alt="" loading="lazy" /> : <span className="books-cover-none"><Icon name="book" size={32} /></span>}
+          <span className="books-tile-name">{item.title}</span>
+        </button>
+        {activation ? (
+          <span className="books-ticks">
+            <label title="Use it in this campaign">
+              <input type="checkbox" checked={item.active} data-activate={item.id} onChange={(event) => session.activateBook(item.id, event.target.checked)} /> Active
+            </label>
+            {item.hasBook && !item.adventure ? (
+              <label title={item.forPlayers ? "A players' book" : "The GM's book (it may hold spoilers)"}>
+                <input type="checkbox" checked={item.shared} disabled={!item.active} data-players={item.id} onChange={(event) => session.shareBook(item.id, event.target.checked)} /> Players
+              </label>
+            ) : item.adventure ? (
+              <span className="books-gm-only" title="An adventure is the GM's alone; show the players its pictures and maps">
+                GM only
+              </span>
+            ) : null}
+          </span>
+        ) : gm && item.shared ? (
+          <span className="books-players" title="The players may read it (Activation)">
+            Players
+          </span>
+        ) : null}
+      </div>
     );
   }
 }

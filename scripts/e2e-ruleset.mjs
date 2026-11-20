@@ -155,6 +155,8 @@ async function runRuleset(ruleset, plan) {
         for (const title of want) {
           const book = shelf.find((item) => item.title === title || item.name === title);
           if (!check(book, `the shelf has ${title}`, shelf.map((item) => item.title).join(" | ").slice(0, 400))) continue;
+          // A long shelf opens on its kinds' tiles: the search shows the book wherever it is filed.
+          await page.fill(".books-search", book.title);
           const box = page.locator(`[data-activate="${book.id}"]`);
           // The box is the host's: it ticks when the host says the book is active.
           if (!(await box.isChecked())) {

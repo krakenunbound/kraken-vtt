@@ -23,6 +23,16 @@ const SAME_GROUP = [
   [/^accessor(y|ies)$/i, "Accessories"],
   [/^handbooks?$/i, "Handbooks"],
 ];
+// The worlds a setting book is filed under.
+const WORLDS = [
+  [/\bgreyhawk\b/i, "Greyhawk"],
+  [/\b(mystara|known world|karameikos)\b/i, "Mystara"],
+  [/\b(forgotten realms|faer[uû]n|sword coast)\b/i, "Forgotten Realms"],
+  [/\bgolarion\b/i, "Golarion"],
+  [/\b(eberron)\b/i, "Eberron"],
+  [/\b(dragonlance|krynn)\b/i, "Dragonlance"],
+  [/\b(ravenloft)\b/i, "Ravenloft"],
+];
 // A line known by its title, whatever its category says.
 const LINES = [
   [/^osric\b/i, "OSRIC"],
@@ -34,7 +44,9 @@ const TESTS = [
   ["art", /\b(tokens?|pogs?|portraits?|decals?|asset pack|assets|props|heroic (fe)?male characters|fantasy monsters fm\d)\b/i],
   ["maps", /\b(battle ?maps?|map module|maps?|tiles?|high res maps|karameikos map)\b/i],
   ["setting", /\b(greyhawk|mystara|known world|forgotten realms|golarion|world builder|setting reference|campaign reference|gazetteer|worlds?)\b/i],
-  ["adventure", /\b(adventures?|module|one-shot|scenario|adventure pack|AP\d|slave lords|campaign)\b|^[A-Z]{1,2}\d{1,2}[\s:-]/],
+  ["adventure", /\b(adventures?|module|one-shot|scenario|adventure pack|AP\d|slave lords|campaign)\b/i],
+  // An adventure's code ("B4 The Lost City"): capitals, so a title's ordinary words never match.
+  ["adventure", /^[A-Z]{1,2}\d{1,2}[\s:-]/],
   ["rules", /\b(core|rules?|rulebooks?|handbook|player'?s|players|dungeon master|monstrous|manual|guide|tome|accessory|essentials|reference|osric|complete|deities|demihuman|siegecore|bestiary|monsters|spells?|magic items)\b/i],
 ];
 
@@ -49,7 +61,7 @@ export function organize(item, all = []) {
   const words = `${category} ${title}`;
   let kind = KIND_IDS.includes(item.kind) ? item.kind : "";
   if (!kind) kind = TESTS.find(([, test]) => test.test(category))?.[0] ?? TESTS.find(([, test]) => test.test(title))?.[0] ?? "";
-  if (!kind && item.hasStory) kind = "adventure";
+  if (!kind && (item.hasStory || item.adventure)) kind = "adventure";
   if (!kind && item.hasBook) kind = "rules";
   if (!kind) kind = /\bno book\b/i.test(words) ? "art" : "other";
 
@@ -66,7 +78,9 @@ export function organize(item, all = []) {
   if (!group && kind === "rules") group = LINES.find(([test]) => test.test(title))?.[1] ?? "";
   if (!group && category && !PLAIN.test(category)) group = SAME_GROUP.find(([test]) => test.test(category))?.[1] ?? category;
   if (!group && kind === "adventure" && code) group = `${code[1]} series`;
-  if (!group) group = KINDS.find((entry) => entry.id === kind).label;
+  // A setting under its world's name.
+  if (!group && kind === "setting") group = WORLDS.find(([test]) => test.test(words))?.[1] ?? "";
+  // No group: the book sits straight under its kind (never "Settings > Settings").
 
   // Within a group: by the adventure code's number (B2 before B10), else by title.
   const order = typeof item.order === "string" || typeof item.order === "number" ? String(item.order) : code ? `${code[1]}${String(code[2]).padStart(3, "0")}` : title.toLowerCase();
@@ -88,7 +102,8 @@ export function shelfTree(items) {
   const sort = (list) => list.sort((a, b) => a.order.localeCompare(b.order, undefined, { numeric: true }) || String(a.item.title).localeCompare(String(b.item.title)));
   return KINDS.map((kind) => {
     const mine = tops.filter((entry) => entry.kind === kind.id);
-    const groups = [...new Set(mine.map((entry) => entry.group))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    // Books with no group first (straight under the kind, name ""), then the groups by name.
+    const groups = [...new Set(mine.map((entry) => entry.group))].sort((a, b) => (a === "" ? -1 : b === "" ? 1 : a.localeCompare(b, undefined, { numeric: true })));
     return {
       ...kind,
       count: placed.filter((entry) => entry.kind === kind.id).length,
