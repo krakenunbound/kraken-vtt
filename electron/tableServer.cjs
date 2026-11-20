@@ -563,7 +563,8 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   const bookOfPath = (fgPath) => String(fgPath ?? "").split("@").slice(1).join("@");
   // A picture shown to some of the players (to: their names) reaches only them.
   const seesImage = (client, item) => !client || client.role === "dm" || !Array.isArray(item.to) || item.to.some((name) => sameName(name, client.name));
-  const shelfView = (client) => ({ active: [...shelf.active], shared: [...shelf.shared].filter((id) => shelf.active.has(id)), images: shelf.images.filter((item) => seesImage(client, item)) });
+  // A player learns only the books shared with them (never which adventure the GM has loaded).
+  const shelfView = (client) => ({ active: !client || client.role === "dm" ? [...shelf.active] : [...shelf.active].filter((id) => shelf.shared.has(id)), shared: [...shelf.shared].filter((id) => shelf.active.has(id)), images: shelf.images.filter((item) => seesImage(client, item)) });
   const fits = (info) => Boolean(info) && fitsRuleset(info, ruleset);
   // The GM reads the campaign's active books; a player, those the GM opened to them.
   const canRead = (client, book) => (client.role === "dm" ? fits(books?.info(book)) && shelf.active.has(books?.info(book)?.id ?? book) : shelf.active.has(book) && shelf.shared.has(book));
@@ -893,8 +894,9 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     if (!line.lang || client.role === "dm") return line;
     const { understood, ...rest } = line;
     if (line.id === client.id || (typeof line.sentBy === "string" && line.sentBy === seatKey(client))) return rest;
-    const mine = records.list({ type: "character", owner: client.name }).map((record) => record.name);
-    if (mine.some((name) => (understood ?? []).includes(name))) return rest;
+    // Understood by one of this reader's characters (the GM's list, or worked out now: no cap on how many know it).
+    const theirs = records.list({ type: "character", owner: client.name });
+    if (theirs.some((record) => (understood ?? []).includes(record.name) || languages.knows(record.data, line.lang))) return rest;
     return { ...rest, text: languages.garble(line.text, line.lang), garbled: true };
   }
   function forPlayer(client, value) {

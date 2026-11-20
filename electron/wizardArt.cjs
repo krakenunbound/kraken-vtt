@@ -38,8 +38,11 @@ function readAll(extension) {
   if (Object.keys(found).length) {
     // Kraken's copy, for a computer without FG.
     try {
+      const home = path.resolve(copyFolder(extension));
       for (const [name, bytes] of Object.entries(found)) {
-        const target = path.join(copyFolder(extension), name);
+        const target = path.resolve(home, name);
+        // A name that climbs out of the folder ("../") is not copied.
+        if (!target.startsWith(home + path.sep)) continue;
         if (fs.existsSync(target) && fs.statSync(target).size === bytes.length) continue;
         fs.mkdirSync(path.dirname(target), { recursive: true });
         fs.writeFileSync(target, bytes);

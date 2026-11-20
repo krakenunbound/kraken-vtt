@@ -1071,6 +1071,8 @@ export function ChatDock({ session }: { session: Session }) {
         onSubmit={(event) => {
           event.preventDefault();
           if (!draft.trim() && !attached) return;
+          // Sitting down again after a dropped connection: the line waits in the box (Enter again once back).
+          if (session.reconnecting) return;
           // A first word that names a command finishes it, as Tab does.
           const typed = /^\/(\S*)$/.exec(draft.trim());
           if (typed && suggestions.length > 0 && !suggestions.some((command) => command.names.includes(typed[1].toLowerCase()))) {
