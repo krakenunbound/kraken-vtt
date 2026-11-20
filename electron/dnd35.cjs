@@ -49,7 +49,9 @@ async function check35(table, record, { kind = "check", attribute, skill, dc, bo
   const against = Number(dc) > 0 ? Math.round(Number(dc)) : null;
   const fixed = [10, 20].includes(Number(take)) ? Number(take) : 0;
   const rolled = table.act(fixed ? `${fixed}${total ? rules.signed(total) : ""}` : `1d20${total ? rules.signed(total) : ""}`, kind === "save" ? "save" : "check");
-  const success = against === null ? null : rolled.total >= against;
+  // A saving throw (rolled, not taken): a natural 1 always fails, a natural 20 always succeeds.
+  const die = !fixed && kind === "save" ? Number(rolled.terms?.[0]?.rolls?.[0]) : 0;
+  const success = against === null ? null : die === 1 ? false : die === 20 ? true : rolled.total >= against;
   const words = `${label ? `${label} ` : ""}${tag}${fixed ? ` [TAKE ${fixed}]` : ""}${against !== null ? ` [DC ${against}] [${success ? "SUCCESS" : "FAILURE"} ${rolled.total} vs ${against}]` : ""}`;
   table.postRoll(rolled, words, from || record.name, false, { by: record.name, ...(against !== null ? { result: success ? "SUCCESS" : "FAILURE", against } : {}) });
   return { total: rolled.total, d20: fixed ? [fixed] : rolled.terms[0].rolls, modifier: total, dc: against, success };

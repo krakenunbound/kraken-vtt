@@ -238,6 +238,7 @@ function cleanEntry(raw) {
     // Delay (the tracker row's Delay): out of the order until its Act now; actingNow: the entry it cut in after.
     ...(raw.delayed ? { delayed: true } : {}),
     ...(typeof raw.actingNow === "string" ? { actingNow: raw.actingNow.slice(0, 40) } : {}),
+    ...(Number.isFinite(Number(raw.actedRound)) && raw.actedRound !== null && raw.actedRound !== undefined ? { actedRound: Number(raw.actedRound) } : {}),
     // Ironsworn and Starforged: a foe's rank and progress (ticks, 0-40), out of the fight once defeated.
     iron: raw.iron && typeof raw.iron === "object" ? { rank: ["troublesome", "dangerous", "formidable", "extreme", "epic"].includes(raw.iron.rank) ? raw.iron.rank : "dangerous", ticks: Math.min(40, Math.max(0, Math.round(num(raw.iron.ticks, 0)))), defeated: Boolean(raw.iron.defeated) } : null,
     deathsaves: raw.deathsaves && typeof raw.deathsaves === "object" ? { success: Math.min(3, Math.max(0, Math.round(num(raw.deathsaves.success, 0)))), failure: Math.min(3, Math.max(0, Math.round(num(raw.deathsaves.failure, 0)))) } : { success: 0, failure: 0 },
@@ -348,7 +349,8 @@ function durationRounds(text, casterLevel, roundSeconds = 10) {
   const match = /(\d+)?\s*(round|minute|turn|hour)s?(\s*(?:\/|per)\s*(?:caster\s*)?level)?/.exec(value);
   if (!match) return 0;
   const count = Number(match[1] ?? 1) * (match[3] ? Math.max(1, casterLevel) : 1);
-  const seconds = { round: roundSeconds, minute: 60, turn: 60, hour: 3600 }[match[2]];
+  // A turn is ten minutes in every game that counts them (Basic Fantasy, AD&D, C&C).
+  const seconds = { round: roundSeconds, minute: 60, turn: 600, hour: 3600 }[match[2]];
   return Math.max(1, Math.round((count * seconds) / roundSeconds));
 }
 
@@ -687,7 +689,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     }
     if (linked && linked.type === "character") {
       const data = linked.data ?? {};
-      return { hp: Number(data.hp?.total) || 0, wounds: Number(data.hp?.wounds) || 0, temp: Math.max(0, Number(data.hp?.temp) || 0), ac: Number(data.ac?.total) || entry.ac };
+      return { hp: Number(data.hp?.total) || 0, wounds: Number(data.hp?.wounds) || 0, temp: Math.max(0, Number(data.hp?.temp) || 0), ac: data.ac?.total !== undefined && data.ac?.total !== null && data.ac?.total !== "" && Number.isFinite(Number(data.ac.total)) ? Number(data.ac.total) : entry.ac };
     }
     return { hp: entry.hp, wounds: entry.wounds, temp: 0, ac: entry.ac };
   }
@@ -2050,7 +2052,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         }
       }
       const turns = table().dice.roll("2d4").total;
-      putEffect(entry, `Turned (flees the cleric for ${turns} turns)`, turns * 10);
+      // A turn is ten minutes: its rounds by the game's own round (Basic Fantasy's 10 seconds: 60 a turn).
+      putEffect(entry, `Turned (flees the cleric for ${turns} turns)`, Math.round((turns * 600) / (rulesetActions()?.roundSeconds ?? 60)));
       lines.push(`${entry.name} (${type}): TURNED for ${turns} turns${result.need ? ` (needed ${result.need})` : ""}${result.damage ? ` after ${damage} damage` : ""}`);
     }
     table().say(`[TURN UNDEAD] ${turner.name}, a level ${level} Cleric: d20 = ${rolled.total}, 2d6 = ${startPool} hit dice.\n${lines.join("\n")}${failed ? `\n${turner.name} may not turn undead again for one turn.` : ""}`, "Combat", false);
@@ -2625,7 +2628,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     // A slot of its level (3.5E: spellcasting.used by level; 2E: each class's row, from 1st level).
     if (isCharacter && level > 0 && data.spellcasting) {
       const rows = Array.isArray(data.spellcasting) ? data.spellcasting : [data.spellcasting];
-      const index = Array.isArray(data.spellcasting) ? level - 1 : level;
+      // 3.5E counts from level 0 (cantrips); 2E's rows and Basic Fantasy's perday from 1st level.
+      const index = Array.isArray(data.spellcasting) || dbf() ? level - 1 : level;
       const row = rows.find((item) => num(item?.perday?.[index], 0) > num(item?.used?.[index], 0));
       if (!row) throw new Error(`${caster.name} has no level ${level} spell left today.`);
       const used = [...(row.used ?? [])];
@@ -2690,7 +2694,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     if (parsed.effect) {
       const roundSeconds = decl?.roundSeconds ?? 6;
       const span = parsed.effect.duration;
-      const unitSeconds = { round: roundSeconds, minute: 60, turn: decl?.roundSeconds >= 60 ? 600 : 60, hour: 3600, day: 86400 }[span?.unit] ?? 0;
+      // A turn is ten minutes in every game that counts them (Basic Fantasy's 10-second rounds: 60 to a turn).
+      const unitSeconds = { round: roundSeconds, minute: 60, turn: 600, hour: 3600, day: 86400 }[span?.unit] ?? 0;
       const rounds = span && unitSeconds ? Math.max(1, Math.round((num(span.value, 1) * (span.perLevel ? casterLevel : 1) * unitSeconds) / roundSeconds)) : 0;
       for (const target of targets) {
         if (saved.get(target.id)) continue;
@@ -3150,7 +3155,7 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       const from = at ? rank(at.initresult) : resume ? rank(resume.initresult) : Infinity;
       let nextIndex = -1;
       for (let i = index + 1; i < list.length; i += 1) {
-        if (list[i] === active) continue;
+        if (list[i] === active || list[i].actedRound === state.round) continue;
         if (!skips(list[i], opts)) {
           nextIndex = i;
           break;
@@ -3305,6 +3310,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         state.active = entry.id;
         state.resume = null;
         if (state.round === 0) state.round = 1;
+        // It has had its turn this round: the order does not come round to it again (a tie at its new initiative).
+        entry.actedRound = state.round;
         table().say(`[ACT NOW] ${entry.name}`, "Combat", Boolean(entry.hidden));
         const { options: opts } = await options();
         await startTurn(entry, opts);
