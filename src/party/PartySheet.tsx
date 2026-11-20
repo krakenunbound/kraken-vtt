@@ -1,3 +1,4 @@
+import { Field } from "../core/fields/Field";
 import { useState } from "react";
 import { Picture } from "../characters/ArtPicker";
 import { Icon } from "../ui/icons";
@@ -371,7 +372,8 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                 {[...new Set([...(session.options.currencies?.length ? session.options.currencies : game.party.currency), ...Object.keys(party.parcel.coins ?? {}).filter((coin) => Number(party.parcel.coins?.[coin]) > 0)])].map((coin) => (
                   <label key={coin}>
                     <Coin name={coin} />
-                    <input type="number" min={0} data-parcel-coin={coin} aria-label={`Parcel ${coin}`} value={party.parcel.coins?.[coin] ?? 0} onChange={(event) => patch({ parcel: { coins: { [coin]: Math.max(0, Number(event.target.value) || 0) } } })} />
+                    {/* Sent when it is left or on Enter (each keystroke waiting on the host's echo lost letters). */}
+                    <Field value={party.parcel.coins?.[coin] ?? 0} number editable label={`Parcel ${coin}`} onSave={(text) => patch({ parcel: { coins: { [coin]: Math.max(0, Number(text) || 0) } } })} />
                   </label>
                 ))}
               </div>
@@ -381,12 +383,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
                     <span>
                       {item.name} ×{item.count}
                     </span>
-                    <input
-                      aria-label={`Who gets ${item.name}`}
-                      placeholder="Give to (names, comma separated)"
-                      value={item.assign ?? ""}
-                      onChange={(event) => patch({ parcel: { items: { [id]: { assign: event.target.value } } } })}
-                    />
+                    <Field value={item.assign ?? ""} editable label={`Who gets ${item.name}`} onSave={(text) => patch({ parcel: { items: { [id]: { assign: text } } } })} />
                     <button type="button" onClick={() => patch({ parcel: { items: { [id]: null } } })} title="Take out of the parcel">
                       ×
                     </button>

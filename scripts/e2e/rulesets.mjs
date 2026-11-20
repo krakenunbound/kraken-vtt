@@ -116,7 +116,7 @@ async function handParcel(ctx, { coin = "GP", amount = 50, item }) {
   await page.click('[role="tab"]:has-text("Inventory")');
   // (A game without coin, Fate, hands out only things.)
   if (coin) {
-    const coinBox = page.locator(`[data-parcel-coin="${coin}"], label:has-text("${coin}") input[type="number"]`).first();
+    const coinBox = page.locator(`[aria-label="Parcel ${coin}"]`).first();
     await coinBox.fill(String(amount));
   }
   if (item) {
