@@ -321,6 +321,10 @@ const TOOLS = [
       const agent = needTable(ctx);
       const record = agent.records.get(args.id);
       if (!record) throw new Error(`No record ${args.id}.`);
+      if (record.type !== "character") throw new Error(`${record.name} is not a character: only a character's sheet is refreshed.`);
+      // Games whose sheets work out their own numbers on every edit: nothing here to rerun (and never C&C's rules).
+      const own = [["../ironsworn.cjs", "isIronsworn"], ["../forged.cjs", "isForged"], ["../cairn.cjs", "isCairn"], ["../fate.cjs", "isFate"], ["../astra.cjs", "isAstra"], ["../mgt2.cjs", "isMgt2"]].find(([file, test]) => require(file)[test]?.(record));
+      if (own) return out({ id: record.id, refreshed: false, note: "This game's sheet keeps its own numbers up to date as it is edited: nothing to refresh." });
       if (adnd2e.is2e(record)) {
         const derived = (await adnd2e.rules2e()).derive(record.data);
         const updated = agent.records.update(args.id, { data: derived }, agent.seat, { replace: true });

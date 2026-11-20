@@ -299,8 +299,8 @@ try {
 
   // 8. Regions: a trap stops a player's token on its first square and holds that token alone (the
   // others go on); the GM alone is told, rolls its save and damage, applies them, and lets it go.
-  const trap = await tool("kraken_region", { action: "add", kind: "trap", name: "Pit of spikes", note: "DC 12 Dex or 2d6", rect: { col: 2, row: 5, cols: 1, rows: 1 }, trap: { damage: "2d6", damageType: "piercing", save: { attribute: "dex", dc: 12 }, half: true, effect: { label: "Bleeding", duration: 3 } } });
-  assert(trap.trap?.damage === "2d6" && trap.trap.save.dc === 12 && trap.trap.half === true, `the trap keeps what it does: ${JSON.stringify(trap.trap)}`);
+  const trap = await tool("kraken_region", { action: "add", kind: "trap", name: "Pit of spikes", note: "DC 12 Dex or 2d6", rect: { col: 2, row: 5, cols: 1, rows: 1 }, trap: { damage: "2d6", damageType: "piercing", save: { attribute: "dex", dc: 1 }, half: true, effect: { label: "Bleeding", duration: 3 } } });
+  assert(trap.trap?.damage === "2d6" && trap.trap.save.dc === 1 && trap.trap.half === true, `the trap keeps what it does: ${JSON.stringify(trap.trap)}`);
   await tool("kraken_token_move", { id: annToken.id, col: 0, row: 5 });
   ann.send({ type: "token-move", id: annToken.id, x: 225, y: 275 });
   await latest(dm, "notice", (m) => /Pit of spikes/.test(m.text), "the GM is told");
@@ -325,9 +325,10 @@ try {
   assert(JSON.stringify(Object.keys(shown).sort()) === '["id","kind","points"]', `only where it is: ${JSON.stringify(shown)}`);
   // The GM's strip: held, rolled (dice forced: a 15 saves against 12; the spikes roll 9), applied: half, no effect on a save, and she goes on.
   assert((await tool("kraken_region", { action: "held" }))[0]?.tokenId === annToken.id, "the agent lists who the trap holds");
-  await tool("kraken_dice_force", { values: [15] });
+  // (Castles & Crusades: the trap's number is a challenge level; her own Dexterity save, made through the tracker.)
+  await tool("kraken_dice_force", { values: [20] });
   const rolledSave = await tool("kraken_region", { action: "save", tokenId: annToken.id });
-  assert(rolledSave.save?.success === true && rolledSave.save.total >= 12, `her save against it: ${JSON.stringify(rolledSave)}`);
+  assert(rolledSave.save?.success === true && rolledSave.save.total >= 20, `her save against it: ${JSON.stringify(rolledSave)}`);
   await tool("kraken_dice_force", { values: [4, 5] });
   const rolledDamage = await tool("kraken_region", { action: "damage", tokenId: annToken.id });
   assert(rolledDamage.damage?.total === 9, `its damage, rolled for the GM: ${JSON.stringify(rolledDamage)}`);

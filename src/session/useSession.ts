@@ -796,7 +796,12 @@ export function useSession() {
             if (wait && msg.ok) wait.resolve(String(msg.id ?? ""), msg);
             else if (wait) wait.reject(new Error(typeof msg.error === "string" ? msg.error : "Not allowed."));
           }
-          if (msg.type === "error" && typeof msg.reason === "string") setError(msg.reason);
+          // Seated, a refusal is shown (Desktop's toast) and kept in the chat log as the seat's own line.
+          if (msg.type === "error" && typeof msg.reason === "string") {
+            const reason = msg.reason;
+            setError(reason);
+            setChat((current) => [...current, { id: "local", from: "Table", text: reason, at: Date.now(), local: true }].slice(-1000));
+          }
           if (msg.type === "scene" && roleRef.current === "player") {
             // No scene: the GM stopped sharing the map (or none is up): the player has no map.
             setPlayerScene(msg.scene ? toPlayerScene(msg.scene as NetScene, originRef.current) : null);
@@ -1280,7 +1285,8 @@ export function useSession() {
     if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(body));
   }, []);
   // A line on this screen only (/help, /info), and /clear.
-  const note = useCallback((text: string, from = "Maelstrom") => setChat((current) => [...current, { id: "local", from, text, at: Date.now(), local: true }].slice(-100)), []);
+  const clearError = useCallback(() => setError(null), []);
+  const note = useCallback((text: string, from = "Maelstrom") => setChat((current) => [...current, { id: "local", from, text, at: Date.now(), local: true }].slice(-1000)), []);
   // Sound, the GM's: the library, playing for the table, ambience, music, the chat's triggers.
   const soundList = useCallback(async (): Promise<SoundLibrary> => {
     const response = await fetch(`${originRef.current}/sound/list?token=${assetRef.current}`);
@@ -1563,6 +1569,7 @@ export function useSession() {
     chat,
     records,
     error,
+    clearError,
     playerScene,
     host,
     join,

@@ -925,6 +925,11 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   // kept to undo and for this turn's path.
   function stepToken(token, to, seat, { snap, collide }) {
     const from = { x: token.x, y: token.y };
+    // A player's token stays on the map's picture (off it, it would see past every wall); the GM may park one beside it.
+    if (seat.role !== "dm") {
+      const offset = geometry.sceneOrigin(scene);
+      to = { ...to, x: Math.min(offset.x + scene.width, Math.max(offset.x, Number(to.x) || 0)), y: Math.min(offset.y + scene.height, Math.max(offset.y, Number(to.y) || 0)) };
+    }
     const result = geometry.settleMove(scene, wallsHere(), doorsHere(), from, to, token.squares, { snap, collide });
     let at = { x: result.x, y: result.y };
     let sprang = null;

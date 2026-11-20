@@ -265,6 +265,14 @@ try {
   assert(darkView().tokens.some((item) => item.id === orc.id), "light gone: darkvision back");
   await tool("kraken_scene_settings", { darkness: null });
 
+  // Audit 060: a viewer beside the map's picture sees nothing (not the whole map round the walls).
+  {
+    const geometry = await import("../shared/map/geometry.mjs");
+    const scene = { width: 2000, height: 1000, padding: 0, grid: { size: 100, distance: 5 }, walls: [{ x1: 1000, y1: 0, x2: 1000, y2: 1000 }] };
+    const inside = geometry.sceneSight(scene, { x: 500, y: 500 }, []);
+    assert(inside.length > 0 && !geometry.pointInPolygon(1500, 500, inside), "inside: the wall hides the far side");
+    assert(geometry.sceneSight(scene, { x: -150, y: 500 }, []).length === 0, "outside the picture: nothing seen");
+  }
   console.log("ok walls: chains drawn; wall, ethereal, invisible, window (opened by the player, closed by Close all doors), toggle, one-way and shadow caster each as FG; split, remove, undo; the mask (global, reveal, hide again, undo) withholds what is under it; text, numbers (no reuse, renumber, prefix) and pins in layer groups (GM-only, locked); paint shapes and fills; FX layers with masks; bright light spoils darkvision (C&C); saved; never sent to players");
 } finally {
   for (const ws of sockets) ws.close();

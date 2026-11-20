@@ -34,6 +34,16 @@ if (!USER_DATA) throw new Error("The backend needs KRAKEN_USER_DATA.");
 // What goes wrong in this process is kept in <userData>/logs/backend.log (Settings > Open logs).
 const backendLog = require("./logFile.cjs").createLog(path.join(USER_DATA, "logs"), "backend");
 backendLog.capture();
+// Something no handler caught: logged (capture's monitor), the hosted campaign saved, and the table goes on.
+process.on("uncaughtException", (error) => {
+  console.error("uncaught", error);
+  try {
+    if (typeof flushCampaign === "function") flushCampaign();
+  } catch {
+    /* saving is best-effort here */
+  }
+});
+process.on("unhandledRejection", (error) => console.error("unhandled rejection", error));
 
 // --- Asking the window's process -------------------------------------------
 let asked = 0;

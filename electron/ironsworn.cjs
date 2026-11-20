@@ -156,7 +156,7 @@ async function resolveOutcome(table, record, data, roll, from) {
       track.done = "fulfilled";
     }
     if (key === "forge_a_bond" && track && data.game === "starforged") {
-      const reward = rules.TICKS[rules.rankOf(track.rank)];
+      const reward = rules.LEGACY_TICKS[rules.rankOf(track.rank)] ?? 0;
       data.legacy.bonds = rules.markLegacy(data.legacy.bonds, reward);
       track.bonded = true;
       applied.push(`${reward} ticks on the bonds legacy track`);

@@ -191,6 +191,20 @@ try {
   const line = await chat;
   assert(line.from === "DM" && line.text === "Roll init", "chat reached the player");
 
+  // Audit 058: crafted frames (an object whose toString is not a function) never stop the table.
+  {
+    const raw = new WebSocket(`ws://127.0.0.1:${info.port}`);
+    sockets.push(raw);
+    await new Promise((resolve) => raw.once("open", resolve));
+    raw.send(JSON.stringify({ type: "join", name: { toString: 1 }, password: "secret" }));
+    raw.send("{not json");
+    for (const type of ["chat", "ping", "ruler"]) player.ws.send(JSON.stringify({ type, text: { toString: 1 }, x: { valueOf: 1 }, y: { toString: 1 } }));
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const still = nextOf(player.ws, "chat");
+    dm.ws.send(JSON.stringify({ type: "chat", text: "Still here" }));
+    assert((await still).text === "Still here", "the table goes on after crafted messages");
+  }
+
   console.log("SESSION_OK");
 } finally {
   for (const ws of sockets) ws.close();

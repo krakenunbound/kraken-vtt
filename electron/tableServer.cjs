@@ -109,14 +109,15 @@ function sameSecret(left, right) {
   return crypto.timingSafeEqual(a, b);
 }
 
+// Only strings and numbers are read from a message: anything else (an object a client crafted) is the fallback.
 function text(value, fallback) {
-  const raw = typeof value === "string" ? value : value == null ? "" : String(value);
+  const raw = typeof value === "string" ? value : typeof value === "number" || typeof value === "boolean" ? String(value) : "";
   const clean = raw.replace(/[\u0000-\u001f]/g, "").trim();
   return clean || fallback;
 }
 
 function num(value, fallback) {
-  const n = typeof value === "number" ? value : Number(value);
+  const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
   return Number.isFinite(n) ? n : fallback;
 }
 
@@ -924,14 +925,21 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     const roll = (formula, label) => agentHandle.roll(formula, label, "Map", true, { mods: false });
     const rollSave = async () => {
       if (!trap.save?.attribute || token.held.save) return;
-      const entry = entryOfToken(token.id);
+      // The game's own save, with the creature's bonuses: it joins the tracker first if it is not on it
+      // (traps are mostly sprung exploring, with no fight running), as it does to take the damage.
+      let entry = entryOfToken(token.id);
+      if (!entry && token.recordId) {
+        await combat.add({ recordId: token.recordId }, GM_SEAT).catch(() => undefined);
+        entry = entryOfToken(token.id);
+      }
       let save = null;
       if (entry) {
         try {
           const made = await combat.save(entry.id, trap.save.attribute, trap.save.dc, what);
           if (made && typeof made.success === "boolean") save = { success: made.success, total: Math.round(num(made.total, 0)) };
-        } catch {
-          /* not one of this game's saves: a d20 against the DC */
+        } catch (error) {
+          // Not one of this game's saves: the GM is told, then a d20 against the DC.
+          agentHandle.say(`${what}: "${trap.save.attribute}" is not a save in this game (${error instanceof Error ? error.message : "refused"}); a plain d20 was rolled. Set the trap's save to one of the game's own.`, "Map", true);
         }
       }
       if (!save) {
@@ -2153,7 +2161,12 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
           const accountPassword = typeof account.password === "string" ? account.password : "";
           const accountToken = typeof account.token === "string" ? account.token.slice(0, 100) : "";
           if (accounts?.has(client.name)) {
-            const signed = accounts.signIn(client.name, { password: accountPassword, token: accountToken });
+            let signed = null;
+            try {
+              signed = accounts.signIn(client.name, { password: accountPassword, token: accountToken });
+            } catch (error) {
+              return refuse(error instanceof Error ? error.message : "Signing in failed.");
+            }
             if (!signed && accountPassword) missed(remote);
             if (signed) misses.delete(remote);
             if (!signed)
@@ -3506,7 +3519,17 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
         sendMaps();
       }
     };
-    ws.on("message", (raw) => modifierScope(client.joined ? clearKey(client) : "", () => onMessage(raw), client.joined ? { id: client.id, name: client.name, gm: client.role === "dm" } : null));
+    // One bad message never stops the table: it is logged, and a seat that has not joined is closed.
+    ws.on("message", (raw) => {
+      try {
+        const done = modifierScope(client.joined ? clearKey(client) : "", () => onMessage(raw), client.joined ? { id: client.id, name: client.name, gm: client.role === "dm" } : null);
+        if (done && typeof done.catch === "function") done.catch((error) => console.error("a table message failed", error));
+      } catch (error) {
+        console.error("a table message failed", error);
+        if (!client.joined) ws.close();
+        else send(ws, { type: "error", reason: "That could not be done." });
+      }
+    });
 
     ws.on("close", (code) => {
       clearTimeout(joinTimer);

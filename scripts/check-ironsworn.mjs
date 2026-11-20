@@ -63,7 +63,7 @@ function assert(condition, message) {
   assert(past.data.meters.health === 0 && past.overflow === 2 && past.data.momentum === 0, "3 harm at health 1: health 0 and -2 momentum");
   assert(rules.blocked({ game: "classic", debilities: { wounded: true } }, "health") === "Wounded", "wounded blocks health");
   assert(rules.vowReward("classic", "dangerous", "strong") === 2 && rules.vowReward("classic", "dangerous", "weak") === 1 && rules.vowReward("classic", "troublesome", "weak") === 0 && rules.vowReward("classic", "epic", "strong") === 5, "classic experience by rank (one less on a weak hit)");
-  assert(rules.vowReward("starforged", "formidable", "strong") === 4 && rules.vowReward("starforged", "formidable", "weak") === 8 - 0 && rules.vowReward("starforged", "epic", "strong") === 1, "Starforged quests legacy ticks by rank (formidable 4; a weak hit one rank lower: dangerous 8; epic 1)");
+  assert(rules.vowReward("starforged", "formidable", "strong") === 4 && rules.vowReward("starforged", "formidable", "weak") === 2 && rules.vowReward("starforged", "epic", "strong") === 12 && rules.vowReward("starforged", "troublesome", "strong") === 1, "Starforged quests legacy by rank (troublesome 1 tick ... formidable 1 box; a weak hit one rank lower: dangerous 2 ticks; epic 3 boxes)");
   const legacy = rules.markLegacy({ ticks: 36, cleared: 0 }, 8);
   assert(legacy.cleared === 1 && legacy.ticks === 4 && rules.legacyXp(legacy) === 21 && rules.legacyXp({ ticks: 12 }) === 6, `legacy: 3 boxes are 6 experience; a full track clears (20) and the next box is 1: ${JSON.stringify(legacy)}`);
   const strike = rules.outcomeEffects("On a **strong hit**, inflict +1 harm. You retain initiative.");
@@ -309,20 +309,22 @@ const done = [];
     // A vow (the inciting one) fulfilled: dangerous: 2 boxes a milestone; 3 milestones: 6 boxes; strong hit: 2 ticks on the quests legacy.
     const inciting = Object.entries(data(vesna).tracks).find(([, track]) => track.name === "Bring the colonists home")[0];
     for (let i = 0; i < 3; i++) await tool("kraken_ironsworn", { id: vesna, action: "move", move: "reach_a_milestone", track: inciting });
+    // (Raised to epic once its progress is marked: an epic vow's reward is 3 boxes, the most.)
+    await tool("kraken_character_edit", { id: vesna, changes: [{ path: `tracks.${inciting}.rank`, value: "epic" }] });
     force(2, 5);
     await tool("kraken_ironsworn", { id: vesna, action: "move", move: "fulfill_your_vow", track: inciting });
     pc = data(vesna);
-    assert(pc.legacy.quests.ticks === 8 && pc.experience.earned === 4 && pc.tracks[inciting].done === "fulfilled", `a dangerous vow: 8 ticks (2 boxes) on quests legacy: 4 experience: ${JSON.stringify(pc.legacy)} ${JSON.stringify(pc.experience)}`);
+    assert(pc.legacy.quests.ticks === 12 && pc.experience.earned === 6 && pc.tracks[inciting].done === "fulfilled", `an epic vow: 12 ticks (3 boxes) on quests legacy: 6 experience: ${JSON.stringify(pc.legacy)} ${JSON.stringify(pc.experience)}`);
     // Forge a Bond with the connection (dangerous): 8 ticks on bonds legacy.
     const ashe = Object.entries(pc.tracks).find(([, track]) => track.kind === "connection")[0];
     await tool("kraken_ironsworn", { id: vesna, action: "track-mark", track: ashe, times: 4 });
     force(1, 1);
     await tool("kraken_ironsworn", { id: vesna, action: "move", move: "forge_a_bond", track: ashe });
     pc = data(vesna);
-    assert(pc.legacy.bonds.ticks === 8 && pc.experience.earned === 8 && pc.tracks[ashe].bonded, "a bond forged: bonds legacy 8 ticks, 8 experience");
+    assert(pc.legacy.bonds.ticks === 2 && pc.experience.earned === 6 && pc.tracks[ashe].bonded, `a dangerous bond forged: 2 ticks on bonds legacy, no box yet: ${JSON.stringify(pc.legacy)}`);
     // Advance: a module for 3.
     await tool("kraken_ironsworn", { id: vesna, action: "advance", asset: "Medbay" });
-    assert(data(vesna).experience.available === 5, "a new asset: 3 experience");
+    assert(data(vesna).experience.available === 3, "a new asset: 3 experience");
     // Impacts lower momentum's maximum; a battered starship counts.
     await tool("kraken_ironsworn", { id: vesna, action: "debility", key: "wounded", on: true });
     const shipKey = Object.entries(data(vesna).assets).find(([, asset]) => asset.name === "Starship")[0];

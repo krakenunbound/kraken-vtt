@@ -54,6 +54,8 @@ export const RANK_NAMES = { troublesome: "Troublesome", dangerous: "Dangerous", 
 // Ticks a mark of progress adds, by rank (4 ticks a box).
 export const TICKS = { troublesome: 12, dangerous: 8, formidable: 4, extreme: 2, epic: 1 };
 export const MAX_TICKS = 40;
+// Starforged legacy rewards by rank run the other way: troublesome 1 tick ... epic 3 boxes.
+export const LEGACY_TICKS = { troublesome: 1, dangerous: 2, formidable: 4, extreme: 8, epic: 12 };
 // Experience: a new asset 3, an asset's next ability 2.
 export const ASSET_COST = 3;
 export const UPGRADE_COST = 2;
@@ -252,7 +254,7 @@ export function experience(data) {
 export function vowReward(game, rank, outcome) {
   if (outcome === "miss") return 0;
   const used = outcome === "weak" ? lowerRank(rank) : rankOf(rank);
-  if (game === "starforged") return used ? TICKS[used] : 0;
+  if (game === "starforged") return used ? LEGACY_TICKS[used] : 0;
   return used ? VOW_XP[used] : 0;
 }
 

@@ -765,6 +765,7 @@ export function Desktop({
         <ChatDock session={session} />
         <ClocksStrip session={session} />
         {gm ? <UndoToast session={session} /> : null}
+        <TableToast session={session} mapOpen={Boolean(scene)} />
 
         <div className="window-layer">
           {windows.windows.map((item) =>
@@ -843,6 +844,24 @@ export function Desktop({
           <DiceLayer holdSeconds={session.options.diceHold} />
         </Suspense>
       ) : null}
+    </div>
+  );
+}
+
+// What the host said to this seat: a refusal or failure (it is in the chat log too), or, with no map
+// open to show it, a notice such as "Campaign saved.". Gone after a few seconds, or on a click.
+function TableToast({ session, mapOpen }: { session: Session; mapOpen: boolean }) {
+  const { error, clearError } = session;
+  const notice = mapOpen ? null : session.notice;
+  useEffect(() => {
+    if (!error) return;
+    const timer = setTimeout(clearError, 6000);
+    return () => clearTimeout(timer);
+  }, [error, clearError]);
+  if (!error && !notice) return null;
+  return (
+    <div className={`table-toast${error ? " is-error" : ""}`} role={error ? "alert" : "status"} data-table-toast={error ? "error" : "notice"} onClick={error ? clearError : undefined}>
+      {error ?? notice}
     </div>
   );
 }

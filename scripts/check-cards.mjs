@@ -75,9 +75,21 @@ try {
   assert(wounds("Fire Imp") === 32, `double, then resisted: 32: ${wounds("Fire Imp")}`);
   after = (await ct({ action: "apply-card", card: line.roll.card, targetId: id("Fire Imp"), mult: 0 })).card;
   assert(wounds("Fire Imp") === 0, "x0 takes it all back");
+  // Audit 059: a 5 HP kobold the 32 killed stays dead at x1/2 (16 is still more than 5); x0 puts it back as it was.
+  {
+    const kobold = agent.records.create({ type: "npc", name: "Kobold", data: { hp: 5, ac: 12, abilities: { dexterity: { score: 14, bonus: 2 } } } }, agent.seat);
+    await ct({ action: "add", recordId: kobold.id });
+    view = await ct({ action: "view" });
+    await ct({ action: "apply-card", card: line.roll.card, targetId: id("Kobold"), mult: 1 });
+    assert(wounds("Kobold") === 5, `the kobold falls: ${wounds("Kobold")}`);
+    await ct({ action: "apply-card", card: line.roll.card, targetId: id("Kobold"), mult: 0.5 });
+    assert(wounds("Kobold") === 5, `x1/2 is still 16: it stays down, not healed back: ${wounds("Kobold")}`);
+    await ct({ action: "apply-card", card: line.roll.card, targetId: id("Kobold"), mult: 0 });
+    assert(wounds("Kobold") === 0, `x0: as it was before the roll: ${wounds("Kobold")}`);
+  }
   // Hagar was not on it: the GM applies it to him too (he joins the card).
   after = (await ct({ action: "apply-card", card: line.roll.card, targetId: id("Hagar"), mult: 1 })).card;
-  assert(wounds("Hagar") === 32 && after.targets.length === 3, "a creature not on the card joins it");
+  assert(wounds("Hagar") === 32 && after.targets.length === 4, "a creature not on the card joins it (the kobold joined too)");
   after = (await ct({ action: "apply-card", card: line.roll.card, targetId: id("Hagar"), mult: "heal" })).card;
   assert(wounds("Hagar") === 0, `heal: the damage given back and healed (capped at his wounds): ${wounds("Hagar")}`);
 

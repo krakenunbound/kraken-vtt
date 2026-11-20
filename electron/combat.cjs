@@ -2267,6 +2267,17 @@ function createCombat({ saved, table, onChange = () => undefined }) {
   }
   // One creature's share of a card's roll: amount after its save (half, or the
   // whole), then its resistances by type; applied now unless the card waits.
+  // Damage a card put on a creature, as it landed: a creature's wounds stop at its maximum (5E, Basic
+  // Fantasy, Traveller, Apeira Astra), so a 12 on a 5 HP orc is 5 taken, and its card's x1/2 then
+  // takes 6 against those 5 (it stays dead) rather than handing back the 6 it never took.
+  async function woundsLanded(target, amount, why, opts) {
+    const worn = (v) => num(v.wounds, 0) - num(v.temp, 0);
+    const was = vitals(target);
+    await applyWounds(target, amount, why, opts);
+    const moved = worn(vitals(state.entries.find((item) => item.id === target.id) ?? target)) - worn(was);
+    // A creature with no hit points to count (wounds kept elsewhere, a game's own characteristics): what was asked.
+    return num(was.hp, 0) > 0 ? moved : amount;
+  }
   async function landOn(card, target, amount, why, opts = {}, { save } = {}) {
     const dealt = card.kind === "heal" ? { amount: Math.max(0, amount), note: "" } : damageTaken(target, Math.max(0, amount), card.type);
     const row = { id: target.id, name: target.name, base: Math.max(0, amount), taken: 0, mult: null, note: dealt.note.trim(), ...(save ? { save } : {}), ...(target.hidden ? { hidden: true } : {}) };
@@ -2274,13 +2285,13 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     if (card.auto) {
       if (card.kind === "heal") row.taken = -(await healBy(target, dealt.amount, why));
       else if (dealt.amount > 0) {
-        await applyWounds(target, dealt.amount, `${why}${dealt.note}`, opts);
-        row.taken = dealt.amount;
+        row.taken = await woundsLanded(target, dealt.amount, `${why}${dealt.note}`, opts);
       } else table().say(`${why} -> ${target.name}: no damage${dealt.note}`, "Combat", Boolean(target.hidden));
       row.mult = 1;
     }
     publish(card);
-    return card.kind === "heal" ? -row.taken : row.taken;
+    // What the roll dealt (the card keeps what actually landed, for its buttons).
+    return card.kind === "heal" ? -row.taken : row.mult === 1 ? dealt.amount : 0;
   }
   // A card's button: what this creature takes now (mult 0, 0.5, 1, 2; "heal": the
   // roll heals it instead). A creature not on the card yet (the GM's chosen) joins it.
@@ -2303,13 +2314,15 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       row.note = dealt.note.trim();
     }
     const delta = want - row.taken;
-    if (delta > 0) await applyWounds(target, delta, `[DAMAGE] ${card.name} (from its card)`, {});
+    // What it now carries from this card is what actually landed (wounds stop at the maximum).
+    let taken = want;
+    if (delta > 0) taken = row.taken + (await woundsLanded(target, delta, `[DAMAGE] ${card.name} (from its card)`, {}));
     else if (delta < 0) {
       // More healing (capped at its wounds), or damage taken back.
-      if (want < 0 && row.taken <= 0) want = row.taken - (await healBy(target, -delta, `[HEAL] ${card.name} (from its card)`));
-      else await applyWounds(target, delta, `[HEAL] ${card.name} (from its card)`, {});
+      if (want < 0 && row.taken <= 0) taken = row.taken - (await healBy(target, -delta, `[HEAL] ${card.name} (from its card)`));
+      else taken = row.taken + (await woundsLanded(target, delta, `[HEAL] ${card.name} (from its card)`, {}));
     }
-    row.taken = want;
+    row.taken = taken;
     row.mult = mult === "heal" ? "heal" : times;
     publish(card);
     changed();
@@ -3725,6 +3738,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
       if (dbf()) return saveBf(find(entryId), stat, cl, from, castName);
       if (five()) return save5e(find(entryId), stat, cl, from, castName, { advantage: ["advantage", "disadvantage"].includes(advantage) ? advantage : "" });
       const { engine, game, options: opts } = await options();
+      // "dex" as Map Studio's traps write it: the attribute it stands for.
+      const short = String(stat ?? "").trim().toLowerCase();
+      stat = STATS.find((name) => name === short || (short.length >= 3 && name.startsWith(short))) ?? stat;
       if (!STATS.includes(stat)) throw new Error("Pick an attribute.");
       const entry = find(entryId);
       const linked = record(entry);

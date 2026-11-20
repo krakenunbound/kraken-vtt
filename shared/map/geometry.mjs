@@ -357,6 +357,9 @@ export function settleMove(scene, walls, doors, from, to, squares = 1, { snap = 
 // the viewer's own radius (half a token), as Foundry's token vision uses.
 export function visibilityPolygon(origin, walls, doors, bounds, distancePixels = 1, externalRadius = 0, sense = "sight", radius = 0, cone = null) {
   let { x: bx, y: by, width: bw, height: bh } = bounds;
+  // Outside the scene's rectangle (a token parked beside the map, in its padding) sees nothing: the
+  // rays would run round the outside of the box and close over the whole map, walls and all.
+  if (!(origin.x >= bx && origin.x <= bx + bw && origin.y >= by && origin.y <= by + bh)) return [];
   // A light reaches only so far: its square around it, inside the scene.
   if (radius > 0) {
     const left = Math.max(bx, origin.x - radius);
