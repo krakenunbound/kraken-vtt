@@ -33,9 +33,24 @@ const PROVIDERS = {
   xai: { name: "xAI Grok", kind: "openai", base: "https://api.x.ai/v1", env: ["XAI_API_KEY"], placeholder: "xai-..." },
   deepseek: { name: "DeepSeek", kind: "openai", base: "https://api.deepseek.com/v1", env: ["DEEPSEEK_API_KEY"], placeholder: "sk-..." },
   openrouter: { name: "OpenRouter (many models)", kind: "openai", base: "https://openrouter.ai/api/v1", env: ["OPENROUTER_API_KEY"], placeholder: "sk-or-..." },
-  custom: { name: "Other (OpenAI-compatible)", kind: "openai", base: "", env: [], placeholder: "its key (none for a local one)" },
+  // A model on this computer or the network (Ollama, LM Studio, llama.cpp, vLLM...): its address, no key needed.
+  custom: { name: "Local AI (Ollama, LM Studio...) or other", kind: "openai", base: "", env: [], placeholder: "its key, if it asks for one" },
 };
 const providerOf = (id) => PROVIDERS[id] ?? PROVIDERS.anthropic;
+// A local service's address as the GM types it ("192.168.1.20:11434", "localhost:1234", a full URL): its
+// OpenAI-compatible root, http:// and /v1 added when left out.
+function serviceBase(text) {
+  const given = String(text ?? "").trim();
+  if (!given) return "";
+  const full = /^https?:\/\//i.test(given) ? given : `http://${given}`;
+  try {
+    const url = new URL(full);
+    if (url.pathname === "/" || url.pathname === "") url.pathname = "/v1";
+    return url.toString().replace(/\/+$/, "");
+  } catch {
+    return full.replace(/\/+$/, "");
+  }
+}
 
 // Tools the assistant does not get: running code in the GM's window, and
 // players' accounts (it reads what players write, so it never resets a password),
@@ -180,7 +195,7 @@ function createAssistant({ ctx, onEvent = () => {}, makeClient, key, settings = 
     const chosen = settings() ?? {};
     const id = PROVIDERS[chosen.provider] ? chosen.provider : "anthropic";
     const provider = providerOf(id);
-    return { id, provider, model: String(chosen.model || provider.model || ""), base: id === "custom" ? String(chosen.base || "") : provider.base };
+    return { id, provider, model: String(chosen.model || provider.model || ""), base: id === "custom" ? serviceBase(chosen.base) : provider.base };
   };
   const keyFor = (id) => {
     const found = key(id);
@@ -252,7 +267,7 @@ function createAssistant({ ctx, onEvent = () => {}, makeClient, key, settings = 
 
   // Any OpenAI-style API (OpenAI, Gemini, Grok, DeepSeek, OpenRouter, a local server).
   async function openaiRounds({ id, model, base }) {
-    if (!base) throw new Error("Give the address of the OpenAI-compatible service (for Ollama, http://localhost:11434/v1).");
+    if (!base) throw new Error("Give the local AI's address (Ollama: 127.0.0.1:11434, or the IP:port of the computer running it).");
     if (!model) throw new Error("Choose a model for the assistant first.");
     const apiKey = keyFor(id);
     const functions = toolList().map((tool) => ({ type: "function", function: { name: tool.name, description: tool.description.slice(0, 1024), parameters: tool.inputSchema } }));
@@ -331,7 +346,7 @@ function createAssistant({ ctx, onEvent = () => {}, makeClient, key, settings = 
       if (!response.ok) throw new Error(String(data?.error?.message ?? `HTTP ${response.status}`));
       return (data?.data ?? []).map((item) => item.id).filter(Boolean);
     }
-    const base = id === "custom" ? choice.base : provider.base;
+    const base = id === "custom" ? serviceBase(choice.base) : provider.base;
     if (!base) throw new Error("Give the service's address first.");
     const data = await openaiRequest(fetchImpl, base, apiKey, "/models", null);
     return (data?.data ?? data?.models ?? []).map((item) => String(item.id ?? item.name ?? "").replace(/^models\//, "")).filter(Boolean).sort();
@@ -363,4 +378,4 @@ function createAssistant({ ctx, onEvent = () => {}, makeClient, key, settings = 
   };
 }
 
-module.exports = { createAssistant, keyStore, keyFileOf, envKey, MODEL, PROVIDERS, WITHHELD, touchesDisk };
+module.exports = { createAssistant, keyStore, keyFileOf, envKey, MODEL, PROVIDERS, WITHHELD, touchesDisk, serviceBase };

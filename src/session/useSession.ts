@@ -1659,6 +1659,8 @@ export function useSession() {
     // The party's watch order and formation (a player moves their own characters).
     partyOrder: (change: { action: "place" | "remove" | "watch" | "fill" | "rotate" | "clear"; id?: string; x?: number; y?: number; watch?: number; columns?: number; direction?: "left" | "right" }) => send({ type: "party-order", ...change }),
     shareBook: (book: string, shared: boolean) => send({ type: "book-share", book, shared }),
+    // The party's stash: put a row of a character's gear in (put: character, key), or take an item out (take: id, character).
+    partyStash: (change: { action: "put"; character: string; key: string } | { action: "take"; id: string; character: string }) => send({ type: "party-stash", ...change }),
     showImage: (book: string, file: string, name: string, to?: string[]) => send({ type: "image-share", book, file, name, ...(to?.length ? { to } : {}) }),
     hideImage: (id: string) => send({ type: "image-unshare", id }),
     soundList,

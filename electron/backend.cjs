@@ -1083,7 +1083,8 @@ function assistantStatus() {
   const found = assistantKey(choice.provider);
   const providers = Object.entries(assistantModule.PROVIDERS).map(([id, provider]) => {
     const key = assistantKey(id);
-    return { id, name: provider.name, placeholder: provider.placeholder, env: provider.env[0] ?? "", hasKey: Boolean(key), keyFrom: key?.from ?? null };
+    // A local AI needs no key.
+    return { id, name: provider.name, placeholder: provider.placeholder, env: provider.env[0] ?? "", hasKey: Boolean(key) || id === "custom", keyFrom: key?.from ?? null };
   });
   // A local service (Ollama, LM Studio) may need no key.
   return { ...assistant.view(), hasKey: Boolean(found) || choice.provider === "custom", keyFrom: found?.from ?? null, providers };

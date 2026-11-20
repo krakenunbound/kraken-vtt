@@ -184,6 +184,25 @@ try {
   const coined = await tool("kraken_table_options", { currencies: ["Crowns", " Shields ", ""] });
   assert(coined.currencies?.join() === "Crowns,Shields", `the GM's coins: ${JSON.stringify(coined.currencies)}`);
   assert(!("currencies" in (await tool("kraken_table_options", { currencies: [] }))), "an empty list: the game's coins again");
+  // The party stash, where players trade: Ann puts her character's rope in, Bob takes it into his; neither can
+  // move the other's gear; the item leaves one sheet and lands on the other once.
+  agent.records.update(ann.id, { data: { inventorylist: { "id-00001": { name: "Rope, hemp (50 ft)", count: 1, carried: 1, weight: 10 } } } }, agent.seat);
+  const stash = (seat, body) => seat.ws.send(JSON.stringify({ type: "party-stash", ...body }));
+  stash(player, { action: "put", character: bob.id, key: "id-00001" });
+  await latest(player, (m) => m.type === "error" && /not your character/.test(m.reason), "Ann cannot put Bob's gear in");
+  stash(player, { action: "put", character: ann.id, key: "id-00001" });
+  const stashed = await latest(player, (m) => m.type === "party" && m.party.stash?.length === 1, "the rope reaches the stash");
+  assert(stashed.party.stash[0].name === "Rope, hemp (50 ft)" && stashed.party.stash[0].from === "Aldric", `the stash says what and from whom: ${JSON.stringify(stashed.party.stash)}`);
+  assert(!agent.records.get(ann.id).data.inventorylist?.["id-00001"], "and it left Aldric's gear");
+  const bobSeat = await join("Bob");
+  stash(player, { action: "take", id: stashed.party.stash[0].id, character: bob.id });
+  await latest(player, (m) => m.type === "error" && /not your character/.test(m.reason), "Ann cannot take into Bob's character");
+  stash(bobSeat, { action: "take", id: stashed.party.stash[0].id, character: bob.id });
+  await latest(bobSeat, (m) => m.type === "party" && m.party.stash?.length === 0, "Bob takes it out");
+  assert(Object.values(agent.records.get(bob.id).data.inventorylist ?? {}).some((item) => item.name === "Rope, hemp (50 ft)"), `it is in Borin's gear: ${JSON.stringify(agent.records.get(bob.id).data.inventorylist)}`);
+  stash(bobSeat, { action: "take", id: stashed.party.stash[0].id, character: bob.id });
+  await latest(bobSeat, (m) => m.type === "error" && /took that already/.test(m.reason), "it cannot be taken twice");
+  bobSeat.ws.close();
   console.log("PARTY_OK");
 } finally {
   for (const ws of sockets) ws.close();

@@ -8,6 +8,7 @@ import { CrewSheet } from "./CrewSheet";
 import { carriesCreatureDrop, dropOnCreature } from "../effects/drops";
 import { has, rulesetFor } from "../../shared/rulesets/registry.mjs";
 import { RestParty } from "../bookkeeping/RestParty";
+import { INVENTORY_DRAG, STASH_DRAG } from "../core/parts/Parts";
 
 export type PartyMember = {
   id: string;
@@ -74,6 +75,8 @@ export type PartyView = {
   members: PartyMember[];
   inventory: { name: string; count: number; carriedBy: Record<string, number> }[];
   parcel: { coins: Record<string, number>; items: Record<string, { name: string; count: number; assign?: string }> };
+  // The stash the players trade through: put in from a sheet, taken out onto a sheet.
+  stash?: { id: string; name: string; count: number; from: string }[];
   quests: Record<string, Entry>;
   encounters: Record<string, Entry>;
   order: { marching: string[]; watches: Record<string, { name: string; members: string[] }>; formation: { facing: number; slots: { x: number; y: number; id: string }[] } };
@@ -417,6 +420,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
               </button>
             </div>
           ) : null}
+          <PartyStash session={session} stash={party.stash ?? []} />
           <h3>Party inventory</h3>
           <ul className="sheet-list">
             {party.inventory.length === 0 ? <li className="hint empty-state">Nothing carried yet. What the party's characters carry is listed here.</li> : null}
@@ -744,5 +748,63 @@ function OrderTab({ session, party }: { session: Session; party: PartyView }) {
         </p>
       </section>
     </div>
+  );
+}
+
+// The party's stash, where the players trade: drag an item from your character's inventory here to put it in;
+// drag one from here onto your inventory (or press Take) to have it. Chat says who put and took what.
+function PartyStash({ session, stash }: { session: Session; stash: NonNullable<PartyView["stash"]> }) {
+  const [over, setOver] = useState(false);
+  const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
+  // Take: into the player's own character (the first they hold).
+  const mine = Object.values(session.records).find((record) => record.type === "character" && record.owner && record.owner.toLowerCase() === me.toLowerCase());
+  return (
+    <section
+      className={over ? "party-stash drop-over" : "party-stash"}
+      data-party-stash
+      aria-label="Party stash"
+      onDragOver={(event) => {
+        if (!event.dataTransfer.types.includes(INVENTORY_DRAG)) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        setOver(true);
+      }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(event) => {
+        setOver(false);
+        const [character, key] = event.dataTransfer.getData(INVENTORY_DRAG).split("|");
+        if (!character || !key) return;
+        event.preventDefault();
+        session.partyStash({ action: "put", character, key });
+      }}
+    >
+      <h3>Party stash</h3>
+      <p className="hint">Drag an item from your character's inventory here to share it; drag it from here onto an inventory (or press Take) to have it.</p>
+      <ul className="sheet-list">
+        {stash.length === 0 ? <li className="hint empty-state">Nothing in the stash.</li> : null}
+        {stash.map((entry) => (
+          <li
+            key={entry.id}
+            data-stash-item={entry.id}
+            draggable
+            title={`Put in by ${entry.from || "someone"}: drag it onto an inventory to take it`}
+            onDragStart={(event) => {
+              event.dataTransfer.setData(STASH_DRAG, entry.id);
+              event.dataTransfer.effectAllowed = "move";
+            }}
+          >
+            <span>
+              {entry.name} {entry.count > 1 ? `×${entry.count}` : ""}
+            </span>
+            <small className="hint">from {entry.from || "?"}</small>
+            {mine ? (
+              <button type="button" data-action="stash-take" title={`Into ${mine.name}'s gear`} onClick={() => session.partyStash({ action: "take", id: entry.id, character: mine.id })}>
+                Take
+              </button>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

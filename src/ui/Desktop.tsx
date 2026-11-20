@@ -703,7 +703,8 @@ export function Desktop({
                 data-quiet={quiet || undefined}
                 title={(opens ? `${entry.name}: open the sheet` : entry.owner ? `${entry.name} (${entry.owner})` : `${entry.name}: no one holds it yet; take it in Character Selection`) + (quiet ? ` · ${entry.owner} is ${quiet}` : "") + (gm && holder ? " · right-click: Ring bell, View as, Kick, Ban" : "")}
                 onClick={() => (opens ? windows.open("sheet", entry.name, entry.id) : !entry.owner ? windows.open("charselect", "Character Selection") : undefined)}
-                onContextMenu={gm && entry.owner ? (event) => playerMenu.open(entry.owner, event) : undefined}
+                // The GM's: Whisper, Ring bell, View as, Kick, Ban; a player's: Whisper (to whoever holds it).
+                onContextMenu={entry.owner && (gm || entry.owner.toLowerCase() !== me.toLowerCase()) ? (event) => playerMenu.open(entry.owner, event) : undefined}
                 {...(opens ? slotDrag({ kind: "sheet", record: entry.id, label: entry.name }) : {})}
                 // FG's share with one: a record, a note, a story or a picture dropped on a player's portrait (the GM's).
                 {...(gm && entry.owner ? shareDrop(session, entry.owner) : {})}
@@ -844,7 +845,7 @@ export function Desktop({
         <SceneTitleCard session={session} />
         <BellAndHands session={session} />
       </div>
-      {gm ? <PlayerMenu session={session} menu={playerMenu.state} onClose={playerMenu.close} /> : null}
+      <PlayerMenu session={session} menu={playerMenu.state} onClose={playerMenu.close} />
       <ReconnectBanner session={session} />
       {dice.show ? (
         <Suspense fallback={null}>

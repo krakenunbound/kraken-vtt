@@ -540,7 +540,10 @@ function FieldWithWord({ field, scope }: { field: NonNullable<BoxSpec["fields"]>
 // Containers on the inventory (the GM asked for better than FG's typed location): a backpack, sack or
 // bag of holding takes an item dragged onto it; an item in one says so (x takes it out); a container is
 // dropped or picked up in one click, its contents with it (their weight follows, bookkeeping.mjs).
-const INVENTORY_DRAG = "application/x-kraken-inventory";
+// An inventory row dragged ("<character id>|<row key>"): into a container, or into the party's stash.
+export const INVENTORY_DRAG = "application/x-kraken-inventory";
+// An item dragged out of the party's stash (its stash id): onto a character's inventory, it is theirs.
+export const STASH_DRAG = "application/x-kraken-stash";
 const containerOf = (item: Row) => Number(item.capacity) > 0 || CONTAINERS.some((kind: { match: string }) => new RegExp(kind.match, "i").test(String(item.name ?? "")));
 
 function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; formats: Record<string, Format> }) {
@@ -555,7 +558,24 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
     <>
       {spec.label ? <h4>{spec.label}</h4> : null}
       {modifier && spec.modifier?.place === "top" ? modifier : null}
-      <ul className={`${spec.className ?? "five-items"}${spec.head && items.length ? " has-head" : ""}`} {...(spec.count ? { [`data-${spec.count}`]: items.length } : {})}>
+      <ul
+        className={`${spec.className ?? "five-items"}${spec.head && items.length ? " has-head" : ""}`}
+        {...(spec.count ? { [`data-${spec.count}`]: items.length } : {})}
+        {...(spec.path === "inventorylist" && editable
+          ? {
+              onDragOver: (event: React.DragEvent) => {
+                if (event.dataTransfer.types.includes(STASH_DRAG)) event.preventDefault();
+              },
+              onDrop: (event: React.DragEvent) => {
+                const id = event.dataTransfer.getData(STASH_DRAG);
+                if (!id) return;
+                event.preventDefault();
+                event.stopPropagation();
+                sheet.session.partyStash({ action: "take", id, character: sheet.record.id });
+              },
+            }
+          : {})}
+      >
         {spec.head && items.length ? (
           <li className="cc-list-head" aria-hidden="true">
             {spec.select ? <small className="h-select">{spec.head.select ?? ""}</small> : null}
@@ -608,7 +628,7 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
           const inside = packs ? String(item.location ?? "").trim() : "";
           // Carried unless it says otherwise (FG's carried: 0 not carried, 1 carried, 2 equipped).
           const held = item.carried === undefined || item.carried === "" ? 1 : num(item.carried);
-          const bag = packs && editable
+          const bag = spec.path === "inventorylist" && editable
             ? {
                 draggable: true,
                 onDragStart: (event: React.DragEvent) => {
@@ -616,7 +636,7 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
                   event.dataTransfer.setData(INVENTORY_DRAG, `${sheet.record.id}|${key}`);
                   event.dataTransfer.effectAllowed = "move";
                 },
-                ...(container
+                ...(packs && container
                   ? {
                       onDragOver: (event: React.DragEvent) => {
                         if (!event.dataTransfer.types.includes(INVENTORY_DRAG)) return;

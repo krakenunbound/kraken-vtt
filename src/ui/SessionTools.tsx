@@ -3,6 +3,7 @@ import { qrModules, qrSvgPath } from "./qr";
 import type { Seat, Session } from "../session/useSession";
 import { sound } from "../sound/soundEngine";
 import { Icon } from "./icons";
+import { startWhisper } from "./ChatDock";
 import "./session.css";
 import { cssRect, cssX, cssY, pageZoom } from "./pageZoom";
 
@@ -317,6 +318,9 @@ export function PlayerMenu({ session, menu, onClose }: { session: Session; menu:
     list[next]?.focus();
   };
   const viewing = Boolean(session.map.previewing) && (session.map.previewAs ?? "").toLowerCase() === menu.name.toLowerCase();
+  const gm = session.role === "dm";
+  const me = session.players.find((item) => item.id === session.selfId)?.name ?? "";
+  const whisper = me.toLowerCase() !== menu.name.toLowerCase();
   return (
     <div
       ref={ref}
@@ -325,7 +329,9 @@ export function PlayerMenu({ session, menu, onClose }: { session: Session; menu:
       onToggle={(event) => {
         if ((event.nativeEvent as ToggleEvent).newState === "closed") {
           onClose();
-          if (opener.current instanceof HTMLElement && !ref.current?.contains(document.activeElement)) opener.current.focus({ focusVisible: false } as FocusOptions);
+          // Back to the portrait only when focus was left nowhere (an item that moved it on, Whisper, keeps it there).
+          const left = document.activeElement;
+          if (opener.current instanceof HTMLElement && (!left || left === document.body || ref.current?.contains(left))) opener.current.focus({ focusVisible: false } as FocusOptions);
         }
       }}
     >
@@ -334,6 +340,14 @@ export function PlayerMenu({ session, menu, onClose }: { session: Session; menu:
           {menu.name}
           {seat ? null : <small> (not at the table)</small>}
         </p>
+        {/* A private message: only the two of them and the GM (who sees every whisper) read it. */}
+        {whisper ? (
+          <button type="button" role="menuitem" data-menu="whisper" title={gm ? `Only ${menu.name} reads it` : `Only ${menu.name} and the GM read it`} onClick={done(() => startWhisper(menu.name))}>
+            <Icon name="whisper" size={15} /> Whisper
+          </button>
+        ) : null}
+        {gm ? (
+          <>
         <button type="button" role="menuitem" data-menu="ring" disabled={!seat || seat.lost} onClick={done(() => session.ringPlayer(menu.name))}>
           <Icon name="bell" size={15} /> Ring bell
         </button>
@@ -363,6 +377,8 @@ export function PlayerMenu({ session, menu, onClose }: { session: Session; menu:
         >
           <Icon name="ban" size={15} /> Ban…
         </button>
+          </>
+        ) : null}
       </div>
     </div>
   );

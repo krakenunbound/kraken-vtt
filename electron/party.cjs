@@ -92,6 +92,8 @@ async function partyView(table, seat = null) {
     members: members.map(({ items, ...member }) => member),
     inventory: partyInventory(members),
     parcel: party.data.parcel ?? { coins: {}, items: {} },
+    // The stash the players trade through (an unidentified item by its unidentified name to a player).
+    stash: rows(party.data.stash).map(([id, entry]) => ({ id, name: seat?.role !== "dm" && entry.item && unidentified(entry.item) ? String(entry.item.nonid_name || "Unidentified item") : String(entry.name ?? ""), count: Number(entry.count) || 1, from: String(entry.from ?? "") })),
     quests: party.data.quests ?? {},
     encounters: party.data.encounters ?? {},
     order: orderOf(party),
@@ -220,6 +222,37 @@ async function giveCoin(table, member, coin, each, engine) {
   const found = rows(current).find(([, row]) => String(row.name).toLowerCase() === name.toLowerCase());
   const key = found ? found[0] : engine.nextId(current);
   table.records.update(member.id, { data: { coins: { [key]: { name: found ? found[1].name : name, amount: (Number(found?.[1].amount) || 0) + each * factor } } } }, table.seat);
+}
+
+// The party's stash, where the players trade: an item put in leaves its character's gear (the sheet worked out
+// again) and waits there; whoever takes it out has it in their gear. edit(changes): the character's own edit.
+async function stashPut(table, character, key, edit, by) {
+  const row = character.data?.inventorylist?.[key];
+  if (!row || typeof row !== "object") throw new Error("That item is not in their gear any more.");
+  const item = Object.fromEntries(Object.entries(row).filter(([field]) => !["carried", "location"].includes(field)));
+  await edit([{ path: `inventorylist.${key}`, value: null }]);
+  const party = partyRecord(table);
+  const stash = party.data.stash ?? {};
+  let n = Object.keys(stash).length + 1;
+  while (stash[`id-${String(n).padStart(5, "0")}`]) n += 1;
+  const id = `id-${String(n).padStart(5, "0")}`;
+  const count = Math.max(1, Number(row.count) || 1);
+  table.records.update(PARTY_ID, { data: { stash: { [id]: { name: String(row.name ?? "Item"), count, from: character.name, item } } } }, table.seat);
+  table.say(`[PARTY] ${by} puts ${itemName(row)}${count > 1 ? ` (${count})` : ""} in the party stash.`, by);
+  return { id };
+}
+async function stashTake(table, character, id, by) {
+  const party = partyRecord(table);
+  const entry = party.data.stash?.[id];
+  if (!entry) throw new Error("Someone took that already.");
+  // Out of the stash first, so two hands cannot take the same item.
+  table.records.update(PARTY_ID, { data: { stash: { [id]: null } } }, table.seat);
+  const { engine } = await siege();
+  const game = siegeLibrary(table.records).game;
+  const count = Math.max(1, Number(entry.count) || 1);
+  await giveItem(table, { id: character.id, name: character.name }, { name: entry.name, item: { ...(entry.item ?? {}), count: 1 } }, count, engine, game);
+  table.say(`[PARTY] ${by} takes ${itemName(entry.item ?? entry)}${count > 1 ? ` (${count})` : ""} from the party stash.`, by);
+  return { character: character.name };
 }
 
 // A treasure parcel dropped on one character's sheet (FG's): its items into
@@ -551,4 +584,4 @@ function addToParcel(table, { coins = {}, items = [], from = "" } = {}) {
   return { coins: nextCoins, items: items.length };
 }
 
-module.exports = { addToParcel, giveTo, PARTY_ID, partyRecord, partyView, awardXP, awardEntries, distribute, groupCheck, partyRoll, rollForMember, partyRollLabel, changeOrder, fillFormation, rotate, RANGE };
+module.exports = { addToParcel, giveTo, stashPut, stashTake, PARTY_ID, partyRecord, partyView, awardXP, awardEntries, distribute, groupCheck, partyRoll, rollForMember, partyRollLabel, changeOrder, fillFormation, rotate, RANGE };

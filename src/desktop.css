@@ -2796,3 +2796,10 @@ label.set-row { cursor: pointer; }
   .sidebar-entry { min-height: 44px; }
   .quick-slot { min-height: 44px; }
 }
+
+/* The party's stash: a drop target for a sheet's inventory rows; its items drag onto a sheet. */
+.party-stash { margin: 8px 0; padding: 8px 10px; border: 1px dashed var(--panel-edge); border-radius: 8px; }
+.party-stash.drop-over { border-color: var(--brass); background: rgba(199, 154, 74, 0.1); }
+.party-stash li[draggable] { cursor: grab; }
+.party-stash li { display: flex; gap: 8px; align-items: center; }
+.party-stash li > span { flex: 1; }

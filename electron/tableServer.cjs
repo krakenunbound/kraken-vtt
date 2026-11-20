@@ -24,7 +24,7 @@ const languages = require("../shared/text/languages.mjs");
 
 const MAX_CLIENTS = 16;
 // What a player may not do while the GM has paused the game: move or change tokens, open doors, roll, finish a character wizard or improve a character.
-const PAUSE_HOLDS = new Set(["token-place", "token-move", "token-update", "token-remove", "token-undo", "door", "roll", "siege-check", "ct", "template", "effects", "cairn", "fate", "ironsworn", "forged", "party-group", "party-prompt-roll", "starship", "bookkeeping", "rest", "build-character", "level-up"]);
+const PAUSE_HOLDS = new Set(["token-place", "token-move", "token-update", "token-remove", "token-undo", "door", "roll", "siege-check", "ct", "template", "effects", "cairn", "fate", "ironsworn", "forged", "party-group", "party-prompt-roll", "party-stash", "starship", "bookkeeping", "rest", "build-character", "level-up"]);
 
 
 // What a player may do with raw record changes (the GM and the agent may do
@@ -3557,6 +3557,20 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
         } catch (error) {
           send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." });
         }
+        return;
+      }
+
+      // The party's stash, where players trade: put an item of your character's in, take one out into your character's gear.
+      if (msg.type === "party-stash") {
+        const seat = seatOf(client);
+        const character = records.get(String(msg.character ?? ""), seat);
+        if (!character || character.type !== "character" || (client.role !== "dm" && String(character.owner ?? "").toLowerCase() !== client.name.toLowerCase())) {
+          send(ws, { type: "error", reason: "That is not your character." });
+          return;
+        }
+        const who = client.role === "dm" ? "GM" : client.name;
+        const run = msg.action === "put" ? party.stashPut(agentHandle, character, String(msg.key ?? ""), (changes) => editCharacter(agentHandle, character, changes, seat), who) : msg.action === "take" ? party.stashTake(agentHandle, character, String(msg.id ?? ""), who) : Promise.reject(new Error("Put or take."));
+        run.catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." }));
         return;
       }
 

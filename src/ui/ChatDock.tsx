@@ -563,8 +563,29 @@ function ExternalTower({ session, on, drop, title, towerRef, onToggle }: { sessi
   );
 }
 
+// Start a whisper (a portrait's Whisper): the chat's line becomes "/w Name " with the caret after it.
+export const CHAT_DRAFT = "kraken-chat-draft";
+export function startWhisper(name: string) {
+  window.dispatchEvent(new CustomEvent(CHAT_DRAFT, { detail: `/w ${name} ` }));
+}
+
 export function ChatDock({ session }: { session: Session }) {
   const [draft, setDraft] = useState("");
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const begin = (event: Event) => {
+      const text = String((event as CustomEvent).detail ?? "");
+      setDraft(text);
+      requestAnimationFrame(() => {
+        const field = input.current;
+        if (!field) return;
+        field.focus();
+        field.setSelectionRange(text.length, text.length);
+      });
+    };
+    window.addEventListener(CHAT_DRAFT, begin);
+    return () => window.removeEventListener(CHAT_DRAFT, begin);
+  }, []);
   const [pool, setPool] = useState<number[]>([]);
   // The modifier box is the host's (each seat's own): every roll this seat starts reads it.
   const modifier = session.modifiers.total;
@@ -1143,6 +1164,7 @@ export function ChatDock({ session }: { session: Session }) {
           </span>
         ) : null}
         <input
+          ref={input}
           aria-label="Message"
           value={draft}
           maxLength={500}

@@ -135,9 +135,17 @@ export function AssistantWindow() {
             </select>
           </label>
           {status.provider === "custom" ? (
-            <label>
+            <label title="Where the local AI answers: Ollama on this computer is 127.0.0.1:11434; on another computer, its IP and port (192.168.1.20:11434). LM Studio is port 1234. A full URL works too.">
               Address{" "}
-              <input data-assistant="base" value={base} placeholder="http://localhost:11434/v1" onChange={(event) => setBase(event.target.value)} onBlur={() => base !== status.base && void choose({ base })} spellCheck={false} />
+              <input
+                data-assistant="base"
+                value={base}
+                placeholder="127.0.0.1:11434"
+                onChange={(event) => setBase(event.target.value)}
+                onBlur={() => base !== status.base && void choose({ base })}
+                onKeyDown={(event) => event.key === "Enter" && !event.nativeEvent.isComposing && base !== status.base && void choose({ base })}
+                spellCheck={false}
+              />
             </label>
           ) : null}
           {status.hasKey ? (
