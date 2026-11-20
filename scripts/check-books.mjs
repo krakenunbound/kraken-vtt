@@ -68,6 +68,23 @@ assert(text.includes('data-page="inn"') && text.includes('data-file="images/keep
   assert(JSON.stringify(kinds) === JSON.stringify(Object.fromEntries(Object.keys(kinds).map((file) => [file, wanted[file]]))) && Object.keys(kinds).length === 6, `a book's media by kind: ${JSON.stringify(kinds)}`);
   assert(shelf.media("Caves", "sounds/drip.ogg")?.mime === "audio/ogg" && shelf.media("Caves", "art/goblin.png") === null, "a sound is served as media, a picture is not");
 }
+// A book whose contents FG wraps whole in one <category> (B3, A4: refmanualindex > category > chapters, the pages
+// kept inline): its chapters and pages are listed and read, from the module and from a pack that kept the wrapper.
+{
+  const { mkdtempSync, writeFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { zipSync, strToU8 } = await import("fflate");
+  const { chaptersOf } = require("../electron/books.cjs");
+  const dir = mkdtempSync(path.join(tmpdir(), "kraken-wrapped-"));
+  const db = '<root><reference static="true"><refmanualindex><category name="" baseicon="0" decalicon="0"><chapters><id-00001><name type="string">The Palace</name><subchapters><id-00001><name type="string">Arrival</name><refpages><id-00001><name type="string">The Gate</name><blocks><id-00001><blocktype type="string">singletext</blocktype><text type="formattedtext"><p>A silver gate.</p></text></id-00001></blocks></id-00001></refpages></id-00001></subchapters></id-00001></chapters></category></refmanualindex></reference></root>';
+  writeFileSync(path.join(dir, "Wrapped.mod"), zipSync({ "definition.xml": strToU8("<root><name>Wrapped</name><ruleset>2E</ruleset></root>"), "db.xml": strToU8(db) }));
+  const shelf = createBookShelf({ folder: dir });
+  const wrapped = shelf.contents("Wrapped");
+  assert(wrapped.chapters[0]?.name === "The Palace" && wrapped.chapters[0].sections[0].pages.length === 1, `a wrapped contents lists its chapters: ${JSON.stringify(wrapped.chapters)}`);
+  const page = shelf.page("Wrapped", wrapped.chapters[0].sections[0].pages[0].id);
+  assert(page?.blocks.some((block) => block.kind === "text" && block.html.includes("A silver gate.")), "and its inline page reads");
+  assert(Object.keys(chaptersOf({ category: { chapters: { a: {} } } })).join() === "a" && Object.keys(chaptersOf({ chapters: { b: {} } })).join() === "b", "a pack that kept the wrapper reads the same");
+}
 // Typed superscripts and line breaks in a book's text read as such; nothing else does.
 {
   const { toHtml } = require("../electron/books.cjs");

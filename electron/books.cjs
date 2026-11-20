@@ -100,12 +100,20 @@ function parse(text) {
 
 // Whether a pack has a page to read: a page record, or a page kept inside its contents (read once: the shelf
 // keeps the answer with the rest of its description).
+// A book's chapters from its contents record: data.chapters, or (B3, A4...) inside the one <category> FG wraps
+// the whole contents in (refmanualindex > category > chapters).
+function chaptersOf(data) {
+  if (data?.chapters && typeof data.chapters === "object") return data.chapters;
+  const wrapped = data?.category?.chapters;
+  return wrapped && typeof wrapped === "object" ? wrapped : {};
+}
+
 function packHasPages(file) {
   try {
     const records = JSON.parse(Buffer.from(packs.readEntries(file, (name) => name === "records.json")["records.json"]).toString("utf8"));
     if (records.some((record) => record.type === "refpage")) return true;
     const index = records.find((record) => record.type === "refindex");
-    return Object.values(index?.data?.chapters && typeof index.data.chapters === "object" ? index.data.chapters : {}).some((chapter) =>
+    return Object.values(chaptersOf(index?.data)).some((chapter) =>
       Object.values(chapter?.subchapters ?? {}).some((section) => Object.values(section?.refpages ?? {}).some((page) => page?.blocks || typeof page?.text === "string" || page?.listlink)),
     );
   } catch {
@@ -600,7 +608,7 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "", modu
       const index = indexOf(book);
       // A page is its own record (reference.refmanualdata.<id>), or (FG's newer layout) kept inside the contents
       // itself, with its blocks: then it is named by where it sits, "~chapter.section.page".
-      const chapters = byOrder(index?.data?.chapters).map((chapter, c) => ({
+      const chapters = byOrder(chaptersOf(index?.data)).map((chapter, c) => ({
         name: String(chapter.name ?? ""),
         sections: byOrder(chapter.subchapters).map((section, s) => ({
           name: String(section.name ?? ""),
@@ -634,14 +642,14 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "", modu
       let record = book.records.get(`reference.refmanualdata.${pageId}@${book.info.name}`);
       const at = /^~(\d+)\.(\d+)\.(\d+)$/.exec(String(pageId));
       if (!record && at) {
-        const chapter = byOrder(indexOf(book)?.data?.chapters)[Number(at[1])];
+        const chapter = byOrder(chaptersOf(indexOf(book)?.data))[Number(at[1])];
         const section = byOrder(chapter?.subchapters)[Number(at[2])];
         const entry = byOrder(section?.refpages)[Number(at[3])];
         if (entry) record = { name: String(entry.name ?? ""), data: entry };
       }
       // A link to a page by its own name whose words are kept inside the contents: found there.
       if (!record && !at) {
-        for (const chapter of byOrder(indexOf(book)?.data?.chapters))
+        for (const chapter of byOrder(chaptersOf(indexOf(book)?.data)))
           for (const section of byOrder(chapter.subchapters))
             for (const entry of byOrder(section.refpages))
               if (!record && /refmanualdata\.([^.@]+)/.exec(entry.listlink?.recordname ?? "")?.[1] === String(pageId) && (entry.blocks || typeof entry.text === "string")) record = { name: String(entry.name ?? ""), data: entry };
@@ -670,4 +678,4 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "", modu
   };
 }
 
-module.exports = { createBookShelf, toHtml, fitsRuleset, forPlayers, isAdventure, describe };
+module.exports = { chaptersOf, createBookShelf, toHtml, fitsRuleset, forPlayers, isAdventure, describe };

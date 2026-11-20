@@ -96,7 +96,9 @@ function check(file) {
   if (m.records !== undefined && Number(m.records) !== records.length) warnings.push(`manifest says ${m.records} records, records.json has ${records.length}`);
   // Pages are refpage records, or (FG's newer layout) kept inside the refindex with their blocks.
   const index = records.find((record) => record.type === "refindex");
-  const inline = Object.values(index?.data?.chapters && typeof index.data.chapters === "object" ? index.data.chapters : {}).some((chapter) =>
+  // data.chapters, or inside the one <category> FG may wrap the whole contents in (B3, A4).
+  const chapters = index?.data?.chapters ?? index?.data?.category?.chapters;
+  const inline = Object.values(chapters && typeof chapters === "object" ? chapters : {}).some((chapter) =>
     Object.values(chapter?.subchapters ?? {}).some((section) => Object.values(section?.refpages ?? {}).some((page) => page?.blocks || typeof page?.text === "string")),
   );
   const hasPages = records.some((record) => record.type === "refpage") || inline;

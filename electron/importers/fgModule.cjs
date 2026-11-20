@@ -458,7 +458,12 @@ function parseModule(file, only) {
         if (seen.has(fgPath)) continue;
         seen.add(fgPath);
         const data = convert(node);
-        const converted = data && typeof data === "object" ? data : { value: data };
+        let converted = data && typeof data === "object" ? data : { value: data };
+        // A contents record FG wraps whole in one <category> (refmanualindex > category > chapters): its chapters.
+        if ((innerType ?? type) === "refindex" && !converted.chapters && converted.category?.chapters) {
+          const { category: wrapper, ...rest } = converted;
+          converted = { ...rest, chapters: wrapper.chapters };
+        }
         const kind = innerType ?? type;
         const fields = kind === "npc" ? siegeNpc(converted) : kind === "item" ? priced(converted) : converted;
         const isPublic = visibility === "all" || fields.public === true;
