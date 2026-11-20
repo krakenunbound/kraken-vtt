@@ -485,6 +485,9 @@ function MapViewInner({
   onTemplateDoneRef.current = onTemplateDone;
   // Shift+wheel over a token turns it (FG's token orientation): set each render, read by the wheel handler.
   const turnRef = useRef<(tokenId: string, direction: number, fine: boolean) => boolean>(() => false);
+  // Ctrl+wheel over a token: the GM sizes it, about a tenth a notch (a size sent but not yet back is built on).
+  const sizeRef = useRef<(tokenId: string, direction: number) => boolean>(() => false);
+  const sizing = useRef(new Map<string, { squares: number; at: number }>());
   const elevateRef = useRef<(tokenId: string, direction: number) => boolean>(() => false);
   const [menu, setMenu] = useState<Menu | null>(null);
   const [camera, setCamera] = useState<Camera>(() => views.get(sceneIn.id)?.camera ?? { x: 0, y: 0, scale: 0.1 });
@@ -672,6 +675,11 @@ function MapViewInner({
         const over = (event.target as HTMLElement | null)?.closest?.("[data-token]")?.getAttribute("data-token");
         const step = -Math.sign(event.deltaY || event.deltaX);
         if (over && step && elevateRef.current(over, step)) return;
+      }
+      if (event.ctrlKey && !event.shiftKey && !event.altKey) {
+        const over = (event.target as HTMLElement | null)?.closest?.("[data-token]")?.getAttribute("data-token");
+        const step = -Math.sign(event.deltaY || event.deltaX);
+        if (over && step && sizeRef.current(over, step)) return;
       }
       if (event.shiftKey) {
         const over = (event.target as HTMLElement | null)?.closest?.("[data-token]")?.getAttribute("data-token");
@@ -925,6 +933,17 @@ function MapViewInner({
     if (!token || !(gm || token.mine)) return false;
     const unit = scene.grid.distance > 0 ? scene.grid.distance : 5;
     actions.updateToken(token.id, { elevation: Math.round(((token.elevation ?? 0) + direction * unit) * 10) / 10 });
+    return true;
+  };
+  sizeRef.current = (tokenId, direction) => {
+    const token = tokens.find((item) => item.id === tokenId);
+    if (!token || !gm) return false;
+    const pending = sizing.current.get(tokenId);
+    const from = pending && Date.now() - pending.at < 1500 ? pending.squares : token.squares;
+    const next = Math.min(50, Math.max(0.25, Math.round(from * (direction > 0 ? 1.1 : 1 / 1.1) * 20) / 20));
+    if (next === from) return true;
+    sizing.current.set(tokenId, { squares: next, at: Date.now() });
+    actions.updateToken(token.id, { squares: next });
     return true;
   };
   // Shift+wheel over a token: a turn of 45 degrees (Ctrl or Alt: 15), for the GM or the token's player.

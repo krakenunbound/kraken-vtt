@@ -13,6 +13,7 @@ Maelstrom is mostly driven by the mouse: click to use, drag to move or share, ri
 | Mouse wheel | Zoom about the pointer. | Everyone |
 | **Shift+wheel** over a token | Turn it (its facing). | Everyone (own tokens) |
 | **Alt+wheel** over a token | Raise or lower it a square's distance (elevation). | Everyone (own tokens) |
+| **Ctrl+wheel** over a token | Make it bigger or smaller, about a tenth a notch (a quarter square to 50 squares). | GM |
 | **Ctrl+Z** | Undo the selected token's last move (a player's own if none is selected). | Everyone |
 | **Escape** | Let go of the selection, close a menu, end an area template. | Everyone |
 | Right-drag | Measure. Everyone sees your ruler. | Everyone |

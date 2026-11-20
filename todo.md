@@ -11,7 +11,7 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
       as merged. Core UI stage 5 and bookkeeping each passed on their own branch,
       but not together after the merge; only the window-less checks ran on main.
 - [x] Rerun `verify-bookkeeping-ui` on the merged build (it was stopped).
-- [ ] Release 0.1.0-alpha.91 once the suite passes.
+- [x] Release: 0.1.0-beta.1 is out (2026-11-20; rebuilt at the same version with that day's work).
 - [x] Add `check-tiles` to the suite with `tsx` (it reads TypeScript).
 
 ## Core UI (one interface every game slides into)
@@ -43,11 +43,28 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
       when the scene is shown.
 - [x] Sleep's drifting Zzz overlaps the template's "Sleep (caster)" label.
 
+## From 2026-11-20
+
+- [ ] **FG map grid size:** a few FG maps give a grid finer than the artist's
+      printed squares (N1's Orlane: FG's record says 25 px squares of 10 ft, the
+      printed squares are 50 px of 20 ft). Maelstrom now follows FG's record and
+      offset exactly. Decide: keep FG's grid, or offer the printed grid (a
+      one-click "match the art's squares").
+- [ ] More party token art (the Party folder has 14: banners, flags, fantasy,
+      horror and sci-fi groups); a way for the GM to add their own there from
+      Folders.
+- [ ] The Complete Book of Necromancers (an FG module) names three pictures from
+      its author's campaign folder; two are not in the module at all, the third is
+      under another folder. A page picture that is not found could be looked up by
+      its file name elsewhere in the book.
+- [ ] Ctrl+wheel sizes a token (the GM's); a touchpad pinch over a token now
+      sizes it instead of zooming. Check that is wanted.
+
 ## Maps and tokens
 
 - [ ] Token vision panel (sight on/off, angle, mode).
 - [ ] Preload the next scene for players.
-- [ ] Universal VTT (.dd2vtt / .uvtt) import.
+- [x] Universal VTT (.dd2vtt / .uvtt) import (0.1.0-beta.1).
 - [ ] Act on several selected tokens at once (delete, hide, faction, size).
 - [ ] Random token image from a folder; width/height/scale tokens; hex
       snapping for large tokens.

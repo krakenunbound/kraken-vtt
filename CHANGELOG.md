@@ -8,6 +8,12 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release.
 
+- **The party token:** name your party on the party sheet and choose its token: 14 new pictures in the Party folder (banners and flags, fantasy groups, a caravan, horror investigators and monster hunters, a sci-fi crew, squad and insignia, a compass marker), or any token. Drag it onto a big map, a city or a region, to mark where the party is. There is one a map, sized so it shows, and dropping it again moves it there. The agent's `kraken_party_edit` sets its name and token.
+- **Size a token with the wheel:** Ctrl+wheel over a token makes it bigger or smaller, about a tenth a notch (the GM's). Tokens may now be from a quarter square up to 50 squares.
+- **Fantasy Grounds maps line up with their art:** FG's grid offset is now read from the picture's top-left corner, as FG does (it was read from the centre, which shifted the grid off the artist's lines), and a square measures what FG says (10 ft on Orlane, not 5). A map opened before is put right the next time it is opened, unless you moved its grid yourself; your grid settings (opacity, colour, style, offset, size) stay with each map.
+- **Every map pin comes through:** older modules (A4, B3...) keep their map pins in a list that only ever brought its last pin; all of them now come, placed and named after the entry each opens. Pins drop FG's sort codes ("000.002.31 21. Cave of the Bats" reads "21. Cave of the Bats") and an older map's pins are sized to the picture. Maps opened before gain the pins they lacked. Weather effects keep every shape of their mask. Text and pins may be as small as a twentieth of a square.
+- **Fixed:** books whose contents FG wraps in one category (B3, A4) showed no pages; they open now, from the module and from a pack.
+
 ## 0.1.0-beta.1: The beta
 
 Maelstrom VTT leaves alpha. This release is a full audit of the table (93 problems found and fixed, from backups and saving to what players can see, combat rules and Map Studio), a library you can find your way around (Modules as icons, then covers by series), a Folders button that adds new material while players stay connected, and a documented book format (.kpack) that people and AI agents can convert books into.

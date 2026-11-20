@@ -74,7 +74,7 @@ function cleanToken(raw) {
     name: text(raw.name, "Token").slice(0, 48),
     x,
     y,
-    squares: Math.min(10, Math.max(0.25, num(raw.squares, 1))),
+    squares: Math.min(50, Math.max(0.25, num(raw.squares, 1))),
     owner: text(raw.owner, "").slice(0, 24),
     faction: FACTIONS.includes(raw.faction) ? raw.faction : "none",
     hidden: Boolean(raw.hidden),
@@ -1506,7 +1506,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       // The party's token marks where the party is on a big map: a twelfth of the map's shorter side, so it shows.
       const partySize = () => Math.max(1, Math.round(Math.min(scene.width, scene.height) / 12 / Math.max(1, geometry.gridSize(scene))));
       const sized = record?.type === "starship" ? require("./starships.cjs").shipSquares(record.data?.tons) : record?.type === "party" ? partySize() : record ? geometry.tokenSquares(record.data?.space, units()) : 1;
-      const squares = Math.min(10, Math.max(0.25, num(input.squares, sized)));
+      const squares = Math.min(50, Math.max(0.25, num(input.squares, sized)));
       let point;
       if (Number.isFinite(input.col) && Number.isFinite(input.row)) point = squareCenter(input.col, input.row, squares);
       else if (Number.isFinite(input.x) && Number.isFinite(input.y)) point = { x: input.x, y: input.y };
@@ -1744,7 +1744,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (patch.vision !== undefined) token.vision = patch.vision == null ? null : Math.min(1000, Math.max(0, num(patch.vision, 0)));
       if (patch.name !== undefined) token.name = text(patch.name, token.name).slice(0, 48);
       if (patch.hidden !== undefined) token.hidden = Boolean(patch.hidden);
-      if (patch.squares !== undefined) token.squares = Math.min(10, Math.max(0.25, num(patch.squares, token.squares)));
+      if (patch.squares !== undefined) token.squares = Math.min(50, Math.max(0.25, num(patch.squares, token.squares)));
       const wasFaction = token.faction;
       if (patch.faction !== undefined && FACTIONS.includes(patch.faction)) token.faction = patch.faction;
       if (patch.owner !== undefined) token.owner = text(patch.owner, "").slice(0, 24);
