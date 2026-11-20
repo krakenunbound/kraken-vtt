@@ -39,7 +39,10 @@ const RECORDS = "records.json";
 const FORMAT = "kraken-pack";
 // 2: a book's pages kept in categories (a 3.5E Monster Manual's creatures)
 // and a rulebook's tables are read; a pack made before is remade from its module.
-const VERSION = 2;
+// 3 adds where a pack is filed (kind, group, order, parent), its thumbnail and what it holds (contents); a pack in
+// format 2 is still current (those fields are worked out for it), only one below 2 is made again.
+const VERSION = 3;
+const CURRENT = 2;
 const EXTENSION = ".kpack";
 
 // Which Kraken ruleset an FG module's ruleset is for.
@@ -148,7 +151,11 @@ function packIndex(folder = packFolder()) {
   const byName = new Map();
   let entries = [];
   try {
-    entries = fs.readdirSync(folder).filter(isPack);
+    // A folder per game (Packs/AD&D 2E...): packs two levels down too; never a hidden folder or the wizards'.
+    entries = fs
+      .readdirSync(folder, { recursive: true })
+      .map(String)
+      .filter((name) => isPack(path.basename(name)) && name.split(/[\\/]/).length <= 3 && !name.split(/[\\/]/).some((part) => part.startsWith(".") || part === "Wizards"));
   } catch {
     return byName;
   }
@@ -192,7 +199,7 @@ function packVersion(file) {
   }
 }
 // Whether a pack is as Kraken makes them now (else its module is read, until the pack is made again).
-const packCurrent = (file) => packVersion(file) >= VERSION;
+const packCurrent = (file) => packVersion(file) >= CURRENT;
 // The pack, unless the FG module it was made from is newer (the GM changed it
 // since), or the pack was made by an older Kraken.
 function preferPack(pack, module) {
@@ -239,12 +246,28 @@ const COMPRESSED = /\.(png|webp|jpe?g|gif|webm|mp4|ogg|mp3|m4a)$/i;
 // importer's readModule; describe: the shelf's description of a module (its
 // category, cover, whether it has a book). Writes <folder>/<name>.kpack (in
 // place of an older one, only when whole) and says what it holds.
+// What a pack holds, counted by the sidebar list each record shows in (docs/kpack-format.md "contents").
+const LIST_OF = { refpage: "pages", npc: "npcs", item: "items", spell: "spells", spelldesc: "spells", encounter: "story", story: "story", storytemplate: "story", battle: "encounters", battlerandom: "encounters", treasureparcels: "parcels", tables: "tables", image: "images", quest: "quests", vehicle: "vehicles", location: "locations", class: "classes", race: "races", feat: "feats", skill: "skills", pregencharsheet: "characters", card: "cards", deck: "cards", note: "notes", effect: "effects" };
+function contentsOf(records) {
+  const counts = {};
+  for (const record of records) {
+    const list = LIST_OF[record.type] ?? "other";
+    counts[list] = (counts[list] ?? 0) + 1;
+  }
+  return counts;
+}
+// A pack's folder: the game's own, inside the packs folder (Packs/AD&D 2E, Packs/Any...).
+const gameFolder = (folder, ruleset) => path.join(folder, String(ruleset || "Any").replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_").trim() || "Any");
+
 function makePack(source, { read, describe, folder = packFolder(), onProgress = () => undefined } = {}) {
   const module = read(source);
   const about = describe(source) ?? {};
   const { info } = module;
-  fs.mkdirSync(folder, { recursive: true });
-  const target = path.join(folder, path.basename(source).replace(/\.mod$/i, "") + EXTENSION);
+  const home = gameFolder(folder, krakenRuleset(info.ruleset));
+  fs.mkdirSync(home, { recursive: true });
+  const target = path.join(home, path.basename(source).replace(/\.mod$/i, "") + EXTENSION);
+  // The same pack left flat in the packs folder by an older Maelstrom: replaced by this one.
+  const flat = path.join(folder, path.basename(target));
   const temporary = `${target}.part`;
   const files = sourceFiles(source);
   const kept = files.names.filter((item) => KEEP.test(item.name));
@@ -256,6 +279,11 @@ function makePack(source, { read, describe, folder = packFolder(), onProgress = 
     title: info.displayName || about.title || info.name,
     category: about.category || "Other",
     ruleset: krakenRuleset(info.ruleset),
+    // Where it is filed (shared/packs/organize.mjs worked it out from its category and title; edit to change).
+    ...filing(info, about, records),
+    // Its icon in the lists: the module's own thumbnail, else its cover.
+    thumbnail: kept.find((item) => /^thumbnail\.(png|webp|jpe?g)$/i.test(item.name))?.name || about.cover || "",
+    contents: contentsOf(records),
     author: info.author || "",
     cover: about.cover || "",
     hasBook: Boolean(about.hasBook),
@@ -309,7 +337,19 @@ function makePack(source, { read, describe, folder = packFolder(), onProgress = 
     throw failed ?? new Error("The pack could not be written.");
   }
   fs.renameSync(temporary, target);
+  if (flat !== target && fs.existsSync(flat)) fs.rmSync(flat, { force: true });
   return { file: target, name: manifest.name, title: manifest.title, ruleset: manifest.ruleset, records: records.length, pictures: kept.length, bytes: fs.statSync(target).size };
 }
 
-module.exports = { BUNDLED, readEntries, packVersion, packCurrent, packFolder, isPack, fileName, readManifest, readPack, packFor, packIndex, preferPack, makePack, krakenRuleset, EXTENSION, FORMAT, VERSION };
+// kind, group and order for a new pack, as the lists file it (no parent: that is found among the other packs).
+function filing(info, about, records) {
+  try {
+    const { organize } = require("../shared/packs/organize.mjs");
+    const placed = organize({ title: info.displayName || about.title || info.name, name: info.name, category: about.category || "", hasBook: Boolean(about.hasBook), hasStory: records.some((record) => record.type === "encounter") });
+    return { kind: placed.kind, group: placed.group, order: placed.order };
+  } catch {
+    return {};
+  }
+}
+
+module.exports = { BUNDLED, CURRENT, gameFolder, contentsOf, readEntries, packVersion, packCurrent, packFolder, isPack, fileName, readManifest, readPack, packFor, packIndex, preferPack, makePack, krakenRuleset, EXTENSION, FORMAT, VERSION };

@@ -235,7 +235,7 @@ export type SoundTrigger = { id: string; name: string; on: string; match: string
 // Books (FG's Library): what the GM has shared, and the pictures shown to the players.
 export type ShownImage = { id: string; book: string; file: string; name: string; at: number; to?: string[] };
 export type BookShelf = { active: string[]; shared: string[]; images: ShownImage[] };
-export type BookInfo = { id: string; name: string; title: string; category: string; ruleset: string; author: string; hasBook: boolean; cover: string; adventure: boolean; forPlayers: boolean; active: boolean; shared: boolean; pack?: boolean };
+export type BookInfo = { id: string; name: string; title: string; category: string; ruleset: string; author: string; hasBook: boolean; cover: string; adventure: boolean; forPlayers: boolean; active: boolean; shared: boolean; pack?: boolean; kind?: string; group?: string; order?: string; parent?: string; hasStory?: boolean };
 export type BookPageRef = { id: string; name: string; keywords: string };
 export type BookContents = BookInfo & { chapters: { name: string; sections: { name: string; pages: BookPageRef[] }[] }[]; pictures: { name: string; category: string; file: string }[]; assets?: string[] };
 export type BookBlock = { kind: "text"; html: string; frame?: string } | { kind: "picture"; file: string; caption: string; align: string; scale: number; name: string };
@@ -487,6 +487,8 @@ export function useSession() {
   const [readAloudNow, setReadAloudNow] = useState<ReadAloud | null>(null);
   // The read-alouds of this sitting, oldest first (the Read aloud window lists them).
   const [readAloudLog, setReadAloudLog] = useState<ReadAloud[]>([]);
+  // When the GM last read Maelstrom's folders again (Folders > Refresh): lists of books and art are fetched anew.
+  const [contentAt, setContentAt] = useState(0);
   const [soundscape, setSoundscape] = useState<Soundscape>({ ambience: [], music: null });
   // The campaign's ruleset ("Castles & Crusades", "D&D 5E", "Worldbuilding"): it picks the sheet.
   const [ruleset, setRuleset] = useState("");
@@ -759,6 +761,7 @@ export function useSession() {
             sentAway = String(msg.reason ?? "The GM has asked you to leave the table.");
             setError(sentAway);
           }
+          if (msg.type === "content-refreshed") setContentAt(Number(msg.at) || Date.now());
           if (msg.type === "books") setBookShelf({ active: (msg.active as string[]) ?? [], shared: (msg.shared as string[]) ?? [], images: (msg.images as ShownImage[]) ?? [] });
           if (msg.type === "image-shown" && typeof msg.id === "string") setImageShown({ id: msg.id, at: Date.now() });
           if (msg.type === "book-sounds" && msg.sounds && typeof msg.sounds === "object") setBookSounds(msg.sounds as Record<string, PageSounds>);
@@ -1575,6 +1578,7 @@ export function useSession() {
     records,
     error,
     clearError,
+    contentAt,
     playerScene,
     host,
     join,

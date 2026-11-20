@@ -949,6 +949,27 @@ span.ct-init { display: inline-block; }
 .books-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
 .books-list { flex: 1; min-height: 0; overflow: auto; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; background: rgba(0, 0, 0, 0.25); }
 .books-category h3 { margin: 10px 0 4px; color: var(--brass); font-size: 1.02rem; }
+/* Modules and Books: kind > group > book > parts, each level folding open with its own marker. */
+.books-kind > summary, .books-group > summary, .books-parts > summary { display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; user-select: none; }
+.books-kind > summary::-webkit-details-marker, .books-group > summary::-webkit-details-marker, .books-parts > summary::-webkit-details-marker { display: none; }
+.books-kind > summary::before, .books-group > summary::before, .books-parts > summary::before { content: "\25B8"; color: var(--brass-dim); font-size: 0.8em; transition: rotate 0.15s; }
+.books-kind[open] > summary::before, .books-group[open] > summary::before, .books-parts[open] > summary::before { rotate: 90deg; }
+.books-kind > summary { margin: 10px 0 4px; padding: 6px 8px; border-radius: 6px; background: rgba(199, 154, 74, 0.12); color: var(--brass); font-size: 1.05rem; font-weight: 600; }
+.books-kind > summary small, .books-group > summary small { margin-left: auto; opacity: 0.7; font-weight: 400; font-size: 0.8rem; }
+.books-group { margin-left: 12px; }
+.books-group > summary { margin: 6px 0 2px; padding: 3px 6px; color: var(--brass); font-size: 0.95rem; }
+.books-parts { margin: 0 0 4px 34px; }
+.books-parts > summary { padding: 2px 4px; font-size: 0.82rem; opacity: 0.8; }
+.books-parts .books-row { padding-left: 6px; border-left: 1px solid var(--brass-dim); }
+/* The GM's Folders window. */
+.folders-window { display: grid; gap: 8px; padding: 8px; }
+.folders-bar { display: flex; gap: 8px; }
+.folders-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.folders-list li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px dashed transparent; border-radius: 8px; background: rgba(255, 255, 255, 0.03); }
+.folders-list li.is-over { border-color: var(--brass); background: rgba(199, 154, 74, 0.15); }
+.folders-name { display: grid; flex: 1; }
+.folders-name small { opacity: 0.7; }
+.folders-note { margin: 0; font-size: 0.85rem; }
 .books-row { display: flex; align-items: center; gap: 8px; }
 .books-open { flex: 1; display: flex; align-items: center; gap: 12px; padding: 4px 6px; border: none; background: transparent; text-align: left; border-radius: 6px; }
 .books-open:hover { background: rgba(255, 255, 255, 0.05); }

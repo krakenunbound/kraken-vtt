@@ -73,6 +73,10 @@ function createArtLibrary({ base, roots }) {
   }
 
   return {
+    // Refresh (the GM's Folders window): read the folder again at the next look.
+    forget() {
+      index = null;
+    },
     // What the pickers show, newest scan at most 30 seconds old.
     list(kind) {
       return [...scan().values()]

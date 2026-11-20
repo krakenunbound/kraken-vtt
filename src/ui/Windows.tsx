@@ -13,7 +13,7 @@ import { cssRect, cssX, cssY, pageZoom } from "./pageZoom";
 // the edge of the main window, or sent out with its pop-out button, becomes a
 // window of its own that can go on another monitor.
 
-export type WindowKind = "assets" | "studio" | "imagelist" | "assistant" | "characters" | "party" | "combat" | "players" | "sheet" | "settings" | "decals" | "wallpapers" | "gmicons" | "towers" | "deathmarkers" | "calendar" | "effects" | "clocks" | "motd" | "krits" | "library" | "dice" | "sound" | "books" | "book" | "images" | "picture" | "notes" | "note" | "charselect" | "records" | "record" | "adventure" | "story" | "map" | "cards" | "ships" | "bookrecord" | "oracles" | "delve" | "sessionlog" | "readaloud";
+export type WindowKind = "folders" | "assets" | "studio" | "imagelist" | "assistant" | "characters" | "party" | "combat" | "players" | "sheet" | "settings" | "decals" | "wallpapers" | "gmicons" | "towers" | "deathmarkers" | "calendar" | "effects" | "clocks" | "motd" | "krits" | "library" | "dice" | "sound" | "books" | "book" | "images" | "picture" | "notes" | "note" | "charselect" | "records" | "record" | "adventure" | "story" | "map" | "cards" | "ships" | "bookrecord" | "oracles" | "delve" | "sessionlog" | "readaloud";
 type Placement = { x: number; y: number; w: number; h: number; out?: ScreenPlace | null };
 // minimized: tucked away to the tray (still open: its state kept), brought back from the tray or its sidebar button.
 export type OpenWindow = { key: string; kind: WindowKind; title: string; payload?: string; z: number; popped: boolean; minimized?: boolean } & Placement;
@@ -25,6 +25,7 @@ const DEFAULTS: Record<WindowKind, Placement> = {
   party: { x: 180, y: 60, w: 760, h: 720 },
   combat: { x: 260, y: 70, w: 640, h: 520 },
   players: { x: 300, y: 120, w: 480, h: 360 },
+  folders: { x: 320, y: 110, w: 460, h: 520 },
   // Wide enough that each setting keeps its switch on the right of its label.
   settings: { x: 340, y: 110, w: 560, h: 300 },
   decals: { x: 220, y: 70, w: 720, h: 600 },
@@ -69,7 +70,7 @@ const DEFAULTS: Record<WindowKind, Placement> = {
 // Kinds that stay in the main window (none now: the map pops out as the rest do).
 const STAYS_IN: WindowKind[] = [];
 // Kinds that open tall enough to show all they hold (a short list of settings), never cut off with a scroll bar.
-const FIT_CONTENT: WindowKind[] = ["settings", "players"];
+const FIT_CONTENT: WindowKind[] = ["settings", "players", "folders"];
 // Kinds that stay behind every other window (none now: the map window comes to
 // the front when it opens, and goes behind another window clicked, as FG's image windows do).
 const AT_BACK: WindowKind[] = [];
@@ -516,7 +517,7 @@ export function FloatingWindow({ item, children, link }: { item: OpenWindow; chi
 const TRAY_ICON: Partial<Record<WindowKind, Parameters<typeof Icon>[0]["name"]>> = {
   map: "map", studio: "pen", book: "book", books: "book", bookrecord: "book", story: "book", adventure: "book", record: "book", records: "book",
   sheet: "character", characters: "character", charselect: "character", party: "party", players: "players", combat: "combat",
-  settings: "settings", sound: "music", assistant: "sparkle", calendar: "calendar", notes: "chat", note: "chat", effects: "flask",
+  settings: "settings", folders: "folder", sound: "music", assistant: "sparkle", calendar: "calendar", notes: "chat", note: "chat", effects: "flask",
   clocks: "hourglass", dice: "d20", towers: "tower", readaloud: "chat", library: "map", imagelist: "map", images: "map", picture: "map", sessionlog: "book",
 };
 // Where the GM left the tray (null: just above the quick slots).

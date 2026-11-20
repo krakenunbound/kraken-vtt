@@ -11,7 +11,7 @@ export function ImagesList({ session }: { session: Session }) {
   const [search, setSearch] = useState("");
   const [mapsOnly, setMapsOnly] = useState(false);
   const [status, setStatus] = useState("");
-  const shelfKey = session.bookShelf.active.join("|");
+  const shelfKey = `${session.bookShelf.active.join("|")}@${session.contentAt}`;
   useEffect(() => {
     session
       .bookFetch<{ books: BookInfo[] }>("list")

@@ -178,7 +178,7 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
 - **Maelstrom packs.** Make each of your books into Maelstrom's own file (`.kpack`)
   once, in Books > Packs. Copy the packs folder to any computer and your books
   open there in Maelstrom, with no Fantasy Grounds installed. Maelstrom's own books
-  ship as packs too ([the format](docs/kraken-pack-format.md)).
+  ship as packs too ([the format](docs/kpack-format.md)).
 - **Map Studio, Maelstrom's map maker.** Paint maps from art packs, walls and
   doors with art along them, lights, weather with masks, traps and regions,
   a dungeon generator and play testing, saved straight into Maelstrom's images.

@@ -152,7 +152,9 @@
     "player-sound-ui": "node scripts/verify-player-sound-ui.mjs",
     "code-mode": "node scripts/check-code-mode.mjs",
     "settings-ui": "node scripts/verify-settings-ui.mjs",
-    "open-art": "node scripts/check-open-art.mjs"
+    "open-art": "node scripts/check-open-art.mjs",
+    "kpack:check": "node scripts/kpack-check.mjs",
+    "kpack:make": "node scripts/kpack-make.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.4.0",

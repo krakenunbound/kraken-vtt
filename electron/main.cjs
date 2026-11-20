@@ -265,6 +265,9 @@ for (const name of [
   "assistant-models",
   "packs",
   "packs-make",
+  "content-folders",
+  "content-add",
+  "content-refresh",
 ])
   ipcMain.handle(name, (_event, ...args) => call(name, ...args));
 
@@ -306,6 +309,14 @@ ipcMain.handle("sound-folder", async () => shell.openPath(await call("sound-fold
 ipcMain.handle("packs-folder", async () => shell.openPath(await call("packs-folder")));
 ipcMain.handle("decal-folder", async (_event, kind) => shell.openPath(await call("decal-folder", kind)));
 ipcMain.handle("kraken-folder", async (_event, kind) => shell.openPath(await call("kraken-folder", kind ?? "")));
+// One of the Folders window's folders, opened in Explorer (by its kind: never a path the page names).
+ipcMain.handle("content-open", async (_event, kind) => {
+  const { root, folders } = await call("content-folders");
+  const found = kind ? folders.find((item) => item.kind === kind) : { path: root };
+  if (!found?.path) return "No such folder.";
+  require("fs").mkdirSync(found.path, { recursive: true });
+  return shell.openPath(found.path);
+});
 // Settings > Open logs.
 ipcMain.handle("open-logs", async () => shellOp({ action: "open", path: await call("logs-folder") }));
 // The start screen's campaign menu; Export asks where the .zip goes first.

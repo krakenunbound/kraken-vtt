@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { shelfTree } from "../../shared/packs/organize.mjs";
 import { markInlineRolls } from "../ui/InlineRolls";
 import { createPortal } from "react-dom";
 import type { BookContents, BookInfo, BookPage, BookSoundRef, Session, ShownImage, SoundLibrary } from "../session/useSession";
@@ -266,7 +267,7 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
   const [tab, setTab] = useState<"books" | "activation" | "packs">(start);
   // Packs are made by the GM's own app (the host), from the FG modules on its computer.
   const canPack = gm && typeof window !== "undefined" && Boolean(window.kraken?.packs);
-  const shelfKey = `${session.bookShelf.active.join("|")}/${session.bookShelf.shared.join("|")}`;
+  const shelfKey = `${session.bookShelf.active.join("|")}/${session.bookShelf.shared.join("|")}@${session.contentAt}`;
   useEffect(() => {
     session
       .bookFetch<{ books: BookInfo[]; ruleset: string }>("list")
@@ -282,7 +283,8 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
     const wanted = search.toLowerCase();
     return (list ?? []).filter((item) => (activation || (item.hasBook && (!gm || item.active))) && (!wanted || `${item.title} ${item.category} ${item.ruleset}`.toLowerCase().includes(wanted)));
   }, [list, search, activation, gm]);
-  const categories = useMemo(() => [...new Set(shown.map((item) => item.category))], [shown]);
+  // Filed as kind > group > book > its parts (shared/packs/organize.mjs), each kind with its icon.
+  const tree = useMemo(() => shelfTree(shown) as ShelfKind[], [shown]);
   const empty = !gm
     ? "The GM has not shared any books yet."
     : search
@@ -321,12 +323,45 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
         {error ? <p className="hint">{error}</p> : null}
         {list && shown.length === 0 ? <p className="hint">{empty}</p> : null}
         {!list && !error ? <p className="hint">Gathering the books…</p> : null}
-        {categories.map((category) => (
-          <section key={category} className="books-category">
-            <h3>{category}</h3>
-            {shown
-              .filter((item) => item.category === category)
-              .map((item) => (
+        {tree.map((kind) => (
+          <details key={kind.id} className="books-kind" data-kind={kind.id} open>
+            <summary title={kind.hint}>
+              <Icon name={kind.icon} size={18} />
+              <span>{kind.label}</span>
+              <small>{kind.count}</small>
+            </summary>
+            {kind.groups.map((group) => (
+              // A group is open when it is the kind's only one, or a search is narrowing the list.
+              <details key={`${kind.id}/${group.name}`} className="books-group" data-group={group.name} open={Boolean(search) || kind.groups.length === 1 || undefined}>
+                <summary>
+                  <span>{group.name}</span>
+                  <small>{group.books.reduce((sum, book) => sum + 1 + book.parts.length, 0)}</small>
+                </summary>
+                {group.books.map((book) => (
+                  <Fragment key={book.item.id}>
+                    {row(book.item)}
+                    {book.parts.length ? (
+                      <details className="books-parts" open={Boolean(search) || undefined}>
+                        <summary>
+                          {book.parts.length} part{book.parts.length === 1 ? "" : "s"} of {book.item.title}
+                        </summary>
+                        {book.parts.map((part) => (
+                          <Fragment key={part.item.id}>{row(part.item)}</Fragment>
+                        ))}
+                      </details>
+                    ) : null}
+                  </Fragment>
+                ))}
+              </details>
+            ))}
+          </details>
+        ))}
+      </div>
+      <input type="search" className="books-search" hidden={gm && tab === "packs"} placeholder="Search" aria-label="Search books" value={search} onChange={(event) => setSearch(event.target.value)} />
+    </div>
+  );
+  function row(item: BookInfo) {
+    return (
                 <div key={item.id} className={activation && !item.active ? "books-row off" : "books-row"} role="listitem">
                   <button
                     type="button"
@@ -365,14 +400,10 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
                     <span className="books-players" title="The players may read it (Activation)">Players</span>
                   ) : null}
                 </div>
-              ))}
-          </section>
-        ))}
-      </div>
-      <input type="search" className="books-search" hidden={gm && tab === "packs"} placeholder="Search" aria-label="Search books" value={search} onChange={(event) => setSearch(event.target.value)} />
-    </div>
-  );
+    );
+  }
 }
+type ShelfKind = { id: string; label: string; icon: string; hint: string; count: number; groups: { name: string; books: { item: BookInfo; parts: { item: BookInfo }[] }[] }[] };
 
 // A page with no sounds of its own (one object, so it never looks changed).
 const NO_SOUNDS = { links: {}, blocks: [] };

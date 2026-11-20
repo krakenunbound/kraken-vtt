@@ -176,6 +176,10 @@ function createDecalLibrary({ folder, builtin = "", fgData = "", own = ["kraken"
   }
 
   return {
+    // Refresh (the GM's Folders window): read the folder again at the next look.
+    forget() {
+      index = null;
+    },
     folder,
     list() {
       return [...scan().values()]

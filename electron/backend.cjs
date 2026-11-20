@@ -666,6 +666,90 @@ function rulesetLogos() {
   return { folder, logos };
 }
 
+// --- The GM's Folders window ------------------------------------------------------------------
+// Maelstrom's folders, each with what goes in it: books and modules (Packs), dice, dice towers, GM icons,
+// background decals, wallpapers, sounds, and the hosted campaign's own maps.
+const CONTENT_KINDS = [
+  { kind: "packs", label: "Books & modules (.kpack)", accept: /\.kpack$/i },
+  { kind: "sounds", label: "Sounds & music", accept: /\.(ogg|mp3|wav|m4a|flac|webm)$/i },
+  { kind: "maps", label: "This campaign's maps", accept: /\.(png|jpe?g|webp|dd2vtt|df2vtt|uvtt)$/i },
+  { kind: "dice", label: "Dice", accept: /\.(zip|json|png|webp)$/i },
+  { kind: "towers", label: "Dice towers", accept: /\.(png|webp|gif|webm|zip)$/i },
+  { kind: "gmicons", label: "GM icons", accept: /\.(png|webp|jpe?g|gif|svg)$/i },
+  { kind: "decals", label: "Background decals", accept: /\.(png|webp|jpe?g|svg)$/i },
+  { kind: "wallpapers", label: "Wallpapers", accept: /\.(png|webp|jpe?g|gif|webm|mp4)$/i },
+];
+function contentFolder(kind) {
+  if (kind === "sounds") return sounds().folder;
+  if (kind === "maps") return hosted ? campaignMapsFolder() : "";
+  return kraken.folderOf(kind);
+}
+// What a folder holds that Maelstrom reads (its packs, for Packs); never a hidden or backup folder's files.
+function countIn(folder, kind = "") {
+  try {
+    return fs
+      .readdirSync(folder, { recursive: true })
+      .map(String)
+      .filter((name) => !name.split(/[\/]/).some((part) => part.startsWith(".")) && (kind === "packs" ? /\.kpack$/i.test(name) : !/\.(md|txt|json|tmp|part)$/i.test(name) && /\.[a-z0-9]+$/i.test(name))).length;
+  } catch {
+    return 0;
+  }
+}
+function contentFolders() {
+  kraken.ready?.();
+  return { root: kraken.root(), folders: CONTENT_KINDS.map(({ kind, label }) => ({ kind, label, path: contentFolder(kind), files: contentFolder(kind) ? countIn(contentFolder(kind), kind) : 0 })).filter((item) => item.path) };
+}
+// A pack goes into its game's folder (Packs/<game>), as its own manifest says.
+function packHome(bytes) {
+  try {
+    const { unzipSync } = require("fflate");
+    const files = unzipSync(new Uint8Array(bytes), { filter: (entry) => entry.name === "kraken-pack.json" });
+    const about = JSON.parse(Buffer.from(files["kraken-pack.json"]).toString("utf8"));
+    const game = String(about.ruleset || "Any").replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_").trim() || "Any";
+    return path.join(kraken.folderOf("packs"), game);
+  } catch {
+    throw new Error("That is not a Maelstrom pack (.kpack) that can be read.");
+  }
+}
+function contentAdd(kind, files) {
+  const spec = CONTENT_KINDS.find((item) => item.kind === kind);
+  if (!spec) throw new Error("Drop it on one of the folders.");
+  const base = contentFolder(kind);
+  if (!base) throw new Error("Host a campaign first: its maps go in its own folder.");
+  const added = [];
+  const refused = [];
+  for (const file of files.slice(0, 200)) {
+    const name = path.basename(String(file?.name ?? "")).replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_");
+    const bytes = bytesOf(file?.bytes);
+    if (!name || !spec.accept.test(name) || !bytes.length) {
+      refused.push(name || "(no name)");
+      continue;
+    }
+    const folder = kind === "packs" ? packHome(bytes) : base;
+    fs.mkdirSync(folder, { recursive: true });
+    // Written whole first, then put in place: a half-copied pack is never read.
+    fs.writeFileSync(path.join(folder, `${name}.part`), bytes);
+    fs.renameSync(path.join(folder, `${name}.part`), path.join(folder, name));
+    added.push(path.relative(kraken.root(), path.join(folder, name)));
+  }
+  contentRefresh();
+  return { added, refused };
+}
+// Everything read again: the books and packs, sounds, art, decals, dice; the table hears of it, nobody is sent away.
+function contentRefresh() {
+  books().refresh();
+  for (const library of [soundLibrary, wallpapers(), decals(), gmIcons(), towers(), dicePacks(), tiles()]) {
+    try {
+      library?.forget?.();
+      library?.refresh?.();
+    } catch {
+      /* a library that cannot be read again is read at its next look */
+    }
+  }
+  table?.agent?.contentChanged?.();
+  return contentFolders();
+}
+
 // The campaign menu's actions, for the start screen and the agent alike.
 // Never the campaign being played for delete or restore; it is saved first for the rest.
 async function manageCampaign(input) {
@@ -853,6 +937,11 @@ const calls = {
     fs.mkdirSync(sounds().folder, { recursive: true });
     return sounds().folder;
   },
+  // The GM's Folders window: where each kind of thing goes, how many are there, to open or drop files on.
+  "content-folders": () => contentFolders(),
+  // Files dropped on one of them: copied in, then everything read again (the table stays up).
+  "content-add": (kind, files) => contentAdd(String(kind ?? ""), Array.isArray(files) ? files : []),
+  "content-refresh": () => contentRefresh(),
   // A folder of Documents/Kraken VTT (kfolders.cjs), to open: "" is the top.
   "kraken-folder": (kind) => {
     const folder = kind ? kraken.folderOf(String(kind)) : (kraken.folderOf("dice"), kraken.root());
@@ -925,6 +1014,8 @@ const agentContext = {
   updater: (action) => ask("updater", { action }),
   assistant: () => assistant,
   packs: { view: (input) => packsView(input ?? {}), make: (ids) => makePacks(ids), job: () => packJob },
+  // The GM's Folders window: Maelstrom's folders, and everything in them read again with the table running.
+  folders: { list: () => contentFolders(), refresh: () => contentRefresh() },
   // Map Studio's asset pack folders (Settings > Map Studio art).
   // Map Studio's agent tools (kraken_map_studio, electron/studio/agentTools.cjs): an action of the editor
   // (studio/web/agent.js, in the GM's Map Studio window), and the editor's Save to Kraken into the open image.

@@ -47,6 +47,11 @@ contextBridge.exposeInMainWorld("kraken", {
   openDecalFolder: (kind) => ipcRenderer.invoke("decal-folder", kind),
   // Documents/Kraken VTT, or one of its folders (dice, towers, gmicons, decals, wallpapers, packs).
   openKrakenFolder: (kind) => ipcRenderer.invoke("kraken-folder", kind),
+  // The GM's Folders window: the folders, files dropped into one, everything read again, a folder opened.
+  contentFolders: () => ipcRenderer.invoke("content-folders"),
+  contentAdd: (kind, files) => ipcRenderer.invoke("content-add", kind, files),
+  contentRefresh: () => ipcRenderer.invoke("content-refresh"),
+  contentOpen: (kind) => ipcRenderer.invoke("content-open", kind),
   pickSounds: (kind, group) => ipcRenderer.invoke("sound-pick", kind, group),
   addSound: (kind, group, name, bytes) => ipcRenderer.invoke("sound-add", kind, group, name, bytes),
   openSoundFolder: () => ipcRenderer.invoke("sound-folder"),

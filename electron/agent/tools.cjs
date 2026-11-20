@@ -2494,6 +2494,16 @@ const TOOLS = [
     },
   },
   {
+    name: "kraken_folders",
+    description:
+      "Maelstrom's folders for what a GM adds (the GM's Folders window, the folder button along the top): books and modules as .kpack (Packs/<game>, docs/kpack-format.md), sounds and music, this campaign's maps, dice, dice towers, GM icons, background decals and wallpapers. action list: each folder's path and how many files it holds; refresh: read them all again (new books show in Modules, new art and sounds in their pickers) while the table stays up, with no player disconnected. Put files in a folder first (a pack in its game's folder), then refresh.",
+    inputSchema: object({ action: { type: "string", enum: ["list", "refresh"] } }),
+    run(args, ctx) {
+      if (!ctx.folders) throw new Error("The folders are the GM's Maelstrom app's.");
+      return out(args.action === "refresh" ? ctx.folders.refresh() : ctx.folders.list());
+    },
+  },
+  {
     name: "kraken_packs",
     description:
       "Kraken packs (the Books window's Packs tab): the GM's Fantasy Grounds books made into Kraken's own files (.kpack, one per book: its pages, records, maps with walls, pictures), kept in one folder (Documents/Kraken VTT/Packs) that can be copied to any computer, where the books open with no Fantasy Grounds. action list (ruleset: a Kraken ruleset such as \"Castles & Crusades\" or \"D&D 3.5E\", empty for every game: each FG module, its pack (current or older than the module), and packs with no module here; making: the pack being made, how far); make (books: module ids or names, or [\"all\"] for every listed one without a current pack; made one at a time in the background, then they show on the shelf); folder (where the packs are). Packs hold the GM's own books: never share them.",

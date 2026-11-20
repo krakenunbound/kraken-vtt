@@ -1695,7 +1695,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       try {
         if (url.pathname === "/book/list") return json({ books: shelfFor(client), ruleset, ...shelfView(client) });
         // A book's cover, for Modules (the GM chooses what to make active); its content needs it active.
-        if (url.pathname === "/book/cover") return canRead(client, book) || (client.role === "dm" && fits(books?.info(book))) ? picture(books.cover(book)) : nothing();
+        if (url.pathname === "/book/cover") return canRead(client, book) || (client.role === "dm" && fits(books?.info(book))) ? void Promise.resolve(books.coverSmall ? books.coverSmall(book) : books.cover(book)).then(picture, () => nothing()) : nothing();
         if (url.pathname === "/book/picture") return canSeePicture(client, book, url.searchParams.get("file") || "") ? picture(books.picture(book, url.searchParams.get("file") || "")) : nothing();
         if (!canRead(client, book)) return nothing();
         // A record a page links to (a creature, spell, item...), as FG opens it from the book.
@@ -3043,6 +3043,12 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
         castVote(String(msg.id ?? ""), msg.choice, client.name);
         return;
       }
+      // The GM's Folders window's Refresh, from a browser seat (the app's own window asks its backend directly).
+      if (msg.type === "content-refresh") {
+        if (client.role !== "dm") return;
+        agentHandle.contentChanged?.();
+        return;
+      }
       // FG's /save: the GM saves the campaign now.
       if (msg.type === "save") {
         if (client.role !== "dm") return;
@@ -3735,6 +3741,13 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     prompts: () => chat.filter((line) => line.prompt).map((line) => line.prompt),
     votes: () => chat.filter((line) => line.vote).map((line) => line.vote),
     save: () => onChange("save"),
+    // The GM's Folders window's Refresh: the art read again, every seat's book shelf and lists sent again,
+    // while the table stays up (no one is sent away).
+    contentChanged() {
+      art?.forget?.();
+      for (const [ws, client] of clients) send(ws, { type: "books", ...shelfView(client) });
+      broadcast({ type: "content-refreshed", at: Date.now() });
+    },
     // The GM's /clear: the GM's chat windows clear, now and when they come back.
     clearChat() {
       chatCleared.set("@gm", Date.now());

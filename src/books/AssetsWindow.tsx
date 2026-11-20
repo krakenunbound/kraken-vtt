@@ -19,7 +19,7 @@ export function AssetsWindow({ session }: { session: Session }) {
   const [search, setSearch] = useState("");
   const [picked, setPicked] = useState<Picked | null>(null);
   const [status, setStatus] = useState("");
-  const shelfKey = session.bookShelf.active.join("|");
+  const shelfKey = `${session.bookShelf.active.join("|")}@${session.contentAt}`;
   useEffect(() => {
     session
       .bookFetch<{ books: BookInfo[] }>("list")

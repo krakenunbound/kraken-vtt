@@ -55,6 +55,10 @@ function createSoundLibrary({ folder, builtin = "" }) {
   }
 
   return {
+    // Refresh (the GM's Folders window): read the folder again at the next look.
+    forget() {
+      index = null;
+    },
     folder,
     kinds: KINDS,
     list(kind) {

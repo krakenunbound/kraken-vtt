@@ -98,9 +98,15 @@ function parse(text) {
   return doc?.documentElement ?? null;
 }
 
+// A pack with no cover of its own: the picture whose name says cover, title or front, else its first picture.
+function coverAmong(pictures) {
+  const list = (Array.isArray(pictures) ? pictures : []).map(String).filter((name) => /\.(png|webp|jpe?g)$/i.test(name));
+  return list.find((name) => /(^|[\/_ -])(thumbnail|cover|title|front)[^\/]*$/i.test(name)) ?? list[0] ?? "";
+}
+
 // What a module is, from its definition.xml (and whether it has a book); a
 // Kraken pack, from its own description.
-const DESCRIBED = 3;
+const DESCRIBED = 4;
 function describe(file) {
   if (packs.isPack(file)) {
     const manifest = packs.readManifest(file);
@@ -114,7 +120,14 @@ function describe(file) {
       author: String(manifest.author ?? ""),
       hasBook: Boolean(manifest.hasBook),
       hasStory: manifest.hasStory !== undefined ? Boolean(manifest.hasStory) : packHasStory(file),
-      cover: String(manifest.cover ?? ""),
+      // Its picture in the lists: the pack's thumbnail, else its cover, else the picture most like a cover.
+      cover: String(manifest.thumbnail || manifest.cover || coverAmong(manifest.pictures) || ""),
+      // Where it is filed (format 3; shared/packs/organize.mjs works it out for older packs): its kind, group in it,
+      // order in the group, and the pack it is a part of.
+      ...(typeof manifest.kind === "string" ? { kind: manifest.kind } : {}),
+      ...(typeof manifest.group === "string" ? { group: manifest.group } : {}),
+      ...(typeof manifest.order === "string" || typeof manifest.order === "number" ? { order: String(manifest.order) } : {}),
+      ...(typeof manifest.parent === "string" ? { parent: manifest.parent } : {}),
       // The world's calendar it brings (shared/calendars.mjs settingCalendar).
       calendar: typeof manifest.calendar === "string" ? manifest.calendar : "",
       pack: true,
@@ -288,6 +301,24 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
       } catch {
         /* a folder not there */
       }
+    }
+    // The packs folder keeps a folder per game (Packs/AD&D 2E, Packs/Any...): their packs too, two levels down.
+    if (packsFolder) {
+      const walk = (dir, depth) => {
+        let found = [];
+        try {
+          found = fs.readdirSync(dir, { withFileTypes: true });
+        } catch {
+          return;
+        }
+        for (const entry of found) {
+          if (!entry.isDirectory() || entry.name.startsWith(".") || entry.name === "Wizards") continue;
+          const sub = path.join(dir, entry.name);
+          for (const inner of fs.readdirSync(sub, { withFileTypes: true })) if (inner.isFile() && /\.kpack$/i.test(inner.name)) entries.push({ entry: inner, dir: sub });
+          if (depth < 2) walk(sub, depth + 1);
+        }
+      };
+      walk(packsFolder, 1);
     }
     for (const { entry, dir } of entries) {
       const file = path.join(dir, entry.name);
@@ -473,6 +504,26 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
         }
       }
       return picture;
+    },
+    // The cover as a list's icon: a big picture (a map standing in for a cover) made small once, and kept.
+    async coverSmall(id) {
+      const picture = this.cover(id);
+      if (!picture || picture.bytes.length <= 300 * 1024) return picture;
+      const found = info(id);
+      const stat = fs.statSync(found.file);
+      const name = require("crypto").createHash("sha1").update(`small|${found.file}|${stat.size}|${Math.round(stat.mtimeMs)}|${found.cover}`).digest("hex");
+      const kept = cache ? path.join(path.dirname(cache), "book-covers", `${name}.webp`) : "";
+      if (kept && fs.existsSync(kept)) return { bytes: fs.readFileSync(kept), mime: "image/webp" };
+      try {
+        const bytes = await require("sharp")(picture.bytes, { limitInputPixels: 200_000_000 }).resize(192, 192, { fit: "cover" }).webp({ quality: 80 }).toBuffer();
+        if (kept) {
+          fs.mkdirSync(path.dirname(kept), { recursive: true });
+          fs.writeFileSync(kept, bytes);
+        }
+        return { bytes, mime: "image/webp" };
+      } catch {
+        return picture;
+      }
     },
     // The book's contents: chapters, their sections, and the pages in each.
     contents(id) {

@@ -111,6 +111,11 @@ export type KrakenApi = {
   addDecal: (name: string, bytes: Uint8Array, kind?: "decal" | "wallpaper" | "gmicon" | "tile" | "tower") => Promise<KrakenDecal>;
   openDecalFolder: (kind?: "decal" | "wallpaper" | "gmicon" | "tile" | "tower") => Promise<string>;
   openKrakenFolder?: (kind?: "" | "dice" | "towers" | "gmicons" | "decals" | "wallpapers" | "packs") => Promise<string>;
+  // The GM's Folders window.
+  contentFolders?: () => Promise<{ root: string; folders: { kind: string; label: string; path: string; files: number }[] }>;
+  contentAdd?: (kind: string, files: { name: string; bytes: Uint8Array }[]) => Promise<{ added: string[]; refused: string[] }>;
+  contentRefresh?: () => Promise<{ root: string; folders: { kind: string; label: string; path: string; files: number }[] }>;
+  contentOpen?: (kind: string) => Promise<string>;
   pickSounds: (kind: string, group: string) => Promise<KrakenSound[]>;
   addSound: (kind: string, group: string, name: string, bytes: Uint8Array) => Promise<KrakenSound>;
   openSoundFolder: () => Promise<string>;

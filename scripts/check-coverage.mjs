@@ -109,6 +109,7 @@ const MESSAGES = {
   vote: "kraken_vote",
   "vote-cast": "kraken_vote",
   save: "kraken_save",
+  "content-refresh": "kraken_folders",
   "sound-play": "kraken_sound",
   "sound-stop": "kraken_sound",
   ambience: "kraken_sound",

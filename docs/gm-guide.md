@@ -199,7 +199,7 @@ any other way).
   yourself. On a new computer, install Kraken, create that folder, and copy
   the `.kpack` files into it (on Linux, `~/Documents/Kraken VTT/Packs`).
   Kraken's own games' books are packs too. They come with Kraken. The format
-  is in [kraken-pack-format.md](kraken-pack-format.md).
+  is in [kpack-format.md](kpack-format.md).
 - In **Modules**, make a book active to bring its records (NPCs, items,
   encounters, maps, story) into the campaign. A book that is not active is
   off limits: its pages, pictures, maps and records open only once it is. A players' book can be shared
