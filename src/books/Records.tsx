@@ -1,3 +1,4 @@
+import { categoryOf, categoryOrder } from "../../shared/records/categorize.mjs";
 import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import { inlineRollNodes } from "../ui/InlineRolls";
 import type { QuickSlot, Session, TableRecord } from "../session/useSession";
@@ -177,20 +178,41 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
   const [status, setStatus] = useState("");
   const [newName, setNewName] = useState("");
   const wanted = search.trim().toLowerCase();
-  const rows = all
-    .filter((record) => listOf(record) === list && (!wanted || record.name.toLowerCase().includes(wanted)) && (!sharedOnly || shared(record)))
-    .sort((a, b) => a.name.localeCompare(b.name));
-  // FG's master index: under each book's name (the campaign's own first),
-  // then the book's own categories.
+  // Grouped by type (Weapons, Armor & Shields...; Humanoids, Undead...; Level 1...) or by book; filtered by either.
+  const [groupChoice, setGroupBy] = useState<"type" | "book" | null>(null);
+  const [typeWanted, setTypeWanted] = useState("");
+  const [bookWanted, setBookWanted] = useState("");
+  // Another list: its own types and books, so the filters start again.
+  useEffect(() => {
+    setTypeWanted("");
+    setBookWanted("");
+    setGroupBy(null);
+  }, [list]);
+  const inList = useMemo(() => all.filter((record) => listOf(record) === list).map((record) => ({ record, ...categoryOf(record), book: record.source || "Campaign" })), [all, list]);
+  // Lists with types of their own (items, creatures, spells) start by type; the rest by book.
+  const typed = inList.some((row) => ["item", "npc", "spell", "spelldesc"].includes(row.record.type));
+  const groupBy = groupChoice ?? (typed ? "type" : "book");
+  const typeCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const row of inList) if (row.category && (!bookWanted || row.book === bookWanted)) counts.set(row.category, (counts.get(row.category) ?? 0) + 1);
+    return [...counts].sort((a, b) => categoryOrder(a[0], b[0]));
+  }, [inList, bookWanted]);
+  const bookNames = useMemo(() => [...new Set(inList.map((row) => row.book))].sort((a, b) => (a === "Campaign" ? -1 : b === "Campaign" ? 1 : a.localeCompare(b))), [inList]);
+  const picked = inList
+    .filter((row) => (!wanted || row.record.name.toLowerCase().includes(wanted)) && (!sharedOnly || shared(row.record)) && (!typeWanted || row.category === typeWanted) && (!bookWanted || row.book === bookWanted))
+    .sort((a, b) => a.record.name.localeCompare(b.record.name));
+  const rows = picked.map((row) => row.record);
+  // By type: the type, then its kind within (Martial Melee, Magic; Human; Evocation). By book: the book, then the type.
   const groups = new Map<string, Map<string, TableRecord[]>>();
-  for (const record of rows.slice(0, LIMIT)) {
-    const book = record.source || "Campaign";
-    const category = typeof record.data.fgCategory === "string" && record.data.fgCategory !== book ? record.data.fgCategory : "";
-    const inBook = groups.get(book) ?? new Map<string, TableRecord[]>();
-    inBook.set(category, [...(inBook.get(category) ?? []), record]);
-    groups.set(book, inBook);
+  for (const row of picked.slice(0, LIMIT)) {
+    const head = groupBy === "type" ? row.category || row.book : row.book;
+    const sub = groupBy === "type" ? (row.category ? row.sub : "") : row.category;
+    const inHead = groups.get(head) ?? new Map<string, TableRecord[]>();
+    inHead.set(sub, [...(inHead.get(sub) ?? []), row.record]);
+    groups.set(head, inHead);
   }
-  const books = [...groups.keys()].sort((a, b) => (a === "Campaign" ? -1 : b === "Campaign" ? 1 : a.localeCompare(b)));
+  for (const [head, subs] of groups) groups.set(head, new Map([...subs].sort((a, b) => (a[0] === "" ? -1 : b[0] === "" ? 1 : groupBy === "book" ? categoryOrder(a[0], b[0]) : a[0].localeCompare(b[0])))));
+  const books = [...groups.keys()].sort((a, b) => (groupBy === "type" ? categoryOrder(a, b) : a === "Campaign" ? -1 : b === "Campaign" ? 1 : a.localeCompare(b)));
   const recordMenu = useRecordMenu(session);
 
   return (
@@ -206,6 +228,29 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
       <section className="records-main">
         <div className="records-head">
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search" aria-label="Search the list" />
+          {typeCounts.length > 1 ? (
+            <select aria-label="Type" data-filter="type" value={typeWanted} onChange={(event) => setTypeWanted(event.target.value)} title="Show one type">
+              <option value="">All types</option>
+              {typeCounts.map(([name, count]) => (
+                <option key={name} value={name}>
+                  {name} ({count})
+                </option>
+              ))}
+            </select>
+          ) : null}
+          {bookNames.length > 1 ? (
+            <select aria-label="Book" data-filter="book" value={bookWanted} onChange={(event) => setBookWanted(event.target.value)} title="Show one book's">
+              <option value="">All books</option>
+              {bookNames.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          ) : null}
+          <button type="button" className="ghost" data-action="records-group" title={groupBy === "type" ? "Grouped by type: click to group by book" : "Grouped by book: click to group by type"} onClick={() => setGroupBy(groupBy === "type" ? "book" : "type")}>
+            {groupBy === "type" ? "By type" : "By book"}
+          </button>
           {gm ? (
             <button type="button" className={sharedOnly ? "on" : ""} aria-pressed={sharedOnly} data-action="records-shared-only" title="Filter by sharing mode" onClick={() => setSharedOnly(!sharedOnly)}>
               {sharedOnly ? "Shared" : "All"}

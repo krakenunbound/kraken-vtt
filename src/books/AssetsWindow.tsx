@@ -1,9 +1,10 @@
+import { categoryOf, categoryOrder } from "../../shared/records/categorize.mjs";
 import { useEffect, useMemo, useState } from "react";
 import type { BookContents, BookInfo, Session } from "../session/useSession";
 import { imageWindow } from "../table/imageWindow";
 import { Icon } from "../ui/icons";
 
-// The GM's Assets (FG's): every picture of every active book and art pack, by
+// The GM's Assets: every picture of every active book and art pack, by
 // book and folder, record or not (Blender Props Test's props, a book's
 // art). A picture's preview: share it with the players, make it the table's
 // background decal, or make it a map: it joins Campaign > Images and opens in
@@ -42,9 +43,18 @@ export function AssetsWindow({ session }: { session: Session }) {
   const book = books?.find((item) => item.id === bookId) ?? null;
   const files = contents[bookId] ?? [];
   // The folder's own folders and pictures (a search looks through them all).
+  // Each picture's kind from its folders and name (maps/, tokens/, portraits/, handouts/...).
+  const [kind, setKind] = useState("");
+  const kinds = useMemo(() => {
+    const of = new Map<string, string>();
+    for (const file of files) of.set(file, categoryOf({ type: "image", name: nameOf(file), data: { fgCategory: file.split("/").slice(0, -1).join(" ") } } as never).category);
+    return of;
+  }, [files]);
+  const kindCounts = useMemo(() => [...[...kinds.values()].reduce((counts, name) => counts.set(name, (counts.get(name) ?? 0) + 1), new Map<string, number>())].sort((a, b) => categoryOrder(a[0], b[0])), [kinds]);
   const view = useMemo(() => {
     const wanted = search.trim().toLowerCase();
-    if (wanted) return { folders: [], pictures: files.filter((file) => file.toLowerCase().includes(wanted)) };
+    // A kind chosen, or a search: every such picture in the book, whatever its folder.
+    if (wanted || kind) return { folders: [], pictures: files.filter((file) => (!wanted || file.toLowerCase().includes(wanted)) && (!kind || kinds.get(file) === kind)).sort() };
     const prefix = folder ? `${folder}/` : "";
     const folders = new Set<string>();
     const pictures: string[] = [];
@@ -56,7 +66,7 @@ export function AssetsWindow({ session }: { session: Session }) {
       else pictures.push(file);
     }
     return { folders: [...folders].sort(), pictures: pictures.sort() };
-  }, [files, folder, search]);
+  }, [files, folder, search, kind, kinds]);
   const crumbs = folder ? folder.split("/") : [];
   const act = async (what: string, run: () => Promise<unknown>) => {
     setStatus(`${what}…`);
@@ -87,13 +97,23 @@ export function AssetsWindow({ session }: { session: Session }) {
   return (
     <div className="assets-window" data-assets>
       <div className="assets-head">
-        <select aria-label="Book" value={bookId} onChange={(event) => (setBookId(event.target.value), setFolder(""), setPicked(null))}>
+        <select aria-label="Book" value={bookId} onChange={(event) => (setBookId(event.target.value), setFolder(""), setKind(""), setPicked(null))}>
           {(books ?? []).map((item) => (
             <option key={item.id} value={item.id}>
               {item.title || item.name}
             </option>
           ))}
         </select>
+        {kindCounts.length > 1 ? (
+          <select aria-label="Kind" data-filter="type" value={kind} onChange={(event) => setKind(event.target.value)} title="Show one kind of picture from the whole book">
+            <option value="">All kinds (by folder)</option>
+            {kindCounts.map(([name, count]) => (
+              <option key={name} value={name}>
+                {name} ({count})
+              </option>
+            ))}
+          </select>
+        ) : null}
         <input type="search" placeholder="Search" aria-label="Search assets" value={search} onChange={(event) => setSearch(event.target.value)} />
       </div>
       {books && books.length === 0 ? <p className="hint">No book is active: make your books and art packs active in Modules.</p> : null}

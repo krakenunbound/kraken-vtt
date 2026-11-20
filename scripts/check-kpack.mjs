@@ -83,4 +83,19 @@ pack(path.join(bundled, "D&D 5E"), "Shipped Book", [inlineIndex].map((record) =>
   assert(shelf.page(named("Inline Book").id, "inside").name === "Kept inside", "and a link to it by name");
   done.push("packs in game folders (the GM's and shipped)", "pages kept in the contents", "no empty books");
 }
+// Lists by type (shared/records/categorize.mjs): the same words whatever the book wrote.
+{
+  const { categoryOf } = await import("../shared/records/categorize.mjs");
+  const cat = (type, data, name = "X") => categoryOf({ type, name, data });
+  assert(cat("item", { type: "Weapon", subtype: "Martial Melee Weapons" }).category === "Weapons", "a weapon");
+  assert(cat("item", { type: "Weapon", subtype: "Magic" }).category === "Weapons" && cat("item", { type: "Weapon", subtype: "Magic" }).sub === "Magic", "a magic weapon is a weapon, marked magic");
+  assert(cat("item", { type: "Armor", subtype: "Magic" }).category === "Armor & Shields", "armour");
+  assert(cat("item", { type: "Wondrous Item" }).category === "Magic Items" && cat("item", { type: "Potion", subtype: "Magic" }).category === "Potions & Oils", "wondrous items and potions");
+  assert(cat("item", { type: "Gem" }).category === "Treasure" && cat("item", { type: "Goods and Services", subtype: "Adventuring Gear" }).category === "Food, Drink & Lodging", "treasure, goods and services");
+  assert(cat("npc", { type: "Medium Humanoid (Human)" }).category === "Humanoids" && cat("npc", { type: "Medium Humanoid (Human)" }).sub === "Human", "a humanoid, its kind");
+  assert(cat("npc", { type: "Huge Dragon" }).category === "Dragons" && cat("npc", { type: "Demon" }).category === "Fiends", "dragons and fiends");
+  assert(cat("spell", { level: 3, school: "Evocation" }).category === "Level 3" && cat("spell", { level: 0 }).category === "Cantrips & Orisons", "spells by level");
+  assert(cat("image", { fgCategory: "Portraits" }).category === "Portraits" && cat("image", { fgCategory: "Book illustrations" }).category === "Illustrations" && cat("image", { image: { grid: "on" } }).category === "Maps", "pictures by kind");
+  done.push("lists by type");
+}
 console.log(`ok kpack: ${done.join("; ")}`);

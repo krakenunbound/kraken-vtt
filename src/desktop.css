@@ -1712,8 +1712,10 @@ textarea.cc-field.tall { min-height: 220px; }
 .records-lists button small { color: var(--muted); }
 .records-lists button.on { border-color: var(--brass-dim); background: var(--brass-soft); color: var(--brass); }
 .records-main { display: flex; flex-direction: column; min-height: 0; padding: 8px; gap: 6px; }
-.records-head { display: flex; gap: 6px; }
-.records-head input { flex: 1; }
+.records-head { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.records-head input { flex: 1 1 10rem; min-width: 8rem; }
+.records-head select { flex: 0 1 auto; max-width: 14rem; min-width: 0; }
+.assets-head { flex-wrap: wrap; }
 .records-head button.on { border-color: var(--brass); color: var(--brass); }
 .records-list { overflow: auto; flex: 1; }
 .records-row { display: flex; align-items: center; gap: 4px; }
