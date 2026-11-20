@@ -159,6 +159,7 @@ async function startPlaced(id: string) {
 // When each triggered sound's folder last played (a burst plays once).
 const recentlyPlayed = new Map<string, number>();
 
+let scapeGen = 0;
 export const sound = {
   subscribe(listener: () => void) {
     listeners.add(listener);
@@ -221,6 +222,13 @@ export const sound = {
     }
     playingChanged();
   },
+  // The table left: its music, ambience and placed sounds stop, and any still loading never start.
+  leaveTable() {
+    scapeGen += 1;
+    void sound.setScape({ ambience: [], music: null } as unknown as Soundscape);
+    sound.setPlaced([]);
+    sound.stopAll();
+  },
   stopAll() {
     for (const source of playing.keys()) {
       try {
@@ -236,6 +244,8 @@ export const sound = {
   async setScape(scape: Soundscape) {
     const ctx = graph();
     if (!ctx) return;
+    // The newest soundscape wins: one still loading when another arrives (or the table is left) stops there.
+    const gen = ++scapeGen;
     const wanted = new Map(scape.ambience.map((item) => [item.id, item.volume]));
     for (const [id, loop] of ambience) {
       if (wanted.has(id)) {
@@ -257,6 +267,7 @@ export const sound = {
       if (ambience.has(id)) continue;
       try {
         const data = await buffer(id);
+        if (gen !== scapeGen) return;
         if (ambience.has(id)) continue;
         const source = ctx.createBufferSource();
         source.buffer = data;

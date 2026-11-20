@@ -576,6 +576,11 @@ export function useSession() {
     setReconnecting(null);
     setBans([]);
     setViewPull(null);
+    // Left for good (or sent back to Join): the table's music, ambience and placed sounds stop, and its
+    // read-aloud passages go with it (a reconnect to the same table keeps them: it never comes here).
+    sound.leaveTable();
+    setReadAloudNow(null);
+    setReadAloudLog([]);
     lastJoin.current = null;
   }, []);
 

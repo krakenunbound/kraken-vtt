@@ -223,6 +223,8 @@ try {
 
   // The GM's hidden rolls: combat only (the default), silent, or all.
   await wait();
+  // (A plain 10: a natural 1 or 20 would sound the fumble or the critical instead.)
+  agent.dice.force([10, 10]);
   gm.send({ type: "roll", formula: "1d20", label: "[ATTACK] (M) Mace", mode: "gm" });
   gm.send({ type: "roll", formula: "1d20", label: "Perception", mode: "gm" });
   await settle();

@@ -392,7 +392,7 @@ function wizard35Options(value) {
 // The session's chat kept with the campaign (FG keeps the whole session); a joining seat gets the last JOIN_CHAT.
 const MAX_CHAT = 2000;
 const JOIN_CHAT = 300;
-const CHAT_KINDS = new Set(["say", "emote", "action", "ooc", "story", "mood"]);
+const CHAT_KINDS = new Set(["say", "emote", "action", "ooc", "story", "mood", "readaloud"]);
 
 function savedChat(value) {
   if (!Array.isArray(value)) return [];
@@ -402,7 +402,12 @@ function savedChat(value) {
     .map((line) => ({
       id: text(line.id, "").slice(0, 32),
       from: text(line.from, "Player").slice(0, 24),
-      text: text(line.text, "").slice(0, 500),
+      text: text(line.text, "").slice(0, line.kind === "readaloud" ? 6000 : 500),
+      // Its sender's seat (a name, "@gm"): theirs again after a reload; a language and who understands it; a passage's title.
+      ...(typeof line.sentBy === "string" ? { sentBy: line.sentBy.slice(0, 40) } : {}),
+      ...(typeof line.lang === "string" ? { lang: line.lang.slice(0, 40) } : {}),
+      ...(Array.isArray(line.understood) ? { understood: line.understood.filter((name) => typeof name === "string").slice(0, 200) } : {}),
+      ...(typeof line.title === "string" ? { title: line.title.slice(0, 120) } : {}),
       at: num(line.at, 0),
       ...(line.roll && typeof line.roll === "object" ? { roll: line.roll } : {}),
       ...(line.secret ? { secret: true } : {}),
@@ -621,7 +626,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       ambience: (Array.isArray(scape.ambience) ? scape.ambience : []).filter((item) => typeof item?.id === "string").slice(0, 8).map((item) => ({ id: item.id.slice(0, 300), volume: level(item) })),
       // When the track started (the host's clock), so every seat hears the same bar; a folder's playlist plays in
       // order or shuffled, and repeats or stops at its end (docs/feature-parity.md S9).
-      music: scape.music && typeof scape.music.id === "string" ? { id: scape.music.id.slice(0, 300), volume: level(scape.music), loop: scape.music.loop !== false, group: typeof scape.music.group === "string" ? scape.music.group.slice(0, 300) : null, startedAt: Number.isFinite(Number(scape.music.startedAt)) ? Number(scape.music.startedAt) : Date.now(), order: scape.music.order === "order" ? "order" : "shuffle", repeat: scape.music.repeat !== false } : null,
+      music: scape.music && typeof scape.music.id === "string" ? { id: scape.music.id.slice(0, 300), volume: level(scape.music), loop: scape.music.loop !== false, group: typeof scape.music.group === "string" ? scape.music.group.slice(0, 300) : null, startedAt: Number.isFinite(Number(scape.music.startedAt)) ? Number(scape.music.startedAt) : Date.now(), order: scape.music.order === "order" ? "order" : "shuffle", repeat: scape.music.repeat !== false, played: Array.isArray(scape.music.played) ? scape.music.played.filter((id) => typeof id === "string").slice(-500) : [] } : null,
     };
   };
   let soundscape = cleanScape(saved.sound);
@@ -882,7 +887,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   function heard(client, line) {
     if (!line.lang || client.role === "dm") return line;
     const { understood, ...rest } = line;
-    if (line.id === client.id) return rest;
+    if (line.id === client.id || (typeof line.sentBy === "string" && line.sentBy === seatKey(client))) return rest;
     const mine = records.list({ type: "character", owner: client.name }).map((record) => record.name);
     if (mine.some((name) => (understood ?? []).includes(name))) return rest;
     return { ...rest, text: languages.garble(line.text, line.lang), garbled: true };
@@ -1162,13 +1167,14 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   const sameName = (a, b) => String(a ?? "").toLowerCase() === String(b ?? "").toLowerCase();
   const seesLine = (client, line) => {
     // A self roll (Foundry's /selfroll) is the roller's alone.
-    if (line.self) return client.id === line.id;
+    const sentIt = client.id === line.id || (typeof line.sentBy === "string" && line.sentBy === seatKey(client));
+    if (line.self) return sentIt;
     // A whisper: who sent it, who it is to, and the GM (as FG's GM sees every whisper).
     // A whisper to a character reaches whoever holds it.
     if (line.to)
       return (
         client.role === "dm" ||
-        client.id === line.id ||
+        sentIt ||
         // To a seat by its name (a player, the GM's "GM"): that seat; otherwise to whoever holds the character of that name.
         line.to.some((name) => sameName(name, client.name) || (!RESERVED_NAMES.has(String(name).toLowerCase()) && ![...clients.values()].some((seat) => sameName(seat.name, name)) && records.list({ type: "character", owner: client.name }).some((record) => sameName(name, record.name))))
       );
@@ -1214,6 +1220,8 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     if (linked) return linked;
     return records.list({ type: "npc" }).find((record) => sameName(record.name, name)) ?? null;
   }
+  // A seat by who sits in it, not by its connection (new on every reload): the GM, or a player's name.
+  const seatKey = (client) => (client.role === "dm" ? "@gm" : String(client.name ?? "").toLowerCase());
   function addChat(entry) {
     // The roller's roll mode (the chat bar's): the GM and them, the GM alone, or them alone.
     const asked = entry.roll && !entry.secret && !entry.self && !entry.to && !entry.tower ? modifiers.modeNow() : null;
@@ -1229,6 +1237,10 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
           if (ws) send(ws, { type: "chat", id: seat.id, from: entry.from, text: `[BLIND] ${String(entry.roll.label ?? "").slice(0, 120)} [${entry.roll.formula}]`.replace(/\s+/g, " "), at: Date.now(), tower: true });
         }
       }
+    }
+    if (!entry.sentBy) {
+      const sender = [...clients.values()].find((client) => client.id === entry.id);
+      if (sender) entry.sentBy = seatKey(sender);
     }
     // A roll goes out with the throw its roller just made, for the 3D dice.
     // (A tracker's roll is the agent's: it is thrown by the seat that just asked for it.)
@@ -3842,25 +3854,42 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     if (action === "volume" && soundscape.music) return setSoundscape({ ...soundscape, music: { ...soundscape.music, volume: extra.volume } });
     // The playlist's order and repeat: as asked, else as it was.
     const current = soundscape.music;
-    if (action === "playlist" && current) return setSoundscape({ ...soundscape, music: { ...current, ...(extra.order ? { order: extra.order } : {}), ...(typeof extra.repeat === "boolean" ? { repeat: extra.repeat } : {}) } });
+    if (action === "playlist" && current) {
+      const next = { ...current, ...(extra.order ? { order: extra.order } : {}), ...(typeof extra.repeat === "boolean" ? { repeat: extra.repeat } : {}) };
+      // A folder of one track loops with Repeat, and plays out without it.
+      if (current.group && typeof extra.repeat === "boolean") {
+        const count = sounds?.list("music").filter((item) => `music/${item.group}` === current.group || `music/${item.group}`.startsWith(`${current.group}/`)).length ?? 0;
+        if (count <= 1) next.loop = extra.repeat;
+      }
+      return setSoundscape({ ...soundscape, music: next });
+    }
     const order = extra.order === "order" || extra.order === "shuffle" ? extra.order : (current?.order ?? "shuffle");
     const repeat = typeof extra.repeat === "boolean" ? extra.repeat : (current?.repeat ?? true);
     const wanted = String((action === "next" ? current?.group : idOrGroup) ?? idOrGroup ?? "");
     const fromFolder = sounds?.has(wanted) ? null : wanted;
     const inFolder = fromFolder ? sounds.list("music").filter((item) => `music/${item.group}` === fromFolder || `music/${item.group}`.startsWith(`${fromFolder}/`)).sort((a, b) => a.id.localeCompare(b.id)) : [];
     let picked;
+    // The tracks of this pass through the folder already played (shuffled: each once before any again).
+    let played = action === "next" && current?.id ? [...(current.played ?? []), current.id] : [];
     if (fromFolder && order === "order" && inFolder.length) {
       // In order: the first track, or the one after the current; past the last, from the top again or stop.
       const at = action === "next" ? inFolder.findIndex((item) => item.id === current?.id) + 1 : 0;
       if (at >= inFolder.length && !repeat) return setSoundscape({ ...soundscape, music: null });
       picked = inFolder[at % inFolder.length];
-    } else {
-      picked = sounds?.pick(wanted);
-      for (let tries = 0; picked && inFolder.length > 1 && picked.id === current?.id && tries < 8; tries++) picked = sounds.pick(wanted);
-    }
+    } else if (fromFolder && inFolder.length) {
+      let left = inFolder.filter((item) => !played.includes(item.id));
+      if (left.length === 0) {
+        // The whole folder played: round again (not the same track twice running), or stop.
+        if (!repeat) return setSoundscape({ ...soundscape, music: null });
+        played = [];
+        left = inFolder.length > 1 ? inFolder.filter((item) => item.id !== current?.id) : inFolder;
+      }
+      picked = left[Math.floor(Math.random() * left.length)];
+    } else picked = sounds?.pick(wanted);
     if (!picked) throw new Error(`No music "${wanted}".`);
-    const loop = extra.loop !== false && (!fromFolder || inFolder.length <= 1);
-    return setSoundscape({ ...soundscape, music: { id: picked.id, volume: extra.volume ?? current?.volume ?? 0.7, loop, group: fromFolder, startedAt: Date.now(), order, repeat } });
+    // A track on its own loops; a folder of one loops only with Repeat on (else it plays once and stops).
+    const loop = extra.loop !== false && (!fromFolder || (inFolder.length <= 1 && repeat));
+    return setSoundscape({ ...soundscape, music: { id: picked.id, volume: extra.volume ?? current?.volume ?? 0.7, loop, group: fromFolder, startedAt: Date.now(), order, repeat, played } });
   }
   function setTriggers(list) {
     const cleaned = list === "default" ? defaultTriggers() : cleanTriggers(list);

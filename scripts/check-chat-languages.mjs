@@ -97,6 +97,13 @@ try {
   assert(orcLine && orcLine.text !== said, "nor the words of a language its characters do not know");
   done.push("the chat a joining seat is sent is heard the same way");
 
+  // Audit 066: a line in a language keeps it when the campaign is saved and opened again.
+  {
+    const kept = server.persisted().chat.filter((line) => line.lang);
+    assert(kept.length > 0 && kept.every((line) => Array.isArray(line.understood)), `languages are saved with their lines: ${JSON.stringify(kept.slice(0, 1))}`);
+    const again = createTableServer({ ruleset: "D&D 5E", saved: { chat: server.persisted().chat } });
+    assert(again.persisted().chat.filter((line) => line.lang).length === kept.length, "and read back");
+  }
   for (const seat of [gm, ann, bob, carl]) seat.ws.close();
   console.log(`check-chat-languages: ${done.length} groups passed`);
   for (const line of done) console.log(`  ok ${line}`);
