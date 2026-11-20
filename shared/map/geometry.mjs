@@ -122,7 +122,7 @@ export function tokenSquares(space, unitsPerSquare = 5) {
 // Distance from a to b in the scene's units. diagonal is FG's distance
 // multiplier for a diagonal step (HRDD): 1 counts every square as one,
 // 1.5 is the 5-10-5 variant, "raw" is a straight-line measure.
-/** @param {any} scene @param {any} a @param {any} b @param {number | string} [diagonal] @param {any} [rest] */
+/** @param {any} scene @param {any} a @param {any} b @param {number | string} [diagonalIn] @param {any} [rest] */
 export function gridDistance(scene, a, b, diagonalIn = 1) {
   const size = gridSize(scene);
   const per = Number(scene?.grid?.distance) > 0 ? Number(scene.grid.distance) : 5;
@@ -203,7 +203,7 @@ export function pathDistance(scene, points, diagonal = 1, costAt = null) {
 
 // A distance with height in it (elevation in the scene's units, as FG's and
 // Foundry's token elevation): the climb counts as a third axis, by the same rule.
-/** @param {any} scene @param {any} a @param {any} b @param {number | string} [diagonal] @param {any} [rest] */
+/** @param {any} scene @param {any} a @param {any} b @param {number | string} [diagonalIn] @param {any} [rest] */
 export function gridDistance3(scene, a, b, diagonal = 1, rise = 0) {
   const flat = gridDistance(scene, a, b, diagonal);
   const up = Math.abs(Number(rise) || 0);
