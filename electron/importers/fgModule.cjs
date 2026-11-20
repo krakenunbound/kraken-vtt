@@ -425,7 +425,7 @@ function parseModule(file, only) {
   }
   const files = readFiles(file, { xmlOnly: true });
   const definitionBytes = files.get("definition.xml");
-  if (!definitionBytes) throw new Error("That is not a Fantasy Grounds module (no definition.xml).");
+  if (!definitionBytes) throw new Error("That is not a .mod module (no definition.xml).");
   const definition = parseXml(strFromU8(definitionBytes));
   const field = (tag) => {
     const found = elements(definition).find((node) => node.tagName === tag);

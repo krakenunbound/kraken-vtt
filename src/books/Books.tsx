@@ -297,7 +297,7 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
     : search
       ? "No book has that name."
       : activation
-        ? "No Fantasy Grounds modules for this campaign's game were found on this computer."
+        ? "No books for this campaign's game yet: add packs (Folders, or Modules > Packs)."
         : "No books are active in this campaign yet. Make them active in Modules.";
   return (
     <div className="books-window">
@@ -308,7 +308,7 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
               Activation
             </button>
             {canPack ? (
-              <button type="button" role="tab" aria-selected={tab === "packs"} className={tab === "packs" ? "dice-chip on" : "dice-chip"} data-books-tab="packs" title="Your books in Maelstrom's own files, to use on any computer without Fantasy Grounds" onClick={() => setTab("packs")}>
+              <button type="button" role="tab" aria-selected={tab === "packs"} className={tab === "packs" ? "dice-chip on" : "dice-chip"} data-books-tab="packs" title="Your books in Maelstrom's own files (.kpack), to use on any computer" onClick={() => setTab("packs")}>
                 Packs
               </button>
             ) : null}

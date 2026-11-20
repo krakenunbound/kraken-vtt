@@ -119,7 +119,9 @@ let bookShelf = null;
 // A test's own shelf of modules (KRAKEN_BOOKS) has its own packs folder too, never the GM's.
 process.env.KRAKEN_PACKS ||= process.env.KRAKEN_BOOKS ? path.join(USER_DATA, "packs") : packs.packFolder();
 function books() {
-  if (!bookShelf) bookShelf = createBookShelf({ folder: process.env.KRAKEN_BOOKS || path.join(fgDataFolder(), "modules"), cache: path.join(USER_DATA, "books-index.json"), also: [packs.BUNDLED, path.join(APP_DIR, "games", "modules")], packsFolder: packs.packFolder() });
+  // The GM's books are their packs (and those Maelstrom ships); FG's modules folder is read only to make packs from
+  // (Modules > Packs), never put on the shelf by itself. A test's own shelf (KRAKEN_BOOKS) lists its modules.
+  if (!bookShelf) bookShelf = createBookShelf({ folder: process.env.KRAKEN_BOOKS || path.join(fgDataFolder(), "modules"), cache: path.join(USER_DATA, "books-index.json"), also: [packs.BUNDLED, path.join(APP_DIR, "games", "modules")], packsFolder: packs.packFolder(), modulesShown: Boolean(process.env.KRAKEN_BOOKS) });
   return bookShelf;
 }
 
@@ -169,7 +171,7 @@ function makePacks(ids) {
   const queued = [];
   for (const id of wanted) {
     const found = files.find((item) => !item.pack && (item.id === id || item.name === id || item.title === id));
-    if (!found) throw new Error(`No FG module "${id}" on this computer.`);
+    if (!found) throw new Error(`No module "${id}" on this computer.`);
     if (packJob.current === found.id || packJob.queue.includes(found.id)) continue;
     packJob.failed = packJob.failed.filter((failed) => failed.id !== found.id);
     packJob.queue.push(found.id);

@@ -47,7 +47,7 @@ export function PacksPanel({ ruleset }: { ruleset: string }) {
   return (
     <div className="packs-panel" data-packs>
       <p className="hint">
-        Your Fantasy Grounds books as <b>Maelstrom packs</b>: one file per book, with its pages, records, maps (walls and doors too) and pictures. Copy the packs folder to any computer with Maelstrom and the books open there, with no Fantasy Grounds and no .mod files. A pack is yours: keep it to yourself.
+        Your .mod modules as <b>Maelstrom packs</b>: one file per book, with its pages, records, maps (walls and doors too) and pictures. Copy the packs folder to any computer with Maelstrom and the books open there, with no .mod files. A pack is yours: keep it to yourself.
       </p>
       <div className="packs-bar">
         <button type="button" className="ghost" data-action="packs-folder" title={view?.folder ?? ""} onClick={() => void api.openFolder()}>
@@ -70,10 +70,10 @@ export function PacksPanel({ ruleset }: { ruleset: string }) {
       {error ? <p className="hint">{error}</p> : null}
       <div className="packs-list" role="list">
         {!view ? <p className="hint">Looking for your books…</p> : null}
-        {view && view.books.length === 0 ? <p className="hint">No Fantasy Grounds books for {wanted || "any game"} on this computer.</p> : null}
+        {view && view.books.length === 0 ? <p className="hint">No .mod modules for {wanted || "any game"} on this computer.</p> : null}
         {(view?.books ?? []).map((book) => {
           const failed = book.state === "failed" ? failedOf(book.id) : "";
-          const status = book.state === "making" ? "Making…" : book.state === "waiting" ? "Waiting" : failed ? "Could not make it" : book.packOnly ? "Pack (no FG module here)" : book.pack ? (book.pack.current ? "Pack made" : "Pack older than the module") : "No pack yet";
+          const status = book.state === "making" ? "Making…" : book.state === "waiting" ? "Waiting" : failed ? "Could not make it" : book.packOnly ? "Pack (no .mod here)" : book.pack ? (book.pack.current ? "Pack made" : "Pack older than the module") : "No pack yet";
           return (
             <div key={book.id} className={book.pack?.current ? "packs-row done" : "packs-row"} role="listitem" data-pack-book={book.id} data-pack-state={book.state || (book.pack ? (book.pack.current ? "made" : "old") : "none")}>
               <span className="packs-title">

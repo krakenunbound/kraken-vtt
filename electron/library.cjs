@@ -104,7 +104,7 @@ async function addBattle(table, fgPath, { place = true } = {}) {
     });
     added.push(...list.map((entry) => entry.name));
   }
-  table.say(`[ENCOUNTER] ${battle.name}: ${added.join(", ")}${frame || !battle.source ? "" :" (no FG map open: tokens not placed)"}.`, "Combat", true);
+  table.say(`[ENCOUNTER] ${battle.name}: ${added.join(", ")}${frame || !battle.source ? "" :" (no map open: tokens not placed)"}.`, "Combat", true);
   return { encounter: battle.name, added };
 }
 

@@ -243,7 +243,7 @@ class Source {
       this.path = path.join(this.dataFolder, "modules", key);
       if (isFile(this.path) && isZipfile(this.path)) {
         this.zipped = true;
-        if (_encrypted(zipDirectory(this.path))) throw new Error("This module is encrypted by FG and cannot be opened.");
+        if (_encrypted(zipDirectory(this.path))) throw new Error("This module is encrypted and cannot be opened.");
       } else if (isFile(path.join(this.path, "definition.xml"))) this.zipped = false;
       else throw new Error(`Module not found: ${key}`);
     } else throw new Error("Unknown source type.");

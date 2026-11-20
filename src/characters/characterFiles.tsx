@@ -117,7 +117,7 @@ export function ExportButton({ record }: { record: TableRecord }) {
               save(`${record.name}.xml`, toFgXml(record), "application/xml");
             }}
           >
-            Fantasy Grounds (.xml)
+            XML character (.xml)
           </button>
         </span>
       ) : null}

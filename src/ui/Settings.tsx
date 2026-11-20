@@ -294,7 +294,7 @@ function StudioFoldersSetting() {
     void kraken.studioSettings?.(patch).then(setSettings).catch((reason: Error) => setError(reason.message));
   const lists: [keyof Pick<StudioSettings, "dungeondraftFolders" | "packFolders">, "dd" | "pack", string, string][] = [
     ["dungeondraftFolders", "dd", "Dungeondraft packs", "Folders holding .dungeondraft_pack files"],
-    ["packFolders", "pack", "Art packs", "Folders holding art packs (.mod); Fantasy Grounds' modules folder is read anyway"],
+    ["packFolders", "pack", "Art packs", "Folders holding art packs (.mod)"],
   ];
   return (
     <SettingsSection title="Map Studio art" setting="studio-folders">

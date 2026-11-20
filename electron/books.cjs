@@ -282,7 +282,9 @@ const byOrder = (object) => Object.values(object && typeof object === "object" ?
 
 // also: more folders of modules (the books Kraken ships, content/modules).
 // packsFolder: the GM's Kraken packs (Documents/Kraken VTT/Packs).
-function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
+// modulesShown false: the modules in \`folder\` (Fantasy Grounds' modules folder) are not books on the shelf, only
+// files to make packs from (files()); the shelf is the packs and the books Maelstrom ships.
+function createBookShelf({ folder, cache = "", also = [], packsFolder = "", modulesShown = true }) {
   let known = null;
   let every = [];
   const opened = new Map(); // id -> the read book, the last few
@@ -376,7 +378,9 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
     // pack, unless the module is newer (the GM changed it since).
     every = Object.values(next);
     const books = new Map();
+    const fgFolder = path.resolve(folder) + path.sep;
     for (const info of every) {
+      if (!modulesShown && !info.pack && path.resolve(info.file).startsWith(fgFolder)) continue;
       const other = books.get(info.name);
       if (!other) books.set(info.name, info);
       else {

@@ -324,7 +324,7 @@ function toCastles(sheet, library) {
 // fgXml: turns FG XML text into JSON (the host's convertXml).
 export function readCharacterFile(fileText, library, { fgXml } = {}) {
   const format = detectFormat(fileText);
-  if (!format) throw new Error("That file is not a character Kraken can read (Kraken, Fantasy Grounds XML, Foundry or Roll20 JSON).");
+  if (!format) throw new Error("That file is not a character Maelstrom can read (Maelstrom, XML, Foundry or Roll20 JSON).");
   if (format === "kraken") {
     const file = JSON.parse(fileText);
     if (!file.data || typeof file.data !== "object") throw new Error("That Kraken file has no character in it.");
@@ -332,10 +332,10 @@ export function readCharacterFile(fileText, library, { fgXml } = {}) {
     return { format, character, report: `Imported from Kraken${file.ruleset ? ` (${file.ruleset})` : ""}.` };
   }
   if (format === "fg") {
-    if (!fgXml) throw new Error("Fantasy Grounds files are read by the host.");
+    if (!fgXml) throw new Error("XML character files are read by the host.");
     const root = fgXml(fileText);
     const character = root?.character ?? root;
-    if (!character || typeof character !== "object" || !character.name) throw new Error("That XML has no Fantasy Grounds character in it.");
+    if (!character || typeof character !== "object" || !character.name) throw new Error("That XML has no character in it.");
     // FG's SC C&C sheet: Kraken's own fields, so it comes over whole.
     if (character.attributes && rows(character.packages).length > 0) {
       for (const field of ["portrait", "token"]) delete character[field];

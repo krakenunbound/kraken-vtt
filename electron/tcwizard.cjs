@@ -196,7 +196,7 @@ end
 // One wizard (one player's Traveller in the making).
 function createWizard({ roll, say, user = "", options = {}, records = {}, isHost = true }) {
   const scripts = readScripts();
-  if (!scripts) throw new Error(`Traveller's character wizard needs the GM's FG extension ${EXTENSION} (in the FG extensions folder, or its copy beside the packs).`);
+  if (!scripts) throw new Error(`Traveller's character wizard needs the GM's extension ${EXTENSION} (in the extensions folder, or its copy beside the packs).`);
   const L = lauxlib.luaL_newstate();
   lualib.luaL_openlibs(L);
   lauxlib.luaL_requiref(L, to_luastring("js"), interop.luaopen_js, 1);

@@ -4,11 +4,10 @@
 Your books, one per `.kpack` file: rulebooks, bestiaries, adventures, and map
 and token packs. A campaign shows the packs for its game, plus packs marked for
 any game. To use one, make it active in **Modules**; to read it, open it in
-**Books**. Copy this folder to another computer and every book comes along,
-with no Fantasy Grounds needed there.
+**Books**. Copy this folder to another computer and every book comes along.
 
-Packs are made by Maelstrom, not by hand. In **Modules > Packs**, **Make pack**
-turns a Fantasy Grounds module (.mod) into a pack; **Make again** after you
+Packs are made by Maelstrom (`npm run kpack:make` for a book you convert yourself). In
+**Modules > Packs**, **Make pack** turns a .mod module into a pack; **Make again** after you
 change the module. Maelstrom's own games ship their books as packs too.
 
 ## Names and layout

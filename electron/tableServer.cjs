@@ -2694,7 +2694,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
         const owner = client.role === "dm" ? text(msg.owner, "").slice(0, 24) : client.name;
         importCharacter(agentHandle, msg.text, { owner, seat: client.role === "dm" ? seatOf(client) : { role: "dm", name: client.name } })
           .then(({ record, format, report }) => {
-            addChat({ id: client.id, from: client.name, text: `Imported ${record.name}${client.role === "dm" ? "" : `, level ${Number(record.data?.level) || 0}`} (${format === "fg" ? "Fantasy Grounds" : format === "foundry" ? "Foundry VTT" : format === "roll20" ? "Roll20" : format === "kraken" ? "Kraken" : "a file"}).`, at: Date.now() });
+            addChat({ id: client.id, from: client.name, text: `Imported ${record.name}${client.role === "dm" ? "" : `, level ${Number(record.data?.level) || 0}`} (${format === "fg" ? "an XML file" : format === "foundry" ? "Foundry VTT" : format === "roll20" ? "Roll20" : format === "kraken" ? "Kraken" : "a file"}).`, at: Date.now() });
             answer({ ok: true, id: record.id, report });
           })
           .catch((error) => answer({ ok: false, error: error instanceof Error ? error.message : "Could not import that character." }));

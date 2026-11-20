@@ -1178,7 +1178,7 @@ function subscriptionStatus() {
     accessible: false,
     sourceNames: inventory.map((item) => String(item.Name).replace(/\.dat$/, "")),
     sourceCount: inventory.length,
-    reason: "FG subscription vault files are protected; Map Studio does not decrypt or extract them.",
+    reason: "Encrypted store files are protected; Map Studio does not decrypt or extract them.",
     supportedImportPath: "/api/import",
     readableModPacks: readableMods,
   };

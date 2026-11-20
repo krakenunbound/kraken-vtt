@@ -98,7 +98,7 @@ export function ArtPicker({
           </button>
         </header>
         {failed ? <p className="hint">The host's art library could not be read.</p> : null}
-        {items && items.length === 0 ? <p className="hint">The GM has no {kind}s in Fantasy Grounds' {kind}s folders.</p> : null}
+        {items && items.length === 0 ? <p className="hint">The GM has no {kind}s yet: add them in the Folders window.</p> : null}
         <div className="art-grid">
           {current ? (
             <button type="button" className="art-cell art-clear" onClick={() => onPick(null)} title="No picture">

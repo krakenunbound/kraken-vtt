@@ -1691,7 +1691,7 @@
     "error": "Invalid campaign or module name."
    },
    "bad|module|Locked.mod": {
-    "error": "This module is encrypted by FG and cannot be opened."
+    "error": "This module is encrypted and cannot be opened."
    },
    "bad|module|Broken.mod": {
     "error": "Module not found: Broken.mod"
