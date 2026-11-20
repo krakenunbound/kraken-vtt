@@ -8,14 +8,6 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release.
 
-- **Your own portrait:** the portrait and token picker has **From my computer…**: a player picks a picture (PNG, WebP, JPEG, GIF) or a WebM video portrait of their own; the host keeps it with the campaign (player-art, by player) and everyone at the table sees it. The picker is now a dialog over everything, moved by its handle (or the arrow keys).
-- **Whisper from a portrait:** right-click a character's portrait along the top and choose Whisper: the chat starts `/w Name` for you. Only the two of you and the GM read it. Players get the menu too (on other players' portraits).
-- **The party stash, for trading:** drag an item from your character's inventory onto the party sheet's stash (Inventory tab) to put it in; another player drags it onto their inventory (or presses Take) to have it. Chat says who put and took what.
-- **Local AI for the DM Assistant:** the provider "Local AI (Ollama, LM Studio...)" takes the address of the computer running it (127.0.0.1:11434, or IP:port on your network) and needs no key; its models are listed from the server.
-- **An NPC's picture:** click it to see it full size; right-click to share it with the players (all of them, or one).
-- **Fixed, the character wizard:** it no longer rolls gender, age, height and weight on its own when you reach the last page (each has its die, and Roll All Details); and a character who bought no gear starts with none, instead of a free class kit while keeping all the gold (2E and 3.5E).
-- **Fixed:** the chat's export and pop-out buttons overlapped; the Notes box on the 2E, 3.5E and 5E sheets is tall enough to write in.
-
 ## 0.1.0-beta.1: The beta
 
 Maelstrom VTT leaves alpha. This release is a full audit of the table (93 problems found and fixed, from backups and saving to what players can see, combat rules and Map Studio), a library you can find your way around (Modules as icons, then covers by series), a Folders button that adds new material while players stay connected, and a documented book format (.kpack) that people and AI agents can convert books into.
@@ -26,6 +18,13 @@ Maelstrom VTT leaves alpha. This release is a full audit of the table (93 proble
 - **Assets by kind:** Assets shows everything an active book, ruleset or art pack supplies, filed by how the book uses it: Maps, Images, Handouts, Portraits, Tokens, Covers, Music, Sounds and Video (only the kinds a book has, with counts), or by folder as the book keeps them. Sounds, music and video play in the preview for the GM; a map or picture can be made a map, shared or set as the background.
 - **Lists by type, with filters:** Items by type (Weapons, Armor & Shields, Magic Items, Potions & Oils, Treasure...), NPCs by creature type, Spells by level and Images by kind, each with a Type filter, a Book filter and By type / By book.
 - **Players see the records of a shared book** (its classes, species, skills, spells, equipment), so they can make characters from it; the records go away again when the book is unshared.
+- **Your own portrait:** the portrait and token picker has **From my computer…**: a player picks a picture (PNG, WebP, JPEG, GIF) or a WebM video portrait of their own; the host keeps it with the campaign (player-art, by player) and everyone at the table sees it. The picker is now a dialog over everything, moved by its handle (or the arrow keys).
+- **Whisper from a portrait:** right-click a character's portrait along the top and choose Whisper: the chat starts `/w Name` for you. Only the two of you and the GM read it. Players get the menu too (on other players' portraits).
+- **The party stash, for trading:** drag an item from your character's inventory onto the party sheet's stash (Inventory tab) to put it in; another player drags it onto their inventory (or presses Take) to have it. Chat says who put and took what.
+- **Local AI for the DM Assistant:** the provider "Local AI (Ollama, LM Studio...)" takes the address of the computer running it (127.0.0.1:11434, or IP:port on your network) and needs no key; its models are listed from the server.
+- **An NPC's picture:** click it to see it full size; right-click to share it with the players (all of them, or one).
+- **Fixed, the character wizard:** it no longer rolls gender, age, height and weight on its own when you reach the last page (each has its die, and Roll All Details); and a character who bought no gear starts with none, instead of a free class kit while keeping all the gold (2E and 3.5E).
+- **Fixed:** the chat's export and pop-out buttons overlapped; the Notes box on the 2E, 3.5E and 5E sheets is tall enough to write in.
 - **Twelve quick slots on F1–F12** (a key whose slot is empty is left to the browser).
 - **The GM's tools along the top** now include the Session Log and Effects (a player keeps Effects when the GM lets players put effects on). Message is now **MotD**.
 - **Fixed:** the map toolbar's Share shares the map you are looking at (an image open in the image window is put on the table first). No screen, message or folder guide names Fantasy Grounds, and its modules folder is no longer put on the shelf by itself (packs only).
