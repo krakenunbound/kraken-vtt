@@ -362,27 +362,10 @@ export function Wizard2e({ session, onDone }: { session: Session; onDone: (id: s
     setSpells([...spells, { name: spell.name, level: spell.level, caster: caster.key }]);
   }
 
-  // --- Commit: details, filled from the race (rolled on the host) ---
-  const filling = useRef(false);
+  // --- Commit: details. Size comes from the race; the player rolls the rest (each die, or Roll All Details):
+  // nothing is rolled for them.
   useEffect(() => {
-    if (page !== "commit" || !race || filling.current) return;
-    const missing = ["gender", "age", "agemax", "height", "weight"].filter((key) => !bio[key]);
-    if (missing.length === 0 && bio.size) return;
-    filling.current = true;
-    void (async () => {
-      try {
-        const next: Record<string, string> = { ...bio, size: bio.size || W.sizeOf(race) };
-        for (const key of missing) {
-          const dice = W.bioRoll(key, race, next.gender);
-          if (!dice) continue;
-          const roll = await rollOnHost(dice.formula, `${key === "agemax" ? "Maximum age" : titled(key)} (${race})`);
-          next[key] = W.bioValue(key, roll.total + dice.base);
-        }
-        setBio((current) => ({ ...next, ...Object.fromEntries(Object.entries(current).filter(([, value]) => value)) }));
-      } finally {
-        filling.current = false;
-      }
-    })();
+    if (page === "commit" && race && !bio.size) setBio((current) => ({ ...current, size: W.sizeOf(race) }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, race]);
   async function rollBio(key: string) {

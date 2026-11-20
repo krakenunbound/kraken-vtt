@@ -868,7 +868,10 @@ const calls = {
         }
       },
     };
-    const next = createTableServer({ saved, archive, ruleset, onChange: markDirty, art: createArtLibrary({ base: dataFolder, roots: [...defaultRoots(dataFolder), ...krakenArtRoots()] }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), towers: towers(), dicePacks: dicePacks(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts(), prefs: prefs(), studioPicture: (sceneId) => studioPicture(sceneId), ownMaps: { folder: () => campaignMapsFolder() } });
+    // The players' own portraits and tokens (each from their computer), kept with the campaign, by player.
+    const playerArt = campaignId ? path.join(campaigns.folder(campaignFile(), campaignId), "player-art") : path.join(USER_DATA, "player-art");
+    const playerRoots = ["portrait", "token"].map((kind) => ({ dir: path.join(playerArt, `${kind}s`), kind, group: "Players", prefix: `players/${kind}s/` }));
+    const next = createTableServer({ saved, archive, ruleset, onChange: markDirty, playerArt: { folder: (kind) => path.join(playerArt, `${kind}s`) }, art: createArtLibrary({ base: dataFolder, roots: [...playerRoots, ...defaultRoots(dataFolder), ...krakenArtRoots()] }), decals: decals(), wallpapers: wallpapers(), gmIcons: gmIcons(), towers: towers(), dicePacks: dicePacks(), tiles: tiles(), sounds: sounds(), books: books(), accounts: accounts(), prefs: prefs(), studioPicture: (sceneId) => studioPicture(sceneId), ownMaps: { folder: () => campaignMapsFolder() } });
     try {
       const info = await next.listen({ port: wanted, password });
       table = next;

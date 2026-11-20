@@ -90,6 +90,12 @@ function createArtLibrary({ base, roots }) {
       return item ? { path: item.file, mime: item.mime } : null;
     },
     has: (id) => scan().has(String(id)),
+    // The id of a file in a root (a picture just added), read again first.
+    idOf(file) {
+      index = null;
+      const wanted = path.resolve(file);
+      return [...scan().values()].find((item) => path.resolve(item.file) === wanted)?.id ?? null;
+    },
   };
 }
 

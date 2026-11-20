@@ -181,7 +181,7 @@ export default {
         id: "notes",
         page: "panel",
         parts: [
-          { part: "notes", fields: [{ path: "alignment", kind: "text", label: "Alignment" }, { path: "notes", kind: "textarea", label: "Notes" }] },
+          { part: "notes", fields: [{ path: "alignment", kind: "text", label: "Alignment" }, { path: "notes", kind: "textarea", label: "Notes", fieldClass: "tall" }] },
           // What the character wizard gave: feats, languages, proficiencies, traits and features.
           { part: "tags", label: "Feats", hook: "feats", from: ["feats"] },
           { part: "tags", label: "Languages", hook: "languages", from: ["languages"] },

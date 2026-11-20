@@ -688,7 +688,8 @@ export function buildFromSpec(spec, lib) {
   // Gear: the given ([name, count] or names), else the class's kit, from the campaign's items.
   const inventorylist = {};
   const items = lib.items ?? [];
-  const gear = Array.isArray(spec?.gear) && spec.gear.length ? spec.gear : fill ? KITS[key] ?? [] : [];
+  // The wizard's gear stands as bought (none bought is none); a character made without it gets its class's kit.
+  const gear = Array.isArray(spec?.gear) && (spec.gear.length || spec?.wizard === true) ? spec.gear : fill ? KITS[key] ?? [] : [];
   gear.forEach((entry) => {
     const [name, qty] = Array.isArray(entry) ? entry : [entry, 0];
     const found = byName(items, name);

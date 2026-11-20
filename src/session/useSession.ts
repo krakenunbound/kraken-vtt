@@ -1365,6 +1365,13 @@ export function useSession() {
     if (!response.ok) throw new Error("No art library.");
     return (await response.json()) as import("../characters/ArtPicker").ArtItem[];
   }, []);
+  // A portrait or token from this computer: kept by the host with the campaign, for everyone at the table. Its art id.
+  const uploadArt = useCallback(async (kind: "portrait" | "token", file: File) => {
+    const response = await fetch(`${originRef.current}/art/upload?${new URLSearchParams({ token: assetRef.current ?? "", kind, name: file.name })}`, { method: "POST", body: file });
+    const body = (await response.json().catch(() => ({}))) as { id?: string; error?: string };
+    if (!response.ok || !body.id) throw new Error(body.error || "That picture could not be added.");
+    return body.id;
+  }, []);
 
   const send = useCallback((message: Record<string, unknown>) => {
     const socket = socketRef.current;
@@ -1620,6 +1627,7 @@ export function useSession() {
     partyRoll,
     artUrl,
     artList,
+    uploadArt,
     tableCommand,
     soundscape,
     sceneSound,

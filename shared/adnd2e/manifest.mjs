@@ -271,7 +271,7 @@ export default {
         parts: [
           { part: "notes", fields: [{ path: "deity", kind: "text", label: "Deity" }, { path: "languages", kind: "text", label: "Languages" }] },
           { part: "hint", text: ["Infravision ", "{infravision}", " feet."], when: { positive: "infravision" } },
-          { part: "notes", fields: [{ path: "notes", kind: "textarea", label: "Notes", bare: true }] },
+          { part: "notes", fields: [{ path: "notes", kind: "textarea", label: "Notes", bare: true, fieldClass: "tall" }] },
         ],
       },
     ],

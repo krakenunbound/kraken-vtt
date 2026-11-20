@@ -121,7 +121,7 @@ export function useContextMenu() {
 // What can be done with a picture or map, wherever it is: open it in
 // Pictures, put it out on its own (a window of its own, so a map stays up
 // while the book is read) or back in, share it or stop (the GM), close it.
-function usePictureActions(session: Session) {
+export function usePictureActions(session: Session) {
   const windows = useWindows();
   const gm = session.role === "dm";
   const shownOf = (tab: Tab) => session.bookShelf.images.find((item) => keyOf(item) === keyOf(tab));

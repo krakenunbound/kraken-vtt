@@ -484,7 +484,19 @@ function serveWeb(url, res, root) {
 // decals, wallpapers: the background decals and desktop tiles the GM can
 // choose from (decals.cjs).
 // sounds: the GM's sounds (sounds.cjs): one-shots, effects, ambience and music.
-function createTableServer({ saved = {}, archive = null, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, towers = null, dicePacks = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null, prefs: prefsStore = null, studioPicture = null, ownMaps = null } = {}) {
+// A seat's own portrait or token (/art/upload): the kinds the art library shows, each checked by its first bytes.
+const UPLOAD_KINDS = {
+  ".png": (b) => b.subarray(0, 4).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47])),
+  ".jpg": (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff,
+  ".jpeg": (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff,
+  ".gif": (b) => b.subarray(0, 4).toString("latin1") === "GIF8",
+  ".webp": (b) => b.subarray(0, 4).toString("latin1") === "RIFF" && b.subarray(8, 12).toString("latin1") === "WEBP",
+  ".webm": (b) => b.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3])),
+};
+const UPLOAD_MAX = 25 * 1024 * 1024;
+const UPLOAD_PER_SEAT = 200;
+
+function createTableServer({ saved = {}, archive = null, onChange = () => undefined, webRoot = WEB_ROOT, art = null, decals = null, wallpapers = null, gmIcons = null, towers = null, dicePacks = null, tiles = null, sounds = null, books = null, ruleset = "", accounts = null, prefs: prefsStore = null, studioPicture = null, ownMaps = null, playerArt = null } = {}) {
   // Each person's own settings (prefs.cjs): their colour and dice. Kept by the app for every campaign; in memory without a file.
   const prefs = prefsStore ?? createPrefsStore(null, diceLook);
   const prefsKey = (client) => (client.role === "dm" ? "@gm" : client.name);
@@ -1659,6 +1671,54 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       }
       res.writeHead(body ? 200 : 404, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": body ? "private, max-age=3600" : "no-store" });
       res.end(JSON.stringify(body ?? { values: [] }));
+      return;
+    }
+    // A seat's own portrait or token from their computer (the art picker's From my computer): kept with the
+    // campaign under their name, and in the art library, so everyone at the table sees it.
+    if (req.method === "POST" && url.pathname === "/art/upload") {
+      const token = url.searchParams.get("token") || "";
+      const client = token ? [...clients.values()].find((item) => item.assetToken === token) : null;
+      const answer = (code, body) => {
+        if (res.headersSent) return;
+        res.writeHead(code, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+        res.end(JSON.stringify(body));
+      };
+      const kind = url.searchParams.get("kind") === "token" ? "token" : "portrait";
+      const given = String(url.searchParams.get("name") || "");
+      const ext = path.extname(given).toLowerCase();
+      if (!client || !art?.idOf || !playerArt) return answer(404, { error: "Pictures cannot be added here." });
+      if (!UPLOAD_KINDS[ext]) return answer(415, { error: "A portrait is a PNG, WebP, JPEG or GIF picture, or a WebM video." });
+      const chunks = [];
+      let size = 0;
+      req.on("data", (chunk) => {
+        size += chunk.length;
+        if (size > UPLOAD_MAX) {
+          answer(413, { error: "That file is too big (25 MB at most)." });
+          req.destroy();
+          return;
+        }
+        chunks.push(chunk);
+      });
+      req.on("end", () => {
+        if (size > UPLOAD_MAX) return;
+        const bytes = Buffer.concat(chunks);
+        if (!UPLOAD_KINDS[ext](bytes)) return answer(415, { error: "That file is not the picture its name says." });
+        const clean = (value, fallback, length) => String(value).replace(/[^\p{L}\p{N} _.,()'-]/gu, "").replace(/^[.\s]+/, "").trim().slice(0, length) || fallback;
+        const who = clean(client.role === "dm" ? "GM" : client.name, "Player", 40);
+        const base = clean(path.basename(given, path.extname(given)), kind, 80);
+        try {
+          const dir = path.join(playerArt.folder(kind), who);
+          fs.mkdirSync(dir, { recursive: true });
+          if (fs.readdirSync(dir).length >= UPLOAD_PER_SEAT) return answer(409, { error: `You have ${UPLOAD_PER_SEAT} pictures here already: ask the GM to tidy them (Folders).` });
+          let file = `${base}${ext}`;
+          for (let n = 2; fs.existsSync(path.join(dir, file)); n++) file = `${base} ${n}${ext}`;
+          fs.writeFileSync(path.join(dir, file), bytes);
+          const id = art.idOf(path.join(dir, file));
+          return id ? answer(200, { id }) : answer(500, { error: "The picture was kept but could not be listed." });
+        } catch (error) {
+          return answer(500, { error: `Could not keep that picture: ${error.message}` });
+        }
+      });
       return;
     }
     if (req.method === "GET" && (url.pathname === "/art/list" || url.pathname === "/art/file")) {

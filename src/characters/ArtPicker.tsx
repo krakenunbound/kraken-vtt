@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Icon } from "../ui/icons";
 import type { Session } from "../session/useSession";
 
 export type ArtItem = { id: string; kind: "portrait" | "token"; group: string; name: string; video: boolean };
@@ -67,23 +68,87 @@ export function ArtPicker({
     };
   }, [kind]);
 
+  // A modal <dialog> (the top layer: never clipped by the window it opens from), moved by its handle.
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [at, setAt] = useState<{ x: number; y: number } | null>(null);
+  const grab = useRef<{ dx: number; dy: number } | null>(null);
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+    const element = dialog.current;
+    if (element && !element.open) element.showModal();
+    // Light dismiss where the dialog has no closedby (Safari): a click on the backdrop, outside the box.
+    if (!element || "closedBy" in HTMLDialogElement.prototype) return;
+    const outside = (event: MouseEvent) => {
+      if (event.target !== element) return;
+      const box = element.getBoundingClientRect();
+      if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) element.close();
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+    element.addEventListener("click", outside);
+    return () => element.removeEventListener("click", outside);
+  }, []);
+  const moveTo = (x: number, y: number) => {
+    const element = dialog.current;
+    if (!element) return;
+    const view = element.ownerDocument.defaultView ?? window;
+    setAt({ x: Math.max(0, Math.min(x, view.innerWidth - element.offsetWidth)), y: Math.max(0, Math.min(y, view.innerHeight - 48)) });
+  };
+  const here = () => dialog.current?.getBoundingClientRect() ?? { left: 0, top: 0 };
+
+  // A picture from this computer: the host keeps it with the campaign, shared with everyone; then it is chosen.
+  const [adding, setAdding] = useState("");
+  async function addOwn(file: File | undefined) {
+    if (!file) return;
+    setAdding("Adding…");
+    try {
+      const id = await session.uploadArt(kind, file);
+      setAdding("");
+      onPick(id);
+    } catch (error) {
+      setAdding(error instanceof Error ? error.message : "That picture could not be added.");
+    }
+  }
 
   const groups = useMemo(() => [...new Set((items ?? []).map((item) => item.group))], [items]);
   const needle = search.trim().toLowerCase();
   const matches = (items ?? []).filter((item) => (needle ? item.name.toLowerCase().includes(needle) : !group || item.group === group));
+  const title = kind === "portrait" ? "Choose a portrait" : "Choose a token";
 
   return (
-    <div className="art-picker-backdrop" role="presentation" onPointerDown={(event) => event.target === event.currentTarget && onClose()}>
-      <div className="art-picker" role="dialog" aria-label={kind === "portrait" ? "Choose a portrait" : "Choose a token"}>
+    <dialog
+      ref={dialog}
+      className="art-picker"
+      aria-label={title}
+      {...({ closedby: "any" } as object)}
+      style={at ? { margin: 0, left: at.x, top: at.y } : undefined}
+      onClose={onClose}
+    >
+      <div className="art-picker-body">
         <header>
-          <h2>{kind === "portrait" ? "Choose a portrait" : "Choose a token"}</h2>
+          <button
+            type="button"
+            className="art-picker-handle"
+            aria-label={`Move the ${kind} picker (drag, or the arrow keys)`}
+            title="Drag to move (or the arrow keys)"
+            onPointerDown={(event) => {
+              if (event.button !== 0) return;
+              const box = here();
+              grab.current = { dx: event.clientX - box.left, dy: event.clientY - box.top };
+              event.currentTarget.setPointerCapture(event.pointerId);
+            }}
+            onPointerMove={(event) => {
+              if (grab.current && event.currentTarget.hasPointerCapture(event.pointerId)) moveTo(event.clientX - grab.current.dx, event.clientY - grab.current.dy);
+            }}
+            onLostPointerCapture={() => (grab.current = null)}
+            onKeyDown={(event) => {
+              const step = ({ ArrowLeft: [-15, 0], ArrowRight: [15, 0], ArrowUp: [0, -15], ArrowDown: [0, 15] } as Record<string, number[]>)[event.key];
+              if (!step) return;
+              event.preventDefault();
+              const box = here();
+              moveTo(box.left + step[0], box.top + step[1]);
+            }}
+          >
+            <Icon name="hand" size={16} />
+          </button>
+          <h2>{title}</h2>
           <input type="search" placeholder="Search by name" value={search} onChange={(event) => setSearch(event.target.value)} aria-label="Search" autoFocus />
           <select value={group} onChange={(event) => setGroup(event.target.value)} aria-label="Folder" disabled={Boolean(needle)}>
             <option value="">All folders</option>
@@ -93,12 +158,21 @@ export function ArtPicker({
               </option>
             ))}
           </select>
-          <button type="button" onClick={onClose}>
+          <label className="art-own" title={`A ${kind} of your own from this computer (PNG, WebP, JPEG, GIF or a WebM video): kept with the campaign, and everyone at the table sees it`}>
+            <Icon name="import" size={15} /> From my computer…
+            <input type="file" accept="image/png,image/webp,image/jpeg,image/gif,video/webm,.webm" data-action="art-own" hidden onChange={(event) => void addOwn(event.target.files?.[0])} />
+          </label>
+          <button type="button" onClick={() => dialog.current?.close()}>
             Close
           </button>
         </header>
+        {adding ? (
+          <p className="hint" role="status">
+            {adding}
+          </p>
+        ) : null}
         {failed ? <p className="hint">The host's art library could not be read.</p> : null}
-        {items && items.length === 0 ? <p className="hint">The GM has no {kind}s yet: add them in the Folders window.</p> : null}
+        {items && items.length === 0 ? <p className="hint">No {kind}s yet: add one from your computer, or the GM adds them in the Folders window.</p> : null}
         <div className="art-grid">
           {current ? (
             <button type="button" className="art-cell art-clear" onClick={() => onPick(null)} title="No picture">
@@ -125,7 +199,7 @@ export function ArtPicker({
           </button>
         ) : null}
       </div>
-    </div>
+    </dialog>
   );
 }
 

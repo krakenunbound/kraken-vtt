@@ -1317,6 +1317,8 @@ export function toSpec(b, lib, opts) {
     feats: (b.feats ?? []).map((feat) => feat.name),
     gold: goldRolled(b) ? remainingCopper(b, lib, opts) / 100 : 0,
     gear,
+    // The wizard's: its gear stands as bought, none bought is none.
+    wizard: true,
     spells: (b.spells ?? []).filter((spell) => !isChoiceKind(spell.classkey)).map((spell) => ({ name: spell.name, class: spell.classlabel, level: spell.level })),
     choices: {
       deity: choiceText(b, "deity") ?? "",

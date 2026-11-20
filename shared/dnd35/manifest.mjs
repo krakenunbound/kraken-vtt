@@ -257,7 +257,7 @@ export default {
         page: "panel",
         parts: [
           { part: "notes", fields: [{ path: "deity", kind: "text", label: "Deity" }, { path: "languages", kind: "text", label: "Languages" }] },
-          { part: "notes", fields: [{ path: "notes", kind: "textarea", label: "Notes", bare: true }] },
+          { part: "notes", fields: [{ path: "notes", kind: "textarea", label: "Notes", bare: true, fieldClass: "tall" }] },
         ],
       },
     ],

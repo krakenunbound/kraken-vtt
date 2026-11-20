@@ -919,26 +919,23 @@ select {
   font-size: 0.6rem;
 }
 
-.art-picker-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: grid;
-  place-items: center;
-  background: rgba(0, 0, 0, 0.6);
-}
-
-.art-picker {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+/* The portrait and token picker: a modal dialog in the top layer, moved by its handle. */
+dialog.art-picker {
   width: min(960px, 94vw);
   max-height: 88vh;
-  padding: 14px;
+  padding: 0;
+  overflow: hidden;
+  color: var(--text);
   background: var(--bar);
   border: 1px solid var(--line);
   border-radius: 10px;
 }
+dialog.art-picker::backdrop { background: rgba(0, 0, 0, 0.6); }
+.art-picker-body { display: flex; flex-direction: column; gap: 10px; max-height: 88vh; padding: 14px; box-sizing: border-box; }
+.art-picker-handle { padding: 4px 6px; cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none; }
+.art-picker-handle:active { cursor: grabbing; }
+.art-own { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.art-own:hover, .art-own:focus-within { border-color: var(--brass); }
 
 .art-picker header { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .art-picker h2 { margin: 0 auto 0 0; font: 500 1.2rem Georgia, serif; color: var(--brass); }

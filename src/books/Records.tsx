@@ -5,7 +5,7 @@ import type { QuickSlot, Session, TableRecord } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { slotDrag, TABLE_RESULT_DRAG, useOpenLink } from "../ui/QuickSlots";
 import { recordLabel, statblockFor } from "../rulesets/statblocks";
-import { useBookWindows } from "./Books";
+import { useBookWindows, useContextMenu, usePictureActions } from "./Books";
 import { ReadAloudButton } from "./readAloud";
 import { decodeEntities, isFormatted, linkOfRecordname } from "../../shared/text/formatted.mjs";
 import { LinkChip } from "../core/fields/RichText";
@@ -406,6 +406,8 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
   const actions = useRecordActions(session);
   const openLink = useOpenLink(session);
   const [status, setStatus] = useState("");
+  const pictureActions = usePictureActions(session);
+  const pictureMenu = useContextMenu();
   if (!record) return <p className="hint record-window">This is not shown to you any more.</p>;
   // A record read from a book (a page's link) is the book's: shown, not shared or edited.
   const gm = session.role === "dm" && !given;
@@ -438,12 +440,30 @@ export function RecordWindow({ session, id, record: given, book }: { session: Se
   // A creature's portrait, an item's or a vehicle's picture (each from its own book).
   const pictured = npc || record.type === "item" || record.type === "vehicle";
   const portrait = pictured && (data.picture || data.token) ? session.recordArtUrl(record.id, "portrait") : "";
+  // The picture's file in its book ("mm/images/Goblin.webp@B2 ..."), to open full size and share.
+  const pictureRef = String(data.picture || data.token || "");
+  const pictureBook = pictureRef.split("@")[1]?.trim() || record.source || "";
+  const pictureOf = portrait && pictureBook && !pictureRef.startsWith("art:") ? { book: pictureBook, file: pictureRef.split("@")[0], name: record.name } : null;
   const table = tableOf(data);
   const grouped = groupsOf(data);
   const abilities = data.abilities && typeof data.abilities === "object" ? (data.abilities as Record<string, { score?: number; bonus?: number } | undefined>) : null;
   return (
     <article className="record-window" data-record={record.id}>
-      {portrait ? <img className="record-portrait" src={portrait} alt={record.name} draggable={false} onError={(event) => (event.currentTarget.style.display = "none")} /> : null}
+      {portrait ? (
+        // Its picture: click to see it full size; right-click to share it with the players (all or one).
+        <img
+          className="record-portrait"
+          data-record-portrait
+          src={portrait}
+          alt={record.name}
+          title={pictureOf ? "Click to see it full size; right-click to share it" : record.name}
+          draggable={false}
+          onClick={pictureOf ? () => pictureActions.toPictures(pictureOf) : undefined}
+          onContextMenu={pictureOf ? (event) => pictureMenu.show(event, pictureActions.items(pictureOf, "book")) : undefined}
+          onError={(event) => (event.currentTarget.style.display = "none")}
+        />
+      ) : null}
+      {pictureMenu.element}
       <header>
         <h3 {...slotDrag({ kind: "record", record: record.id, label: record.name })}>{record.name}</h3>
         <small className="hint">

@@ -1059,7 +1059,8 @@ export function buildFromSpec(spec, lib = {}) {
   // Gear: the books' items by name, else Kraken's table of weapons and armor; [name, count] buys several.
   const inventorylist = {};
   const items = lib.items ?? [];
-  const gear = Array.isArray(spec?.gear) && spec.gear.length ? spec.gear : [...new Set(classes.flatMap((cls) => KITS[classKey(cls.name)] ?? []))].slice(0, 6);
+  // The wizard's gear stands as bought (none bought is none); a character made without it gets its class's kit.
+  const gear = Array.isArray(spec?.gear) && (spec.gear.length || spec?.wizard === true) ? spec.gear : [...new Set(classes.flatMap((cls) => KITS[classKey(cls.name)] ?? []))].slice(0, 6);
   for (const entry of gear) {
     const [name, count] = Array.isArray(entry) ? [String(entry[0] ?? ""), Math.max(1, Math.round(num(entry[1], 1)))] : [String(entry ?? ""), 1];
     const found = byName(items, name);
