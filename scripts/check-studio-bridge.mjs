@@ -44,6 +44,10 @@ assert(project.walls[0].points[0] === 0 && project.walls[0].points[1] === 5, "po
 const checked = assets.validateProject(JSON.parse(JSON.stringify(project)));
 assert(checked.walls.length === kinds.length, "Map Studio accepts the project");
 const back = bridge.masterFrom(project, scene);
+// Audit 063/065: a wall keeps its id through the round trip (doors' states are kept by it), and Map Studio's
+// "hidden" on a terrain or toggle never switches a wall off.
+assert(back.walls.every((wall, i) => wall.id === walls[i].id), `ids kept: ${back.walls.map((wall) => wall.id)}`);
+assert(back.walls.every((wall) => !wall.hidden), "no wall comes back switched off");
 for (const [i, wall] of walls.entries()) {
   const got = back.walls[i];
   for (const key of ["x1", "y1", "x2", "y2", "kind", "door", "ds", "dir"]) assert(got[key] === wall[key], `wall ${wall.kind} ${key}: ${got[key]} vs ${wall[key]}`);

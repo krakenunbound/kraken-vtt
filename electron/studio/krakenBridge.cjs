@@ -65,10 +65,15 @@ function krakenWalls(walls, origin) {
     const door = kind === "door" ? 1 : kind === "secret" ? 2 : 0;
     const ds = door ? (flags.has("locked") ? 2 : flags.has("open") ? 1 : 0) : 0;
     const dir = flags.has("single_sided") ? (flags.has("counterclockwise") ? 2 : 1) : 0;
+    // One stretch keeps its wall's id (the table keeps a door's state, and found and grouped doors, by it);
+    // a path's stretches are numbered. Map Studio's "hidden" only hides a toggle from players: a terrain or
+    // pit wall with it still blocks (a wall the GM switched off at the table stays off: fromStudio).
+    const single = points.length === 4;
+    const base = String(wall.id ?? uid("w")).slice(0, 60);
     for (let i = 0; i + 3 < points.length; i += 2) {
       const [x1, y1, x2, y2] = [points[i] + origin.x, points[i + 1] + origin.y, points[i + 2] + origin.x, points[i + 3] + origin.y];
       if (x1 === x2 && y1 === y2) continue;
-      out.push({ id: `${String(wall.id ?? uid("w")).slice(0, 60)}-${i / 2}`, x1: round(x1), y1: round(y1), x2: round(x2), y2: round(y2), kind, door, ds, dir, ...(flags.has("hidden") && kind !== "secret" && kind !== "toggle" ? { hidden: true } : {}) });
+      out.push({ id: single ? base : `${base}-${i / 2}`, x1: round(x1), y1: round(y1), x2: round(x2), y2: round(y2), kind, door, ds, dir });
     }
   }
   return out;

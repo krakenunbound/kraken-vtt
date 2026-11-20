@@ -601,7 +601,8 @@ async function studioSave(token, project, image) {
   }
   // The GM may have changed campaigns while the picture was written: nothing goes into another one.
   sameCampaign(found);
-  const counts = table.agent.map.fromStudio({ ...master, project, picture, of: found.scene ?? null });
+  // No art painted now: the map's own picture again (not the last painted one); the grid as Map Studio lined it up.
+  const counts = table.agent.map.fromStudio({ ...master, project, picture: picture ?? false, of: found.scene ?? null, grid: { size: project.grid, offsetX: project.gridOffset?.x, offsetY: project.gridOffset?.y } });
   emit("studio-saved", { sceneId: view.scene.id, picture: Boolean(picture) });
   return { saved: true, ...counts, picture: Boolean(picture) };
 }

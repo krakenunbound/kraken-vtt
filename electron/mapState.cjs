@@ -589,6 +589,8 @@ function presetLight(name, profiles = []) {
 // Walls an image may hold from Map Studio (FG maps run to many thousands of segments).
 const MAX_WALLS_STUDIO = 20000;
 
+// Weather Map Studio can hold (krakenBridge.cjs TO_STUDIO_FX); any other kind stays as the table had it.
+const STUDIO_WEATHER = new Set(["rain", "snow", "blizzard", "fog", "clouds", "water"]);
 function createMapState({ saved, records, onChange = () => undefined, hasArt = () => false, hasPicture = () => false, artFor = () => null, hasTile = () => true, combatFor = () => null, activeRecord = () => null, sharedWith = null, colorOf = playerColor, tableOptions = () => ({}), onRegion = () => undefined, onTracker = () => false, onFaction = () => undefined }) {
   // One master per map: a second state (the GM's private image window) works on
   // the very same walls, lights, tokens, paint and effects as the table's.
@@ -1959,23 +1961,64 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       if (!scene) return null;
       return { scene, walls: wallsHere(), lights: lightsHere(), fx: fxHere(), regions: regionsHere(), studio: state.studio[scene.id] ?? null };
     },
-    fromStudio({ walls = [], lights = [], fx = [], regions = null, project = null, picture = null, of = null }) {
+    // picture: the painted picture; false: Map Studio paints nothing now (the base picture again); null: unchanged.
+    // grid: the square size and offset Map Studio lined up with the picture.
+    fromStudio({ walls = [], lights = [], fx = [], regions = null, project = null, picture = null, of = null, grid = null }) {
       // Into the open scene, or (of) a map's master that is not open now: the same master wherever it is shown.
       const open = scene;
       const target = of ?? scene;
       if (!target) throw new Error("No scene is open.");
-      state.walls[target.id] = walls.map(cleanWall).filter(Boolean).slice(0, MAX_WALLS_STUDIO);
+      // What the table knows of a wall that Map Studio does not (found, grouped, switched off) stays with its id.
+      const oldWalls = new Map((state.walls[target.id] ?? []).map((wall) => [wall.id, wall]));
+      state.walls[target.id] = walls
+        .map(cleanWall)
+        .filter(Boolean)
+        .slice(0, MAX_WALLS_STUDIO)
+        .map((wall) => {
+          const old = oldWalls.get(wall.id);
+          if (!old) return wall;
+          return { ...wall, ...(old.found ? { found: old.found } : {}), ...(old.group ? { group: old.group } : {}), ...(old.hidden ? { hidden: old.hidden } : {}) };
+        });
       // Map Studio's traps and regions play at the table.
       // One the GM switched off at the table stays off (the same id, else the same kind and name).
       if (Array.isArray(regions)) {
         const was = state.regions[target.id] ?? [];
         const off = (region) => was.some((old) => old.on === false && (old.id === region.id || (old.kind === region.kind && old.name === region.name)));
-        state.regions[target.id] = regions.map(cleanRegion).filter(Boolean).slice(0, MAX_REGIONS).map((region) => (off(region) ? { ...region, on: false } : region));
+        // So does one the players have been shown (revealed), by the same match.
+        const shown = (region) => was.some((old) => old.revealed && (old.id === region.id || (old.kind === region.kind && old.name === region.name)));
+        state.regions[target.id] = regions
+          .map(cleanRegion)
+          .filter(Boolean)
+          .slice(0, MAX_REGIONS)
+          .map((region) => (off(region) ? { ...region, on: false } : region))
+          .map((region) => (shown(region) && !("revealed" in region) ? { ...region, revealed: true } : region));
       }
-      state.lights[target.id] = lights.map(cleanLight).filter(Boolean).slice(0, 500);
-      state.fx[target.id] = fx.map(cleanFx).filter(Boolean).slice(0, 20);
+      // Lights and weather: a light's settings the table has and Map Studio does not stay with its id; a weather
+      // layer keeps who sees it and how its mask is used; a kind of weather Map Studio cannot hold is kept as it was.
+      const oldLights = new Map((state.lights[target.id] ?? []).map((light) => [light.id, light]));
+      state.lights[target.id] = lights.map((light) => ({ ...(oldLights.get(light.id) ?? {}), ...light })).map(cleanLight).filter(Boolean).slice(0, 500);
+      const oldFx = state.fx[target.id] ?? [];
+      const keptFx = oldFx.filter((layer) => !STUDIO_WEATHER.has(layer.type));
+      state.fx[target.id] = [
+        ...fx.map((layer) => {
+          const old = oldFx.find((item) => item.id === layer.id);
+          return old ? { ...layer, players: old.players, mask: { ...layer.mask, mode: old.mask?.mode ?? layer.mask?.mode } } : layer;
+        }),
+        ...keptFx,
+      ]
+        .map(cleanFx)
+        .filter(Boolean)
+        .slice(0, 20);
       const before = state.studio[target.id] ?? {};
-      state.studio[target.id] = { project, picture: picture ?? before.picture ?? null, saved: Date.now() };
+      state.studio[target.id] = { project, picture: picture === false ? null : picture ?? before.picture ?? null, saved: Date.now() };
+      // Only when Map Studio's grid differs from the map's (a project always carries one).
+      const size = Number(grid?.size);
+      const now = target.grid ?? {};
+      const moved = size !== Number(now.size) || (Number(grid?.offsetX) || 0) !== (Number(now.offsetX) || 0) || (Number(grid?.offsetY) || 0) !== (Number(now.offsetY) || 0);
+      if (Number.isFinite(size) && size >= 10 && size <= 1000 && moved) {
+        const old = state.settings[target.id] ?? {};
+        state.settings[target.id] = cleanSettings({ ...old, grid: { ...(old.grid ?? {}), size, offsetX: Number(grid.offsetX) || 0, offsetY: Number(grid.offsetY) || 0 } });
+      }
       if (open && open.id === target.id) liveScene();
       changed();
       return { walls: state.walls[target.id].length, lights: state.lights[target.id].length, fx: state.fx[target.id].length, regions: (state.regions[target.id] ?? []).length };
