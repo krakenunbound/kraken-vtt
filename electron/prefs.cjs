@@ -46,6 +46,23 @@ function cleanPrefs(input, before, lookOf) {
   if (input.volume !== undefined) out.volume = clamp(input.volume, 0, 1, 0.7);
   if (input.tray !== undefined) out.tray = clamp(input.tray, 0.6, 1.6, 1);
   if (input.roll !== undefined) out.roll = clamp(input.roll, 0.5, 2.5, 1);
+  // Their layout and interface settings (each screen's "kraken-" settings: windows, sidebar, chat size, UI scale,
+  // map toolbar...), so they follow the person to the app or any browser. null takes one away.
+  if (input.ui && typeof input.ui === "object") {
+    const ui = { ...(out.ui ?? {}) };
+    for (const [name, value] of Object.entries(input.ui)) {
+      if (!/^kraken-[\w:.\-]{1,110}$/.test(name) || /^kraken-(signin:|recent-games|chat-draft)/.test(name)) continue;
+      if (value === null) delete ui[name];
+      else if (typeof value === "string" && value.length <= 20000) ui[name] = value;
+    }
+    // At most 300 settings and about 400 KB a person: the newest kept.
+    let names = Object.keys(ui);
+    while (names.length > 300 || JSON.stringify(ui).length > 400000) {
+      delete ui[names[0]];
+      names = Object.keys(ui);
+    }
+    out.ui = ui;
+  }
   return out;
 }
 

@@ -86,7 +86,8 @@ try {
   await seat.waitForSelector(".sidebar");
 
   // The Traveller wizard (the GM's KrakenCharWizardMGT2 run on the host): every page, every roll the table's.
-  await seat.click('.sidebar [data-launch="characters"]');
+  // Character Selection opens by itself for a player who holds no character; else from the sidebar.
+  if (!(await seat.waitForSelector('[data-window="charselect"] [data-action="new-character"]', { timeout: 4000 }).catch(() => null))) await seat.click('.sidebar [data-launch="characters"]');
   await seat.click('[data-action="new-character"]');
   await seat.waitForSelector('[data-wizard="mgt2"]');
   await seat.fill('[aria-label="Character name"]', "Mira Sol");

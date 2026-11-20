@@ -206,6 +206,12 @@ try {
   stash(bobSeat, { action: "take", id: stashed.party.stash[0].id, character: bob.id });
   await latest(bobSeat, (m) => m.type === "error" && /took that already/.test(m.reason), "it cannot be taken twice");
   bobSeat.ws.close();
+  // The agent's stash: put Borin's rope back in, list it, and take it out for Aldric.
+  const ropeKey = Object.entries(agent.records.get(bob.id).data.inventorylist ?? {}).find(([, item]) => item.name === "Rope, hemp (50 ft)")[0];
+  const putBack = await tool("kraken_party_stash", { action: "put", character: bob.id, key: ropeKey });
+  assert(putBack.stash.length === 1 && putBack.stash[0].from === "Borin", `the agent puts Borin's rope in: ${JSON.stringify(putBack.stash)}`);
+  const takenOut = await tool("kraken_party_stash", { action: "take", id: putBack.stash[0].id, character: ann.id });
+  assert(takenOut.stash.length === 0 && Object.values(agent.records.get(ann.id).data.inventorylist ?? {}).some((item) => item.name === "Rope, hemp (50 ft)"), "and takes it out for Aldric");
 
   // The party token: the GM names the party and chooses its token; on a big map it is one token, placed again it
   // moves there, and the party's art is what the table is served for it.

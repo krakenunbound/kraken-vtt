@@ -8,13 +8,23 @@ Every game in Maelstrom has its own character wizard and its own sheet, built on
 
 The sidebar's **Characters** opens Character Selection, for the GM and every player, as in Fantasy Grounds. Every character shows as a card (for the GM, all of them).
 
-- **A card** opens its sheet. A player takes a character no one holds by opening it.
+- **A card** opens its sheet. A character the GM has **released** opens for a player to look over (nothing is theirs yet); its **Take** button makes it theirs. Characters the GM keeps are marked *The GM's* and cannot be taken.
 - **New character** runs the game's wizard.
 - **Create** makes a blank character to fill in by hand.
 - **Import** brings a character in from a file.
 - **Edit mode** (the pencil) shows each card's **Export**, and the GM's **Delete**.
 
 The portrait bar along the top of the screen shows the characters at the table.
+
+### Who holds a character (the GM's)
+
+Right-click a character's portrait (or its card in Character Selection):
+
+- **Give to (a player at the table):** they hold it, and its tokens on every map become theirs. Steve can't come tonight, so Brenda plays Zifnab; next week, give him back to Steve.
+- **Release to the players:** no one holds it, and players may open it to look it over, then take it. Use it for pregens when a player's character dies.
+- **Keep as the GM's:** no player holds or sees it.
+
+A character stays with its player's account: it is theirs every time they sign in, from the app or any browser.
 
 ## The character wizards
 

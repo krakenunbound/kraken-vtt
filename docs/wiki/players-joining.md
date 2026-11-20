@@ -15,12 +15,16 @@ If you lose your connection, Maelstrom shows *Reconnecting…* and puts you back
 
 ## Your character
 
-- Open **Characters**. It shows Character Selection: every character you may take, as cards.
+- Open **Characters**. It shows Character Selection: your characters, and those the GM has released. Click a released one to look it over; press **Take** to make it yours.
 - Press **New character** (a figure with a plus) to open the game's character wizard. It walks you through each step: for Descending Darkness, kin, class, background and abilities; for Apeira Astra, Origin, Paths and skills. Rolls in the wizard are made by the host, in chat for the table.
 - Click a card to open its **sheet**. Click a skill, save or attack on it to roll it.
 - Drag items, spells and other links from the books the GM shares onto your sheet.
 
 More in [Character sheets and wizards](character-sheets-and-wizards.md).
+
+## Your settings follow you
+
+With an account, your settings are kept by the GM's app with it: the UI scale, where your windows sit, the sidebar, the chat's size, the map's toolbar and the rest. Sit down from the app one week and Chrome the next: they are there as you left them. Your characters stay yours too.
 
 ## Rolling
 

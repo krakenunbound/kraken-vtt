@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { adoptAccountUi, accountUiChanged } from "./accountUi";
 import { dicePacks } from "../dice/dicePacks";
 import type { MapScene } from "../table/MapView";
 import { sound, type Soundscape } from "../sound/soundEngine";
@@ -277,7 +278,7 @@ export type PictureKind = "decal" | "wallpaper" | "gmicon" | "tile" | "tower";
 // A character's face as everyone is told it (FG's character list).
 // A player's account as the GM is shown it (never a password).
 export type PlayerAccount = { name: string; createdAt: number; seenAt: number | null; devices: number; seated: boolean };
-export type RosterEntry = { id: string; name: string; owner: string; online: boolean; portrait: string | null; species: string; classes: string; level: number };
+export type RosterEntry = { id: string; name: string; owner: string; released?: boolean; online: boolean; portrait: string | null; species: string; classes: string; level: number };
 
 export type CombatEntry = {
   // 5E: death saves of a Dying character.
@@ -641,6 +642,11 @@ export function useSession() {
             accountToken.current = you.accountToken ?? "";
             lastJoin.current = { url, join, label, origin, role: you.role };
             if (Array.isArray(msg.bans)) setBans(msg.bans as Ban[]);
+            // Their layout and interface settings, kept with their account: onto this screen before the desktop draws.
+            adoptAccountUi((msg.prefs as { ui?: unknown } | undefined)?.ui, (ui) => {
+              const open = socketRef.current;
+              if (open && open.readyState === WebSocket.OPEN) open.send(JSON.stringify({ type: "prefs", patch: { ui } }));
+            });
             assetRef.current = you.assetToken ?? "";
             // Sounds come from the host, for this seat.
             sound.setSource((id) => `${originRef.current}/sound/file?token=${assetRef.current}&id=${encodeURIComponent(id)}`);
@@ -765,7 +771,10 @@ export function useSession() {
           if (msg.type === "books") setBookShelf({ active: (msg.active as string[]) ?? [], shared: (msg.shared as string[]) ?? [], images: (msg.images as ShownImage[]) ?? [] });
           if (msg.type === "image-shown" && typeof msg.id === "string") setImageShown({ id: msg.id, at: Date.now() });
           if (msg.type === "book-sounds" && msg.sounds && typeof msg.sounds === "object") setBookSounds(msg.sounds as Record<string, PageSounds>);
-          if (msg.type === "prefs") diceStore.adopt(msg.prefs);
+          if (msg.type === "prefs") {
+            diceStore.adopt(msg.prefs);
+            accountUiChanged((msg.prefs as { ui?: unknown } | undefined)?.ui);
+          }
           if (msg.type === "quickslots" && Array.isArray(msg.slots)) setQuickSlotsState(msg.slots as (QuickSlot | null)[]);
           if (msg.type === "modifiers" && msg.modifiers && typeof msg.modifiers === "object") setModifiers(msg.modifiers as ModifierStack);
           if (msg.type === "chat-cleared") {
@@ -1156,6 +1165,16 @@ export function useSession() {
   }, []);
 
   // FG's Character Selection: take a character no one holds; it becomes this seat's.
+  // The GM's say over a character: give it to a player, release it (players may look it over and take it), or keep it.
+  const characterOwner = useCallback((id: string, action: "give" | "release" | "keep", player = "") => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+    const req = ++opCounter.current;
+    return new Promise<string>((resolve, reject) => {
+      opWaits.current.set(req, { resolve, reject });
+      socket.send(JSON.stringify({ type: "character-owner", req, id, action, player }));
+    });
+  }, []);
   const takeCharacter = useCallback((id: string) => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
@@ -1652,6 +1671,7 @@ export function useSession() {
     // The character sheet: fields typed on it (the host works the numbers out again).
     importCharacter,
     takeCharacter,
+    characterOwner,
     editCharacter: (id: string, changes: { path: string; value: unknown }[]) => send({ type: "character-edit", id, changes }),
     // A record dropped on the sheet (FG's sheet drop): a race or class, a spell, an item.
     dropOnCharacter: (id: string, recordId: string) => send({ type: "character-drop", id, recordId }),

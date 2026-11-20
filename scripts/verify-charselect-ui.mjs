@@ -98,6 +98,9 @@ try {
   let roster = (await tool("kraken_characters", { action: "roster" })).roster;
   assert(roster.length === 3 && roster.filter((entry) => !entry.owner).length === 2, `the roster: three, two held by no one: ${JSON.stringify(roster)}`);
 
+  // The GM releases the two no one holds: players may look them over and take them (the GM's own are not theirs).
+  await tool("kraken_characters", { action: "release", id: idOf(maelis) });
+  await tool("kraken_characters", { action: "release", id: idOf(zhree) });
   browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
   const seat = await browser.newPage({ viewport: { width: 2560, height: 1440 } });
   seat.on("pageerror", (error) => failures.push(`player: ${error.message}`));
@@ -111,15 +114,18 @@ try {
   await seat.waitForSelector('[data-window="charselect"] .charselect-card', { timeout: 10000 });
   const cards = await seat.$$eval(".charselect-card", (list) => list.map((card) => ({ text: card.textContent, disabled: card.disabled })));
   assert(cards.length === 3, `three cards: ${JSON.stringify(cards)}`);
-  assert(cards.filter((card) => card.text.includes("Server") && !card.disabled).length === 2, `two no one holds ("Server"), pickable: ${JSON.stringify(cards)}`);
+  assert(cards.filter((card) => card.text.includes("Released") && !card.disabled).length === 2, `two no one holds, released, pickable: ${JSON.stringify(cards)}`);
   assert(cards.some((card) => card.text.includes("Bimz") && card.text.includes("Someone else") && card.disabled), `Bimz shows its holder and cannot be picked: ${JSON.stringify(cards)}`);
   // The filter.
   await seat.fill('[aria-label="Filter characters"]', "zhr");
   assert((await seat.$$(".charselect-card")).length === 1, "the filter finds Zhree");
   await seat.fill('[aria-label="Filter characters"]', "");
 
-  // Taking Maelis: hers, and the sheet opens.
+  // Looking Maelis over: her sheet opens, nothing is the player's yet; then Take: hers, and the list closes.
   await seat.click(`[data-charselect="${idOf(maelis)}"]`);
+  await seat.waitForSelector('.sheet-5e [data-stat="ac"]', { timeout: 10000 });
+  assert((await tool("kraken_record_get", { id: idOf(maelis) })).owner === "", "looking binds nothing");
+  await seat.click(`[data-take="${idOf(maelis)}"]`);
   await seat.waitForSelector('[data-window="charselect"]', { state: "detached", timeout: 10000 });
   await seat.waitForSelector('.sheet-5e [data-stat="ac"]', { timeout: 10000 });
   const taken = await tool("kraken_record_get", { id: idOf(maelis) });
@@ -182,12 +188,12 @@ try {
   await seat.waitForFunction((id) => document.querySelector(`.portrait-strip [data-portrait="${id}"]`)?.textContent.includes("A test player"), idOf(zhree), { timeout: 10000 });
   await tool("kraken_characters", { action: "release", id: idOf(maelis) });
   await seat.waitForFunction((id) => document.querySelector(`.portrait-strip [data-portrait="${id}"]`)?.textContent.includes("Server"), idOf(maelis), { timeout: 10000 });
-  // Maelis's sheet closes on the player's screen: it is not theirs to see any more.
-  await seat.waitForFunction(() => ![...document.querySelectorAll(".window-title, .window header")].some((title) => title.textContent.includes("Maelis")), null, { timeout: 10000 });
+  // Released, Maelis is no one's: the player may still read her (released characters are for looking over), not change her.
+  assert((await tool("kraken_record_get", { id: idOf(maelis) })).owner === "", "Maelis is no one's");
   // The player opens it again from a portrait no one holds.
   await seat.click(`[data-portrait="${idOf(maelis)}"]`);
   await seat.waitForSelector(`[data-charselect="${idOf(maelis)}"]:not([disabled])`, { timeout: 10000 });
-  assert((await seat.textContent(`[data-charselect="${idOf(maelis)}"]`)).includes("Server"), "Maelis is offered again");
+  assert((await seat.textContent(`[data-charselect="${idOf(maelis)}"]`)).includes("Released"), "Maelis is offered again (released)");
   assert((await seat.textContent(`[data-charselect="${idOf(zhree)}"]`)).includes("Yours"), "Zhree is the player's");
 
   // The player's edit mode (FG's pencil): Export on their own card only, its two formats.

@@ -3,6 +3,7 @@ import type { Session, TableRecord } from "../session/useSession";
 import { slotDrag } from "../ui/QuickSlots";
 import { Icon } from "../ui/icons";
 import { Picture } from "./ArtPicker";
+import { PlayerMenu, usePlayerMenu } from "../ui/SessionTools";
 import { canMakeBlank, createBlank, ExportButton, useCharacterFiles } from "./characterFiles";
 
 // FG's Character Selection, what the sidebar's Characters opens for everyone:
@@ -16,12 +17,14 @@ import { canMakeBlank, createBlank, ExportButton, useCharacterFiles } from "./ch
 // a game that has them), Import (a file; dropping one on the list does the
 // same), and the filter.
 // onSheet: open a character's sheet window. onWizard: the Character Wizard (in a window of its own).
-type Card = { id: string; name: string; owner: string; portrait: string | null; species: string; classes: string; level: number };
+type Card = { id: string; name: string; owner: string; released?: boolean; portrait: string | null; species: string; classes: string; level: number };
 
 export function CharacterSelect({ session, onSheet, onWizard, onClose }: { session: Session; onSheet: (id: string, name: string) => void; onWizard: () => void; onClose: () => void }) {
   const [filter, setFilter] = useState("");
   const [status, setStatus] = useState("");
   const [editing, setEditing] = useState(false);
+  // The GM's right-click on a card: give it to a player, release it, or keep it.
+  const menu = usePlayerMenu();
   const gm = session.role === "dm";
   const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
   // The GM keeps the list open (FG's host list); a player's closes once they have picked.
@@ -37,14 +40,20 @@ export function CharacterSelect({ session, onSheet, onWizard, onClose }: { sessi
         .filter((record) => record.type === "character")
         .map((record) => {
           const entry = roster.get(record.id);
-          return { id: record.id, name: record.name, owner: record.owner, portrait: entry?.portrait ?? (typeof record.data.portrait === "string" ? record.data.portrait : null), species: entry?.species ?? "", classes: entry?.classes ?? "", level: entry?.level ?? Number(record.data.level ?? 0) };
+          return { id: record.id, name: record.name, owner: record.owner, released: entry?.released ?? (!record.owner && record.visibility !== "gm"), portrait: entry?.portrait ?? (typeof record.data.portrait === "string" ? record.data.portrait : null), species: entry?.species ?? "", classes: entry?.classes ?? "", level: entry?.level ?? Number(record.data.level ?? 0) };
         })
     : session.roster;
   const shown = cards.filter((entry) => entry.name.toLowerCase().includes(filter.trim().toLowerCase())).sort((a, b) => a.name.localeCompare(b.name));
 
+  // A released character (no one holds it) a player may look over first: its sheet opens to read.
+  const look = (entry: Card) => onSheet(entry.id, entry.name);
   const pick = async (entry: Card) => {
     if (gm || (entry.owner === me && me)) return done(entry.id, entry.name);
     if (entry.owner) return;
+    if (session.records[entry.id]) return look(entry);
+    await take(entry);
+  };
+  const take = async (entry: Card) => {
     setStatus(`Taking ${entry.name}…`);
     try {
       await session.takeCharacter(entry.id);
@@ -106,7 +115,8 @@ export function CharacterSelect({ session, onSheet, onWizard, onClose }: { sessi
       <ul className="charselect-cards" {...files.drop}>
         {shown.map((entry) => {
           const mine = gm || (Boolean(me) && entry.owner === me);
-          const free = !entry.owner;
+          // No one holds it: a player may take it once the GM has released it; the GM's own are not theirs to take.
+          const free = !entry.owner && (gm || entry.released !== false);
           const record: TableRecord | undefined = session.records[entry.id];
           return (
             <li key={entry.id} className="charselect-item">
@@ -115,8 +125,9 @@ export function CharacterSelect({ session, onSheet, onWizard, onClose }: { sessi
                 className={mine ? "charselect-card mine" : free ? "charselect-card free" : "charselect-card held"}
                 data-charselect={entry.id}
                 disabled={!mine && !free}
-                title={mine ? `${entry.name}: open the sheet` : free ? `Take ${entry.name}` : `${entry.name} is ${entry.owner}'s`}
+                title={mine ? `${entry.name}: open the sheet${gm ? " (right-click: give, release or keep it)" : ""}` : free ? `Look over ${entry.name} (Take to make it yours)` : entry.owner ? `${entry.name} is ${entry.owner}'s` : `${entry.name} is the GM's`}
                 onClick={() => void pick(entry)}
+                onContextMenu={gm ? (event) => menu.open(entry.owner, event, { id: entry.id, name: entry.name, owner: entry.owner, released: Boolean(entry.released) }) : undefined}
                 {...(mine ? slotDrag({ kind: "sheet", record: entry.id, label: entry.name }) : {})}
               >
                 <span className="charselect-face">{entry.portrait ? <Picture session={session} id={entry.portrait} alt="" still /> : null}</span>
@@ -124,9 +135,14 @@ export function CharacterSelect({ session, onSheet, onWizard, onClose }: { sessi
                   <b>{entry.name}</b>
                   <small>Level {entry.level}</small>
                   {entry.classes || entry.species ? <small>{[entry.species, entry.classes].filter(Boolean).join(" · ")}</small> : null}
-                  <strong className="charselect-holder">{free ? "Server" : gm ? `Owned by ${entry.owner}` : mine ? "Yours" : entry.owner}</strong>
+                  <strong className="charselect-holder">{!entry.owner ? (entry.released === false ? "The GM's" : "Released") : gm ? `Owned by ${entry.owner}` : mine ? "Yours" : entry.owner}</strong>
                 </span>
               </button>
+              {!gm && free && !mine ? (
+                <button type="button" className="charselect-take" data-action="take-character" data-take={entry.id} title={`Make ${entry.name} yours`} onClick={() => void take(entry)}>
+                  Take
+                </button>
+              ) : null}
               {editing && mine && record ? (
                 <span className="charselect-tools">
                   <ExportButton record={record} />
@@ -144,6 +160,7 @@ export function CharacterSelect({ session, onSheet, onWizard, onClose }: { sessi
           <li className="hint empty-state">{cards.length ? "No character by that name." : "No characters yet. Make one with New character above (the Character Wizard), or import one."}</li>
         ) : null}
       </ul>
+      {gm ? <PlayerMenu session={session} menu={menu.state} onClose={menu.close} /> : null}
     </section>
   );
 }

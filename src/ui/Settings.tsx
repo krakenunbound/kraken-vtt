@@ -26,7 +26,7 @@ function UiScaleRow() {
   const [scale, setScale] = useState(() => Math.round(getUiScale() * 100));
   const apply = (value: number) => setUiScale(Math.min(200, Math.max(50, value)) / 100);
   return (
-    <SettingRow label="UI scale" hint="How big everything on this screen is: windows, text and pictures. Smaller fits more on the screen. This screen only." className="settings-ui-scale">
+    <SettingRow label="UI scale" hint="How big everything is: windows, text and pictures. Smaller fits more on the screen. It follows your account, like your window layout: the app or any browser you sit down at." className="settings-ui-scale">
       <input type="range" min={50} max={150} step={5} value={Math.min(150, scale)} aria-label="UI scale (slider)" data-setting="ui-scale-slider" onChange={(event) => setScale(Number(event.target.value))} onPointerUp={() => apply(scale)} onKeyUp={() => apply(scale)} />
       <input type="number" className="set-number" min={50} max={200} step={5} value={scale} aria-label="UI scale (percent)" data-setting="ui-scale" onChange={(event) => setScale(Number(event.target.value))} onBlur={() => apply(scale)} onKeyDown={(event) => { if (event.key === "Enter" && !event.nativeEvent.isComposing) apply(scale); }} />
       <span className="set-unit">%</span>

@@ -528,7 +528,8 @@ export function Desktop({
   useEffect(() => {
     if (gm || offered.current || !session.selfId) return;
     offered.current = true;
-    if (characters.length === 0) windows.open("charselect", "Character Selection");
+    // Theirs only: a released character they can read is not one they hold.
+    if (!characters.some((record) => record.owner && record.owner.toLowerCase() === me.toLowerCase())) windows.open("charselect", "Character Selection");
   }, [gm, session.selfId, characters.length]);
   // The GM shows the players a picture: it opens on their screens, as FG's.
   useEffect(() => {
@@ -701,10 +702,11 @@ export function Desktop({
                 className={classes}
                 data-portrait={entry.id}
                 data-quiet={quiet || undefined}
-                title={(opens ? `${entry.name}: open the sheet` : entry.owner ? `${entry.name} (${entry.owner})` : `${entry.name}: no one holds it yet; take it in Character Selection`) + (quiet ? ` · ${entry.owner} is ${quiet}` : "") + (gm && holder ? " · right-click: Ring bell, View as, Kick, Ban" : "")}
+                title={(opens ? `${entry.name}: open the sheet` : entry.owner ? `${entry.name} (${entry.owner})` : `${entry.name}: no one holds it yet; take it in Character Selection`) + (quiet ? ` · ${entry.owner} is ${quiet}` : "") + (gm ? " · right-click: give, release or keep it" + (holder ? "; Ring bell, View as, Kick, Ban" : "") : "")}
                 onClick={() => (opens ? windows.open("sheet", entry.name, entry.id) : !entry.owner ? windows.open("charselect", "Character Selection") : undefined)}
                 // The GM's: Whisper, Ring bell, View as, Kick, Ban; a player's: Whisper (to whoever holds it).
-                onContextMenu={entry.owner && (gm || entry.owner.toLowerCase() !== me.toLowerCase()) ? (event) => playerMenu.open(entry.owner, event) : undefined}
+                // The GM: give, release or keep the character, and its player's menu; a player: Whisper its player.
+                onContextMenu={gm ? (event) => playerMenu.open(entry.owner, event, { id: entry.id, name: entry.name, owner: entry.owner, released: Boolean(entry.released) }) : entry.owner && entry.owner.toLowerCase() !== me.toLowerCase() ? (event) => playerMenu.open(entry.owner, event) : undefined}
                 {...(opens ? slotDrag({ kind: "sheet", record: entry.id, label: entry.name }) : {})}
                 // FG's share with one: a record, a note, a story or a picture dropped on a player's portrait (the GM's).
                 {...(gm && entry.owner ? shareDrop(session, entry.owner) : {})}

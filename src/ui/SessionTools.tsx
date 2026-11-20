@@ -275,16 +275,18 @@ export function InviteCard({ session }: { session: Session }) {
 
 // The GM's menu for a player (a right-click on their row in Players, or on their portrait):
 // Ring bell, View as, Kick, Ban. A popover at the pointer; arrow keys move through it.
-export type PlayerMenuState = { name: string; x: number; y: number; keyboard: boolean } | null;
+// character: a character's portrait or card was right-clicked (the GM gives, releases or keeps it).
+export type MenuCharacter = { id: string; name: string; owner: string; released: boolean };
+export type PlayerMenuState = { name: string; x: number; y: number; keyboard: boolean; character?: MenuCharacter } | null;
 export function usePlayerMenu() {
   const [state, setState] = useState<PlayerMenuState>(null);
-  const open = (name: string, event: ReactMouseEvent) => {
+  const open = (name: string, event: ReactMouseEvent, character?: MenuCharacter) => {
     event.preventDefault();
     // In CSS pixels (a player's UI scale zooms the page).
     const box = cssRect(event.currentTarget as HTMLElement);
     // A click from the keyboard (detail 0) opens it under the element; a pointer at the pointer.
     const keyboard = event.detail === 0 && event.type === "click";
-    setState({ name, x: keyboard ? box.left : cssX(event.clientX), y: keyboard ? box.bottom : cssY(event.clientY), keyboard });
+    setState({ name, x: keyboard ? box.left : cssX(event.clientX), y: keyboard ? box.bottom : cssY(event.clientY), keyboard, ...(character ? { character } : {}) });
   };
   return { state, open, close: () => setState(null) };
 }
@@ -335,7 +337,37 @@ export function PlayerMenu({ session, menu, onClose }: { session: Session; menu:
         }
       }}
     >
-      <div role="menu" aria-label={`${menu.name}`} onKeyDown={items}>
+      <div role="menu" aria-label={menu.character ? menu.character.name : `${menu.name}`} onKeyDown={items}>
+        {/* The GM's say over the character: give it to a player at the table, release it to the players
+            (they may look it over and take it), or keep it as the GM's. */}
+        {gm && menu.character ? (
+          <>
+            <p className="player-menu-name" aria-hidden="true">
+              {menu.character.name}
+              <small> {menu.character.owner ? `(${menu.character.owner}'s)` : menu.character.released ? "(released)" : "(the GM's)"}</small>
+            </p>
+            {session.players
+              .filter((item) => item.role === "player" && !item.lost && item.name.toLowerCase() !== menu.character!.owner.toLowerCase())
+              .map((item) => (
+                <button key={item.id} type="button" role="menuitem" data-menu="give" data-player={item.name} title={`${item.name} holds ${menu.character!.name} (and its tokens) until you give it back`} onClick={done(() => void session.characterOwner(menu.character!.id, "give", item.name).catch(() => undefined))}>
+                  <Icon name="character" size={15} /> Give to {item.name}
+                </button>
+              ))}
+            {menu.character.owner || !menu.character.released ? (
+              <button type="button" role="menuitem" data-menu="release" title="No one holds it: the players may look it over and take it" onClick={done(() => void session.characterOwner(menu.character!.id, "release").catch(() => undefined))}>
+                <Icon name="unlock" size={15} /> Release to the players
+              </button>
+            ) : null}
+            {menu.character.owner || menu.character.released ? (
+              <button type="button" role="menuitem" data-menu="keep" title="Yours: no player holds it, and players cannot see or take it" onClick={done(() => void session.characterOwner(menu.character!.id, "keep").catch(() => undefined))}>
+                <Icon name="lock" size={15} /> Keep as the GM's
+              </button>
+            ) : null}
+            {menu.name ? <hr /> : null}
+          </>
+        ) : null}
+        {menu.name ? (
+          <>
         <p className="player-menu-name" aria-hidden="true">
           {menu.name}
           {seat ? null : <small> (not at the table)</small>}
@@ -377,6 +409,8 @@ export function PlayerMenu({ session, menu, onClose }: { session: Session; menu:
         >
           <Icon name="ban" size={15} /> Ban…
         </button>
+          </>
+        ) : null}
           </>
         ) : null}
       </div>

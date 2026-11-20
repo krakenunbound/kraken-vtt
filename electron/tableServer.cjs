@@ -2023,6 +2023,8 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
           id: record.id,
           name: record.name,
           owner: record.owner,
+          // No one holds it: released to the players (they may look it over and take it), or the GM's own.
+          released: !record.owner && record.visibility !== "gm",
           online: Boolean(record.owner) && seated.has(record.owner),
           portrait: typeof data.portrait === "string" ? data.portrait : null,
           species: String(data.race ?? data.species ?? ""),
@@ -2051,7 +2053,32 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     const record = records.get(text(id, ""));
     if (!record || record.type !== "character") throw new Error("There is no such character.");
     if (record.owner && record.owner !== client.name) throw new Error(`${record.name} is ${record.owner}'s.`);
-    return records.update(record.id, { owner: client.name, visibility: "owner" }, { role: "dm", name: "GM" });
+    // A character no one holds may be taken once the GM has released it (the GM's own stay the GM's).
+    if (!record.owner && record.visibility === "gm") throw new Error(`${record.name} is the GM's: ask the GM to release it.`);
+    const taken = records.update(record.id, { owner: client.name, visibility: "owner" }, { role: "dm", name: "GM" });
+    map.reown(record.id, client.name);
+    sendRoster();
+    return taken;
+  }
+
+  // The GM's say over a character: give (assign) it to a player (they hold it: Brenda plays Steve's tonight),
+  // release it (no one holds it; players may look it over and take it: the pregens for a player whose
+  // character died), or keep it (the GM's own, hidden from players). Its tokens on every map follow.
+  function characterOwner(id, action, player = "") {
+    const record = records.get(text(id, ""));
+    if (!record || record.type !== "character") throw new Error("There is no such character.");
+    const name = text(player, "").trim().slice(0, 40);
+    let patch;
+    if (action === "give") {
+      if (!name) throw new Error("Give it to whom? A player's name.");
+      patch = { owner: name, visibility: "owner" };
+    } else if (action === "release") patch = { owner: "", visibility: "all" };
+    else if (action === "keep") patch = { owner: "", visibility: "gm" };
+    else throw new Error("give, release or keep?");
+    const changedRecord = records.update(record.id, patch, { role: "dm", name: "GM" });
+    map.reown(record.id, patch.owner);
+    sendRoster();
+    return changedRecord;
   }
 
   // The scene a player is sent: the map and lights. Walls stay on the host
@@ -2416,6 +2443,16 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       }
 
       // FG's Character Selection: a player takes a character no one holds.
+      if (msg.type === "character-owner") {
+        try {
+          if (client.role !== "dm") throw new Error("Only the GM gives, releases or keeps a character.");
+          const record = characterOwner(msg.id, msg.action, msg.player);
+          send(ws, { type: "op-result", req: msg.req, ok: true, id: record.id });
+        } catch (error) {
+          send(ws, { type: "op-result", req: msg.req, ok: false, error: error.message });
+        }
+        return;
+      }
       if (msg.type === "take-character") {
         try {
           const record = takeCharacter(client, msg.id);
@@ -3762,6 +3799,9 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     ruleset: () => ruleset,
     // FG's character list: every character's face, who holds it, who is seated.
     roster: () => rosterView(),
+    characterOwner: (id, action, player) => characterOwner(id, action, player),
+    // A character's own edit (as its sheet makes it), for the agent's tools.
+    editCharacter: (record, changes) => editCharacter(agentHandle, record, changes, { role: "dm", name: "GM" }),
     // Players' accounts: list, create, password, remove (accountAction).
     accounts: (input) => accountAction(input),
     records,

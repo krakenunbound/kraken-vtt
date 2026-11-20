@@ -1455,6 +1455,20 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       }
     },
     tokens: () => tokensHere(),
+    // A character given to another player, released or kept by the GM: its tokens on every map follow.
+    reown(recordId, owner) {
+      let changedAny = false;
+      for (const list of Object.values(state.tokens)) {
+        for (const token of list ?? []) {
+          if (token && token.recordId === recordId && token.owner !== owner) {
+            token.owner = owner;
+            changedAny = true;
+          }
+        }
+      }
+      if (changedAny) changed();
+      return changedAny;
+    },
     viewFor,
     sightOn,
     setSight(on) {

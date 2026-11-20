@@ -164,11 +164,11 @@ const TOOLS = [
   {
     name: "kraken_characters",
     description:
-      "FG's character list and Character Selection. roster: every character at the table (name, portrait, species, class, level, owner, whether the owner is seated); what the portrait bar shows. give: hand a character to a player (owner = their name; they see it and it is theirs, as when they pick it in Character Selection). release: take it back (no one holds it; it is listed again for players to pick).",
+      "FG's character list and Character Selection. roster: every character at the table (name, portrait, species, class, level, owner, whether the owner is seated); what the portrait bar shows. give: hand a character to a player (owner = their name; they see it and it is theirs, as when they pick it in Character Selection; its tokens become theirs: a player plays another's character tonight). release: no one holds it, and players may look it over and take it (the pregens for a player whose character died). keep: no one holds it and it is the GM's own (hidden from players, not to be taken).",
     inputSchema: object(
       {
-        action: { type: "string", enum: ["roster", "give", "release"] },
-        id: string("Character record id (give, release)"),
+        action: { type: "string", enum: ["roster", "give", "release", "keep"] },
+        id: string("Character record id (give, release, keep)"),
         owner: string("The player's name (give)"),
       },
       ["action"],
@@ -178,11 +178,9 @@ const TOOLS = [
       if (args.action === "roster") return out({ roster: agent.roster() });
       const record = agent.records.get(args.id ?? "");
       if (!record || record.type !== "character") throw new Error(`No character ${args.id ?? ""}.`);
-      if (args.action === "give") {
-        if (!args.owner) throw new Error("give needs owner: the player's name.");
-        agent.records.update(record.id, { owner: args.owner, visibility: "owner" }, agent.seat);
-      } else if (args.action === "release") agent.records.update(record.id, { owner: "", visibility: "gm" }, agent.seat);
-      else throw new Error("action is roster, give or release.");
+      if (!["give", "release", "keep"].includes(args.action)) throw new Error("action is roster, give, release or keep.");
+      if (args.action === "give" && !args.owner) throw new Error("give needs owner: the player's name.");
+      agent.characterOwner(record.id, args.action, args.owner ?? "");
       return out({ roster: agent.roster() });
     },
   },
@@ -1376,6 +1374,34 @@ const TOOLS = [
     inputSchema: object({}),
     async run(_args, ctx) {
       return out(await party.partyView(needTable(ctx)));
+    },
+  },
+  {
+    name: "kraken_party_stash",
+    description:
+      "The party's stash, where players trade (the party sheet's Inventory tab): list (what is in it: id, name, count, who put it in); put (character: a character id, key: the inventorylist row's key: that item leaves the character's gear and waits in the stash); take (id: a stash item, character: who gets it: it joins their gear). Chat says who put and took what.",
+    inputSchema: object(
+      {
+        action: { type: "string", enum: ["list", "put", "take"] },
+        character: string("A character id (put, take)"),
+        key: string("put: the item's row key in the character's inventorylist"),
+        id: string("take: the stash item's id"),
+      },
+      ["action"],
+    ),
+    async run(args, ctx) {
+      const agent = needTable(ctx);
+      if (args.action === "list") return out({ stash: (await party.partyView(agent)).stash ?? [] });
+      const character = agent.records.get(args.character ?? "");
+      if (!character || character.type !== "character") throw new Error(`No character ${args.character ?? ""}.`);
+      if (args.action === "put") {
+        if (!args.key) throw new Error("put needs key: the item's row in the character's inventorylist.");
+        await party.stashPut(agent, character, String(args.key), (changes) => agent.editCharacter(character, changes), "GM");
+      } else if (args.action === "take") {
+        if (!args.id) throw new Error("take needs id: the stash item's id.");
+        await party.stashTake(agent, character, String(args.id), "GM");
+      } else throw new Error("action is list, put or take.");
+      return out({ stash: (await party.partyView(agent)).stash ?? [] });
     },
   },
   {

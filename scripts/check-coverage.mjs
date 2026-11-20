@@ -32,6 +32,8 @@ const MESSAGES = {
   quest: "kraken_quest",
   "build-character": "kraken_build_character",
   "take-character": "kraken_characters",
+  "character-owner": "kraken_characters",
+  "party-stash": "kraken_party_stash",
   accounts: "kraken_accounts",
   "sign-out": "kraken_accounts",
   "level-up": "kraken_level_up",
