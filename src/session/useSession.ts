@@ -495,7 +495,7 @@ export function useSession() {
   // The GM's: the open scene's own sound, if it has one.
   const [sceneSound, setSceneSound] = useState<{ sceneId: string | null; kept: Soundscape | null }>({ sceneId: null, kept: null });
   const [bookSounds, setBookSounds] = useState<Record<string, PageSounds>>({});
-  const [quickSlots, setQuickSlotsState] = useState<(QuickSlot | null)[]>(Array(10).fill(null));
+  const [quickSlots, setQuickSlotsState] = useState<(QuickSlot | null)[]>(Array(12).fill(null));
   const [modifiers, setModifiers] = useState<ModifierStack>({ slots: [], keys: [], total: 0 });
   const [bookShelf, setBookShelf] = useState<BookShelf>({ active: [], shared: [], images: [] });
   // The last picture the GM showed the players (a player's screen opens it).

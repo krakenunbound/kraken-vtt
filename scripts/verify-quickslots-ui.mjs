@@ -161,7 +161,7 @@ try {
   assert((await lastRoll())?.formula === "3d6", `a click on the slot rolls 3d6 (${JSON.stringify(await lastRoll())})`);
   const before = (await tool("kraken_chat_log", { count: 50 })).length;
   await page.click(".desktop-surface", { position: { x: 300, y: 300 } }).catch(() => undefined);
-  await page.keyboard.press("4");
+  await page.keyboard.press("F4");
   await settle(800);
   const after = await tool("kraken_chat_log", { count: 50 });
   assert(after.length > before && after.at(-1).roll?.formula === "3d6", "the 4 key rolls slot 4's dice");
@@ -290,9 +290,9 @@ try {
   let roll = await lastRoll();
   assert(roll?.formula === "4d6k3" && roll.total >= 3 && roll.total <= 18, `the macro rolls 4d6k3 (${JSON.stringify(roll)})`);
   await page.click(".desktop-surface", { position: { x: 300, y: 300 } }).catch(() => undefined);
-  await page.keyboard.press("6");
+  await page.keyboard.press("F6");
   await settle(900);
-  // Typing a 6 in the chat is a 6, not the slot.
+  // Typing a 6 in the chat is a 6 (the slots are on F1-F12).
   await page.click("form.chat-entry input");
   await page.keyboard.press("6");
   assert((await page.inputValue("form.chat-entry input")) === "6", "a number typed in the chat stays in the chat");

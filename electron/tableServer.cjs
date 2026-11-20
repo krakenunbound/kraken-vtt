@@ -596,7 +596,8 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   // Each seat's quick slots (by name; the GM's as "@gm"): what they keep at
   // hand to open again with a click: a book (at a page), a picture or map,
   // a character sheet.
-  const SLOTS = 10;
+  // Twelve, one for each function key (F1-F12).
+  const SLOTS = 12;
   const cleanSlot = (raw) => {
     if (!raw || typeof raw !== "object") return null;
     const label = text(raw.label, "").slice(0, 80);

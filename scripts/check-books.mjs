@@ -195,7 +195,7 @@ try {
   player.send({ type: "quickslots", slots: [{ kind: "book", book: "Test Handbook", page: "first", label: "Rules" }, { kind: "virus", label: "x" }, null, { kind: "picture", book: "Test Keep", file: "images/keep.png", label: "Keep" }] });
   await settle();
   const mine = player.events.filter((event) => event.type === "quickslots").at(-1)?.slots;
-  assert(mine?.length === 10 && mine[0].page === "first" && mine[1] === null && mine[3].kind === "picture", `a player's slots, cleaned: ${JSON.stringify(mine)}`);
+  assert(mine?.length === 12 && mine[0].page === "first" && mine[1] === null && mine[3].kind === "picture", `a player's slots, cleaned: ${JSON.stringify(mine)}`);
   assert(server.agent.quickSlots("@gm").every((slot) => slot === null), "the GM's slots are the GM's own");
   assert(server.agent.quickSlots("A test player")[0].label === "Rules", "the agent reads a player's slots");
   const later = createTableServer({ books, ruleset: "Castles & Crusades", saved: server.persisted() });
