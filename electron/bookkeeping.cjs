@@ -283,7 +283,8 @@ function createBookkeeping(table) {
     }
   }
   // Game time passed (the calendar's Advance): each day that ended is eaten and drunk for.
-  async function timePassed() {
+  // minutes: the game time that passed (a date set by hand moves no time, so eats for no days).
+  async function timePassed(minutes = Infinity) {
     await ready;
     const now = today();
     if (lastDay === null || !switches().rations) {
@@ -291,7 +292,21 @@ function createBookkeeping(table) {
       return [];
     }
     const lines = [];
-    for (let day = lastDay; day < now && day < lastDay + 60; day += 1) for (const record of party()) lines.push(...(await feed(table.records.get(record.id) ?? record, day)));
+    const { addDays, calendarOf } = require("../shared/calendars.mjs");
+    const id = table.calendar?.()?.view?.({ role: "dm", name: "GM" })?.id;
+    const calendar = calendarOf(id);
+    // The days that ended, walked back from today to the last day counted, no more than the time that passed
+    // (a date set by hand moves no time): by the calendar's own years, so 28 Sunsebb to 1 Needfest is one day.
+    const most = Number.isFinite(minutes) ? Math.ceil(Math.max(0, minutes) / 1440) : 366;
+    const ended = [];
+    let at = { year: Math.floor(now / 1000), day: now % 1000 };
+    while (ended.length < most) {
+      at = addDays(calendar, at.year, at.day, -1);
+      const key = at.year * 1000 + at.day;
+      if (key < lastDay) break;
+      ended.unshift(key);
+    }
+    for (const key of ended) for (const record of party()) lines.push(...(await feed(table.records.get(record.id) ?? record, key)));
     lastDay = now;
     return lines;
   }

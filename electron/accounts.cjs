@@ -31,19 +31,37 @@ function same(a, b) {
 function createAccountStore(file) {
   /** @type {Map<string, { name: string, salt: string, hash: string, tokens: { hash: string, at: number }[], createdAt: number, seenAt: number | null }>} */
   const accounts = new Map();
+  // A missing file is a first start; one that cannot be read or parsed is kept as it is, and nothing
+  // is written over it (a new account would otherwise replace every account in it).
+  let damaged = "";
+  let text = null;
   try {
-    const parsed = file ? JSON.parse(fs.readFileSync(file, "utf8")) : null;
-    for (const row of Array.isArray(parsed?.accounts) ? parsed.accounts : []) {
-      const name = clean(row?.name, 24);
-      if (!name || typeof row.salt !== "string" || typeof row.hash !== "string") continue;
-      const tokens = (Array.isArray(row.tokens) ? row.tokens : []).filter((token) => token && typeof token.hash === "string").slice(-MAX_TOKENS);
-      accounts.set(key(name), { name, salt: row.salt, hash: row.hash, tokens, createdAt: Number(row.createdAt) || Date.now(), seenAt: Number(row.seenAt) || null });
-    }
-  } catch {
-    /* No accounts yet. */
+    text = file ? fs.readFileSync(file, "utf8") : null;
+  } catch (error) {
+    if (error?.code !== "ENOENT") damaged = `could not be read (${error?.code ?? error})`;
   }
+  if (text !== null) {
+    try {
+      const parsed = JSON.parse(text);
+      for (const row of Array.isArray(parsed?.accounts) ? parsed.accounts : []) {
+        const name = clean(row?.name, 24);
+        if (!name || typeof row.salt !== "string" || typeof row.hash !== "string") continue;
+        const tokens = (Array.isArray(row.tokens) ? row.tokens : []).filter((token) => token && typeof token.hash === "string").slice(-MAX_TOKENS);
+        accounts.set(key(name), { name, salt: row.salt, hash: row.hash, tokens, createdAt: Number(row.createdAt) || Date.now(), seenAt: Number(row.seenAt) || null });
+      }
+    } catch {
+      damaged = "is damaged";
+      try {
+        fs.copyFileSync(file, `${file}.damaged-${Date.now()}`);
+      } catch {
+        /* the original stays where it is regardless */
+      }
+    }
+  }
+  if (damaged) console.error(`accounts: ${file} ${damaged}; accounts are not saved until it is fixed or removed`);
   const save = () => {
     if (!file) return;
+    if (damaged) throw new Error(`The players' accounts file ${damaged}, so nothing is written over it. Restore ${path.basename(file)} (a copy was kept beside it), or remove it to start the accounts again, then restart Maelstrom.`);
     fs.mkdirSync(path.dirname(file), { recursive: true });
     const temp = `${file}.tmp`;
     fs.writeFileSync(temp, JSON.stringify({ accounts: [...accounts.values()] }));

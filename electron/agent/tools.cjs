@@ -1056,7 +1056,7 @@ const TOOLS = [
     description: "FG's /save: save the campaign now.",
     inputSchema: object({}),
     run(_args, ctx) {
-      needTable(ctx).save();
+      if (needTable(ctx).save() === false) throw new Error("The campaign could not be saved to the disk.");
       return out({ saved: true });
     },
   },

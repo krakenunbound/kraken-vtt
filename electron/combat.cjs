@@ -2370,8 +2370,11 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     return linked ? r5.npcSave(linked.data, stat) : 0;
   }
   // A saving throw against a DC (cl is the DC for 5E); effects' SAVE bonuses and dice count.
-  async function save5e(entry, stat, dcIn, from, castName, { silent = false, advantage: chosen = "" } = {}) {
+  async function save5e(entry, statIn, dcIn, from, castName, { silent = false, advantage: chosen = "" } = {}) {
     await r5Ready;
+    // "dex" as Map Studio's traps (and players) write it: the ability it stands for.
+    const short = String(statIn ?? "").trim().toLowerCase();
+    const stat = STATS.find((name) => name === short || (short.length >= 3 && name.startsWith(short))) ?? short;
     if (!STATS.includes(stat)) throw new Error("Pick an ability.");
     const dc = Math.max(0, Math.round(num(dcIn, 0)));
     const modifier = saveBonus5e(entry, stat) + effectBonus(entry, "SAVE");

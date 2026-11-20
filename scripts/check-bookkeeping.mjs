@@ -263,6 +263,14 @@ try {
   await settle();
   assert(rations() === before, "rations off: the days pass, nothing eaten");
   await tool("kraken_table_options", { bookkeeping: { rations: true } });
+  // Audit 2026-11-19 008: an hour across New Year is one day's food, not a season's; a date set by hand eats nothing.
+  {
+    const was = rations();
+    await tool("kraken_calendar", { action: "set", month: 99, day: 99, hour: 23, minute: 0 });
+    await tool("kraken_calendar", { action: "advance", hours: 1 });
+    await settle();
+    assert(rations() === was - 1, `one midnight at New Year, one ration: ${was} then ${rations()}`);
+  }
   // A party member whose food is still in an unopened Explorer's Pack: the pack is opened when the day ends.
   const kip = agent.records.create({ type: "character", name: "Kip", owner: "", visibility: "gm", data: { ...base, inventorylist: { "id-00001": structuredClone(kit["id-00004"]) } } }, agent.seat);
   agent.records.update("party", { data: { members: [ryn.id, ox.id, kip.id] } }, agent.seat);

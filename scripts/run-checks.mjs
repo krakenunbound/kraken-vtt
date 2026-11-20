@@ -7,6 +7,7 @@ const LIMIT = 300000;
 const files = readdirSync("scripts")
   .filter((name) => /^(check|verify)-.*\.mjs$/.test(name) || name === "playtest-b2.mjs")
   .sort((a, b) => (a.startsWith("check") === b.startsWith("check") ? a.localeCompare(b) : a.startsWith("check") ? -1 : 1));
+const failed = [];
 for (const name of files) {
   const started = Date.now();
   // check-tiles is TypeScript-flavoured: tsx, as the project runs it.
@@ -27,6 +28,9 @@ for (const name of files) {
   });
   const last = result.out.trim().split("\n").slice(-2).join(" | ").slice(0, 260);
   const mark = result.code === 0 ? "PASS" : result.code === "TIMEOUT" ? "TIMEOUT" : "FAIL";
+  if (mark !== "PASS") failed.push(`${mark} ${name}`);
   console.log(`${mark} ${name} (${Math.round((Date.now() - started) / 1000)}s): ${last}`);
 }
-console.log("DONE");
+// A failed or timed-out check fails the run (after every check has had its turn).
+console.log(failed.length ? `DONE, ${failed.length} failed: ${failed.join(", ")}` : "DONE");
+process.exitCode = failed.length ? 1 : 0;

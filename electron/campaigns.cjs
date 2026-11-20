@@ -240,6 +240,8 @@ function exportZip(file, input) {
   };
   add(folder(file, found.id), "campaign/");
   add(picturesFolder(file, found.id), "studio/");
+  // Its own maps (Documents/Kraken VTT/Campaigns/<name>), which its image records name by file.
+  if (input?.maps) add(String(input.maps), "maps/");
   const bytes = Buffer.from(zipSync(entries, { level: 6 }));
   const target = String(input?.path ?? "");
   if (!target) throw new Error("Where should the .zip go?");
@@ -294,8 +296,25 @@ function backup(file, input) {
     }
     fs.copyFileSync(from, to);
   }
-  // The newest ten are kept; older ones are this feature's own folders, removed.
-  for (const old of backups(file, { id: found.id }).slice(KEEP_BACKUPS)) fs.rmSync(path.join(backupsFolder(file, found.id), old.id), { recursive: true, force: true });
+  // Map Studio's painted pictures go too (pictures/; an empty one means "none"), linked like the adventure:
+  // Map Studio writes each picture as a new file, so a link keeps this backup's bytes.
+  const pictures = picturesFolder(file, found.id);
+  fs.mkdirSync(path.join(dir, "pictures"), { recursive: true });
+  if (fs.existsSync(pictures)) {
+    for (const entry of fs.readdirSync(pictures, { withFileTypes: true })) {
+      if (!entry.isFile() || scratch(entry.name)) continue;
+      const from = path.join(pictures, entry.name);
+      const to = path.join(dir, "pictures", entry.name);
+      try {
+        fs.linkSync(from, to);
+      } catch {
+        fs.copyFileSync(from, to);
+      }
+    }
+  }
+  // The newest ten are kept (and one being restored from); older ones are this feature's own folders, removed.
+  const keep = String(input?.keep ?? "");
+  for (const old of backups(file, { id: found.id }).filter((item) => item.id !== keep).slice(KEEP_BACKUPS)) fs.rmSync(path.join(backupsFolder(file, found.id), old.id), { recursive: true, force: true });
   return backups(file, { id: found.id }).find((item) => item.id === `${at}-${reason}`) ?? null;
 }
 // A backup put back: what is there now is backed up first ("before-restore"), so a restore can be undone.
@@ -303,7 +322,8 @@ function restore(file, input) {
   const found = find(read(file), input?.id);
   const chosen = backups(file, { id: found.id }).find((item) => item.id === String(input?.backup ?? ""));
   if (!chosen) throw new Error("No such backup.");
-  backup(file, { id: found.id, reason: "before-restore" });
+  // The chosen backup is kept while the before-restore one is made (it may be the oldest of ten).
+  backup(file, { id: found.id, reason: "before-restore", keep: chosen.id });
   const dir = path.join(backupsFolder(file, found.id), chosen.id);
   const target = folder(file, found.id);
   for (const name of BACKUP_FILES) {
@@ -313,9 +333,22 @@ function restore(file, input) {
       const temp = `${to}.tmp`;
       fs.copyFileSync(from, temp);
       fs.renameSync(temp, to);
-    } else if (name === "bundle.zip") fs.rmSync(to, { force: true });
+      fs.rmSync(`${to}.bak`, { force: true });
+    } else {
+      // Not in the backup (an older save kept records inside state.json): not left to win over it, nor its .bak.
+      fs.rmSync(to, { force: true });
+      fs.rmSync(`${to}.bak`, { force: true });
+    }
+  }
+  // Map Studio's pictures as they were; a backup from before pictures were kept leaves today's alone.
+  const pictures = path.join(dir, "pictures");
+  if (fs.existsSync(pictures)) {
+    const live = picturesFolder(file, found.id);
+    fs.rmSync(live, { recursive: true, force: true });
+    fs.mkdirSync(live, { recursive: true });
+    for (const name of fs.readdirSync(pictures)) fs.copyFileSync(path.join(pictures, name), path.join(live, name));
   }
   return { restored: chosen, campaign: found.name };
 }
 
-module.exports = { read, create, touch, setRuleset, exists, readState, writeState, readBundle, writeBundle, removeBundle, folder, picturesFolder, rename, duplicate, remove, exportZip, backups, backup, restore };
+module.exports = { read, create, touch, setRuleset, exists, readState, writeState, readBundle, writeBundle, removeBundle, folder, picturesFolder, copyFolder, rename, duplicate, remove, exportZip, backups, backup, restore };

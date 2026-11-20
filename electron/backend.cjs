@@ -303,8 +303,9 @@ const SAVE_EVERY_MS = 30000;
 const SAVE_AFTER_CHANGE_MS = 2000;
 let hosted = null;
 
+// True when what is in memory is on the disk; false when the write failed (it is still dirty, so it is tried again).
 function flushCampaign() {
-  if (!hosted || !hosted.dirty) return;
+  if (!hosted || !hosted.dirty) return true;
   const persisted = table ? table.persisted() : {};
   const state = { ...hosted.state, ...persisted, view: hosted.state.view ?? null, savedAt: Date.now() };
   try {
@@ -312,8 +313,10 @@ function flushCampaign() {
     hosted.state = state;
     hosted.dirty = false;
     hosted.recordsDirty = false;
+    return true;
   } catch (error) {
     console.error("could not save campaign", error);
+    return false;
   }
 }
 function markDirty(kind) {
@@ -327,15 +330,24 @@ function markDirty(kind) {
   if (kind === "save") {
     hosted.recordsDirty = true;
     clearTimeout(hosted.soon);
-    flushCampaign();
-    return;
+    return flushCampaign();
   }
   clearTimeout(hosted.soon);
   hosted.soon = setTimeout(flushCampaign, SAVE_AFTER_CHANGE_MS);
 }
 function closeCampaign() {
   if (!hosted) return;
-  flushCampaign();
+  // Leaving or quitting: a failed save is not thrown away with the table, it goes to recovery/ beside the campaigns.
+  if (!flushCampaign()) {
+    try {
+      const dir = path.join(path.dirname(campaignFile()), "recovery");
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, `${hosted.id}-${Date.now()}.json`), JSON.stringify({ ...hosted.state, ...(table ? table.persisted() : {}) }));
+      console.error("the campaign could not be saved; its state was written to", dir);
+    } catch (error) {
+      console.error("could not write the recovery copy either", error);
+    }
+  }
   clearInterval(hosted.timer);
   clearInterval(hosted.backups);
   clearTimeout(hosted.soon);
@@ -348,7 +360,8 @@ function backupCampaign(id, reason) {
     if (hosted && hosted.id === id) {
       hosted.dirty = true;
       hosted.recordsDirty = true;
-      flushCampaign();
+      // A backup of the old disk state would look current: none is made when the save failed.
+      if (!flushCampaign()) return null;
     }
     return campaigns.backup(campaignFile(), { id, reason });
   } catch (error) {
@@ -490,11 +503,16 @@ async function studioOpenImage({ sceneId, name, picture }) {
 // Where Map Studio's Open dialogs start: the hosted campaign's own maps folder,
 // Documents/Kraken VTT/Campaigns/<campaign>/Maps (made when first asked for);
 // with no campaign hosted, Documents/Kraken VTT/Maps.
+// Documents/Kraken VTT/Campaigns/<name> ("" when the name has no usable letters).
+function campaignNamedFolder(campaignName) {
+  const name = String(campaignName ?? "").replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_").replace(/[. ]+$/, "").trim().slice(0, 80);
+  return name ? path.join(kraken.root(), "Campaigns", name) : "";
+}
 function campaignMapsFolder() {
   const found = hosted ? campaigns.read(campaignFile()).find((item) => item.id === hosted.id) : null;
-  const name = String(found?.name ?? "").replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_").replace(/[. ]+$/, "").trim().slice(0, 80);
+  const named = campaignNamedFolder(found?.name);
   kraken.ready?.();
-  const folder = name ? path.join(kraken.root(), "Campaigns", name, "Maps") : path.join(kraken.root(), "Maps");
+  const folder = named ? path.join(named, "Maps") : path.join(kraken.root(), "Maps");
   fs.mkdirSync(folder, { recursive: true });
   return folder;
 }
@@ -517,9 +535,13 @@ async function studioAdopt({ name, bytes }) {
   const base = path.basename(String(name || "Map.png")).replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_");
   const ext = (path.extname(base) || ".png").toLowerCase();
   const stem = path.basename(base, path.extname(base)).slice(0, 80) || "Map";
-  // The same picture already there keeps its file (and so its master); another of the same name gets a number.
+  // The same picture already there keeps its file (and so its master); another of the same name gets a number,
+  // and so does one whose scene id another map already has (Keep.png and Keep.webp, Lower_Keep and Lower-Keep).
+  const sceneOf = (name) => `own-${name.toLowerCase().replace(/\.[a-z0-9]+$/, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60)}`;
+  const others = fs.readdirSync(folder).filter((name) => /\.(png|jpe?g|webp)$/i.test(name));
+  const taken = (name) => others.some((other) => other !== name && sceneOf(other) === sceneOf(name));
   let file = `${stem}${ext}`;
-  for (let n = 2; fs.existsSync(path.join(folder, file)) && !fs.readFileSync(path.join(folder, file)).equals(bytes); n++) file = `${stem} (${n})${ext}`;
+  for (let n = 2; (fs.existsSync(path.join(folder, file)) && !fs.readFileSync(path.join(folder, file)).equals(bytes)) || taken(file); n++) file = `${stem} (${n})${ext}`;
   if (!fs.existsSync(path.join(folder, file))) fs.writeFileSync(path.join(folder, file), bytes);
   const records = table.agent.records;
   const known = records.list({ type: "image" }).find((record) => record.data?.own && record.data?.file === file);
@@ -528,7 +550,7 @@ async function studioAdopt({ name, bytes }) {
   // Map Studio works on the map's master by its scene (as the table's /table/own-map names it):
   // nothing else opens (the image window shows it when the GM opens it from Images).
   const meta = await require("sharp")(bytes, { limitInputPixels: 200_000_000 }).metadata();
-  const id = `own-${file.toLowerCase().replace(/\.[a-z0-9]+$/, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60)}`;
+  const id = sceneOf(file);
   const grid = table.agent.map.gridOf(id);
   const scene = { id, name: known?.name ?? title, width: meta.width, height: meta.height, padding: 0, grid };
   const { url } = await studioUrl();
@@ -538,17 +560,21 @@ async function studioAdopt({ name, bytes }) {
   const token = bridge().openSession({ sceneId: id, scene, name: scene.name, pictureId: asset.id, size: { width: asset.width, height: asset.height }, campaignId: hosted.id });
   return { url: `${url}/?kraken=${token}`, file, record: known?.id ?? null };
 }
-async function studioOpen(token) {
-  const found = bridge().session(token);
+// A Map Studio session works on the campaign it was opened from, and only while that one is hosted.
+function sameCampaign(found) {
   if (!found) throw new Error("Open the image in Map Studio from Maelstrom again.");
+  if (!hosted || !table || found.campaignId !== hosted.id) throw new Error("This Map Studio tab belongs to another campaign: open the image in Map Studio from the campaign being played.");
+  return found;
+}
+async function studioOpen(token) {
+  const found = sameCampaign(bridge().session(token));
   const view = openMaster(found.sceneId, found.scene ?? null);
   return { project: bridge().projectFor({ view, pictureId: found.pictureId, size: found.size, name: found.name }), kraken: { scene: view.scene.name } };
 }
 // Map Studio's pictures for an image, kept with the GM's data by campaign and scene.
 const studioPictureFile = (campaignId, picture) => path.join(USER_DATA, "studio", "pictures", String(campaignId).replace(/[^\w.-]/g, "_"), String(picture?.file ?? "").replace(/[^\w.-]/g, "_"));
 async function studioSave(token, project, image) {
-  const found = bridge().session(token);
-  if (!found) throw new Error("Open the image in Map Studio from Maelstrom again.");
+  const found = sameCampaign(bridge().session(token));
   const view = openMaster(found.sceneId, found.scene ?? null);
   const master = bridge().masterFrom(project, view.scene);
   let picture = null;
@@ -559,8 +585,12 @@ async function studioSave(token, project, image) {
     picture = { file: `${view.scene.id.replace(/[^\w.-]/g, "_")}.webp`, version: Date.now(), width: project.width, height: project.height };
     const target = studioPictureFile(found.campaignId, picture);
     fs.mkdirSync(path.dirname(target), { recursive: true });
-    await require("sharp")(Buffer.from(match[2], "base64"), { limitInputPixels: 200_000_000 }).webp({ quality: 92 }).toFile(target);
+    // A new file swapped in, never written over: a backup's link to the old picture keeps its bytes.
+    await require("sharp")(Buffer.from(match[2], "base64"), { limitInputPixels: 200_000_000 }).webp({ quality: 92 }).toBuffer().then((bytes) => fs.writeFileSync(`${target}.tmp`, bytes));
+    fs.renameSync(`${target}.tmp`, target);
   }
+  // The GM may have changed campaigns while the picture was written: nothing goes into another one.
+  sameCampaign(found);
   const counts = table.agent.map.fromStudio({ ...master, project, picture, of: found.scene ?? null });
   emit("studio-saved", { sceneId: view.scene.id, picture: Boolean(picture) });
   return { saved: true, ...counts, picture: Boolean(picture) };
@@ -607,15 +637,37 @@ async function manageCampaign(input) {
   if (playing && (action === "duplicate" || action === "export")) {
     hosted.dirty = true;
     hosted.recordsDirty = true;
-    flushCampaign();
+    if (!flushCampaign()) throw new Error("The campaign could not be saved to the disk first, so the copy would be out of date. Check the drive, then try again.");
   }
-  if (action === "rename") return campaigns.rename(file, { id, name: input.name });
-  if (action === "duplicate") return campaigns.duplicate(file, { id, name: input.name });
+  // The campaign's own maps live in Documents/Kraken VTT/Campaigns/<its name>/Maps: they go with it.
+  const before = campaigns.read(file).find((item) => item.id === id);
+  if (action === "rename") {
+    const renamed = campaigns.rename(file, { id, name: input.name });
+    const from = before ? campaignNamedFolder(before.name) : "";
+    const to = campaignNamedFolder(renamed.name);
+    if (from && to && from !== to && fs.existsSync(from)) {
+      // Moved; copied instead when the new name's folder exists or something has the old one open.
+      try {
+        if (fs.existsSync(to)) throw new Error("exists");
+        fs.renameSync(from, to);
+      } catch {
+        campaigns.copyFolder(from, to);
+      }
+    }
+    return renamed;
+  }
+  if (action === "duplicate") {
+    const copy = campaigns.duplicate(file, { id, name: input.name });
+    const from = before ? campaignNamedFolder(before.name) : "";
+    const to = campaignNamedFolder(copy.name);
+    if (from && to && fs.existsSync(from) && !fs.existsSync(to)) campaigns.copyFolder(from, to);
+    return copy;
+  }
   if (action === "export") {
     const found = campaigns.read(file).find((item) => item.id === id);
     if (!found) throw new Error("That campaign is missing.");
     const target = input.path ? String(input.path) : path.join(kraken.root(), "Exports", `${found.name.replace(/[^\w .()-]/g, "_").trim() || "campaign"}.zip`);
-    return campaigns.exportZip(file, { id, path: target });
+    return campaigns.exportZip(file, { id, path: target, maps: campaignNamedFolder(found.name) });
   }
   if (action === "delete") {
     if (!campaigns.exists(file, id)) throw new Error("That campaign is missing.");

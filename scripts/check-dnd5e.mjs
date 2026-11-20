@@ -201,6 +201,10 @@ try {
   force(9);
   const save = (await tool("kraken_combat", { action: "save", id: g2.id, attribute: "dexterity", cl: 14 })).save;
   assert(save.total === 11 && save.success === false && /\[DC 14\] \[FAILURE 11 vs 14\]/.test(last(/^\[SAVE\]/).roll.label), `DEX save +2 against DC 14: ${JSON.stringify(save)}`);
+  // Audit 2026-11-19 009: a trap's "dex" (Map Studio's own word) is the same save, bonus and all.
+  force(9);
+  const short = (await tool("kraken_combat", { action: "save", id: g2.id, attribute: "dex", cl: 14 })).save;
+  assert(short.total === 11, `"dex" is the DEX save, +2: ${JSON.stringify(short)}`);
 
   // Spells: Fire Bolt (a spell attack, d10 x2 at 5th level), Fireball (DEX save, half on a success), Magic Missile's three darts.
   await tool("kraken_combat", { action: "target", id: ils.id, targetId: g2.id, on: true });

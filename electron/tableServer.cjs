@@ -847,7 +847,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   });
   function passGameTime(minutes) {
     // A day that ends is eaten and drunk for (bookkeeping: rations and water).
-    if (bookkeepingApi) void bookkeepingApi.timePassed().catch(() => undefined);
+    if (bookkeepingApi) void bookkeepingApi.timePassed(minutes).catch(() => undefined);
     const rounds = combat.passTime(minutes);
     if (rounds <= 0) return;
     for (const token of map.tokensWithEffects()) {
@@ -3002,8 +3002,9 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       // FG's /save: the GM saves the campaign now.
       if (msg.type === "save") {
         if (client.role !== "dm") return;
-        onChange("save");
-        send(ws, { type: "notice", text: "Campaign saved." });
+        // Only "saved" when it is on the disk (onChange returns false when the write failed).
+        if (onChange("save") === false) send(ws, { type: "error", reason: "The campaign could not be saved to the disk. Check the drive has space and nothing has the campaign's files open, then save again." });
+        else send(ws, { type: "notice", text: "Campaign saved." });
         return;
       }
 
