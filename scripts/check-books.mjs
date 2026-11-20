@@ -159,9 +159,14 @@ try {
   await settle();
   assert(gm.events.some((event) => event.type === "error" && /adventure/.test(event.reason)), "an adventure cannot be opened to the players");
   assert((await get(player, `/book/page?book=${book}&page=inn`)).status === 404, "the player cannot read the adventure");
+  // A shared book's records (its classes, species, equipment) are the players' to see; until then, the GM's.
+  const rope = server.agent.records.create({ type: "item", name: "Rope", source: "Test Handbook", visibility: "gm", data: {} }, server.agent.seat);
+  assert(!server.agent.records.get(rope.id, { role: "player", name: "Player" }), "a book's item is the GM's until the book is shared");
   gm.send({ type: "book-share", book: "Test Handbook" });
   await settle();
   assert(player.events.some((event) => event.type === "books" && event.shared.includes("Test Handbook")), "the players hear a book is open to them");
+  assert(player.events.some((event) => event.type === "records" && event.records.some((record) => record.id === rope.id)), "and get its records");
+  assert(gm.events.some((event) => event.type === "records" && event.records.some((record) => record.id === rope.id && record.viaBook)), "the GM's list shows the players see it through the book");
   assert((await (await get(player, "/book/list")).json()).books.map((item) => item.id).join() === "Test Handbook", "a shared book is on the player's shelf");
   assert((await (await get(player, "/book/page?book=Test%20Handbook&page=first")).json()).name === "First", "and the player reads it");
   gm.send({ type: "book-share", book: "Test Handbook", shared: false });

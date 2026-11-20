@@ -786,6 +786,8 @@ export function useSession() {
               window.setTimeout(() => setBubbles((current) => current.filter((item) => item.id !== bubble.id)), Math.min(10000, 3500 + bubble.text.length * 55));
             }
           }
+          // Every record this seat may see, again (the GM shared a book with the players, or stopped).
+          if (msg.type === "records" && Array.isArray(msg.records)) setRecords(Object.fromEntries((msg.records as TableRecord[]).map((record) => [record.id, record])));
           if (msg.type === "record" && msg.record) {
             const record = msg.record as TableRecord;
             setRecords((current) => ({ ...current, [record.id]: record }));

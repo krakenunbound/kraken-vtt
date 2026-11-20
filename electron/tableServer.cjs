@@ -703,7 +703,20 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   sessions.push(thisSession);
   const archived = new Map();
   const sessionStore = archive ?? { save: (id, lines) => archived.set(id, lines), read: (id) => archived.get(id) ?? null };
-  const records = createRecordStore({ saved: saved.records, onChange: () => onChange("records") });
+  // A book the GM has shared with the players (Modules > Players): its rules records (classes, species, skills,
+  // spells, equipment...) are theirs to see, to make and play their characters; a GM's book and an adventure stay the GM's.
+  let sharedNames = { key: "", names: new Set() };
+  const sharedBookNames = () => {
+    const key = [...shelf.shared].filter((id) => shelf.active.has(id)).join("|");
+    if (key !== sharedNames.key) sharedNames = { key, names: new Set(key ? key.split("|").map((id) => books?.info(id)?.name).filter(Boolean) : []) };
+    return sharedNames.names;
+  };
+  // A record as a seat is sent it: the GM's copy says when the players see it through its shared book (viaBook).
+  const recordFor = (record, seat) => {
+    const seen = viewFor(record, seat);
+    return seat.role === "dm" && record.visibility === "gm" && record.source && record.type !== "npc" && sharedBookNames().has(record.source) ? { ...seen, viaBook: true } : seen;
+  };
+  const records = createRecordStore({ saved: saved.records, onChange: () => onChange("records"), alsoSeen: (record) => Boolean(record.source) && record.type !== "npc" && sharedBookNames().has(record.source) });
   const dice = createDice(saved.dice);
   // Each seat's modifier stack (FG's modifier box and keys), read by every roll the seat starts.
   const rulesetManifest = () => {
@@ -1305,8 +1318,15 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     return entry;
   }
 
+  let sharedSent = "";
   function shelfChanged() {
     for (const [ws, client] of clients) send(ws, { type: "books", ...shelfView(client) });
+    // A book shared with the players, or no longer: their records follow (its classes, species, equipment).
+    const sharedNow = [...shelf.shared].filter((id) => shelf.active.has(id)).sort().join("|");
+    if (sharedNow !== sharedSent) {
+      sharedSent = sharedNow;
+      for (const [ws, client] of clients) if (client.joined) send(ws, { type: "records", records: records.list({ seat: seatOf(client) }).map((record) => recordFor(record, seatOf(client))) });
+    }
     onChange("table");
   }
   function bookFor(book) {
@@ -1451,9 +1471,9 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   records.subscribe(({ kind, record, before }) => {
     for (const [ws, client] of clients) {
       const seat = seatOf(client);
-      const sees = kind === "upsert" && canSee(record, seat);
-      if (sees) send(ws, { type: "record", record: viewFor(record, seat) });
-      else if ((before && canSee(before, seat)) || kind === "delete") send(ws, { type: "record-gone", id: record.id });
+      const sees = kind === "upsert" && records.seenBy(record, seat);
+      if (sees) send(ws, { type: "record", record: recordFor(record, seat) });
+      else if ((before && records.seenBy(before, seat)) || kind === "delete") send(ws, { type: "record-gone", id: record.id });
     }
     // A token's health dot follows its record.
     if (map.tokens().some((token) => token.recordId === record.id)) sendMaps();
@@ -2256,7 +2276,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
           modifiers: modifiers.view(clearKey(client)),
           prefs: prefs.get(prefsKey(client)),
           ...(client.role === "dm" ? { bookSounds: Object.fromEntries(bookSounds), sceneSound: sceneSoundView() } : {}),
-          records: records.list({ seat: seatOf(client) }).map((record) => viewFor(record, seatOf(client))),
+          records: records.list({ seat: seatOf(client) }).map((record) => recordFor(record, seatOf(client))),
           scene: client.role === "player" ? sceneFor(client) : null,
           roster: rosterView(),
           ...(client.role === "dm" ? { bans } : {}),

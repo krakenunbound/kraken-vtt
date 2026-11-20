@@ -72,7 +72,9 @@ export function ShareMenu({ session, record, words = false }: { session: Session
   const menu = useRef<HTMLDivElement>(null);
   const names = playerNames(session, record);
   const some = sharedWith(record);
-  const on = isShared(record) || some.length > 0;
+  // A record of a book shared with the players: they see it through the book (the host marks it viaBook).
+  const viaBook = Boolean((record as { viaBook?: boolean }).viaBook);
+  const on = isShared(record) || some.length > 0 || viaBook;
   const toggle = (name: string) => {
     const has = some.some((item) => item.toLowerCase() === name.toLowerCase());
     const next = has ? some.filter((item) => item.toLowerCase() !== name.toLowerCase()) : [...some, name];
@@ -82,11 +84,11 @@ export function ShareMenu({ session, record, words = false }: { session: Session
     <>
       <button
         type="button"
-        className={isShared(record) ? "records-share on" : some.length ? "records-share some" : "records-share"}
+        className={isShared(record) || viaBook ? "records-share on" : some.length ? "records-share some" : "records-share"}
         data-action="record-share"
         aria-pressed={on}
         aria-haspopup="menu"
-        title={`${shareWords(record)}: click to choose who sees it`}
+        title={viaBook ? "The players see it: its book is shared with them (Modules > Players)" : `${shareWords(record)}: click to choose who sees it`}
         {...({ popovertarget: menuId } as object)}
       >
         <Icon name={on ? "eye" : "eye-off"} size={15} />

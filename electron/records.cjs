@@ -231,7 +231,9 @@ function asRecord(value) {
 }
 
 const RESERVED_NAMES = new Set(["gm", "dm", "agent", "combat", "map", "table", "maelstrom", "calendar"]);
-function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
+// alsoSeen(record, seat): records a player sees though they are the GM's (a book's, once the GM shares the book).
+function createRecordStore({ saved = [], onChange = () => undefined, alsoSeen = () => false } = {}) {
+  const sees = (record, seat) => canSee(record, seat) || (seat?.role !== "dm" && alsoSeen(record, seat));
   const records = new Map();
   const listeners = new Set();
   for (const value of Array.isArray(saved) ? saved : []) {
@@ -262,6 +264,8 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
     for (const record of records.values()) if (record.id !== ownId && record.type === "character" && record.name.toLowerCase() === wanted) throw new Error(`${record.name} is another character's name.`);
   }
   return {
+    // Whether a seat sees a record (its own visibility, or a book shared with the players).
+    seenBy: (record, seat) => sees(record, seat),
     hiddenNames() {
       namesCache = namesCache ?? collectHiddenNames(records.values());
       return namesCache;
@@ -277,7 +281,7 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
       const wantName = name ? String(name).toLowerCase() : "";
       return [...records.values()].filter(
         (record) =>
-          (!seat || canSee(record, seat)) &&
+          (!seat || sees(record, seat)) &&
           (!wantType || record.type === wantType) &&
           (owner === undefined || record.owner === owner) &&
           (source === undefined || record.source === source) &&
@@ -287,7 +291,7 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
 
     get(id, seat) {
       const record = records.get(String(id ?? ""));
-      if (!record || (seat && !canSee(record, seat))) return null;
+      if (!record || (seat && !sees(record, seat))) return null;
       return record;
     },
 
