@@ -212,18 +212,26 @@ function parseScenes(adventure: Record<string, unknown>): (Omit<ParsedScene, "im
   });
 }
 
-function indexAssets(files: ZipFiles): Map<string, Uint8Array> {
-  const map = new Map<string, Uint8Array>();
-  const ranked = Object.entries(files).sort((left, right) => {
-    const leftRank = normalizePath(left[0]).includes("/assets/") || normalizePath(left[0]).startsWith("assets/") ? 0 : 1;
-    const rightRank = normalizePath(right[0]).includes("/assets/") || normalizePath(right[0]).startsWith("assets/") ? 0 : 1;
-    return leftRank - rightRank;
-  });
-  for (const [name, bytes] of ranked) {
+// The archive's pictures by their path, and by file name where only one has that name: "assets/one/map.webp"
+// and "assets/two/map.webp" are two pictures (a name shared by two is found by its path only).
+type AssetIndex = { byPath: Map<string, Uint8Array>; byName: Map<string, Uint8Array | null> };
+function indexAssets(files: ZipFiles): AssetIndex {
+  const byPath = new Map<string, Uint8Array>();
+  const byName = new Map<string, Uint8Array | null>();
+  for (const [name, bytes] of Object.entries(files)) {
+    byPath.set(normalizePath(name).toLowerCase(), bytes);
     const base = baseName(name);
-    if (base && !map.has(base)) map.set(base, bytes);
+    if (!base) continue;
+    byName.set(base, byName.has(base) ? null : bytes);
   }
-  return map;
+  return { byPath, byName };
+}
+// A scene's reference to a picture: the archive file whose path ends with it, else its name if that is unique.
+function assetFor(index: AssetIndex, src: string): Uint8Array | null {
+  const wanted = normalizePath(src).toLowerCase().replace(/^\.?\/+/, "");
+  if (!wanted) return null;
+  for (const [path, bytes] of index.byPath) if (path === wanted || path.endsWith(`/${wanted}`)) return bytes;
+  return index.byName.get(baseName(src)) ?? null;
 }
 
 export function loadBundle(bytes: Uint8Array): LoadedAdventure {
@@ -248,12 +256,12 @@ export function loadBundle(bytes: Uint8Array): LoadedAdventure {
     name: asString(adventure.name, "Untitled adventure"),
     scenes: scenes.map((scene) => ({
       ...scene,
-      image: scene.backgroundSrc ? assets.get(baseName(scene.backgroundSrc)) ?? null : null,
+      image: scene.backgroundSrc ? assetFor(assets, scene.backgroundSrc) : null,
       tokens: scene.tokens.map((token) => ({
         ...token,
-        image: token.imageName ? assets.get(baseName(token.imageName)) ?? null : null,
+        image: token.imageName ? assetFor(assets, token.imageName) : null,
       })),
-      tiles: scene.tiles.map((tile) => ({ ...tile, image: assets.get(baseName(tile.src)) ?? null })),
+      tiles: scene.tiles.map((tile) => ({ ...tile, image: assetFor(assets, tile.src) })),
     })),
   };
 }

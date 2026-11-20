@@ -159,6 +159,15 @@ try {
     "tiles/tent.png": new Uint8Array(png(4)),
     "tiles/canopy.png": new Uint8Array(png(5)),
   });
+  // Audit 016: two scenes' pictures with one file name in two folders are two pictures.
+  {
+    const two = loadBundle(zipSync({
+      "bundle.json": strToU8(JSON.stringify({ adventureData: { name: "Two", scenes: [{ _id: "a", name: "A", width: 100, height: 100, background: { src: "assets/one/map.webp" } }, { _id: "b", name: "B", width: 100, height: 100, background: { src: "assets/two/map.webp" } }] } })),
+      "assets/one/map.webp": new Uint8Array([12]),
+      "assets/two/map.webp": new Uint8Array([34]),
+    }));
+    assert(two.scenes[0].image?.[0] === 12 && two.scenes[1].image?.[0] === 34, `each scene its own picture: ${two.scenes.map((scene) => scene.image?.[0])}`);
+  }
   const loaded = loadBundle(bundle).scenes[0];
   const [tent, canopy] = loaded.tiles;
   assert(tent.flipX && tent.rotation === 90 && tent.alpha === 0.9 && tent.level === "below" && tent.image?.length === png(4).length, `Foundry's tile read: ${JSON.stringify({ ...tent, image: tent.image?.length })}`);
