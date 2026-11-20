@@ -44,7 +44,8 @@ function innerXml(node) {
   return text.trim();
 }
 
-const LIST_TAGS = new Set(["layer", "occluder", "light", "stroke", "path"]);
+// <shortcut>: an older module's map pins (image > shortcuts); <points>: each shape of a weather mask.
+const LIST_TAGS = new Set(["layer", "occluder", "light", "stroke", "path", "shortcut", "points"]);
 
 function convert(node) {
   const type = node.getAttribute("type");

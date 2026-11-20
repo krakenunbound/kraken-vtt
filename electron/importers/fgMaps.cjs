@@ -83,7 +83,8 @@ function fgFont(file) {
 const FX_MAP = { rain: "rain", snow: "snow", blizzard: "blizzard", myst: "fog", clouds: "clouds", water: "water", ocean: "water" };
 
 // One FG image record as a scene for the bundle, and Kraken's extras for it.
-function imageScene(record, moduleName, sceneId, label = moduleName) {
+// names: the module's records' names by path ("encounter.id-00007"), for an older module's pins (they carry no name).
+function imageScene(record, moduleName, sceneId, label = moduleName, names = new Map()) {
   const image = record.data?.image ?? {};
   const layers = list(image.layers?.layer);
   // FG Unity's layers; an older module's image is its bitmap alone (no layers).
@@ -160,6 +161,27 @@ function imageScene(record, moduleName, sceneId, label = moduleName) {
       link: { kind: "fg", id: `${layer.shortcut.record}@${label}`, class: String(layer.shortcut.class ?? "") },
     });
   }
+  // An older module's pins (no layers: image > shortcuts > shortcut), at picture pixels from its top left; a
+  // battle is an encounter, anything else a map key, named by the entry it opens.
+  if (!layers.length) {
+    for (const shortcut of list(image.shortcuts?.shortcut)) {
+      const x = Number(shortcut.x);
+      const y = Number(shortcut.y);
+      const target = String(shortcut.recordname ?? "").replace(/@.*$/, "");
+      if (!Number.isFinite(x) || !Number.isFinite(y) || !target) continue;
+      const kind = String(shortcut.class ?? "");
+      const encounter = kind === "battle";
+      pins.push({
+        x: Math.round(x),
+        y: Math.round(y),
+        text: String(names.get(target) ?? "").slice(0, 200),
+        icon: encounter ? "trap" : "pin",
+        size: 0.4,
+        group: encounter ? "Encounters" : "Map keys",
+        link: { kind: "fg", id: `${target}@${label}`, class: kind },
+      });
+    }
+  }
   const fx = layers
     .filter((layer) => layer.type === "fx" && FX_MAP[layer.fx?.type])
     .map((layer) => ({
@@ -169,10 +191,11 @@ function imageScene(record, moduleName, sceneId, label = moduleName) {
       intensity: Number(layer.fx.RainIntensity ?? layer.fx.WaterIntensity ?? 0.5),
       speed: Number(layer.fx.RainSpeed ?? layer.fx.MystSpeed ?? 0.5),
       direction: Math.round((Number(layer.fx.RainDirection ?? 0.7) % 1) * 360),
-      mask: layer.fx.usemask && layer.fx.mask?.points ? { use: true, mode: "inside", polygons: [nums(layer.fx.mask.points).flatMap((value, index, all) => (index % 2 ? [] : (() => {
+      // Each of the mask's shapes (FG keeps one <points> a shape; a weather area may have several).
+      mask: layer.fx.usemask && layer.fx.mask?.points ? { use: true, mode: "inside", polygons: list(layer.fx.mask.points).map((points) => nums(points).flatMap((value, index, all) => (index % 2 ? [] : (() => {
         const p = at(value, all[index + 1], layer);
         return [Math.round(p.x), Math.round(p.y)];
-      })()))] } : { use: false, mode: "inside", polygons: [] },
+      })()))) } : { use: false, mode: "inside", polygons: [] },
     }));
   // FG's folders: layer groups. A layer in a folder (its parentid) is in that group.
   const folders = new Map(layers.filter((layer) => layer.type === "folder").map((layer) => [String(layer.id), { name: String(layer.name ?? "Folder").slice(0, 40), shown: !layer.invisible }]));
@@ -291,6 +314,20 @@ function fgModuleBundle(moduleName, { only, all = false, file = "", picture = ()
     const hash = require("crypto").createHash("sha1").update(String(record.data?.fgPath ?? record.id ?? record.name)).digest("hex").slice(0, 8);
     return `${base.slice(0, 61)}-${hash}`;
   };
+  // The names an older module's pins show: its records by path, read (once, the importer keeps the module) only
+  // when a map has such pins.
+  let names = null;
+  const namesFor = (record) => {
+    if (!list(record.data?.image?.shortcuts?.shortcut).length) return new Map();
+    if (!names) {
+      names = new Map();
+      for (const item of readModule(moduleName).records) {
+        const at = String(item.data?.fgPath ?? "").replace(/@.*$/, "");
+        if (at && typeof item.name === "string") names.set(at, item.name);
+      }
+    }
+    return names;
+  };
   // A picture asked for by its file (a book page's picture): the image record that draws it.
   const images = module.records.filter((item) => item.type === "image" && (!file || JSON.stringify(item.data).includes(file)));
   // A name asked for: that map exactly, when there is one by that name; else those whose names hold it.
@@ -299,7 +336,7 @@ function fgModuleBundle(moduleName, { only, all = false, file = "", picture = ()
     if (only && !exact.length && !only.some((name) => String(record.name).toLowerCase().includes(String(name).toLowerCase()))) continue;
     if (!only && !all && !isMap(record)) continue;
     const id = sceneIdOf(record);
-    const made = imageScene(record, moduleName, id, label);
+    const made = imageScene(record, moduleName, id, label, namesFor(record));
     if (!made) continue;
     const painted = picture(id);
     if (painted) {
