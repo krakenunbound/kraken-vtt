@@ -3,6 +3,7 @@ import { sound } from "../sound/soundEngine";
 import type { RollMode, Session } from "../session/useSession";
 import type { WindowKind } from "./Windows";
 import { manifestOf } from "../rulesets";
+import { BRAND } from "../../shared/brand.mjs";
 import { resolveTest } from "../../shared/text/actionLinks.mjs";
 
 // The chat's slash commands, as Fantasy Grounds' (so its players know them),
@@ -82,7 +83,8 @@ function splitNames(rest: string, session: Session): { names: string[]; text: st
   let left = rest.trim();
   for (;;) {
     const found = known.find((name) => left.toLowerCase().startsWith(name.toLowerCase()) && /^[\s,]|^$/.test(left.slice(name.length)));
-    const word = found ?? /^\S+/.exec(left)?.[0].replace(/,$/, "");
+    // After a comma only a name at the table counts ("/w Ann, hello there" is to Ann, saying "hello there").
+    const word = found ?? (names.length === 0 ? /^\S+/.exec(left)?.[0].replace(/,$/, "") : undefined);
     if (!word) break;
     names.push(word);
     left = left.slice(word.length).trim();
@@ -95,6 +97,8 @@ function splitNames(rest: string, session: Session): { names: string[]; text: st
 const onOff = (value: string) => (/^(on|yes|true|1)$/i.test(value.trim()) ? true : /^(off|no|false|0)$/i.test(value.trim()) ? false : null);
 
 function percent(rest: string, low: number, high: number) {
+  // No number given ("/volume" alone) is not 0.
+  if (!rest.trim()) return null;
   const value = Number(rest.trim().replace(/%$/, ""));
   return Number.isFinite(value) && value >= low && value <= high ? value / 100 : null;
 }
@@ -423,7 +427,7 @@ export const COMMANDS: Command[] = [
     group: "Screen",
     run: (_rest, context) => {
       const at = context.session.role === "dm" ? `hosting, ${context.session.players.length} at the table` : `at ${context.session.remoteLabel}`;
-      context.session.note(`Kraken VTT ${__KRAKEN_VERSION__}: a free virtual tabletop (PolyForm Shield License 1.0.0). You are ${at}. /help lists the commands.`);
+      context.session.note(`${BRAND.name} ${__KRAKEN_VERSION__}: a free virtual tabletop (PolyForm Shield License 1.0.0). You are ${at}. /help lists the commands.`);
     },
   },
   { names: ["reload"], args: "", help: "Reload this screen", group: "Screen", run: () => window.location.reload() },

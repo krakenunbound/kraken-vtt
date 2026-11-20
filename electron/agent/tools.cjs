@@ -1699,7 +1699,13 @@ const TOOLS = [
       const lib = require("../../shared/calendars.mjs");
       const now = cal.view(seat);
       // A month and day (1-based) as the day of the year, in the calendar named or the one in use.
-      const dayOf = (calendarId, year) => (args.month !== undefined || args.day !== undefined ? lib.dayOfYear(lib.calendarOf(calendarId), year, (args.month ?? 1) - 1, args.day ?? 1) : undefined);
+      // A day of the year from a month and day; the half not given is today's (a day alone is in this month).
+      const dayOf = (calendarId, year) => {
+        if (args.month === undefined && args.day === undefined) return undefined;
+        const cal = lib.calendarOf(calendarId);
+        const today = calendarId === now.id && year === now.year ? lib.monthDay(cal, year, now.day) : { month: 0, day: 1 };
+        return lib.dayOfYear(cal, year, args.month !== undefined ? args.month - 1 : today.month, args.day ?? (args.month !== undefined ? 1 : today.day));
+      };
       const action = args.action ?? "view";
       if (action === "set") {
         const id = args.calendar ?? now.id;
@@ -2069,7 +2075,9 @@ const TOOLS = [
       const { map, seat } = needTable(ctx);
       if (args.found !== undefined) return out(map.setFound(args.id, args.found, seat));
       if (!args.state) throw new Error("state (open, closed, locked) or found.");
-      const state = map.setDoor(args.id, { closed: 0, open: 1, locked: 2 }[args.state], seat);
+      const wanted = { closed: 0, open: 1, locked: 2 }[args.state];
+      if (wanted === undefined) throw new Error(`state is open, closed or locked, not "${args.state}".`);
+      const state = map.setDoor(args.id, wanted, seat);
       return out({ id: args.id, state });
     },
   },

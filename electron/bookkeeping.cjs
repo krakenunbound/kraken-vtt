@@ -304,7 +304,8 @@ function createBookkeeping(table) {
     while (ended.length < most) {
       at = addDays(calendar, at.year, at.day, -1);
       const key = at.year * 1000 + at.day;
-      if (key < lastDay) break;
+      // (A date set back by hand: the last day counted is ahead of today, so only the time that passed counts.)
+      if (key < lastDay && lastDay <= now) break;
       ended.unshift(key);
     }
     for (const key of ended) for (const record of party()) lines.push(...(await feed(table.records.get(record.id) ?? record, key)));

@@ -18,6 +18,8 @@ export const CALENDARS = [
     week: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
     months: [month("January", 31), month("February", 28, { leap: 1 }), month("March", 31), month("April", 30), month("May", 31), month("June", 30), month("July", 31), month("August", 31), month("September", 30), month("October", 31), month("November", 30), month("December", 31)],
     leap: (year) => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0,
+    // The real week: 1 January of year 0 (proleptic) was a Saturday, so 1 January 2026 is a Thursday.
+    weekOffset: 6,
   },
   {
     id: "greyhawk",
@@ -189,7 +191,7 @@ export function weekday(calendar, year, day) {
   if (calendar.imperial) return day === 0 ? -1 : (day - 1) % 7;
   if (calendar.weekRestarts) return (monthDay(calendar, year, day).day - 1) % calendar.week.length;
   // Days counted from year 0, so the week runs on across the years.
-  let total = day;
+  let total = day + (calendar.weekOffset ?? 0);
   for (let y = 0; y < year; y++) total += daysIn(calendar, y);
   return total % calendar.week.length;
 }

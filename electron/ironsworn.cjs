@@ -597,7 +597,8 @@ async function actionIronsworn(table, record, action, args = {}, seat, from) {
       const xp = rules.experience(data);
       const cost = action === "advance" && !free ? rules.ASSET_COST : 0;
       if (cost && xp.available < cost) throw new Error(`A new asset costs ${cost} experience; ${record.name} has ${xp.available}.`);
-      if (action === "asset-add" && seat.role !== "dm" && !args.free) throw new Error("A new asset is bought with experience (Advance).");
+      // A new asset handed out free is the GM's to give; a player buys one with experience (Advance).
+      if (action === "asset-add" && seat.role !== "dm") throw new Error("A new asset is bought with experience (Advance).");
       const key = newKey(data.assets ?? {}, "a");
       data.assets = { ...(data.assets ?? {}), [key]: rules.assetFrom(source) };
       if (cost) data.expspent = num(data.expspent) + cost;

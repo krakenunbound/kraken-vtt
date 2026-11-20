@@ -52,14 +52,24 @@ function cleanPrefs(input, before, lookOf) {
 function createPrefsStore(file, lookOf) {
   /** @type {Map<string, object>} */
   const people = new Map();
+  // A missing file is a first start; one that cannot be read is kept (a copy beside it) and never written over.
+  let damaged = false;
   try {
     const parsed = file ? JSON.parse(fs.readFileSync(file, "utf8")) : null;
     for (const [name, prefs] of Object.entries(parsed?.people ?? {})) if (key(name)) people.set(key(name), cleanPrefs(prefs, {}, lookOf));
-  } catch {
-    /* Nothing kept yet. */
+  } catch (error) {
+    if (error?.code !== "ENOENT") {
+      damaged = true;
+      console.error(`prefs: ${file} could not be read; players' preferences are not saved until it is fixed or removed`);
+      try {
+        fs.copyFileSync(file, `${file}.damaged-${Date.now()}`);
+      } catch {
+        /* the original stays where it is */
+      }
+    }
   }
   const save = () => {
-    if (!file) return;
+    if (!file || damaged) return;
     fs.mkdirSync(path.dirname(file), { recursive: true });
     const temp = `${file}.tmp`;
     fs.writeFileSync(temp, JSON.stringify({ people: Object.fromEntries(people) }));
