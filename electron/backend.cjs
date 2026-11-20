@@ -712,7 +712,8 @@ async function manageCampaign(input) {
   if (action === "delete") {
     if (!campaigns.exists(file, id)) throw new Error("That campaign is missing.");
     // To the recycle bin first (the window's process does it), never gone for good; off the list only once it is there.
-    const folders = [campaigns.folder(file, id), campaigns.picturesFolder(file, id)].filter((dir) => fs.existsSync(dir));
+    // Its own maps' folder (Documents/Kraken VTT/Campaigns/<name>) goes too, so a new campaign of that name starts empty.
+    const folders = [campaigns.folder(file, id), campaigns.picturesFolder(file, id), before ? campaignNamedFolder(before.name) : ""].filter((dir) => dir && fs.existsSync(dir));
     await ask("shell", { action: "trash", paths: folders });
     const { removed } = campaigns.remove(file, { id });
     return { deleted: removed.name, trashed: folders.length };

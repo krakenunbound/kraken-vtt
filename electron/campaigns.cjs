@@ -62,9 +62,17 @@ function write(file, campaigns) {
   writeAtomic(file, JSON.stringify({ campaigns }));
 }
 
+// A campaign's own maps live in a folder named after it (Documents/Kraken VTT/Campaigns/<name>): two campaigns
+// whose names give the same folder (Windows does not tell case apart) would share their maps, so names are unique.
+const folderKey = (name) => String(name ?? "").replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_").replace(/[. ]+$/, "").trim().toLowerCase();
+function mustBeFree(campaigns, name, exceptId = "") {
+  const taken = campaigns.find((campaign) => campaign.id !== exceptId && folderKey(campaign.name) === folderKey(name));
+  if (taken) throw new Error(`Another campaign is called ${taken.name}: give this one a name of its own.`);
+}
 function create(file, input) {
   const name = clean(input?.name, 80);
   if (!name) throw new Error("Name the campaign.");
+  mustBeFree(read(file), name);
   const campaign = {
     id: crypto.randomBytes(8).toString("hex"),
     name,
@@ -185,6 +193,7 @@ function rename(file, input) {
   const found = find(campaigns, input?.id);
   const name = clean(input?.name, 80);
   if (!name) throw new Error("Name the campaign.");
+  mustBeFree(campaigns, name, found.id);
   found.name = name;
   write(file, campaigns);
   return found;
@@ -208,7 +217,14 @@ const scratch = (name) => name === "backups" || name === "hosting.lock" || /\.(t
 function duplicate(file, input) {
   const campaigns = read(file);
   const found = find(campaigns, input?.id);
-  const copy = { ...found, id: crypto.randomBytes(8).toString("hex"), name: clean(input?.name, 80) || `${found.name} (copy)`.slice(0, 80), createdAt: Date.now(), playedAt: null };
+  // A name asked for must be free; the default "(copy)" is numbered until it is.
+  let name = clean(input?.name, 80);
+  if (name) mustBeFree(campaigns, name);
+  else {
+    name = `${found.name} (copy)`.slice(0, 80);
+    for (let n = 2; campaigns.some((campaign) => folderKey(campaign.name) === folderKey(name)); n++) name = `${found.name} (copy ${n})`.slice(0, 80);
+  }
+  const copy = { ...found, id: crypto.randomBytes(8).toString("hex"), name, createdAt: Date.now(), playedAt: null };
   copyFolder(folder(file, found.id), folder(file, copy.id), scratch);
   copyFolder(picturesFolder(file, found.id), picturesFolder(file, copy.id));
   campaigns.unshift(copy);

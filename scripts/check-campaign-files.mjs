@@ -89,6 +89,23 @@ assert(campaigns.backups(file, { id: made.id })[0].reason === "before-restore", 
   const entries = unzipSync(readFileSync(zipFile));
   assert(Buffer.from(entries["maps/Maps/Keep.png"] ?? []).toString() === "original", `the export has the map's original: ${Object.keys(entries)}`);
 }
+// Audit 050: two campaigns never share a name (their maps' folder is named after them).
+{
+  let refused = 0;
+  for (const attempt of [() => campaigns.create(file, { name: "hommlet" }), () => campaigns.rename(file, { id: campaigns.create(file, { name: "Nulb" }).id, name: "Oldest" })]) {
+    try {
+      attempt();
+    } catch {
+      refused += 1;
+    }
+  }
+  assert(refused === 2, `a taken name is refused: ${refused}`);
+  const a = campaigns.duplicate(file, { id: made.id });
+  const b = campaigns.duplicate(file, { id: made.id });
+  assert(a.name !== b.name, `copies are numbered: ${a.name} / ${b.name}`);
+  campaigns.remove(file, { id: a.id });
+  campaigns.remove(file, { id: b.id });
+}
 // 007: a damaged account roster is never written over by the next account.
 {
   const { createAccountStore } = require("../electron/accounts.cjs");
