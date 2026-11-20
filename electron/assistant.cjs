@@ -227,9 +227,17 @@ function createAssistant({ ctx, onEvent = () => {}, makeClient, key, settings = 
       // The whole reply goes back next time, unchanged (thinking blocks too).
       messages.push({ role: "assistant", content: response.content });
       for (const block of response.content) if (block.type === "text" && block.text.trim()) emit({ kind: "assistant", text: block.text, at: Date.now() });
-      if (response.stop_reason === "refusal") return emit({ kind: "note", text: "The model declined that request." });
-      if (response.stop_reason === "max_tokens") return emit({ kind: "note", text: "The answer was cut off (too long)." });
       const uses = response.content.filter((block) => block.type === "tool_use");
+      // A reply cut off (or declined) with tools asked for: each gets a "not run" result, so the next request is valid.
+      const unanswered = () => uses.length && messages.push({ role: "user", content: uses.map((use) => ({ type: "tool_result", tool_use_id: use.id, content: "Not run: the reply was cut off.", is_error: true })) });
+      if (response.stop_reason === "refusal") {
+        unanswered();
+        return emit({ kind: "note", text: "The model declined that request." });
+      }
+      if (response.stop_reason === "max_tokens") {
+        unanswered();
+        return emit({ kind: "note", text: "The answer was cut off (too long)." });
+      }
       if (response.stop_reason !== "tool_use" || uses.length === 0) return;
       // Every tool the reply asked for, in order (they act on one table), all results in one message.
       const results = [];
@@ -256,9 +264,17 @@ function createAssistant({ ctx, onEvent = () => {}, makeClient, key, settings = 
       const reply = choice?.message ?? { role: "assistant", content: "" };
       messages.push({ role: "assistant", content: reply.content ?? "", ...(reply.tool_calls?.length ? { tool_calls: reply.tool_calls } : {}) });
       if (typeof reply.content === "string" && reply.content.trim()) emit({ kind: "assistant", text: reply.content, at: Date.now() });
-      if (choice?.finish_reason === "length") return emit({ kind: "note", text: "The answer was cut off (too long)." });
-      if (choice?.finish_reason === "content_filter") return emit({ kind: "note", text: "The model declined that request." });
       const calls = reply.tool_calls ?? [];
+      // Cut off or declined with tools asked for: each gets a "not run" answer, so the next request is valid.
+      const unanswered = () => calls.forEach((call) => messages.push({ role: "tool", tool_call_id: call.id, content: "Not run: the reply was cut off." }));
+      if (choice?.finish_reason === "length") {
+        unanswered();
+        return emit({ kind: "note", text: "The answer was cut off (too long)." });
+      }
+      if (choice?.finish_reason === "content_filter") {
+        unanswered();
+        return emit({ kind: "note", text: "The model declined that request." });
+      }
       if (!calls.length) return;
       for (const call of calls) {
         let input = {};

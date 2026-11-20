@@ -278,6 +278,8 @@ async function actionForged(table, record, action, args = {}, seat, from) {
       const penalties = args.harm === false ? { lessEffect: false, minusDice: 0, needHelp: false } : rules.harmPenalties(data);
       const helper = args.assist ? table.records.get(String(args.assist)) : null;
       if (args.assist && (!helper || !isForged(helper) || helper.id === record.id)) throw new Error("Who assists? Another scoundrel.");
+      // Assisting costs the helper stress: their player's (or the GM's) to give.
+      if (helper && seat.role !== "dm" && helper.owner !== seat.name) throw new Error(`${helper.name}'s player chooses to assist (it costs them stress).`);
       if (penalties.needHelp && !helper && !args.pushIncapacitated) throw new Error(`${record.name} has severe harm: they need help (assistance) or to push themselves to act.`);
       const dice = rules.actionPool({ rating: data.actions?.[key], assist: Boolean(helper), pushDice: Boolean(args.pushDice), bargain: Boolean(args.bargain), bonus: num(args.bonus), penalty: penalties.minusDice });
       if (args.pushEffect) effect = rules.shiftEffect(effect, 1);
@@ -397,6 +399,8 @@ async function actionForged(table, record, action, args = {}, seat, from) {
       const crew = crewOf(table);
       if (crew?.claims?.some((claim) => /infirmary/i.test(claim))) dice += 1;
       if (args.friend) dice += 1;
+      // Coin spent to improve the result has to be there.
+      if (num(args.coin) > 0 && Math.round(num(args.coin)) > rules.coinOf(data)) throw new Error(`${record.name} has ${rules.coinOf(data)} coin, not ${Math.round(num(args.coin))}.`);
       const read = await rollPool(table, dice, label, who, { by: record.name });
       const result = rules.shiftResult(read.result, Math.max(0, Math.round(num(args.coin))));
       if (num(args.coin) > 0) rules.setCoin(data, Math.max(0, rules.coinOf(data) - Math.round(num(args.coin))));

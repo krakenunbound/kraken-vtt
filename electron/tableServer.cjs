@@ -743,7 +743,12 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       const concentrating = entry.recordId ? String(records.get(entry.recordId)?.data?.concentration ?? "").trim() : "";
       return { health: combat.health(entry), active: combat.active() === entry.id, effects: entry.effects, ...(concentrating ? { concentrating } : {}) };
     },
-    activeRecord: () => combat.entries().find((item) => item.id === combat.active())?.recordId ?? null,
+    // The active creature's record, for a token that stands for it, only when its entry has no token of its own
+    // (else every token of that record would light up as the active turn).
+    activeRecord: () => {
+      const entry = combat.entries().find((item) => item.id === combat.active());
+      return entry && !entry.tokenId ? (entry.recordId ?? null) : null;
+    },
     colorOf: (name) => tokenColorOf(name),
     tableOptions: () => options,
     onRegion: (event) => regionSprang(event, false),
