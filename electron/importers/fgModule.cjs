@@ -433,7 +433,10 @@ function parseModule(file, only) {
   };
   const name = field("name") || path.basename(file, ".mod");
   const info = { name, displayName: field("displayname") || name, ruleset: field("ruleset"), author: field("author"), file };
-  const prefix = slug(name);
+  // A name with no Latin letters or digits (Japanese, Russian...) gets a short hash of the whole name, so two
+  // such books never share record ids (every other book keeps the ids its campaigns already link to).
+  const plain = slug(name);
+  const prefix = plain || `book-${crypto.createHash("sha1").update(String(name)).digest("hex").slice(0, 10)}`;
   const records = [];
   const seen = new Set();
   // db.xml first: if a path is in both files, the GM copy wins.
