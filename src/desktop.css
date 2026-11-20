@@ -2803,3 +2803,12 @@ label.set-row { cursor: pointer; }
 .party-stash li[draggable] { cursor: grab; }
 .party-stash li { display: flex; gap: 8px; align-items: center; }
 .party-stash li > span { flex: 1; }
+
+/* The party's token (the party sheet), dragged onto a big map. */
+.party-token { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; padding: 8px 10px; border: 1px solid var(--panel-edge); border-radius: 8px; }
+.party-token-face { flex: none; width: 64px; height: 64px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; border: 2px solid var(--brass-dim); background: #0b0d11; color: var(--brass); }
+.party-token-face[draggable="true"] { cursor: grab; }
+.party-token-face :is(img, video) { width: 100%; height: 100%; object-fit: cover; }
+.party-token-info { display: grid; gap: 6px; min-width: 0; }
+.party-token-info input { max-width: 18rem; }
+.party-token-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }

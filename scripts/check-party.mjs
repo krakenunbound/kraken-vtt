@@ -203,6 +203,21 @@ try {
   stash(bobSeat, { action: "take", id: stashed.party.stash[0].id, character: bob.id });
   await latest(bobSeat, (m) => m.type === "error" && /took that already/.test(m.reason), "it cannot be taken twice");
   bobSeat.ws.close();
+
+  // The party token: the GM names the party and chooses its token; on a big map it is one token, placed again it
+  // moves there, and the party's art is what the table is served for it.
+  const edited = await tool("kraken_party_edit", { name: "The Company of the Rose", token: "kraken-games/tokens/Party/Crimson Banner.webp" });
+  assert(edited.name === "The Company of the Rose" && edited.token === "kraken-games/tokens/Party/Crimson Banner.webp", `the party's name and token: ${edited.name} ${edited.token}`);
+  agent.map.setScene({ id: "city", name: "City", width: 1000, height: 1000, padding: 0, backgroundColor: "#000", grid: { size: 100, type: 1, color: "#000", alpha: 0.2, distance: 5, units: "ft" }, walls: [], lights: [], tokens: [] });
+  const placedParty = await tool("kraken_token_place", { recordId: "party", col: 2, row: 2 });
+  const again = await tool("kraken_token_place", { recordId: "party", col: 6, row: 5 });
+  const partyTokens = agent.map.tokens().filter((item) => item.recordId === "party");
+  assert(partyTokens.length === 1 && placedParty.name === "The Company of the Rose", `one party token a map, named for the party: ${JSON.stringify(partyTokens)}`);
+  assert(again.id === placedParty.id, "placed again, it is the same token");
+  assert(partyTokens[0].squares === 1 || partyTokens[0].squares >= 1, `sized for the map: ${partyTokens[0].squares}`);
+  assert(Math.round(partyTokens[0].squares) === Math.max(1, Math.round(1000 / 12 / 100)), `a twelfth of the map's shorter side: ${partyTokens[0].squares}`);
+  const seenToken = await latest(player, (m) => m.type === "party" && m.party.token, "players see the party token");
+  assert(seenToken.party.name === "The Company of the Rose", "players see the party's name");
   console.log("PARTY_OK");
 } finally {
   for (const ws of sockets) ws.close();

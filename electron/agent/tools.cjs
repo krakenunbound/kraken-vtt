@@ -1381,7 +1381,7 @@ const TOOLS = [
   {
     name: "kraken_party_edit",
     description:
-      "Change the party sheet. members: the character ids in party order (or allPlayers: every character a player owns; or fromHere: as the sheet's Party from who's here button, every character of a player at the table now joins and one whose player is not here leaves, characters no player owns staying). parcel coins: { GP: 30, SP: 12 } (amounts to hand out). parcelItem: add an item to the parcel {name, count, assign: \"Name, Name\", itemId: an item record to copy}. quest / encounter: add {name, xp}. marching: character ids front to back.",
+      "Change the party sheet. members: the character ids in party order (or allPlayers: every character a player owns; or fromHere: as the sheet's Party from who's here button, every character of a player at the table now joins and one whose player is not here leaves, characters no player owns staying). parcel coins: { GP: 30, SP: 12 } (amounts to hand out). parcelItem: add an item to the parcel {name, count, assign: \"Name, Name\", itemId: an item record to copy}. quest / encounter: add {name, xp}. marching: character ids front to back. name: the party's name (its token's on the map). token: the party token's art id (kraken_art lists them; the Party folder has banners, flags and groups), \"\" for none; the GM drags it from the party sheet onto a big map (or kraken_token_place record \"party\"), one a map.",
     inputSchema: object({
       members: { type: "array", items: { type: "string" } },
       allPlayers: { type: "boolean" },
@@ -1391,10 +1391,13 @@ const TOOLS = [
       quest: { type: "object", properties: { name: { type: "string" }, xp: { type: "number" } }, additionalProperties: false },
       encounter: { type: "object", properties: { name: { type: "string" }, xp: { type: "number" } }, additionalProperties: false },
       marching: { type: "array", items: { type: "string" } },
+      name: { type: "string" },
+      token: { type: "string" },
     }),
     async run(args, ctx) {
       const agent = needTable(ctx);
       const record = party.partyRecord(agent);
+      if (typeof args.name === "string" && args.name.trim()) agent.records.update(record.id, { name: args.name.trim().slice(0, 80) }, agent.seat);
       const patch = {};
       const key = () => `id-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
       if (args.allPlayers) {
@@ -1425,6 +1428,7 @@ const TOOLS = [
       if (args.quest) patch.quests = { [key()]: { name: args.quest.name ?? "Quest", xp: Number(args.quest.xp) || 0, awarded: 0 } };
       if (args.encounter) patch.encounters = { [key()]: { name: args.encounter.name ?? "Encounter", xp: Number(args.encounter.xp) || 0, awarded: 0 } };
       if (args.marching) patch.order = { marching: args.marching };
+      if (typeof args.token === "string") patch.token = args.token.slice(0, 300);
       if (patch.members) agent.records.update(record.id, { data: { members: null } }, agent.seat);
       agent.records.update(record.id, { data: patch }, agent.seat);
       return out(await party.partyView(agent));

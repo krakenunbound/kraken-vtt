@@ -1899,11 +1899,12 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
         record &&
         (canSee(record, seatOf(client)) || map.tokens().some((item) => item.recordId === record.id && !item.hidden) || client.role === "dm" || (spokenArt.has(record.id) && url.searchParams.get("kind") !== "card"));
       const kind = url.searchParams.get("kind") === "portrait" ? "picture" : url.searchParams.get("kind") === "card" ? "card" : "token";
-      // A character's: its token (or portrait, or its race and class's), from the art library, as a still.
-      if (allowed && record.type === "character" && art) {
+      // A character's: its token (or portrait, or its race and class's), from the art library, as a still;
+      // the party's token (the party sheet's) the same way.
+      if (allowed && (record.type === "character" || record.type === "party") && art) {
         const data = record.data ?? {};
         const wanted = kind === "picture" ? [data.portrait, data.token] : [data.token, data.portrait];
-        const id = [...wanted, artForCharacter(data)].find((item) => typeof item === "string" && art.has(item));
+        const id = [...wanted, record.type === "character" ? artForCharacter(data) : null].find((item) => typeof item === "string" && art.has(item));
         const still = id && /\.webm$/i.test(id) && art.has(id.replace(/\.webm$/i, ".png")) ? id.replace(/\.webm$/i, ".png") : id;
         const file = still ? art.file(still) : null;
         if (file) {

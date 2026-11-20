@@ -1,6 +1,6 @@
 import { Field } from "../core/fields/Field";
 import { useState } from "react";
-import { Picture } from "../characters/ArtPicker";
+import { ArtPicker, Picture } from "../characters/ArtPicker";
 import { Icon } from "../ui/icons";
 import { hasLink, linkFrom, TOKEN_DRAG } from "../ui/QuickSlots";
 import type { Session } from "../session/useSession";
@@ -75,6 +75,9 @@ export type PartyView = {
   members: PartyMember[];
   inventory: { name: string; count: number; carriedBy: Record<string, number> }[];
   parcel: { coins: Record<string, number>; items: Record<string, { name: string; count: number; assign?: string }> };
+  // The party's name and its token for big maps (an art id), the GM's to choose.
+  name?: string;
+  token?: string;
   // The stash the players trade through: put in from a sheet, taken out onto a sheet.
   stash?: { id: string; name: string; count: number; from: string }[];
   quests: Record<string, Entry>;
@@ -165,6 +168,7 @@ export function PartySheet({ session, compact = false }: { session: Session; com
 
       {tab === "main" ? (
         <div className="party-main">
+          <PartyToken session={session} name={party.name ?? "Party"} token={party.token ?? ""} gm={gm} />
           {party.members.length === 0 ? (
             <p className="hint empty-state">
               <b>No one is in the party yet</b>
@@ -805,6 +809,67 @@ function PartyStash({ session, stash }: { session: Session; stash: NonNullable<P
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+// The party's token, for a big map (a city, a region): where the party is. The GM chooses it (banners, flags,
+// groups of adventurers: the art library's Party folder, or any token) and drags it onto the map; one a map, and
+// dropped again it moves there. Players see it.
+function PartyToken({ session, name, token, gm }: { session: Session; name: string; token: string; gm: boolean }) {
+  const [picking, setPicking] = useState(false);
+  const [named, setNamed] = useState(name);
+  const save = (data: Record<string, unknown>) => void session.op({ op: "update", id: "party", patch: { data } }).catch(() => undefined);
+  if (!gm && !token) return null;
+  return (
+    <section className="party-token" data-party-token aria-label="Party token">
+      <div
+        className="party-token-face"
+        draggable={gm && Boolean(token)}
+        title={gm ? (token ? "Drag onto a map: the party's place (one a map; drag again to move it)" : "Choose a token first") : name}
+        onDragStart={(event) => {
+          event.dataTransfer.setData("application/x-kraken-record", "party");
+          event.dataTransfer.setData(TOKEN_DRAG, JSON.stringify({ name, record: "party", art: session.recordArtUrl("party", "token") }));
+          event.dataTransfer.effectAllowed = "copy";
+        }}
+      >
+        {token ? <Picture session={session} id={token} alt={name} still /> : <Icon name="flag" size={28} />}
+      </div>
+      <div className="party-token-info">
+        {gm ? (
+          <input
+            aria-label="Party name"
+            value={named}
+            maxLength={80}
+            onChange={(event) => setNamed(event.target.value)}
+            onBlur={() => named.trim() && named.trim() !== name && void session.op({ op: "update", id: "party", patch: { name: named.trim() } }).catch(() => undefined)}
+            onKeyDown={(event) => event.key === "Enter" && !event.nativeEvent.isComposing && (event.target as HTMLInputElement).blur()}
+          />
+        ) : (
+          <b>{name}</b>
+        )}
+        {gm ? (
+          <span className="party-token-actions">
+            <button type="button" data-action="party-token-choose" onClick={() => setPicking(true)}>
+              {token ? "Change token" : "Choose a token"}
+            </button>
+            {token ? <small className="hint">Drag it onto a map to mark where the party is.</small> : null}
+          </span>
+        ) : null}
+      </div>
+      {picking ? (
+        <ArtPicker
+          session={session}
+          kind="token"
+          current={token || undefined}
+          race="Party"
+          onPick={(id) => {
+            save({ token: id ?? "" });
+            setPicking(false);
+          }}
+          onClose={() => setPicking(false)}
+        />
+      ) : null}
     </section>
   );
 }

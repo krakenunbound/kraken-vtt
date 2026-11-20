@@ -92,6 +92,9 @@ async function partyView(table, seat = null) {
     members: members.map(({ items, ...member }) => member),
     inventory: partyInventory(members),
     parcel: party.data.parcel ?? { coins: {}, items: {} },
+    // The party's name and its token (art id) for big maps: a city or a region, where the party is.
+    name: String(party.name ?? "Party"),
+    token: typeof party.data.token === "string" ? party.data.token : "",
     // The stash the players trade through (an unidentified item by its unidentified name to a player).
     stash: rows(party.data.stash).map(([id, entry]) => ({ id, name: seat?.role !== "dm" && entry.item && unidentified(entry.item) ? String(entry.item.nonid_name || "Unidentified item") : String(entry.name ?? ""), count: Number(entry.count) || 1, from: String(entry.from ?? "") })),
     quests: party.data.quests ?? {},

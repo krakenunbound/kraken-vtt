@@ -1488,10 +1488,24 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         const existing = tokensHere().find((token) => token.recordId === record.id);
         if (existing) return existing;
       }
+      // The party's token (the party sheet's): one a map; dropped again, it moves there.
+      if (record?.type === "party") {
+        const existing = tokensHere().find((token) => token.recordId === record.id);
+        if (existing) {
+          if (Number.isFinite(input.x) && Number.isFinite(input.y)) {
+            existing.x = input.x;
+            existing.y = input.y;
+            changed();
+          }
+          return existing;
+        }
+      }
       if (player && state.locked[scene.id]) throw new Error("The GM has locked token movement.");
       if (tokensHere().length >= MAX_TOKENS) throw new Error("This scene has too many tokens.");
       // A starship's by its tonnage; anyone else's by its space.
-      const sized = record?.type === "starship" ? require("./starships.cjs").shipSquares(record.data?.tons) : record ? geometry.tokenSquares(record.data?.space, units()) : 1;
+      // The party's token marks where the party is on a big map: a twelfth of the map's shorter side, so it shows.
+      const partySize = () => Math.max(1, Math.round(Math.min(scene.width, scene.height) / 12 / Math.max(1, geometry.gridSize(scene))));
+      const sized = record?.type === "starship" ? require("./starships.cjs").shipSquares(record.data?.tons) : record?.type === "party" ? partySize() : record ? geometry.tokenSquares(record.data?.space, units()) : 1;
       const squares = Math.min(10, Math.max(0.25, num(input.squares, sized)));
       let point;
       if (Number.isFinite(input.col) && Number.isFinite(input.row)) point = squareCenter(input.col, input.row, squares);
