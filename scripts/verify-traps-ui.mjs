@@ -83,7 +83,7 @@ try {
   const hero = await tool("kraken_record_create", { type: "character", name: "Wren", owner: "A test player", visibility: "owner", data: { level: 1, hp: { total: 12, wounds: 0 } } });
   const heroToken = await tool("kraken_token_place", { recordId: hero.id, col: 3, row: 4 });
   // A trap two squares on, a door further along, and a secret door beyond it.
-  const trap = await tool("kraken_region", { action: "add", kind: "trap", name: "Spiked pit", note: "Hidden under the rug", rect: { col: 5, row: 4, cols: 1, rows: 1 }, trap: { damage: "2d6", damageType: "piercing", save: { attribute: "dex", dc: 12 }, half: true } });
+  const trap = await tool("kraken_region", { action: "add", kind: "trap", name: "Spiked pit", note: "Hidden under the rug", rect: { col: 5, row: 4, cols: 1, rows: 1 }, trap: { damage: "2d6", damageType: "piercing", save: { attribute: "dex", dc: 1 }, half: true } });
   await tool("kraken_wall", { action: "add", cells: [[12, 2], [12, 6]], kind: "secret" });
   await tool("kraken_wall", { action: "add", cells: [[9, 2], [9, 6]], kind: "door" });
   const walls = await tool("kraken_wall", { action: "list" });
@@ -129,8 +129,9 @@ try {
   assert(/trap holds/.test(refused ?? ""), `its player cannot move it on (${refused})`);
   report.push("a player's token walking over a trap stops on it and is held, its player sees it waiting, the GM's Traps sprung strip has it");
 
-  // 4. The GM rolls its save (forced 15 against DC 12: made) and applies it: half of 2d6 (forced 4+5 = 9: 4); it goes on.
-  await tool("kraken_dice_force", { values: [15] });
+  // 4. The GM rolls its save (Castles & Crusades: the hero's own Dexterity save against CL 1, a forced 20: made) and
+  // applies it: half of 2d6 (forced 4+5 = 9: 4); it goes on.
+  await tool("kraken_dice_force", { values: [20] });
   await page.click(`.traps-sprung [data-trap-held="${heroToken.id}"] [data-trap-action="save"]`);
   await page.waitForSelector(`.traps-sprung [data-trap-rolled="${heroToken.id}"]`, { timeout: 5000 });
   assert(/made/.test(await page.textContent(`.traps-sprung [data-trap-rolled="${heroToken.id}"]`)), "the save is made");

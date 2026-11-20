@@ -361,11 +361,15 @@ export function Desktop({
   const tools: SidebarEntry[] = gm
     ? [
         combatTool,
+        // Effects (conditions, buffs, lights, each dragged onto a creature), beside the combat tracker.
+        { kind: "effects", label: "Effects", icon: "flask", title: "Effects" },
         partyTool,
         calendarTool,
         { kind: "assistant", label: "Assistant", icon: "sparkle", title: "DM Assistant" },
         { kind: "studio", label: "Map Studio", icon: "pen", title: "Map Studio" },
         { kind: "players", label: "Players", icon: "players", title: "Players" },
+        // The GM's record of the sitting (not a player's), with the GM's other tools.
+        { kind: "sessionlog", label: "Session Log", icon: "scroll", title: "Session Log" },
         // Maelstrom's folders: drop in books, sounds, maps and art, then Refresh, with the table still running.
         { kind: "folders", label: "Folders", icon: "folder", title: "Folders", hint: "Add books, modules, sounds and art, and read them again without a restart" },
         { kind: "settings", label: "Settings", icon: "settings", title: "Settings" },
@@ -403,13 +407,12 @@ export function Desktop({
         // The game's own windows: starships in the 2d6 games, Ironsworn's oracles and Delve's sites.
         ...gameWindows,
         { kind: "notes", label: gm ? "Notes" : "Player Notes", icon: "chat", title: gm ? "Notes" : "Player Notes" },
-        // FG's Effects window: conditions, buffs, lights and the GM's own, each dragged onto a creature.
-        { kind: "effects", label: "Effects", icon: "flask", title: "Effects" },
+        // Effects, for a player the GM lets put them on (Settings: lights, conditions or all); the GM's is among the tools.
+        ...(!gm && (session.options.playerEffects ?? "conditions") !== "none" ? [{ kind: "effects" as const, label: "Effects", icon: "flask", title: "Effects" }] : []),
         // Progress clocks: a game with the clocks feature (Forged in the Dark), or any game that has some.
         ...(has(game, "clocks") || session.clocks.clocks.length ? [{ kind: "clocks" as const, label: "Clocks", icon: "hourglass", title: "Clocks" }] : []),
-        ...(gm || session.options.motd?.text || session.options.motd?.links?.length ? [{ kind: "motd" as const, label: "Message", icon: "flag", title: "Message of the Day" }] : []),
+        ...(gm || session.options.motd?.text || session.options.motd?.links?.length ? [{ kind: "motd" as const, label: "MotD", icon: "flag", title: "Message of the Day" }] : []),
         // The GM's Session Log: each sitting's chat, read back and exported.
-        ...(gm ? [{ kind: "sessionlog" as const, label: "Session Log", icon: "scroll", title: "Session Log" }] : []),
       ],
     },
     {
