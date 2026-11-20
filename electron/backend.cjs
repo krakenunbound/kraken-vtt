@@ -359,6 +359,11 @@ function closeCampaign() {
   if (!hosted) return;
   // Leaving or quitting: a failed save leaves its recovery copy (flushCampaign).
   flushCampaign();
+  try {
+    if (hosted.lock && Number(fs.readFileSync(hosted.lock, "utf8").split(" ")[0]) === process.pid) fs.rmSync(hosted.lock, { force: true });
+  } catch {
+    /* already gone */
+  }
   clearInterval(hosted.timer);
   clearInterval(hosted.backups);
   clearTimeout(hosted.soon);
@@ -384,7 +389,30 @@ function openCampaign(id) {
   closeCampaign();
   if (!id) return null;
   if (!campaigns.exists(campaignFile(), id)) throw new Error("That campaign is missing.");
-  hosted = { id, state: campaigns.readState(campaignFile(), id), dirty: false, recordsDirty: false, soon: null, timer: null };
+  // One copy of the app hosts a campaign at a time (two would each save over the other): a lock file with this
+  // process's id, in the campaign's folder while it is hosted; one left by a copy that is gone is taken over.
+  const lock = path.join(campaigns.folder(campaignFile(), id), "hosting.lock");
+  try {
+    // "<pid> <boot time>": a lock from before the computer restarted is stale whatever its pid.
+    const [holderText, bootText] = fs.readFileSync(lock, "utf8").split(" ");
+    const holder = Number(holderText);
+    const sameBoot = Math.abs(Number(bootText) - (Date.now() - require("os").uptime() * 1000)) < 120000;
+    if (holder && holder !== process.pid && sameBoot) {
+      let alive = false;
+      try {
+        process.kill(holder, 0);
+        alive = true;
+      } catch (error) {
+        alive = error?.code === "EPERM";
+      }
+      if (alive) throw Object.assign(new Error("That campaign is open in another copy of Maelstrom VTT: close it there first."), { held: true });
+    }
+  } catch (error) {
+    if (error?.held) throw error;
+  }
+  fs.mkdirSync(path.dirname(lock), { recursive: true });
+  fs.writeFileSync(lock, `${process.pid} ${Math.round(Date.now() - require("os").uptime() * 1000)}`);
+  hosted = { id, state: campaigns.readState(campaignFile(), id), dirty: false, recordsDirty: false, soon: null, timer: null, lock };
   hosted.timer = setInterval(flushCampaign, SAVE_EVERY_MS);
   // A copy as it was before this sitting, then every hour while it is hosted.
   backupCampaign(id, "play");

@@ -202,7 +202,7 @@ function copyFolder(from, to, skip = () => false) {
     else if (entry.isFile()) fs.copyFileSync(source, target);
   }
 }
-const scratch = (name) => name === "backups" || /\.(tmp|bak)$/.test(name);
+const scratch = (name) => name === "backups" || name === "hosting.lock" || /\.(tmp|bak)$/.test(name);
 
 // A copy under a new name: its table, records, adventure and Map Studio pictures.
 function duplicate(file, input) {
