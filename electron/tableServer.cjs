@@ -1718,6 +1718,8 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
         // A book's cover, for Modules (the GM chooses what to make active); its content needs it active.
         if (url.pathname === "/book/cover") return canRead(client, book) || (client.role === "dm" && fits(books?.info(book))) ? void Promise.resolve(books.coverSmall ? books.coverSmall(book) : books.cover(book)).then(picture, () => nothing()) : nothing();
         if (url.pathname === "/book/picture") return canSeePicture(client, book, url.searchParams.get("file") || "") ? picture(books.picture(book, url.searchParams.get("file") || "")) : nothing();
+        // A book's sound or video file: the GM's, in Assets, from an active book.
+        if (url.pathname === "/book/media") return client.role === "dm" && books.media && canRead(client, book) ? picture(books.media(book, url.searchParams.get("file") || "")) : nothing();
         if (!canRead(client, book)) return nothing();
         // A record a page links to (a creature, spell, item...), as FG opens it from the book.
         if (url.pathname === "/book/record") {

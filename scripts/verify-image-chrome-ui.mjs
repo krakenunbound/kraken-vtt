@@ -283,8 +283,9 @@ try {
   await page.click('.sidebar [data-launch="assets"]');
   await page.waitForSelector("[data-assets] select");
   await page.selectOption("[data-assets] select", handbook.id);
-  await page.waitForSelector("[data-asset-folder], [data-asset]");
-  for (let depth = 0; depth < 4 && !(await page.$("[data-asset]")); depth++) await press("[data-asset-folder]");
+  // By kind: the book's kinds as tiles (a single-kind book opens on its files); a map or picture kind.
+  await page.waitForSelector(".books-kind-tile[data-asset-kind], [data-asset]");
+  if (!(await page.$("[data-asset]"))) await press('.books-kind-tile[data-asset-kind="Maps"], .books-kind-tile[data-asset-kind="Images"]');
   await page.waitForSelector("[data-asset]");
   await press("[data-asset]");
   await page.waitForSelector("[data-asset-preview]");
@@ -294,7 +295,7 @@ try {
   await page.waitForSelector("[data-image-window]", { timeout: 30000 });
   await page.waitForSelector('.map-corner [data-action="map-editor"][aria-pressed="true"]');
   const made = Object.values((await tool("kraken_records_list", { type: "image" })).records ?? (await tool("kraken_records_list", { type: "image" })));
-  assert(JSON.stringify(made).includes(file.split("/").pop().replace(/\.[a-z0-9]+$/i, "")), `the picture is a campaign image now (${JSON.stringify(made).slice(0, 200)})`);
+  assert(JSON.stringify(made).includes(file.split("/").pop().replace(/\.[a-z0-9]+$/i, "").replace(/[_-]+/g, " ")), `the picture is a campaign image now (${JSON.stringify(made).slice(0, 200)})`);
   await page.click('.sidebar [data-launch="imagelist"]');
   await page.waitForSelector('[data-images-book="campaign"] [data-image-record]');
   report.push(`Assets: ${file} made a map: it opens unlocked and is in Campaign > Images under This campaign`);

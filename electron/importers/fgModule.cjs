@@ -473,7 +473,8 @@ function parseModule(file, only) {
       }
     }
   }
-  const images = files.list().filter((item) => /\.(png|jpe?g|webp|gif)$/i.test(item));
+  // Its media files: pictures, and the sounds, music and video a book's Assets play.
+  const images = files.list().filter((item) => /\.(png|jpe?g|webp|gif|webm|mp4|ogg|mp3|wav|m4a)$/i.test(item));
   return { info, records: spreadReference(records), images };
 }
 
@@ -517,7 +518,8 @@ function convertXml(text) {
 const raw = new Map(); // module file -> { bytes, size, mtime }
 const pictures = new Map(); // module file|picture -> bytes
 let pictureBytes = 0;
-const PICTURE_TYPES = { ".png": "image/png", ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".webm": "video/webm" };
+// A book's media, as its Assets serve them (sounds and video to the GM; books.cjs media()).
+const PICTURE_TYPES = { ".png": "image/png", ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".webm": "video/webm", ".mp4": "video/mp4", ".ogg": "audio/ogg", ".mp3": "audio/mpeg", ".wav": "audio/wav", ".m4a": "audio/mp4" };
 // Whether a picture's path stays inside its module: no "..", no drive, no
 // absolute path (a record's picture is words anyone may have written).
 function insideModule(wanted) {

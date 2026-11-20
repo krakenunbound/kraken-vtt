@@ -52,6 +52,22 @@ assert(text.includes('data-page="inn"') && text.includes('data-file="images/keep
   library.useShelf((name) => shelf.file(name));
   assert(library.list("Duanes Keep", "story").some((entry) => entry.name === "Arrival"), "its story entries are listed");
 }
+// A book's media by kind (Assets): a gridded map's picture a Map, a creature's token a Token and its picture a
+// Portrait, sounds and music by their type, the rest Images; a sound is served as media, a picture is not.
+{
+  const { mkdtempSync, writeFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { zipSync, strToU8 } = await import("fflate");
+  const dir = mkdtempSync(path.join(tmpdir(), "kraken-media-"));
+  const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+  const db = '<root><image><id-00001><name type="string">Cave</name><image type="image"><layers><layer><name>cave.png</name><bitmap>images/cave.png</bitmap></layer></layers><grid>on</grid></image></id-00001></image><npc><id-00001><name type="string">Goblin</name><token type="token">art/goblin.png@Caves</token><picture type="token">art/goblin-big.png@Caves</picture></id-00001></npc></root>';
+  writeFileSync(path.join(dir, "Caves.mod"), zipSync({ "definition.xml": strToU8("<root><name>Caves</name><ruleset>CnCRPG</ruleset></root>"), "db.xml": strToU8(db), "images/cave.png": png, "art/goblin.png": png, "art/goblin-big.png": png, "sounds/drip.ogg": strToU8("OggS"), "music/theme.mp3": strToU8("ID3"), "misc/other.png": png }));
+  const shelf = createBookShelf({ folder: dir });
+  const kinds = Object.fromEntries(shelf.contents("Caves").media.map((item) => [item.file, item.kind]));
+  const wanted = { "images/cave.png": "Maps", "art/goblin.png": "Tokens", "art/goblin-big.png": "Portraits", "sounds/drip.ogg": "Sounds", "music/theme.mp3": "Music", "misc/other.png": "Images" };
+  assert(JSON.stringify(kinds) === JSON.stringify(Object.fromEntries(Object.keys(kinds).map((file) => [file, wanted[file]]))) && Object.keys(kinds).length === 6, `a book's media by kind: ${JSON.stringify(kinds)}`);
+  assert(shelf.media("Caves", "sounds/drip.ogg")?.mime === "audio/ogg" && shelf.media("Caves", "art/goblin.png") === null, "a sound is served as media, a picture is not");
+}
 // Typed superscripts and line breaks in a book's text read as such; nothing else does.
 {
   const { toHtml } = require("../electron/books.cjs");
@@ -136,6 +152,8 @@ try {
   const activated = (await (await get(gm, "/book/list")).json()).books;
   assert(activated.find((item) => item.id === "Test Keep").active && !activated.find((item) => item.id === "Test Keep").shared, "an active adventure stays the GM's");
   assert(activated.find((item) => item.id === "Test Handbook").shared, "an active players' handbook is open to the players");
+  const sound = `/book/media?book=${book}&file=sounds/gate.ogg`;
+  assert((await get(gm, sound)).headers.get("content-type") === "audio/ogg" && (await get(player, sound)).status === 404, "an active book's sound plays for the GM (Assets), not for a player");
   assert((await (await get(player, "/book/list")).json()).books.map((item) => item.id).join() === "Test Handbook", "the player's shelf: the handbook, not the adventure");
   const loaded = server.agent.records.list({ source: "Test Handbook" });
   assert(loaded.length === 1 && loaded[0].type === "item", `an active module's rules records (its gear) are loaded into the campaign, not its book pages (${loaded.map((record) => record.type)})`);

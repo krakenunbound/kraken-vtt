@@ -113,6 +113,51 @@ function packHasPages(file) {
   }
 }
 
+// Every media file a book holds, each with its kind by how the book uses it: a map record's picture is a Map, a
+// creature's or an encounter's token a Token, a portrait a Portrait, a handout a Handout, another picture record an
+// Image; sounds, music and video by their type; anything else by its folder's words, else Images or Other.
+const MEDIA = /\.(webm|mp4|ogg|mp3|wav|m4a)$/i;
+const AUDIO = /\.(ogg|mp3|wav|m4a)$/i;
+function mediaOf(book) {
+  const files = (book.module.images ?? []).filter((name) => PICTURES.test(name) || MEDIA.test(name));
+  const own = new Map(files.map((name) => [name.toLowerCase(), name]));
+  const kind = new Map();
+  const mark = (reference, as, strong = true) => {
+    const name = own.get(String(reference ?? "").split("@")[0].replace(/^\/+/, "").replaceAll("\\", "/").toLowerCase());
+    if (name && (strong || !kind.has(name))) kind.set(name, as);
+  };
+  for (const record of book.records.values()) {
+    const data = record.data ?? {};
+    if (record.type === "image") {
+      // A grid or walls make a map; else the words, a handout's first ("Handouts - Scenes (Map Adventurer)").
+      const words = `${data.fgCategory ?? ""} ${record.name}`;
+      const played = data.image?.grid === "on" || /occluder/.test(JSON.stringify(data.image ?? {}).slice(0, 20000));
+      const as = played ? "Maps" : /handouts?/i.test(words) ? "Handouts" : /\bmaps?\b/i.test(words) ? "Maps" : "Images";
+      const bitmap = bitmapIn(data.image);
+      if (bitmap) mark(bitmap, as, as === "Maps");
+      continue;
+    }
+    // Tokens and portraits wherever a record names them (a creature, an encounter's creatures, a character).
+    const text = JSON.stringify(data);
+    for (const hit of text.matchAll(/"(token|token3d)"\s*:\s*"([^"]+)"/g)) mark(hit[2], "Tokens");
+    // A creature's or character's picture is its portrait; an item's (or anything else's) picture is an image.
+    const portrait = /^(npc|charsheet|character|pregencharsheet|encounter|battle)$/.test(record.type) ? "Portraits" : "Images";
+    for (const hit of text.matchAll(/"(picture|portrait)"\s*:\s*"([^"]+)"/g)) mark(hit[2], portrait, false);
+  }
+  const byFolder = (name) => {
+    const words = name.toLowerCase();
+    if (AUDIO.test(name)) return /\bmusic\b|\/music\//.test(words) ? "Music" : "Sounds";
+    if (/\.(webm|mp4)$/i.test(name)) return /maps?\//.test(words) ? "Maps" : "Video";
+    if (/(^|\/)maps?\//.test(words) || /battle ?maps?/.test(words)) return "Maps";
+    if (/(^|\/)tokens?\//.test(words) || /pogs?\//.test(words)) return "Tokens";
+    if (/(^|\/)portraits?\//.test(words)) return "Portraits";
+    if (/handouts?/.test(words)) return "Handouts";
+    if (/^thumbnail\.|(^|\/)cover\./.test(words)) return "Covers";
+    return "Images";
+  };
+  return files.map((file) => ({ file, kind: kind.get(file) ?? byFolder(file) }));
+}
+
 // A book's contents record (its chapters, sections and pages).
 const indexOf = (book) => [...book.records.values()].find((record) => record.type === "refindex" && String(record.data?.fgPath ?? record.id ?? "").includes("reference.refmanualindex"));
 
@@ -573,9 +618,14 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "", modu
         .filter((record) => record.type === "image")
         .map((record) => ({ name: record.name, category: record.data.fgCategory ?? "", file: bitmapIn(record.data.image) }))
         .filter((item) => item.file);
-      // Every picture file the book holds (FG's Assets: an art pack's pictures too, record or not).
+      // Every picture file the book holds (an art pack's pictures too, record or not).
       const assets = (book.module.images ?? []).filter((name) => PICTURES.test(name));
-      return { ...publicInfo(id), chapters, pictures, assets };
+      return { ...publicInfo(id), chapters, pictures, assets, media: mediaOf(book) };
+    },
+    // A book's sound or video file (the GM's Assets play them).
+    media(id, file) {
+      const found = info(id);
+      return found && MEDIA.test(String(file)) ? modulePicture(String(file), found.file) : null;
     },
     // One page: its blocks, text as safe HTML, pictures by file.
     page(id, pageId) {

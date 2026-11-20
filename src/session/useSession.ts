@@ -237,7 +237,7 @@ export type ShownImage = { id: string; book: string; file: string; name: string;
 export type BookShelf = { active: string[]; shared: string[]; images: ShownImage[] };
 export type BookInfo = { id: string; name: string; title: string; category: string; ruleset: string; author: string; hasBook: boolean; cover: string; adventure: boolean; forPlayers: boolean; active: boolean; shared: boolean; pack?: boolean; kind?: string; group?: string; order?: string; parent?: string; hasStory?: boolean };
 export type BookPageRef = { id: string; name: string; keywords: string };
-export type BookContents = BookInfo & { chapters: { name: string; sections: { name: string; pages: BookPageRef[] }[] }[]; pictures: { name: string; category: string; file: string }[]; assets?: string[] };
+export type BookContents = BookInfo & { chapters: { name: string; sections: { name: string; pages: BookPageRef[] }[] }[]; pictures: { name: string; category: string; file: string }[]; assets?: string[]; media?: { file: string; kind: string }[] };
 export type BookBlock = { kind: "text"; html: string; frame?: string } | { kind: "picture"; file: string; caption: string; align: string; scale: number; name: string };
 export type BookPage = { book: string; id: string; name: string; blocks: BookBlock[] };
 // A quick slot: something kept at hand, opened with a click.
@@ -1351,7 +1351,7 @@ export function useSession() {
   }, []);
   const ownPictureUrl = useCallback((file: string) => (assetRef.current ? `${originRef.current}/table/own-picture?token=${assetRef.current}&file=${encodeURIComponent(file)}` : ""), []);
   const bookUrl = useCallback(
-    (route: "cover" | "picture", book: string, file = "") =>
+    (route: "cover" | "picture" | "media", book: string, file = "") =>
       assetRef.current ? `${originRef.current}/book/${route}?${new URLSearchParams({ token: assetRef.current, book, ...(file ? { file } : {}) })}` : "",
     [],
   );

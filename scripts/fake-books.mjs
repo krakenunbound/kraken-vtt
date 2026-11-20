@@ -34,7 +34,7 @@ export function makeBooks() {
     <npc><guard><name type="string">Gate Guard</name><hp type="number">7</hp></guard></npc>
   </root>`;
   const definition = `<?xml version="1.0" encoding="UTF-8"?><root><name>${NAME}</name><displayname>The Test Keep</displayname><category>Test Adventures</category><author>Kraken</author><ruleset>CnCRPG</ruleset></root>`;
-  writeFileSync(path.join(folder, "Test Keep.mod"), zipSync({ "definition.xml": strToU8(definition), "db.xml": strToU8(db), "thumbnail.png": PNG, "images/keep.png": PNG }));
+  writeFileSync(path.join(folder, "Test Keep.mod"), zipSync({ "definition.xml": strToU8(definition), "db.xml": strToU8(db), "thumbnail.png": PNG, "images/keep.png": PNG, "sounds/gate.ogg": strToU8("OggS") }));
   mkdirSync(path.join(folder, "Not A Book"), { recursive: true });
   writeFileSync(path.join(folder, "Not A Book", "definition.xml"), `<root><name>Not A Book</name><category>Maps</category></root>`);
   writeFileSync(path.join(folder, "Not A Book", "db.xml"), "<root><npc/></root>");
