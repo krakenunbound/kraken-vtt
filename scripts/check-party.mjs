@@ -21,6 +21,11 @@ assert(xpShares(10, ["a", "b", "c"]).map((s) => s.amount).join() === "3,3,4", "1
 assert(xpShares(7, ["a", "b"]).map((s) => s.amount).join() === "4,3", "7 XP over 2: round(3.5) = 4, last 3");
 assert(xpShares(2, ["a", "b", "c"]).map((s) => s.amount).join() === "0,0,2", "fewer XP than members: the last gets it");
 assert(xpShares(11, ["a", "b", "c"]).map((s) => s.amount).join() === "4,4,3", "11 over 3: 4, 4, 3");
+// Audit 014: the shares never come to more than the award.
+for (let xp = 1; xp <= 60; xp++) for (let n = 1; n <= 8; n++) {
+  const total = xpShares(xp, Array.from({ length: n }, (_, i) => i)).reduce((sum, s) => sum + s.amount, 0);
+  assert(total === xp, `${xp} XP over ${n} adds up: ${total}`);
+}
 assert(coinShares(31, 3).each === 10 && coinShares(31, 3).left === 1 && coinShares(2, 3).each === 0, "coins: floor share, remainder stays");
 assert(assignedShares(1, "A, B").error && assignedShares(5, "A; B").each === 2, "items: more names than items is refused");
 console.log("ok party rules");

@@ -153,9 +153,10 @@ async function awardEntries(table, kind, entryId, from) {
     marked[id] = { awarded: 1 };
   }
   if (Object.keys(marked).length === 0) throw new Error("Nothing left to award.");
-  table.records.update(PARTY_ID, { data: { [kind]: marked } }, table.seat);
+  // Paid first, then marked: a refused award (no party members yet) leaves it to award later.
   // Cairn: an encounter or a quest is marked done, with no experience to hand out.
   if (xp > 0 && table.ruleset?.() !== "Cairn" && !require("./fate.cjs").isFateRuleset(table.ruleset?.())) await awardXP(table, xp, from);
+  table.records.update(PARTY_ID, { data: { [kind]: marked } }, table.seat);
   return xp;
 }
 
@@ -243,7 +244,14 @@ async function giveTo(table, member, { coins = {}, items = [], from: parcelName 
 
 // Hands out the parcel (PartyLootManager.distribute): assigned items to the
 // people named, then each coin split evenly with the remainder left behind.
-async function distribute(table, from) {
+// One distribution at a time (two clicks, or the GM's and the assistant's at once, would each pay the same parcel).
+let distributing = Promise.resolve();
+function distribute(table, from) {
+  const run = distributing.then(() => distributeNow(table, from));
+  distributing = run.catch(() => undefined);
+  return run;
+}
+async function distributeNow(table, from) {
   const { coinShares, assignedShares } = await partyRules();
   const { engine } = await siege();
   const game = siegeLibrary(table.records).game;
@@ -271,7 +279,10 @@ async function distribute(table, from) {
       await giveItem(table, member, item, each, engine, game);
       given.push(`${itemName(item.item && typeof item.item === "object" ? { ...item.item, name: item.name } : item)} (${each}) -> ${member.name}`);
     }
-    parcelUpdate.items[id] = failed.length > 0 ? { assign: failed.join(", ") } : null;
+    // What was not handed out stays in the parcel: the share of those not found, and an uneven split's odd ones.
+    const delivered = each * (names.length - failed.length);
+    const left = Math.max(Number(item.count) || 1, 1) - delivered;
+    parcelUpdate.items[id] = left > 0 ? { count: left, assign: failed.join(", ") } : null;
     if (failed.length > 0) table.say(`[WARNING] Could not give ${itemName(item.item ?? item)} to ${failed.join(", ")}.`, from);
   }
   if (given.length > 0) table.say(`Items distributed: ${given.join("; ")}.`, from);

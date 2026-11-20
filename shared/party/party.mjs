@@ -5,7 +5,9 @@
 export function xpShares(xp, members) {
   const count = members.length;
   if (count === 0) return [];
-  const average = xp >= count ? Math.floor(xp / count + 0.5) : 0;
+  // Rounded, but never so high that the shares come to more than the award (9 among 6: 1 each, 4 to the last).
+  const rounded = xp >= count ? Math.floor(xp / count + 0.5) : 0;
+  const average = (count - 1) * rounded > xp ? Math.floor(xp / count) : rounded;
   const last = Math.max(xp - (count - 1) * average, 0);
   return members.map((member, index) => ({ member, amount: index === count - 1 ? last : average }));
 }

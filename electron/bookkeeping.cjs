@@ -150,12 +150,13 @@ function createBookkeeping(table) {
     const decl = declOf(record);
     const used = lib.bk.useConsumable(decl, record.data, String(key ?? ""), lib.parse.parseSpell);
     if (!used.ok) throw new Error(used.reason);
+    // Who it lands on is found before it is spent: a stale or wrong drop keeps the potion.
+    const target = used.info.heal?.dice ? whoIs(to ?? { recordId: record.id }) : null;
     await save(record, used.data);
     let healed = null;
     let onto = record.name;
-    if (used.info.heal?.dice) {
+    if (used.info.heal?.dice && target) {
       const formula = `${used.info.heal.dice}${used.info.heal.bonus ? (used.info.heal.bonus > 0 ? `+${used.info.heal.bonus}` : used.info.heal.bonus) : ""}`;
-      const target = whoIs(to ?? { recordId: record.id });
       onto = target.name;
       const roll = table.roll(formula, `[HEAL] ${used.name} -> [to ${target.name}]`, seat.role === "dm" ? record.name : seat.name);
       healed = roll.total;
