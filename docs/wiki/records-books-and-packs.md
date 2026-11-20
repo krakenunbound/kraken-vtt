@@ -10,8 +10,8 @@ The sidebar on the right holds everything, as Fantasy Grounds' does:
 
 | Part | What is in it |
 |---|---|
-| **Tools along the top** | The combat tracker, the assistant (the AI agent), Map Studio, the players, settings. |
-| **Library** | Modules (every module and pack for the campaign's game), Books (the active books, to read), Assets, Sound Sets. |
+| **Tools along the top** | The combat tracker, Effects, the assistant (the AI agent), Map Studio, the players, the Session Log, the Message of the Day (MotD), Folders, settings. |
+| **Library** | Modules (every module and pack for the campaign's game, filed by kind and series), Books (the active books, to read), Assets (what each active book supplies, by kind), Sound Sets. |
 | **Player** | Characters, Party (the party sheet), Notes. |
 | **Campaign** | Encounters, Images (maps and handouts), Items, NPCs, Parcels, Quests, Tables. |
 | **World** | Story (each active adventure's story entries, and the campaign's own). |
@@ -28,6 +28,10 @@ The categories fold away, and the arrow at the bottom collapses the sidebar to i
 - **Make a book active** in **Modules** to bring its records (NPCs, items, encounters, maps, story) into the campaign. A book that is not active is off limits: its pages, pictures, maps and records open only once it is.
 - **Books** lists only the active books, to read. A player sees only the ones you open to them; a players' book can be shared with the players.
 - Every list (Items, NPCs, Spells and the rest) shows every active book's records under the book's name.
+- **Modules and Books are filed** by kind (Rulesets, Adventures, Settings, Maps & Tiles, Tokens & Art, Tables & Tools, Other), then by series or line, with each book's cover.
+- **By type or by book:** Items by type (Weapons, Armor & Shields, Magic Items, Potions & Oils, Treasure...), NPCs by creature type, Spells by level and Images by kind, each with a Type filter and a Book filter.
+- **Assets** shows what each active book, ruleset or art pack supplies: Maps, Images, Handouts, Portraits, Tokens, Covers, Music, Sounds and Video. Sounds, music and video play in the preview; a map or picture can be made a map, shared, or set as the background.
+- **Folders** (the GM's, along the top) shows Maelstrom's folders and what each holds. Drop files on one to add them; **Refresh** reads everything again while the table keeps running, so no player is disconnected.
 
 ### Links in a book
 

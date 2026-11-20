@@ -26,6 +26,16 @@ Right-click a character's portrait (or its card in Character Selection):
 
 A character stays with its player's account: it is theirs every time they sign in, from the app or any browser.
 
+![The GM's right-click menu on a portrait: give it to a player or keep it](../screenshots/ownership-menu.jpg)
+
+![Character Selection in Chrome: a released character with its Take button](../screenshots/player-take.jpg)
+
+### Your portrait
+
+The portrait and token picker (click the portrait on a sheet) lists the game's portraits and tokens, and has **From my computer…**: a picture (PNG, WebP, JPEG, GIF) or a WebM video portrait of your own. The host keeps it with the campaign and everyone at the table sees it. The picker opens over everything; move it by its handle, or with the arrow keys.
+
+Right-click another character's portrait along the top and choose **Whisper** to start a private message to its player (`/w Name`); only the two of you and the GM read it.
+
 ## The character wizards
 
 Players make their own characters in the wizard, or the GM makes one for them. Each wizard follows its game's book, step by step. Wizard rolls are the host's, made in chat for the table. Starting gear is bought with the starting money in each wizard's shop.
@@ -72,10 +82,15 @@ Experience and levelling follow each game's rules. The sheet's level up rolls or
 
 The party sheet (sidebar, **Player > Party**) holds the party's members, coin and items.
 
+![The party sheet, named The Lantern Company, and its banner token on the map](../screenshots/party-token.jpg)
+
 - **XP:** award XP, and drop quests and encounters on its XP tab. `/award 50` in chat awards XP too.
 - **Hand out** coin and items to the characters.
 - **The group roll:** a check, save or skill for everyone, rolled for them or asked of the players.
 - **Rest the party:** a short or long rest for everyone.
+- **The party's name and token:** name the party and press **Change token**: banners and flags, fantasy groups, a caravan, investigators and monster hunters, a sci-fi crew, a squad, or any token. Drag the token onto a big map (a city, a region) to mark where the party is. There is one a map, and dropping it again moves it.
+- **The stash (Inventory tab), for trading:** drag an item from your inventory onto the stash to put it in; another player drags it onto their inventory, or presses **Take**. Chat says who put and took what.
+- **Party from who's here** fills the party with the characters at the table, the GM's own included.
 - Some games add a tab: Cairn's **Growth**, Fate's **Milestones**, Forged in the Dark's **Crew**.
 
 ## Parcels and treasure

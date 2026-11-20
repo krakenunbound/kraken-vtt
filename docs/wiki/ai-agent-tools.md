@@ -6,7 +6,7 @@ Maelstrom is built for AI agents from the ground up. Every action a GM can take 
 
 ### The Assistant (in the app)
 
-The **Assistant** is in the tools along the top of the sidebar (GM only). Ask it, stop it, or start a new chat. It works with whichever AI provider you have a key for: Claude (Anthropic), OpenAI (GPT, Codex), Google Gemini, xAI Grok, DeepSeek, OpenRouter, or any other service with an OpenAI-compatible API (a local one such as Ollama or LM Studio too). Choose the provider and its model in the Assistant's window (the models are the provider's own list). Each provider's key is set there (kept encrypted on your computer) or in an environment variable (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `XAI_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`); no tool can set it.
+The **Assistant** is in the tools along the top of the sidebar (GM only). Ask it, stop it, or start a new chat. It works with whichever AI provider you have a key for: Claude (Anthropic), OpenAI (GPT, Codex), Google Gemini, xAI Grok, DeepSeek, OpenRouter, or any other service with an OpenAI-compatible API. **Local AI (Ollama, LM Studio...)** runs on your own computer or one on your network: give its address (127.0.0.1:11434, or IP:port) and no key is needed; its models are listed from the server. Choose the provider and its model in the Assistant's window (the models are the provider's own list). Each provider's key is set there (kept encrypted on your computer) or in an environment variable (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `XAI_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`); no tool can set it.
 
 ### An outside agent over MCP
 

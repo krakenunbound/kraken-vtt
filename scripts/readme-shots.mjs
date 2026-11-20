@@ -416,6 +416,39 @@ try {
     await tool("kraken_windows", { action: "close", kind: "studio" });
   });
 
+  // The party token: the Lantern Company's banner on the watchtower's yard, the party sheet beside it.
+  await scene("party", async () => {
+    await tool("kraken_party_edit", { members: [brennaId, tomasId], name: "The Lantern Company", token: "kraken-games/tokens/Party/Crimson Banner.webp" });
+    await tool("kraken_open_fg_module", { module: "The Empty Watchtower", maps: ["Yard"] });
+    await settle(3000);
+    const yard = await tool("kraken_map", {});
+    const cols = yard.scene?.cols ?? 20;
+    const rows = yard.scene?.rows ?? 15;
+    await tool("kraken_token_place", { recordId: "party", col: Math.floor(cols * 0.42), row: Math.floor(rows * 0.45) });
+    await tool("kraken_windows", { action: "open", kind: "party" });
+    await settle(4000);
+    await shot(page, "party-token");
+  });
+
+  // Who holds a character: the GM's right-click on a pregen's portrait (give, release, keep), and a
+  // player's Character Selection with the released pregen to look over and Take.
+  await scene("ownership", async () => {
+    const pregen = await tool("kraken_build_character", { spec: { name: "Sela Ashgrove", species: "Elf", class: "Ranger", background: "Outlander", level: 2, alignment: "Chaotic good" } });
+    const pregenId = pregen.id ?? pregen.record?.id ?? pregen.character?.id;
+    await tool("kraken_characters", { action: "release", id: pregenId });
+    await settle(1500);
+    await page.click(`.portrait-strip [data-portrait="${pregenId}"]`, { button: "right" });
+    await page.waitForSelector('.player-menu [data-menu="keep"]');
+    await settle(600);
+    await shot(page, "ownership-menu");
+    await page.keyboard.press("Escape");
+    await clearWindows(seat);
+    await seat.click('.sidebar [data-launch="characters"]');
+    await seat.waitForSelector(`[data-take="${pregenId}"]`);
+    await settle(1200);
+    await shot(seat, "player-take");
+  });
+
   // Apeira Astra: the Kestrel's deck.
   await tool("kraken_leave", {});
   await page.waitForSelector("text=My Campaigns", { timeout: 20000 });

@@ -4,7 +4,7 @@ Maelstrom VTT is a free virtual tabletop. The game master (GM) runs Maelstrom on
 
 ![The GM's table: the crypt of The Empty Watchtower in torchlight](../screenshots/gm-crypt.jpg)
 
-> **Maelstrom is in alpha.** The version is in the app's title bar. Expect rough edges, and please report what you find (see [Troubleshooting and FAQ](troubleshooting-and-faq.md)).
+> **Maelstrom is in beta.** The version is in the app's title bar. Expect a few rough edges, and please report what you find (see [Troubleshooting and FAQ](troubleshooting-and-faq.md)).
 
 ## What Maelstrom does
 
@@ -13,7 +13,8 @@ Maelstrom VTT is a free virtual tabletop. The game master (GM) runs Maelstrom on
 - **Your Fantasy Grounds library.** If you own Fantasy Grounds modules, Maelstrom reads them where they are: books, story, encounters, NPCs, items, and maps with walls, doors and lights.
 - **Maps that play.** Walls and doors, line of sight, light and darkness, fog of war, weather, a shared ruler, and Map Studio, Maelstrom's own map maker.
 - **A combat tracker that does the work.** It rolls attacks, damage, saves and initiative by each game's rules and applies the results.
-- **3D dice, sound and music**, a calendar, a party sheet, treasure parcels and the bookkeeping of arrows, rations and torches.
+- **3D dice, sound and music**, a calendar, a party sheet with the party's token and stash, treasure parcels and the bookkeeping of arrows, rations and torches.
+- **The GM decides who holds a character:** give it to a player, release it for the players to take, or keep it. Characters, settings and layout stay with each player's account, from the app or any browser.
 - **A multi-monitor GM.** Every window can pop out to another screen.
 - **AI-first.** Every GM action is also a tool an AI agent can use.
 

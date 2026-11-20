@@ -8,7 +8,7 @@ CoreRPG/5E source, Foundry's core source and Kraken's code; IDs below are used
 in commits and PLAN.md. Keep it current: when a gap closes, mark it Done with
 the release.
 
-Status of the work (2026-11-19):
+Status of the work (2026-11-20, 0.1.0-beta.1):
 
 | Area | Done | Open |
 |---|---|---|
@@ -99,6 +99,18 @@ Kraken already at or ahead: seeded host dice engine, 3D dice, tray with right-cl
 
 Smaller: formulas with spaces and #label (done); dice modifiers rr, xo, min, max, cf, ms (done); roll-mode selector in the chat bar (done: kept by the host per seat, every roll the seat makes); chat export and archive (done: the chat's export for every seat, the GM's Session Log with each sitting archived in the campaign folder); /gm alias, /help note that /r rolls (done); chat languages; quick-slot pages; turn timer (open).
 
+## Added in 0.1.0-beta.1
+
+| Feature | Fantasy Grounds | Foundry | Maelstrom |
+|---|---|---|---|
+| Who holds a character | the GM assigns a PC's owner | per-user ownership levels | right-click a portrait or card: Give to a player (tokens follow), Release (players look it over, then Take), Keep; held by the account; `kraken_characters` give, release, keep |
+| Settings that follow the player | per machine | per browser (client settings) | kept by the host with the account: UI scale, window places, sidebar, chat size, map toolbar; the app or any browser |
+| The party on a big map | party token from the party sheet | a party actor's token | the party sheet's name and token (14 pictures or any token), one a map, sized to show; `kraken_party_edit` |
+| Party stash and trading | party sheet inventory | an item pile module | drag into the party sheet's stash, another player drags it out or Takes it; chat says who; `kraken_party_stash` |
+| Size a token from the map | token scale with the wheel | the token's config | Ctrl+wheel over a token, a tenth a notch, a quarter square to 50 squares |
+| Library filed for finding | module categories | compendium folders | Modules and Books by kind, then series, with covers; Assets by kind; lists by type or by book |
+| Local AI for the assistant | none | modules | Ollama or LM Studio at an address, no key |
+
 ## Session, players and platform
 
 Kraken already at or ahead: accounts with lockout, pop-outs and remembered window places on other monitors, per-player volumes by kind, chat sound triggers, quick slots with macros, votes, read-aloud, Message of the Day, updater, LAN/offline, large-map tiling, colours and speak-as.
@@ -111,7 +123,7 @@ Kraken already at or ahead: accounts with lockout, pop-outs and remembered windo
 | S4 | Pause the game | none | GM button and /pause: players' veil, host refuses moves/rolls | Done (alpha.91), High |
 | S5 | Players-window controls | /kick only, no ban | right-click Kick, Ban (kept per campaign), Ring bell, Share, View as; /afk and idle dim | Done (alpha.91), Medium-High |
 | S6 | Pull players to my view | sharing opens the window only | view-pull with centre/zoom, Shift-ping, scene-title card | Done (alpha.91), Medium |
-| S7 | Settings for this screen | /scaleui only | UI scale and text size sliders, global reduced motion, colour-blind-safe palette with letter marks, rebindable shortcuts (Controls panel) | Partly: UI scale only (unreleased), no text size, reduced motion, colour-blind palette or shortcuts; Medium |
+| S7 | Settings for this screen | /scaleui only | UI scale and text size sliders, global reduced motion, colour-blind-safe palette with letter marks, rebindable shortcuts (Controls panel) | Partly: UI scale only (beta.1, and with every other setting on the screen it follows the player's account to the app or any browser), no text size, reduced motion, colour-blind palette or shortcuts; Medium |
 | S8 | Campaign management, backups, logs | create/pick only; one .bak | rename, duplicate, export zip, delete to recycle bin, open folder; rolling backups + Restore; rotating log + Open logs | Done (alpha.91), Medium |
 | S9 | Playlists and synced music | folder plays randomly, unsynced | playlist record (order/shuffle/repeat/crossfade), startedAt so late joiners hear the same bar, Now playing | Partly: a music folder plays in order or shuffled, repeats or stops (Sound window, kraken_sound order/repeat/playlist), and every seat joins a track at the same moment (the host sends how far in it is; `check-sound`, `verify-music-sync-ui`) (unreleased); a playlist's tracks cross-fade (the next asked for 4 s before the end, by the GM's screen whether or not the Sound window is open; `verify-music-sync-ui`); a playlist record of hand-picked tracks still open; Medium |
 | S10 | Mobile and tablet players | no touch handling | pointer pan, pinch zoom, long-press menu, 44 px targets, narrow tabbed layout | Partly: one-finger pan, two-finger pinch zoom and 44 px targets on a touch screen (map tools, window buttons, token menu, sidebar, quick slots) done (unreleased; `verify-touch-ui`); the long press is the browser's own right-click (to try on the GM's touch laptop); a narrow tabbed layout for phones still open; Medium |

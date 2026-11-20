@@ -1,6 +1,6 @@
 # Troubleshooting and FAQ
 
-Answers to the questions GMs and players ask most, and what to do when something goes wrong. Maelstrom is in alpha, so if your problem is not here, please report it (see the end of this page).
+Answers to the questions GMs and players ask most, and what to do when something goes wrong. Maelstrom is in beta, so if your problem is not here, please report it (see the end of this page).
 
 ## Players can't connect
 

@@ -7,8 +7,8 @@ their Windows or Linux PC and hosts the table; players join from their browser (
 Edge, Brave or Firefox) with nothing to install, or from Maelstrom on their own Windows or Linux PC. It aims for Foundry-level presentation with Fantasy Grounds-level ease
 of use, and a built-in AI agent that can do anything the GM can.
 
-> **Alpha test.** Maelstrom is in alpha (see the version in the app's title bar).
-> Expect rough edges, and please report what you find (see
+> **Beta.** Maelstrom is in beta (see the version in the app's title bar).
+> Expect a few rough edges, and please report what you find (see
 > [Reporting problems](#reporting-problems)). Questions, help and tables looking
 > for players: the [Maelstrom VTT Discord](https://discord.gg/8jj4v8UdXr).
 
@@ -100,6 +100,17 @@ A character's spells and weapons as painted cards. Click one to turn it over and
 ![Ability cards: a player's hand, in Chrome](docs/screenshots/cards-player.jpg)
 A player's hand. Spent cards tip over and go grey, and a long rest stands them up again.
 
+### The party sheet and the party token
+![The party sheet, named The Lantern Company, and its banner token on the map](docs/screenshots/party-token.jpg)
+Name the party and choose its token: banners and flags, a caravan, investigators, a sci-fi crew, or any token. Drag it onto a big map, a city or a region to mark where the party is. The sheet shows everyone's health and defences, rolls a check for the whole party, rests them, and holds the party's stash: drag an item in, and another player drags it out.
+
+### Who holds a character
+![The GM's right-click menu on a portrait: give it to a player or keep it](docs/screenshots/ownership-menu.jpg)
+The GM right-clicks a character's portrait (or its card) to **give** it to a player at the table (its tokens go with it), **release** it to the players, or **keep** it. A character stays with its player's account, and so do their settings and layout, from the app or any browser.
+
+![Character Selection in Chrome: a released character with its Take button](docs/screenshots/player-take.jpg)
+A player sees their own characters and those the GM released. They open a released one to look it over, then press **Take**.
+
 ### The desktop: a hex grid on black
 ![The hex grid wallpaper, the Maelstrom decal and the dice tower](docs/screenshots/desktop-hex.jpg)
 Game-table wallpapers: hex grids, a battle mat, a dungeon map, an old world map, and a sci-fi set. They're big and seamless, so the repeat hardly shows. Your own go in `Documents/Kraken VTT`, beside your dice packs, dice towers, GM icons and decals. Each folder has a guide for you, and one for an AI agent.
@@ -175,6 +186,12 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
 - **Your Fantasy Grounds library.** If you own Fantasy Grounds modules, Maelstrom
   reads them in place: books to read, story, encounters, NPCs, items, and maps
   with their walls, doors and lights.
+- **A library you can find your way around.** Modules and Books are filed by
+  kind (Rulesets, Adventures, Settings, Maps & Tiles...), then by series, with
+  covers. Assets shows what each book supplies, by kind; items, NPCs, spells
+  and images can be listed by type or by book. A shared book's records reach
+  the players, so they can make characters from it. The Folders button adds
+  new material while the table keeps running.
 - **Maelstrom packs.** Make each of your books into Maelstrom's own file (`.kpack`)
   once, in Books > Packs. Copy the packs folder to any computer and your books
   open there in Maelstrom, with no Fantasy Grounds installed. Maelstrom's own books
@@ -189,13 +206,20 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
   Grounds character wizard extensions, Maelstrom runs or follows them page for
   page), a combat tracker that rolls
   attacks, damage, saves and initiative and applies the results, 3D dice,
-  effects, a party sheet and treasure parcels.
+  effects, a party sheet with the party's token and stash, and treasure
+  parcels.
+- **The GM decides who holds a character.** Give a character to a player,
+  release it for the players to look over and take, or keep it. Characters,
+  settings and window layout stay with each player's account, from the app or
+  any browser.
 - **Sound.** One-shots, sound effects triggered by the chat (a sword hit, a
   fireball), ambience and music, each with its own volume for every player.
 - **At the table.** A banner and a chime when it is your turn, your colour on
   your tokens, pings and drawings, shapes on the map (arrows, circles, cones,
   measured as you draw), death markers where creatures fall, a calendar with
-  notes for each game, a message of the day, and FG's read-aloud boxes.
+  notes for each game, a message of the day, read-aloud boxes, whispers from
+  a portrait, players' own portraits (pictures or WebM video), and twelve
+  quick slots on F1 to F12.
 - **Make it yours.** `Documents/Kraken VTT` has a folder for each thing you
   can add: dice packs, dice towers, GM icons, background decals, wallpapers
   and books. Each holds a README on what goes in it and how to make one, for
@@ -203,7 +227,8 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
 - **A multi-monitor GM.** Every window can pop out to another monitor.
 - **AI-first.** Every GM action is also a tool for an AI agent (MCP), so an
   assistant can build characters, run combat or set up a map. See
-  [AGENT.md](AGENT.md).
+  [AGENT.md](AGENT.md). The DM Assistant in the app talks to a cloud model
+  or a local one (Ollama, LM Studio) on your own computer or network.
 
 ## Getting started
 

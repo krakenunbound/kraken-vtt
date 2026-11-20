@@ -157,11 +157,13 @@ Linux, if a firewall is on (such as `ufw`), allow the port yourself:
 
 The **sidebar** on the right holds everything, as Fantasy Grounds' does:
 
-- **Tools along the top:** the combat tracker, the assistant (the AI agent),
-  the players, settings.
-- **Library:** Modules (every module and pack for the campaign's game: make
-  them active, make packs), Books (only the active books, to read; a player
-  sees only the ones you open to them), Sound Sets.
+- **Tools along the top:** the combat tracker, Effects, the assistant (the AI
+  agent), Map Studio, the players, the Session Log, MotD (the Message of the
+  Day), Folders (add books, sounds and art while the table runs), settings.
+- **Library:** Modules (every module and pack for the campaign's game, filed
+  by kind and series: make them active, make packs), Books (only the active
+  books, to read; a player sees only the ones you open to them), Assets (what
+  each active book supplies, by kind), Sound Sets.
 - **Player:** Characters, Party (the party sheet), Notes.
 - **Campaign:** Encounters, Images (maps and handouts), Items, NPCs, Parcels,
   Tables.
@@ -457,7 +459,14 @@ hand-wave any of it:
 - A character's wizard rolls are the host's, in chat for the table. Starting
   gear is bought with the starting money in each wizard's shop (5E takes its
   class and background kits, as Fantasy Grounds does).
-- Give items and treasure through the **party sheet** and **parcels**.
+- Give items and treasure through the **party sheet** and **parcels**. The
+  party sheet also names the party and holds its token (drag it onto a big
+  map to mark where the party is) and its stash, which players trade through.
+- **Who holds a character:** right-click a character's portrait (or its card)
+  to **Give** it to a player at the table (its tokens follow), **Release** it
+  (players look it over, then Take it) or **Keep** it as yours. Players take
+  only released characters. A character, and a player's settings and layout,
+  stay with the player's account.
 - Experience and levelling follow the game's rules.
 
 ## Sound
@@ -521,7 +530,9 @@ flare's switch in **Dice** turns both off).
 ## The AI assistant
 
 Every GM action is also a tool an AI agent can use, through MCP or the
-assistant window. See [AGENT.md](../AGENT.md).
+assistant window. The assistant works with a cloud provider's key, or with a
+local model (Ollama, LM Studio) at an address on your computer or network,
+with no key. See [AGENT.md](../AGENT.md).
 
 ## Your Kraken VTT folder
 

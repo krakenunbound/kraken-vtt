@@ -19,6 +19,8 @@ seat.
 
 ## Your character
 
+- **Characters** shows your characters and those the GM has released: click
+  a released one to look it over, and press **Take** to make it yours.
 - In **Characters**, press the **New character** button (a figure with a plus) to open the game's character wizard. It walks you
   through each step: for Descending Darkness, kin, class, background and
   abilities; for Apeira Astra, Origin, Paths and skills.
@@ -26,6 +28,10 @@ seat.
   on it to roll it.
 - Drag items, spells and other links from the books the GM shares onto your
   sheet.
+- Your portrait: click it on your sheet and choose **From my computer…** for a
+  picture or a WebM video of your own.
+- Your characters, settings and window layout stay with your account, from
+  the app or any browser.
 
 ## Rolling
 
@@ -71,5 +77,6 @@ to move it.
 ## Chat
 
 Type to talk. `/` lists the commands, and `/help` shows all of them. Some
-commands: `/r` rolls dice, `/w <name>` whispers to someone, `/ooc` speaks out
-of character.
+commands: `/r` rolls dice, `/w <name>` whispers to someone (or right-click
+their portrait along the top and choose Whisper), `/ooc` speaks out of
+character.

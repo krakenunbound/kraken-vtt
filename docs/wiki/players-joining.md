@@ -19,6 +19,8 @@ If you lose your connection, Maelstrom shows *Reconnecting…* and puts you back
 - Press **New character** (a figure with a plus) to open the game's character wizard. It walks you through each step: for Descending Darkness, kin, class, background and abilities; for Apeira Astra, Origin, Paths and skills. Rolls in the wizard are made by the host, in chat for the table.
 - Click a card to open its **sheet**. Click a skill, save or attack on it to roll it.
 - Drag items, spells and other links from the books the GM shares onto your sheet.
+- Your **portrait**: click it on your sheet, then **From my computer…** for a picture or a WebM video of your own.
+- Trade through the **party sheet**: drag an item onto its stash, and another player takes it.
 
 More in [Character sheets and wizards](character-sheets-and-wizards.md).
 
