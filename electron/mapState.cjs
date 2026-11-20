@@ -241,7 +241,7 @@ function cleanLabel(raw) {
     y: Math.round(y * 10) / 10,
     text: words,
     font: FONTS.includes(raw.font) ? raw.font : "Bebas Neue",
-    size: Math.min(20, Math.max(0.2, num(raw.size, 1))),
+    size: Math.min(20, Math.max(0.05, num(raw.size, 1))),
     color: color(raw.color, "#ffffff"),
     rotation: ((num(raw.rotation, 0) % 360) + 360) % 360,
     anchor: ANCHORS.includes(raw.anchor) ? raw.anchor : "center",

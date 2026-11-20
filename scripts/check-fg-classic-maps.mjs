@@ -18,7 +18,7 @@ const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), "kraken-classic-maps-"));
 const shortcut = (x, y, kind, record) => `<shortcut><x>${x}</x><y>${y}</y><class>${kind}</class><recordname>${record}</recordname></shortcut>`;
 const db = `<root>
-  <encounter><id-00001><name type="string">1. Gate</name></id-00001><id-00002><name type="string">2. Hall</name></id-00002></encounter>
+  <encounter><id-00001><name type="string">000.001.01 1. Gate</name></id-00001><id-00002><name type="string">2. Hall</name></id-00002></encounter>
   <battle><id-00001><name type="string">Goblin ambush</name></id-00001></battle>
   <image>
     <id-00001><name type="string">Keep (DM)</name><image type="image"><bitmap>keep.png</bitmap><gridsize>50,50</gridsize><shortcuts>${shortcut(10, 20, "encounter", "encounter.id-00001")}${shortcut(30, 40, "encounter", "encounter.id-00002")}${shortcut(50, 60, "battle", "battle.id-00001")}</shortcuts></image></id-00001>
@@ -31,7 +31,7 @@ const extras = Object.values(bundle.extras);
 const pins = extras.flatMap((extra) => extra.pins.filter((pin) => pin.link));
 assert(pins.length === 3, `every pin of an older module's map: ${pins.length}`);
 assert(pins.map((pin) => `${pin.x},${pin.y}`).join(" ") === "10,20 30,40 50,60", `at picture pixels from the top left: ${pins.map((pin) => `${pin.x},${pin.y}`)}`);
-assert(pins.map((pin) => pin.text).join("|") === "1. Gate|2. Hall|Goblin ambush", `named by the entry each opens: ${pins.map((pin) => pin.text)}`);
+assert(pins.map((pin) => pin.text).join("|") === "1. Gate|2. Hall|Goblin ambush" && pins.every((pin) => pin.size >= 0.08 && pin.size <= 0.4), `named by the entry each opens: ${pins.map((pin) => pin.text)}`);
 assert(pins[2].group === "Encounters" && pins[0].group === "Map keys" && pins[0].link.id === "encounter.id-00001@Classic", `a battle is an encounter, a story entry a map key, each linked: ${JSON.stringify(pins)}`);
 const rain = extras.flatMap((extra) => extra.fx).find((fx) => fx.name === "Rain");
 assert(rain?.mask.polygons.length === 2, `every shape of a weather mask: ${JSON.stringify(rain?.mask)}`);

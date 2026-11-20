@@ -503,7 +503,7 @@ function TextTab(props: Props) {
           </label>
           <label>
             Size (squares)
-            <input type="number" min={0.2} max={20} step={0.1} value={shown.size} onChange={(event) => change({ size: Number(event.target.value) || 1 })} aria-label="Text size" />
+            <input type="number" min={0.05} max={20} step={0.1} value={shown.size} onChange={(event) => change({ size: Number(event.target.value) || 1 })} aria-label="Text size" />
           </label>
           <label>
             Outline width

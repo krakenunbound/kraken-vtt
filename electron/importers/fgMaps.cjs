@@ -82,6 +82,10 @@ function fgFont(file) {
 
 const FX_MAP = { rain: "rain", snow: "snow", blizzard: "blizzard", myst: "fog", clouds: "clouds", water: "water", ocean: "water" };
 
+// A pin's words: the entry's name without FG's sort code ("000.002.31 21. Cave of the Bats" -> "21. Cave of the
+// Bats"; the room's own number stays).
+const pinText = (name) => String(name ?? "").replace(/^\d+(\.\d+)+\s+/, "").slice(0, 200);
+
 // One FG image record as a scene for the bundle, and Kraken's extras for it.
 // names: the module's records' names by path ("encounter.id-00007"), for an older module's pins (they carry no name).
 function imageScene(record, moduleName, sceneId, label = moduleName, names = new Map()) {
@@ -154,7 +158,7 @@ function imageScene(record, moduleName, sceneId, label = moduleName, names = new
     pins.push({
       x: Math.round(point.x),
       y: Math.round(point.y),
-      text: String(layer.name ?? "").replace(/^Encounter:\s*/, "").slice(0, 200),
+      text: pinText(String(layer.name ?? "").replace(/^Encounter:\s*/, "")),
       icon: encounter ? "trap" : "pin",
       size: 0.4,
       group: encounter ? "Encounters" : "Map keys",
@@ -174,9 +178,10 @@ function imageScene(record, moduleName, sceneId, label = moduleName, names = new
       pins.push({
         x: Math.round(x),
         y: Math.round(y),
-        text: String(names.get(target) ?? "").slice(0, 200),
+        text: pinText(names.get(target) ?? ""),
         icon: encounter ? "trap" : "pin",
-        size: 0.4,
+        // Sized to the picture (an older module's map rarely has a grid): a small DM map gets small labels.
+        size: Math.round(Math.min(0.4, Math.max(0.08, size.width / (90 * (gridW > 0 ? gridW : 100)))) * 100) / 100,
         group: encounter ? "Encounters" : "Map keys",
         link: { kind: "fg", id: `${target}@${label}`, class: kind },
       });
