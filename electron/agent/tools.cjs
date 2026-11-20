@@ -2149,12 +2149,13 @@ const TOOLS = [
       const map = agent.tableMap ?? agent.map;
       const action = args.action ?? "list";
       if (action === "place") {
+        // Whose targets, found before anything is placed (a refusal leaves no template behind).
+        const entries = combat.entries();
+        const source = args.target ? entries.find((entry) => entry.id === (args.id ?? combat.active())) : null;
+        if (args.target && !source) throw new Error("Whose targets? Give id (a tracker entry) or start combat.");
         const template = map.placeTemplate({ ...(args.template ?? {}), turn: false }, seat);
         let inside = [];
-        if (args.target) {
-          const entries = combat.entries();
-          const source = entries.find((entry) => entry.id === (args.id ?? combat.active()));
-          if (!source) throw new Error("Whose targets? Give id (a tracker entry) or start combat.");
+        if (args.target && source) {
           inside = map.tokensInTemplate(template).map((token) => entries.find((entry) => entry.tokenId === token.id) ?? entries.find((entry) => token.recordId && entry.recordId === token.recordId)).filter((entry) => entry && entry.id !== source.id && combat.health(entry).status !== "Dead");
           combat.targetIds(source.id, inside.map((entry) => entry.id), seat);
         }
