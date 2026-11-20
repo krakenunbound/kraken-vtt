@@ -1945,8 +1945,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     if (all.length === 0) await rollOne(null, plan.swing);
     const missed = [];
     for (const target of all) {
-      const hits = hitOn ? [].concat(hitOn[target.id] ?? "miss") : [plan.swing];
-      const landed = hits.filter((hit) => hit !== "miss" && hit.damage);
+      // A dropped attack roll marks a plain "hit": the weapon's own swing.
+      const hits = (hitOn ? [].concat(hitOn[target.id] ?? "miss") : [plan.swing]).map((hit) => (hit === "hit" || hit === "crit" ? plan.swing : hit));
+      const landed = hits.filter((hit) => hit && hit !== "miss" && hit.damage);
       if (landed.length === 0) {
         missed.push(target.name);
         table().say(`[DAMAGE]${kind} ${plan.name} -> ${target.name}: the attack missed`, "Combat", Boolean(target.hidden));
