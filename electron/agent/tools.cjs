@@ -1381,7 +1381,7 @@ const TOOLS = [
   {
     name: "kraken_party_edit",
     description:
-      "Change the party sheet. members: the character ids in party order (or allPlayers: every character a player owns; or fromHere: as the sheet's Party from who's here button, every character of a player at the table now joins and one whose player is not here leaves, characters no player owns staying). parcel coins: { GP: 30, SP: 12 } (amounts to hand out). parcelItem: add an item to the parcel {name, count, assign: \"Name, Name\", itemId: an item record to copy}. quest / encounter: add {name, xp}. marching: character ids front to back. name: the party's name (its token's on the map). token: the party token's art id (kraken_art lists them; the Party folder has banners, flags and groups), \"\" for none; the GM drags it from the party sheet onto a big map (or kraken_token_place record \"party\"), one a map.",
+      "Change the party sheet. members: the character ids in party order (or allPlayers: every character a player owns; or fromHere: as the sheet's Party from who's here button, every character of a player at the table now joins, and the GM's own (characters no player holds), and one whose player is not here leaves). parcel coins: { GP: 30, SP: 12 } (amounts to hand out). parcelItem: add an item to the parcel {name, count, assign: \"Name, Name\", itemId: an item record to copy}. quest / encounter: add {name, xp}. marching: character ids front to back. name: the party's name (its token's on the map). token: the party token's art id (kraken_art lists them; the Party folder has banners, flags and groups), \"\" for none; the GM drags it from the party sheet onto a big map (or kraken_token_place record \"party\"), one a map.",
     inputSchema: object({
       members: { type: "array", items: { type: "string" } },
       allPlayers: { type: "boolean" },
@@ -1413,7 +1413,8 @@ const TOOLS = [
           const owner = agent.records.get(id)?.owner;
           return agent.records.get(id) && (!owner || here.has(owner));
         });
-        const joining = agent.records.list({ type: "character" }).filter((item) => item.owner && here.has(item.owner) && !kept.includes(item.id));
+        // The GM's own characters (no player holds them) join too: a GM may run one in the party.
+        const joining = agent.records.list({ type: "character" }).filter((item) => (!item.owner || here.has(item.owner)) && !kept.includes(item.id));
         patch.members = [...kept, ...joining.map((item) => item.id)];
       }
       if (args.members) patch.members = args.members.filter((id) => agent.records.get(id)?.type === "character");

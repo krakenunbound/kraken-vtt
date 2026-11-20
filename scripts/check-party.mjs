@@ -78,9 +78,12 @@ try {
   const player = await join("Ann");
   sockets.push(player.ws);
 
-  // Party from who's here: Ann alone is at the table, so Aldric (hers) is the party; Borin and Cyra (their players away) are not.
+  // Party from who's here: Ann alone is at the table, so Aldric (hers) is the party, with the GM's own Ulfgar (no
+  // player holds him); Borin and Cyra (their players away) are not.
+  const gmOwn = character("Ulfgar", "", 12);
   const here = await tool("kraken_party_edit", { fromHere: true });
-  assert(here.members.map((m) => m.name).join() === "Aldric", `who's here: ${here.members.map((m) => m.name)}`);
+  assert(here.members.map((m) => m.name).sort().join() === "Aldric,Ulfgar", `who's here, and the GM's own: ${here.members.map((m) => m.name)}`);
+  agent.records.remove(gmOwn.id, agent.seat);
   const view = await tool("kraken_party_edit", { allPlayers: true });
   assert(view.members.map((m) => m.name).join() === "Aldric,Borin,Cyra", `members ${view.members.map((m) => m.name)}`);
 

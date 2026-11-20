@@ -281,19 +281,20 @@ export function PartySheet({ session, compact = false }: { session: Session; com
           </ul>
           {gm ? (
             <div className="party-controls">
-              {/* Who is here tonight: every character of a player at the table joins; one whose player is not here leaves.
-                  Characters no player owns (the GM's, or not yet taken) stay as they are. */}
+              {/* Who is here tonight: every character of a player at the table joins, and the GM's own (no player holds
+                  them); one whose player is not here leaves. */}
               <button
                 type="button"
                 data-action="party-from-here"
-                title="Add every character of the players at the table now, and take out those whose player is not here (characters no player owns stay)"
+                title="Add every character of the players at the table now and your own (the GM's: characters no player holds), and take out those whose player is not here"
                 onClick={() => {
                   const here = new Set(session.players.filter((seat) => seat.role === "player" && !seat.lost).map((seat) => seat.name));
                   const keep = party.members.filter((member) => {
                     const owner = session.records[member.id]?.owner;
                     return !owner || here.has(owner);
                   });
-                  const joining = characters.filter((record) => record.owner && here.has(record.owner) && !keep.some((member) => member.id === record.id));
+                  // The GM's own characters (no player holds them) join too: a GM may run one in the party.
+                  const joining = characters.filter((record) => (!record.owner || here.has(record.owner)) && !keep.some((member) => member.id === record.id));
                   patch({ members: [...keep.map((member) => member.id), ...joining.map((record) => record.id)] });
                 }}
               >
