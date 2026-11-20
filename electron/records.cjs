@@ -217,6 +217,7 @@ function asRecord(value) {
   }
 }
 
+const RESERVED_NAMES = new Set(["gm", "dm", "agent", "combat", "map", "table", "maelstrom", "calendar"]);
 function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
   const records = new Map();
   const listeners = new Set();
@@ -240,6 +241,13 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
     return record;
   }
 
+  // Whispers go to a character by name: a player's character never takes another character's name,
+  // nor one the table uses for itself (the GM's /gm whispers go to "GM").
+  function playerNameFree(name, ownId) {
+    const wanted = String(name ?? "").trim().toLowerCase();
+    if (RESERVED_NAMES.has(wanted)) throw new Error(`"${name}" is a name the table keeps for itself.`);
+    for (const record of records.values()) if (record.id !== ownId && record.type === "character" && record.name.toLowerCase() === wanted) throw new Error(`${record.name} is another character's name.`);
+  }
   return {
     hiddenNames() {
       namesCache = namesCache ?? collectHiddenNames(records.values());
@@ -272,6 +280,7 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
 
     create(input, seat) {
       if (!seat) throw new Error("Not allowed.");
+      if (seat.role !== "dm" && cleanType(input?.type) === "character") playerNameFree(clean(input?.name, 120), "");
       if (records.size >= MAX_RECORDS) throw new Error("This campaign has too many records.");
       const owner = seat.role === "dm" ? clean(input?.owner, 24) : seat.name;
       if (seat.role !== "dm") {
@@ -306,10 +315,7 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
       const next = { ...before };
       if (patch?.name !== undefined) next.name = clean(patch.name, 120);
       // Whispers go to a character by name: a player's character never takes another's.
-      if (seat.role !== "dm" && before.type === "character" && next.name !== before.name) {
-        const taken = next.name.toLowerCase();
-        for (const record of records.values()) if (record.id !== before.id && record.type === "character" && record.name.toLowerCase() === taken) throw new Error(`${record.name} is another character's name.`);
-      }
+      if (seat.role !== "dm" && before.type === "character" && next.name !== before.name) playerNameFree(next.name, before.id);
       if (seat.role !== "dm" && patch?.data !== undefined && JSON.stringify(patch.data).length > MAX_PLAYER_DATA) throw new Error("That is too big to keep.");
       if (seat.role === "dm") {
         if (patch?.owner !== undefined) next.owner = clean(patch.owner, 24);
@@ -356,4 +362,4 @@ function createRecordStore({ saved = [], onChange = () => undefined } = {}) {
   };
 }
 
-module.exports = { createRecordStore, canSee, canEdit, merge, viewFor, hideNames, itemName, cleanVisibility, unidentified };
+module.exports = { RESERVED_NAMES, createRecordStore, canSee, canEdit, merge, viewFor, hideNames, itemName, cleanVisibility, unidentified };

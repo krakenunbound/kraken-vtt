@@ -8,12 +8,24 @@ export function Field({ value, onSave, number = false, editable, label, wide = f
   const shown = value === undefined || value === null ? "" : String(value);
   const [text, setText] = useState(shown);
   const [typing, setTyping] = useState(false);
+  // Changed by the user since it took the cursor: only then is it saved (a field merely holding the cursor
+  // never writes its old number back over damage the GM applied meanwhile).
+  const [edited, setEdited] = useState(false);
   useEffect(() => {
-    if (!typing) setText(shown);
-  }, [shown, typing]);
+    if (!typing || !edited) setText(shown);
+  }, [shown, typing, edited]);
   const commit = () => {
     setTyping(false);
-    if (text !== shown) onSave(text);
+    setEdited(false);
+    if (!edited || text === shown) return setText(shown);
+    if (number) {
+      // "1,200" is 1200; anything that is not a number ("12gp") puts the old value back rather than saving 0.
+      const plain = /^\s*-?\d{1,3}(,\d{3})+(\.\d+)?\s*$/.test(text) ? text.replace(/,/g, "") : text.trim();
+      if (plain !== "" && !Number.isFinite(Number(plain))) return setText(shown);
+      if (plain !== shown) onSave(plain);
+      return;
+    }
+    onSave(text);
   };
   const common = {
     className: `cc-field${number ? " number" : ""}${wide ? " wide" : ""} ${className}`,
@@ -22,7 +34,10 @@ export function Field({ value, onSave, number = false, editable, label, wide = f
     "aria-label": label,
     title: label,
     onFocus: () => setTyping(true),
-    onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setText(event.target.value),
+    onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setEdited(true);
+      setText(event.target.value);
+    },
     onBlur: commit,
   };
   // An empty text box says what it is for (the sheet's notes, a bond, a spellbook).

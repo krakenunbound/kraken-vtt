@@ -154,6 +154,18 @@ try {
   assert(fetched.body.equals(image), "image bytes match");
   const missing = await get(`http://127.0.0.1:${info.port}/table/image?token=nope`);
   assert(missing.status === 404, "bad image token is 404");
+  // Audit 076: a map the GM holds back is not served to a player's image link.
+  server.agent.shareMap(false);
+  assert((await get(imageUrl)).status === 404, "an unshared map's picture is not served to a player");
+  server.agent.shareMap(true);
+  // Audit 062: a player's character never takes a name the table keeps ("GM"), nor another character's.
+  let refusedName = false;
+  try {
+    server.agent.records.create({ type: "character", name: "GM", data: {} }, { role: "player", name: "Player" });
+  } catch {
+    refusedName = true;
+  }
+  assert(refusedName, "a player's character cannot be named GM");
 
   // Tokens: a player cannot move the GM's creature, can place and move their own character.
   const orc = server.snapshot().tokens.find((item) => item.name === "Orc");

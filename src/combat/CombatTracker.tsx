@@ -488,17 +488,17 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
           <div className="ct-adjust">
             <label>
               Bonus
-              <input type="number" value={entry.init ?? 0} onChange={(event) => session.ct("update", { id: entry.id, patch: { init: Number(event.target.value) || 0 } })} style={{ width: "3.6rem" }} />
+              <NumberBox value={entry.init ?? 0} onSet={(init) => session.ct("update", { id: entry.id, patch: { init } })} width="3.6rem" />
             </label>
             {entry.recordId && session.records[entry.recordId]?.type === "character" ? null : (
               <>
                 <label>
                   HP
-                  <input type="number" value={entry.hp ?? 0} onChange={(event) => session.ct("update", { id: entry.id, patch: { hp: Number(event.target.value) || 0 } })} style={{ width: "4rem" }} />
+                  <NumberBox value={entry.hp ?? 0} onSet={(hp) => session.ct("update", { id: entry.id, patch: { hp } })} width="4rem" />
                 </label>
                 <label>
                   AC
-                  <input type="number" value={entry.ac ?? 10} onChange={(event) => session.ct("update", { id: entry.id, patch: { ac: Number(event.target.value) || 0 } })} style={{ width: "3.6rem" }} />
+                  <NumberBox value={entry.ac ?? 10} onSet={(ac) => session.ct("update", { id: entry.id, patch: { ac } })} width="3.6rem" />
                 </label>
               </>
             )}
@@ -522,6 +522,22 @@ function Row({ entry, session, active }: { entry: CombatEntry; session: Session;
 // FG's combat tracker: the round, everyone in initiative order with the
 // active one marked, and the GM's controls along the bottom.
 // FG's round counter: typed in (Enter or leaving the box), forwards or back.
+// A number typed into the tracker: sent when it is left or on Enter, never a keystroke at a time (clearing
+// HP to retype it would otherwise read as Dead and leave a death marker). Not a number: the old one back.
+function NumberBox({ value, onSet, width }: { value: number; onSet: (value: number) => void; width: string }) {
+  const [draft, setDraft] = useState(String(value));
+  const [was, setWas] = useState(value);
+  if (was !== value) {
+    setWas(value);
+    setDraft(String(value));
+  }
+  const commit = () => {
+    const next = Number(draft);
+    if (draft.trim() !== "" && Number.isFinite(next) && next !== value) onSet(next);
+    else setDraft(String(value));
+  };
+  return <input type="number" value={draft} onChange={(event) => setDraft(event.target.value)} onBlur={commit} onKeyDown={(event) => event.key === "Enter" && !event.nativeEvent.isComposing && commit()} style={{ width }} />;
+}
 function RoundBox({ round, onSet }: { round: number; onSet: (round: number) => void }) {
   const [draft, setDraft] = useState(String(round));
   const [was, setWas] = useState(round);

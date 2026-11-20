@@ -1206,7 +1206,10 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     const mine = shown.filter((token) => token.owner === seat.name || (seat.everyone && token.owner && !token.owner.startsWith("@")));
     // The tokens that see for their player: a token with no sight shows them nothing (all of them blind: nothing but themselves).
     const seers = mine.filter((token) => !token.noSight);
-    const vision = sightOn() && mine.length > 0 ? seers.map(polygonFor) : null;
+    // A seat with a token here (one the GM hid included) or whose character has been on this map (its token
+    // since removed) sees by sight, which may be nothing; only a seat that never had a token here sees the whole map.
+    const ownsAny = all.some((token) => token.owner === seat.name) || (!seat.everyone && records.list?.({ type: "character" })?.some((record) => record.owner === seat.name && enteredHere().includes(record.id)));
+    const vision = sightOn() && (mine.length > 0 || ownsAny) ? seers.map(polygonFor) : null;
     const slack = geometry.gridSize(scene) * 0.05;
     // A hidden token's light neither reaches a player nor lights anything for them.
     const shining = sources.filter((light) => !light.hidden);

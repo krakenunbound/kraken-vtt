@@ -5,7 +5,7 @@ const crypto = require("crypto");
 const os = require("os");
 const { settingCalendar } = require("../shared/calendars.mjs");
 const { WebSocketServer } = require("ws");
-const { createRecordStore, canSee, viewFor, hideNames } = require("./records.cjs");
+const { createRecordStore, canSee, viewFor, hideNames, RESERVED_NAMES } = require("./records.cjs");
 // The players' view of the party sheet and the records (records.cjs viewFor).
 const PLAYER_VIEW = { role: "player", name: "" };
 const { withArt } = require("./characterArt.cjs");
@@ -822,7 +822,8 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       const record = entry.recordId ? records.get(entry.recordId) : null;
       if (!settings?.on || record?.type === "character" || entry.faction === "friend") continue;
       const token = map.tokens().find((item) => item.id === entry.tokenId) ?? (entry.recordId ? map.tokens().find((item) => item.recordId === entry.recordId) : null);
-      if (!token || !map.scene()) continue;
+      // A creature the players never saw leaves nothing for them to find (nor its name).
+      if (!token || !map.scene() || token.hidden || entry.hidden) continue;
       const marker = markerFor(settings, record, entry.name);
       if (!marker) continue;
       try {
@@ -1168,7 +1169,8 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       return (
         client.role === "dm" ||
         client.id === line.id ||
-        line.to.some((name) => sameName(name, client.name) || records.list({ type: "character", owner: client.name }).some((record) => sameName(name, record.name)))
+        // To a seat by its name (a player, the GM's "GM"): that seat; otherwise to whoever holds the character of that name.
+        line.to.some((name) => sameName(name, client.name) || (!RESERVED_NAMES.has(String(name).toLowerCase()) && ![...clients.values()].some((seat) => sameName(seat.name, name)) && records.list({ type: "character", owner: client.name }).some((record) => sameName(name, record.name))))
       );
     return !line.secret || client.role === "dm" || (line.shownTo && line.shownTo === client.name);
   };
@@ -1544,7 +1546,9 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     }
     if (req.method === "GET" && url.pathname === "/table/image") {
       const token = url.searchParams.get("token") || "";
-      const allowed = token.length > 0 && [...clients.values()].some((client) => client.assetToken === token);
+      const asker = token.length > 0 ? [...clients.values()].find((client) => client.assetToken === token) : null;
+      // A player is never sent the picture of a map the GM has not shared.
+      const allowed = Boolean(asker) && (asker.role === "dm" || !scene || hiddenSceneId !== scene.id);
       if (!allowed || !image) {
         res.writeHead(404, { "Access-Control-Allow-Origin": "*", "Cache-Control": "no-store" });
         res.end();
