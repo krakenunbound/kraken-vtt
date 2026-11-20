@@ -6,7 +6,11 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 ## Next
 
-Collected here until the next major release (alpha to beta).
+Collected here until the next major release.
+
+## 0.1.0-beta.1: The beta
+
+Maelstrom VTT leaves alpha. This release is a full audit of the table (93 problems found and fixed, from backups and saving to what players can see, combat rules and Map Studio), a library you can find your way around (Modules as icons, then covers by series), a Folders button that adds new material while players stay connected, and a documented book format (.kpack) that people and AI agents can convert books into.
 
 - **Modules, filed:** books and packs are now in seven kinds, each with its icon (Rulesets, Adventures, Settings, Maps & Tiles, Tokens & Art, Tables & Tools, Other), then their series or line (Core Rules, Handbooks, B series, Against the Slave Lords...), then the books, with an adventure pack's parts folded under it. Every pack with a picture shows one (a pack with no cover uses its picture most like a cover, made small). The same in Books.
 - **Folders (the GM's):** a new folder button along the top opens Maelstrom's folders (books and modules, sounds, this campaign's maps, dice, dice towers, GM icons, decals, wallpapers) with what each holds. Drop files on one to add them; **Refresh** reads everything again while the table keeps running, so new material arrives without a restart and no player is disconnected. The agent's `kraken_folders` does the same.
