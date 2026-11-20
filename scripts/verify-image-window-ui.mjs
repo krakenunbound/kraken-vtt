@@ -140,12 +140,13 @@ try {
   assert(!(await tool("kraken_map")).tokens.some((token) => token.owner === "@test"), "the test token goes when the test ends");
   report.push("play test: a test token and the player's view (no editor); ended, the GM's view again");
 
-  // Put in play: the test player's map is the image, with its walls.
-  await page.click('[data-action="image-play"]');
+  // Put in play from the map toolbar's Share (the image is put on the table, then shared): the test player's map is
+  // the image, with its walls.
+  await page.click('[data-action="map-share"]');
   await page.waitForSelector("[data-image-window]", { state: "detached" });
   await seat.waitForFunction((name) => document.body.textContent?.includes(name), YARD, { timeout: 20000 });
   assert((await walls()) === start + 1, "in play with its walls");
-  report.push("put in play: the test player's map is the image, with the same walls");
+  report.push("shared from the map toolbar: the image goes on the table and the test player's map is it, with the same walls");
 
   // kraken_image: open another, test, close.
   const second = (await tool("kraken_library", { action: "list", module: tower.name, kind: "image" })).find((item) => item.name !== YARD && item.map);

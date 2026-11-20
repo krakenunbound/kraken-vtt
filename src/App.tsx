@@ -129,7 +129,22 @@ export function App() {
   // Its actions are the session's own, always the latest.
   const sessionRef = useRef(session);
   sessionRef.current = session;
-  const mapActions = useMemo(() => new Proxy({} as typeof session, { get: (_target, key) => (sessionRef.current as unknown as Record<string | symbol, unknown>)[key] }), []);
+  const mapActions = useMemo(
+    () =>
+      new Proxy({} as typeof session, {
+        get: (_target, key) => {
+          // The map toolbar's Share: with an image open in the image window (only the GM sees it), that image
+          // is put on the table first, then shared; else the table's map is shared.
+          if (key === "shareMap")
+            return () => {
+              if (live.current.prepNow) void live.current.playImage().then(() => sessionRef.current.shareMap());
+              else sessionRef.current.shareMap();
+            };
+          return (sessionRef.current as unknown as Record<string | symbol, unknown>)[key];
+        },
+      }),
+    [],
+  );
   const recordList = useMemo(() => Object.values(session.records), [session.records]);
   const targeted = useMemo(() => targetedTokens(session), [session.combat, session.map.tokens, session.role]);
   const targeters = useMemo(() => targetersOf(session), [session.combat, session.map.tokens]);
