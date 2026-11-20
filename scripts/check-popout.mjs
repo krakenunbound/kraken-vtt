@@ -21,7 +21,8 @@ try {
   await page.waitForLoadState("domcontentloaded");
   const result = await page.evaluate(() => {
     const child = window.open("", "kraken-popout-test", "popup=yes,width=500,height=300,left=40,top=40");
-    const other = window.open("https://example.com", "elsewhere");
+    // (Not a web address: those go to the system's browser by design, which would open the GM's browser.)
+    const other = window.open("about:blank", "elsewhere");
     if (child) {
       child.document.body.innerHTML = "<p id=hello>drawn by the table</p>";
     }
