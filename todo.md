@@ -45,11 +45,8 @@ the core UI plan in [docs/core-ui-design.md](docs/core-ui-design.md).
 
 ## From 2026-11-20
 
-- [ ] **FG map grid size:** a few FG maps give a grid finer than the artist's
-      printed squares (N1's Orlane: FG's record says 25 px squares of 10 ft, the
-      printed squares are 50 px of 20 ft). Maelstrom now follows FG's record and
-      offset exactly. Decide: keep FG's grid, or offer the printed grid (a
-      one-click "match the art's squares").
+- [x] **FG map grid size:** decided (2026-11-20): follow FG's record (its grid size,
+      offset and scale), even where it is finer than the artist's printed squares.
 - [ ] More party token art (the Party folder has 14: banners, flags, fantasy,
       horror and sci-fi groups); a way for the GM to add their own there from
       Folders.
