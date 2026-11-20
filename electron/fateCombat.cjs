@@ -25,6 +25,8 @@ function cleanState(raw) {
   out.out = ["taken out", "conceded"].includes(raw.out) ? raw.out : "";
   out.pending = raw.pending && typeof raw.pending === "object" && Number(raw.pending.shifts) > 0 ? { shifts: Math.round(Number(raw.pending.shifts)), track: String(raw.pending.track ?? "physical").slice(0, 12), by: String(raw.pending.by ?? "").slice(0, 60) } : null;
   out.taken = Math.max(0, Math.round(Number(raw.taken) || 0));
+  // Hits that came while one waited: each absorbed on its own, in turn.
+  out.queue = (Array.isArray(raw.queue) ? raw.queue : []).filter((hit) => hit && Number(hit.shifts) > 0).slice(0, 20).map((hit) => ({ shifts: Math.round(Number(hit.shifts)), track: String(hit.track ?? "physical").slice(0, 12), by: String(hit.by ?? "").slice(0, 60) }));
   return out;
 }
 
@@ -140,14 +142,29 @@ function createFateCombat({ table, state, record, find, mustGM, targetsOf, chang
 
   // A hit of shifts on a creature: a player's character waits for its
   // player's choice; an NPC takes it the lightest way, or is taken out.
+  // The next hit that waited becomes the one to absorb (and is said).
+  function nextHit(entry) {
+    const next = (own(entry).queue ?? []).shift() ?? null;
+    own(entry).pending = next;
+    if (next) {
+      const options = rules.absorbOptions(next.shifts, rules.freeOf(sheetOf(entry), next.track));
+      table().say(`[HIT] ${entry.name} now absorbs the next hit, ${next.shifts} ${rules.TRACK_NAMES[next.track].toLowerCase()} shift${next.shifts === 1 ? "" : "s"}: ${options.length ? `${rules.planWords(options[0])}, or another way, or concede` : "nothing left to absorb it: taken out, unless they concede"}.`, "Combat", Boolean(entry.hidden));
+    }
+  }
   async function hit(entry, shifts, kind = "physical", by = "") {
     await ready;
     const sheet = sheetOf(entry);
     // The track it has: FAE's one (an NPC's too, in a FAE game), else physical or mental.
     const track = sheet.tracks.some((item) => item.key === "stress") ? "stress" : kind === "mental" ? "mental" : "physical";
     if (isPC(entry)) {
-      const pending = own(entry).pending;
-      own(entry).pending = { shifts: (pending?.track === track ? pending.shifts : 0) + shifts, track, by };
+      // A hit while another waits is its own hit (Fate absorbs each on its own), absorbed after it.
+      if (own(entry).pending) {
+        own(entry).queue = [...(own(entry).queue ?? []), { shifts, track, by }].slice(0, 20);
+        table().say(`[HIT] ${entry.name} takes another ${shifts} ${rules.TRACK_NAMES[track].toLowerCase()} shift${shifts === 1 ? "" : "s"}, to absorb after the one waiting.`, "Combat", Boolean(entry.hidden));
+        changed();
+        return { pending: own(entry).pending.shifts, queued: own(entry).queue.length };
+      }
+      own(entry).pending = { shifts, track, by };
       const options = rules.absorbOptions(own(entry).pending.shifts, rules.freeOf(sheet, track));
       table().say(`[HIT] ${entry.name} takes ${own(entry).pending.shifts} ${rules.TRACK_NAMES[track].toLowerCase()} shift${own(entry).pending.shifts === 1 ? "" : "s"}: ${options.length ? `absorb them (${rules.planWords(options[0])}, or another way) or concede` : "nothing left to absorb them: taken out, unless they concede"}.`, "Combat", Boolean(entry.hidden));
       changed();
@@ -194,6 +211,7 @@ function createFateCombat({ table, state, record, find, mustGM, targetsOf, chang
     const options = rules.absorbOptions(pending.shifts, rules.freeOf(sheet, pending.track));
     if (choice.out || !options.length) {
       own(entry).pending = null;
+      own(entry).queue = [];
       setOut(entry, "taken out");
       table().say(`[TAKEN OUT] ${entry.name} is taken out (${pending.shifts} shifts): ${pending.by || "the attacker"} says what happens to them.`, "Combat", Boolean(entry.hidden));
       changed();
@@ -206,7 +224,7 @@ function createFateCombat({ table, state, record, find, mustGM, targetsOf, chang
       plan = wanted;
     }
     applyToEntry(entry, plan, pending.track, choice.names ?? {});
-    own(entry).pending = null;
+    nextHit(entry);
     const named = plan.consequences.map((key) => `"${String(choice.names?.[key] ?? "").trim() || `${rules.CONSEQUENCE_NAMES[key]} consequence`}"`);
     table().say(`[STRESS] ${entry.name} absorbs ${pending.shifts}: ${rules.planWords(plan)}${named.length ? `, ${named.join(", ")}` : ""}.`, "Combat", Boolean(entry.hidden));
     changed();
@@ -229,6 +247,7 @@ function createFateCombat({ table, state, record, find, mustGM, targetsOf, chang
     if (seat.role !== "dm" && owner(entry) !== seat.name) throw new Error("Concede for your own character.");
     if (outOf(entry)) throw new Error(`${entry.name} is already ${health(entry).status.toLowerCase()}.`);
     own(entry).pending = null;
+    own(entry).queue = [];
     const gain = 1 + own(entry).taken;
     setOut(entry, "conceded");
     const linked = record(entry);
@@ -278,6 +297,7 @@ function createFateCombat({ table, state, record, find, mustGM, targetsOf, chang
       table().records.update(linked.id, { data: rules.derive(data) }, table().seat, { replace: true });
     } else own(entry).stress = {};
     own(entry).pending = null;
+    own(entry).queue = [];
     table().say(`${entry.name}'s stress clears.`, "Combat", Boolean(entry.hidden));
     changed();
   }

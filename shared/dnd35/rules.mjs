@@ -272,10 +272,10 @@ export function weaponAttack(data, item) {
   const enhancement = num(item.bonus, 0);
   const first = num(data.bab, 0) + ability + size + focus + enhancement;
   const bonuses = iteratives(num(data.bab, 0)).map((bab) => bab - num(data.bab, 0) + first);
-  // Strength to damage: x1.5 two-handed; a sling or bow its penalty only (a
-  // composite bow its bonus too, to its rating); a crossbow none; thrown, all.
+  // Strength to damage: a bonus x1.5 two-handed (a penalty as it is); a bow its penalty only (a composite
+  // bow its bonus too, to its rating); a crossbow none; a sling and thrown weapons all of it.
   const name = String(item.name ?? "");
-  const strDamage = kind.ranged && !kind.thrown ? (/crossbow/i.test(name) ? 0 : /composite/i.test(name) ? Math.min(str, num(item.strength, 0) || str) : Math.min(0, str)) : kind.twoHanded ? Math.floor(str * 1.5) : str;
+  const strDamage = kind.ranged && !kind.thrown && !/sling/i.test(name) ? (/crossbow/i.test(name) ? 0 : /composite/i.test(name) ? Math.min(str, num(item.strength, 0) || str) : Math.min(0, str)) : kind.twoHanded && str > 0 ? Math.floor(str * 1.5) : str;
   const plus = damage.bonus + strDamage + enhancement + (hasFeat(data, `Weapon Specialization (${item.name}`) ? 2 : 0);
   return {
     name: String(item.name ?? "Weapon"),

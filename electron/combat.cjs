@@ -2262,6 +2262,8 @@ function createCombat({ saved, table, onChange = () => undefined }) {
     if (health(entry).status === "Dead") return 0;
     const { wounds } = vitals(entry);
     const value = Math.min(Math.max(0, Math.round(amount)), wounds);
+    // Healed while dying (3.5E, 2E, C&C): it stops bleeding, as the tracker's Heal box makes it (5E has death saves).
+    if (value > 0 && !five() && health(entry).status === "Dying") entry.stabilized = true;
     if (value > 0) await applyWounds(entry, -value, why, {});
     return value;
   }
@@ -2533,7 +2535,9 @@ function createCombat({ saved, table, onChange = () => undefined }) {
         if (attackRow) {
           // Attacks on a frozen creature have advantage; a melee hit on one Paralyzed or Unconscious is a critical (FG).
           const advantage = frozen(target);
-          const rolled = table().act(`${advantage ? "2d20kh1" : "1d20"}${attackBonus >= 0 ? "+" : ""}${attackBonus}`, "attack");
+          // The caster's attack effects count, as on a weapon attack (Bless's d4, Bane's -d4).
+          const atk = attackBonus + (casterEntry ? effectBonus(casterEntry, "ATK", target) : 0);
+          const rolled = table().act(`${advantage ? "2d20kh1" : "1d20"}${atk >= 0 ? "+" : ""}${atk}${casterEntry ? effectDice(casterEntry, "ATK", target) : ""}`, "attack");
           const die = natural(rolled);
           const ac = vitals(target).ac + effectBonus(target, "AC");
           landed = die === 20 || (die !== 1 && rolled.total >= ac);

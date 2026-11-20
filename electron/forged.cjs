@@ -301,12 +301,17 @@ async function actionForged(table, record, action, args = {}, seat, from) {
         xp = rules.markXp(data, rules.ATTRIBUTE_OF[key], 1);
         say(`[XP] ${record.name}: a desperate roll, +1 ${rules.titled(rules.ATTRIBUTE_OF[key])} xp${xp.advanced ? ` (the track fills: an advance, a new ${rules.titled(rules.ATTRIBUTE_OF[key])} action dot)` : ""}.`);
       }
+      // The roller's costs are kept before the clock is ticked: a clock gone, hidden or locked is said, not lost with them.
+      save();
       let clock = null;
       if (args.clock && table.clocks) {
         const ticks = rules.ticksFor(read.result, effect);
-        if (ticks > 0) clock = table.clocks().tick(String(args.clock), ticks, seat, { why: `${record.name}'s ${rules.titled(key)}`, by: who });
+        try {
+          if (ticks > 0) clock = table.clocks().tick(String(args.clock), ticks, seat, { why: `${record.name}'s ${rules.titled(key)}`, by: who });
+        } catch (error) {
+          say(`${record.name}'s clock was not ticked: ${error instanceof Error ? error.message : error}`);
+        }
       }
-      save();
       return { result: read.result, highest: read.highest, rolls: read.rolls, dice, position, effect, stress: cost, assist: helper?.id ?? null, xp, clock, outcome: rules.OUTCOMES[position][read.result] };
     }
     case "resist": {
