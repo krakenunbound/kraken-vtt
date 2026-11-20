@@ -152,7 +152,8 @@ async function payInvokes(table, payer, invokes = [], { gm = false } = {}) {
   for (const item of list) {
     const name = clean(item?.aspect ?? item, 120);
     const scene = findAspect(table, item?.id ?? name);
-    if (item?.free && scene && scene.invokes > 0) free.push(scene);
+    // A free invoke counted against what the aspect has left (the same one listed twice uses two of them).
+    if (item?.free && scene && scene.invokes > free.filter((used) => used === scene).length) free.push(scene);
     else fatePoints += 1;
     words.push(name);
   }

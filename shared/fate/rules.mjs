@@ -258,7 +258,8 @@ export function applyPlan(data, plan, track, names = {}) {
   return plan;
 }
 // The free boxes and consequences on a character's data (derived).
-export const freeOf = (data, track) => ({ boxes: (data.tracks ?? []).find((item) => item.key === track)?.boxes ?? [], free: data.slots?.free ?? [] });
+// The extra mild from Physique takes only physical hits, the one from Will only mental ones.
+export const freeOf = (data, track) => ({ boxes: (data.tracks ?? []).find((item) => item.key === track)?.boxes ?? [], free: (data.slots?.free ?? []).filter((key) => !((key === "mild2" && track === "mental") || (key === "mild3" && track === "physical"))) });
 
 // Milestones (Fate Core's The Long Game, FAE's Getting Better): what each lets you do.
 export const MILESTONES = {
