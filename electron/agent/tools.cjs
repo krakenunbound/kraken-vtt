@@ -753,7 +753,7 @@ const TOOLS = [
       if (action === "activate" || action === "deactivate") return out(await table.activateBook(args.book, action === "activate"));
       if (action === "contents") return out(await table.bookContents(args.book));
       if (action === "page") return out(await table.bookPage(args.book, args.page));
-      if (action === "share" || action === "unshare") return out(table.shareBook(args.book, action === "share"));
+      if (action === "share" || action === "unshare") return out(await table.shareBook(args.book, action === "share"));
       if (action === "show") return out(table.showImage(args.book, args.file, args.name, args.to));
       if (action === "sound") return out(table.setBookSound({ ...args, action: args.soundAction, id: args.id }));
       if (action === "sounds") return out(table.bookSounds());

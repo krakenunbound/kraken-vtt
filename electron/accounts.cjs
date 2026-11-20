@@ -81,6 +81,8 @@ function createAccountStore(file) {
   };
 
   return {
+    // The roster could not be read: names cannot be told apart from ones with passwords (tableServer refuses players).
+    damaged: () => Boolean(damaged),
     // What the GM is shown: never a hash.
     list: () => [...accounts.values()].map(({ name, createdAt, seenAt, tokens }) => ({ name, createdAt, seenAt, devices: tokens.length })).sort((a, b) => a.name.localeCompare(b.name)),
     has: (name) => accounts.has(key(name)),

@@ -1341,24 +1341,25 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     const id = pendingBooks.shift();
     if (id === undefined) return;
     const info = books?.info(id);
-    if (info && fits(info)) {
+    if (info && fits(info) && shelf.active.has(id)) {
       const file = books?.file?.(info.id);
       if (file) await prepareModule(file);
-      loadRecords(info);
+      // Deactivated while it waited (or was prepared): its records are not brought back.
+      if (shelf.active.has(id)) loadRecords(info);
     }
     setTimeout(loadNextBook, 50);
   };
   if (pendingBooks.length > 0 && books) setTimeout(loadNextBook, 300);
   // The players may read it, or not (it is made active too). Never an
   // adventure: the players see its pictures and maps, as the GM shows them.
-  function shareBook(book, on = true) {
+  async function shareBook(book, on = true) {
     const info = bookFor(book);
     if (on && info.adventure) throw new Error(`${info.title} is an adventure, the GM's alone. Show the players its pictures and maps instead.`);
     if (on && !info.hasBook) throw new Error(`${info.title} has no book to read.`);
-    if (on) {
-      shelf.active.add(info.id);
-      shelf.shared.add(info.id);
-    } else shelf.shared.delete(info.id);
+    // Made active the whole way (its records, its world's calendar) before it is shared.
+    if (on && !shelf.active.has(info.id)) await activateBook(info.id, true);
+    if (on) shelf.shared.add(info.id);
+    else shelf.shared.delete(info.id);
     shelfChanged();
     return shelfView();
   }
@@ -2161,6 +2162,8 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
           };
           // (retry: a reconnecting player's old connection may not have been seen to drop yet.)
           if (!accounts?.has(client.name) && [...clients.values()].some((seat) => seat.role === "player" && sameName(seat.name, client.name))) return refuse(`Someone named ${client.name} is already at the table.`, { retry: true });
+          // A damaged accounts file: any name might be one with a password, so no player sits until the GM fixes it.
+          if (accounts?.damaged?.()) return refuse("The table cannot check players' accounts right now. Ask the GM to look at the Players window.");
           const account = msg.account && typeof msg.account === "object" ? msg.account : {};
           const accountPassword = typeof account.password === "string" ? account.password : "";
           const accountToken = typeof account.token === "string" ? account.token.slice(0, 100) : "";
@@ -2274,7 +2277,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
         }
         try {
           if (msg.type === "book-activate") activateBook(msg.book, msg.active !== false).catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." }));
-          else if (msg.type === "book-share") shareBook(msg.book, msg.shared !== false);
+          else if (msg.type === "book-share") shareBook(msg.book, msg.shared !== false).catch((error) => send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not do that." }));
           else if (msg.type === "image-share") showImage(msg.book, msg.file, msg.name, msg.to);
           else hideImage(msg.id);
         } catch (error) {
@@ -3020,7 +3023,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       if (msg.type === "save") {
         if (client.role !== "dm") return;
         // Only "saved" when it is on the disk (onChange returns false when the write failed).
-        if (onChange("save") === false) send(ws, { type: "error", reason: "The campaign could not be saved to the disk. Check the drive has space and nothing has the campaign's files open, then save again." });
+        if (onChange("save") === false) send(ws, { type: "error", reason: "The campaign could not be saved to the disk. Check the drive has space and nothing has the campaign's files open, then save again. Until then a copy of the unsaved campaign is kept in the recovery folder beside your campaigns." });
         else send(ws, { type: "notice", text: "Campaign saved." });
         return;
       }

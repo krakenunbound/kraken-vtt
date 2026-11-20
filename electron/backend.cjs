@@ -326,6 +326,16 @@ function flushCampaign() {
     return true;
   } catch (error) {
     console.error("could not save campaign", error);
+    // What could not be saved is kept whole in recovery/<campaign id>.json beside the campaigns (the newest
+    // failed save), so leaving or quitting loses nothing; it is put back by copying it over the campaign's state.json.
+    try {
+      const dir = path.join(path.dirname(campaignFile()), "recovery");
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, `${hosted.id}.json`), JSON.stringify(state));
+      console.error("the unsaved campaign was written to", path.join(dir, `${hosted.id}.json`));
+    } catch (again) {
+      console.error("could not write the recovery copy either", again);
+    }
     return false;
   }
 }
@@ -347,17 +357,8 @@ function markDirty(kind) {
 }
 function closeCampaign() {
   if (!hosted) return;
-  // Leaving or quitting: a failed save is not thrown away with the table, it goes to recovery/ beside the campaigns.
-  if (!flushCampaign()) {
-    try {
-      const dir = path.join(path.dirname(campaignFile()), "recovery");
-      fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(path.join(dir, `${hosted.id}-${Date.now()}.json`), JSON.stringify({ ...hosted.state, ...(table ? table.persisted() : {}) }));
-      console.error("the campaign could not be saved; its state was written to", dir);
-    } catch (error) {
-      console.error("could not write the recovery copy either", error);
-    }
-  }
+  // Leaving or quitting: a failed save leaves its recovery copy (flushCampaign).
+  flushCampaign();
   clearInterval(hosted.timer);
   clearInterval(hosted.backups);
   clearTimeout(hosted.soon);
@@ -689,7 +690,17 @@ async function manageCampaign(input) {
     return { deleted: removed.name, trashed: folders.length };
   }
   if (action === "backups") return { backups: campaigns.backups(file, { id }) };
-  if (action === "backup") return { backup: backupCampaign(id, "manual") };
+  // Asked for by the GM: no backup made is said, with why (the automatic ones stay quiet).
+  if (action === "backup") {
+    if (playing) {
+      hosted.dirty = true;
+      hosted.recordsDirty = true;
+      if (!flushCampaign()) throw new Error("No backup made: the campaign could not be saved to the disk first. Check the drive, then try again.");
+    }
+    const made = campaigns.backup(file, { id, reason: "manual" });
+    if (!made) throw new Error("No backup made: this campaign has nothing saved yet (host it once).");
+    return { backup: made };
+  }
   if (action === "restore") return campaigns.restore(file, { id, backup: input.backup });
   if (action === "folder") {
     const dir = campaigns.folder(file, id);
