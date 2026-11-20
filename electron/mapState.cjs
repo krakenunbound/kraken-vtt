@@ -2145,11 +2145,17 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     },
     // An FG module's map, before it is first shown: its pins, FX layers and
     // grid offset, kept only when the scene has none of its own yet.
-    seed(sceneId, { pins = [], fx = [], tiles = [], groups = [], gridOffset = null, frame = null } = {}) {
+    seed(sceneId, { pins = [], fx = [], tiles = [], groups = [], gridOffset = null, legacyGridOffset = null, frame = null } = {}) {
       const id = String(sceneId).slice(0, 80);
       // Which FG image the scene came from, and its size: to place an encounter's tokens where FG had them.
       if (frame) state.frames[id] = { image: String(frame.image).slice(0, 160), module: String(frame.module).slice(0, 160), width: num(frame.width, 0), height: num(frame.height, 0) };
-      if (!state.labels[id]) {
+      if (state.labels[id]) {
+        // Opened before: the FG pins it lacks join it (an older module's map kept only its last pin until 0.1.0-beta.1);
+        // the pins already there, and the GM's own, stay as they are.
+        const have = new Set(state.labels[id].map((label) => label.link?.id).filter(Boolean));
+        const missing = pins.filter((pin) => pin.link?.id && !have.has(pin.link.id)).map((pin) => cleanLabel({ ...pin, link: { kind: pin.link.kind, id: pin.link.id } })).filter(Boolean);
+        if (missing.length) state.labels[id] = [...state.labels[id], ...missing].slice(0, 2000);
+      } else {
         state.labels[id] = pins.map((pin) => cleanLabel({ ...pin, link: pin.link ? { kind: pin.link.kind, id: pin.link.id } : null })).filter(Boolean).slice(0, 2000);
         const names = [...new Set(state.labels[id].map((label) => label.group).filter(Boolean))];
         // Encounter pins are the GM's; map keys too, until the GM shares them. FG's own folders keep their settings.
@@ -2167,6 +2173,11 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         for (const name of new Set(state.tiles[id].map((tile) => tile.group).filter(Boolean))) if (!state.groups[id]?.some((group) => group.name === name)) (state.groups[id] = state.groups[id] ?? []).push(cleanGroup({ name }));
       }
       if (gridOffset && !state.settings[id]) state.settings[id] = cleanSettings({ grid: { offsetX: gridOffset.x, offsetY: gridOffset.y } });
+      else if (gridOffset && legacyGridOffset) {
+        // Opened before with the grid offset worked out from the picture's centre (wrong): put right, unless the GM moved it.
+        const grid = state.settings[id].grid ?? {};
+        if (grid.offsetX === legacyGridOffset.x && grid.offsetY === legacyGridOffset.y) state.settings[id] = cleanSettings({ ...state.settings[id], grid: { ...grid, offsetX: gridOffset.x, offsetY: gridOffset.y } });
+      }
       onChange();
     },
     // The FG image the open scene came from (fgMaps), or null.

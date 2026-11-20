@@ -99,6 +99,9 @@ function imageScene(record, moduleName, sceneId, label = moduleName, names = new
   if (!size) return null;
   const [gridW] = nums(image.gridsize).length ? nums(image.gridsize) : [50];
   const [offsetX = 0, offsetY = 0] = nums(image.gridoffset);
+  // What one square measures: FG's scale ("10ft", "5 ft", "1.5m"), else 5 ft.
+  const scaleMatch = /^\s*(\d+(?:\.\d+)?)\s*([a-z]*)/i.exec(String(record.data?.scale ?? ""));
+  const squareDistance = scaleMatch && Number(scaleMatch[1]) > 0 ? { value: Number(scaleMatch[1]), units: (scaleMatch[2] || "ft").toLowerCase() } : { value: 5, units: "ft" };
   const baseAt = layerOffset(base);
   // FG point -> scene pixel: from the picture's centre, y up.
   const at = (x, y, layer = base) => {
@@ -264,7 +267,7 @@ function imageScene(record, moduleName, sceneId, label = moduleName, names = new
       height: size.height,
       padding: 0,
       backgroundColor: "#000000",
-      grid: { size: gridW, type: image.grid === "on" ? (image.gridtype === "hexcolumn" ? 4 : image.gridtype === "hexrow" ? 2 : 1) : 0, distance: 5, units: "ft", color: "#000000", alpha: 0.2 },
+      grid: { size: gridW, type: image.grid === "on" ? (image.gridtype === "hexcolumn" ? 4 : image.gridtype === "hexrow" ? 2 : 1) : 0, distance: squareDistance.value, units: squareDistance.units, color: "#000000", alpha: 0.2 },
       background: { src: file },
       walls,
       lights,
@@ -272,7 +275,10 @@ function imageScene(record, moduleName, sceneId, label = moduleName, names = new
       notes: [],
     },
     // FG's grid offset, in scene pixels from the picture's corner.
-    gridOffset: { x: ((size.width / 2 + offsetX) % gridW + gridW) % gridW, y: ((size.height / 2 - offsetY) % gridW + gridW) % gridW },
+    // FG's grid offset is from the picture's top left, y down (measured on N1's and B3's maps: it lands on the artist's lines).
+    gridOffset: gridW > 0 ? { x: ((offsetX % gridW) + gridW) % gridW, y: ((offsetY % gridW) + gridW) % gridW } : { x: 0, y: 0 },
+    // The offset as Maelstrom worked it out before (from the centre): a map opened then is put right when opened again.
+    legacyGridOffset: gridW > 0 ? { x: Math.round((((size.width / 2 + offsetX) % gridW) + gridW) % gridW * 10) / 10, y: Math.round((((size.height / 2 - offsetY) % gridW) + gridW) % gridW * 10) / 10 } : null,
     file,
     bytes: picture.bytes,
     pins,
@@ -350,7 +356,7 @@ function fgModuleBundle(moduleName, { only, all = false, file = "", picture = ()
       files[made.file] = new Uint8Array(painted);
     } else files[made.file] = new Uint8Array(made.bytes);
     scenes.push(made.scene);
-    extras[id] = { pins: [...made.pins, ...made.texts], fx: made.fx, tiles: made.tiles, groups: made.groups, gridOffset: made.gridOffset, walls: made.scene.walls.length, lights: made.scene.lights.length, frame: { image: String(record.data.fgPath ?? "").replace(/@.*$/, ""), module: label, width: made.scene.width, height: made.scene.height } };
+    extras[id] = { pins: [...made.pins, ...made.texts], fx: made.fx, tiles: made.tiles, groups: made.groups, gridOffset: made.gridOffset, legacyGridOffset: made.legacyGridOffset, walls: made.scene.walls.length, lights: made.scene.lights.length, frame: { image: String(record.data.fgPath ?? "").replace(/@.*$/, ""), module: label, width: made.scene.width, height: made.scene.height } };
   }
   if (scenes.length === 0) throw new Error(`No maps in ${label}.`);
   files["bundle.json"] = strToU8(JSON.stringify({ adventureData: { name: label, scenes } }));
