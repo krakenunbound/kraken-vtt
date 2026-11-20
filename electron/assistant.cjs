@@ -44,9 +44,20 @@ const WITHHELD = new Set(["kraken_ui_eval", "kraken_accounts", "kraken_code"]);
 // Nor does it read or write the GM's files by a path: what players write (a
 // note, a backstory, chat) could ask it to. It works on the table's own records,
 // books and libraries; the GM imports and exports files themself.
+// The arguments that are a place on the GM's disk, tool by tool (elsewhere a path is a record's inside a
+// book, a file a picture's in a book: those are the table's own and allowed).
+const DISK_ARGS = {
+  kraken_campaigns: ["path"],
+  kraken_character_import: ["path"],
+  kraken_character_export: ["path"],
+  kraken_dice_packs: ["path"],
+  kraken_open_adventure: ["path"],
+  kraken_packs: ["path", "file", "folder"],
+  kraken_tile: ["file"],
+  kraken_map_studio: ["file", "folder"],
+};
 function touchesDisk(name, input) {
-  if (typeof input?.path === "string" && input.path.trim()) return true;
-  if (name === "kraken_tile" && typeof input?.file === "string" && input.file.trim()) return true;
+  for (const key of DISK_ARGS[name] ?? []) if (typeof input?.[key] === "string" && input[key].trim()) return true;
   if (typeof input?.module === "string" && /[\\/:]/.test(input.module)) return true;
   return false;
 }

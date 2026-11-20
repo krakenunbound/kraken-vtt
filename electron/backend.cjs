@@ -760,8 +760,18 @@ const calls = {
       // Internet play: the port opened on the router by itself (UPnP or NAT-PMP), when the GM asked.
       let upnp = null;
       if (options?.upnp && options?.cloud) {
-        const mapped = await Promise.race([openPort(info.port), new Promise((resolve) => setTimeout(() => resolve({ ok: false, error: "The router took too long to answer." }), 9000))]);
+        const opening = openPort(info.port);
+        const mapped = await Promise.race([opening, new Promise((resolve) => setTimeout(() => resolve({ ok: false, late: true, error: "The router took too long to answer." }), 9000))]);
         if (mapped.ok) portMapping = mapped;
+        // The router answered after all, too late: kept while this table is hosted, else closed at once.
+        else if (mapped.late)
+          opening
+            .then((done) => {
+              if (!done?.ok) return;
+              if (table === next && !portMapping) portMapping = done;
+              else done.remove?.().catch(() => undefined);
+            })
+            .catch(() => undefined);
         upnp = { ok: mapped.ok, method: mapped.method ?? "", external: mapped.external ?? "", error: mapped.error ?? "" };
       }
       const externalV4 = net.externalV4 || upnp?.external || "";

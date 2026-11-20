@@ -141,12 +141,24 @@ function viewFor(record, seat) {
   return data === record.data ? record : { ...record, data };
 }
 // Every string in a value with the real names of unidentified items put as the players know them.
+// The names as one pattern, longest first, each a whole word ("Goblin" never inside "Goblin Archer" or "Goblin 12").
+const namePatterns = new WeakMap();
+function namePattern(names) {
+  let found = namePatterns.get(names);
+  if (!found) {
+    const escaped = [...names.keys()].filter(Boolean).sort((a, b) => b.length - a.length).map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    found = escaped.length ? new RegExp(`(?<![\\p{L}\\p{N}_])(?:${escaped.join("|")})(?![\\p{L}\\p{N}_]| \\d| \\p{Lu})`, "gu") : null;
+    namePatterns.set(names, found);
+  }
+  return found;
+}
+// Fields that are ids, paths and sounds, never words a player reads: left alone.
+const NOT_WORDS = new Set(["id", "recordId", "tokenId", "entryId", "sceneId", "sound", "path", "file", "src", "image", "url", "icon", "portrait", "token", "art"]);
 function hideNames(value, names, depth = 0) {
   if (!names?.size || depth > 12) return value;
   if (typeof value === "string") {
-    let out = value;
-    for (const [real, shown] of names) if (out.includes(real)) out = out.split(real).join(shown);
-    return out;
+    const pattern = namePattern(names);
+    return pattern ? value.replace(pattern, (real) => names.get(real) ?? real) : value;
   }
   if (!value || typeof value !== "object") return value;
   if (Array.isArray(value)) {
@@ -155,6 +167,7 @@ function hideNames(value, names, depth = 0) {
   }
   let out = value;
   for (const [key, child] of Object.entries(value)) {
+    if (NOT_WORDS.has(key)) continue;
     const next = hideNames(child, names, depth + 1);
     if (next !== child) {
       if (out === value) out = { ...value };

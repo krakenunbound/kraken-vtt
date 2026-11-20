@@ -711,7 +711,19 @@ const TOOLS = [
     ),
     run: (args, ctx) =>
       args.link
-        ? out(needTable(ctx).sayLink(args.text, args.link, { from: args.as || "Agent", share: args.share === true }))
+        ? out(
+            needTable(ctx).sayLink(args.text, args.link, {
+              from: args.as || "Agent",
+              share: args.share === true,
+              // A whisper with a link stays a whisper (and its kind, mood and language stay too).
+              extra: {
+                ...(args.kind && args.kind !== "say" ? { kind: args.kind } : {}),
+                ...(args.kind === "mood" && args.mood ? { mood: String(args.mood).slice(0, 24) } : {}),
+                ...(Array.isArray(args.to) && args.to.length ? { to: args.to.map((name) => String(name).slice(0, 24)).slice(0, 12) } : {}),
+                ...(args.lang ? { lang: String(args.lang).slice(0, 40) } : {}),
+              },
+            }),
+          )
         : out(
         needTable(ctx).say(args.text, args.as || "Agent", false, {
           ...(args.kind && args.kind !== "say" ? { kind: args.kind } : {}),
@@ -1169,7 +1181,17 @@ const TOOLS = [
           if (!token) throw new Error(`No token ${id}.`);
           return { id, x: token.x + (args.dcol ?? 0) * step, y: token.y + (args.drow ?? 0) * step };
         });
-        const moved = map.moveMany(moves, seat, { collide: args.asPlayer ? map.sightOn() : false });
+        // As their players: each token moved as its owner would (traps, teleports, the movement lock), one at a time.
+        if (args.asPlayer) {
+          return out(
+            moves.map((move) => {
+              const token = map.tokens().find((item) => item.id === move.id);
+              const done = map.move(move.id, { x: move.x, y: move.y }, token?.owner ? { role: "player", name: token.owner } : seat, { collide: map.sightOn() });
+              return { id: done.token.id, ...map.squareOf(done.token), blocked: done.blocked, ...(done.requested ? { requested: true } : {}), ...(done.sprang ? { sprang: done.sprang.name } : {}) };
+            }),
+          );
+        }
+        const moved = map.moveMany(moves, seat, { collide: false });
         return out(moved.map((item) => ({ id: item.token.id, ...map.squareOf(item.token), blocked: item.blocked })));
       }
       if (args.id === undefined || args.col === undefined || args.row === undefined) throw new Error("Give id, col and row (or ids with dcol and drow).");

@@ -77,6 +77,14 @@ function createEffects(table) {
     throw new Error("Put it on whom? A token, a tracker entry or a character.");
   }
 
+  // What an effect is, for what a player may do with it (one rule for putting on, taking off and pausing):
+  // a light only when all it does is light; a condition only when all it does is conditions.
+  function kindOf(label) {
+    const rest = String(label ?? "").split(";").map((part) => part.trim()).filter(Boolean).slice(1);
+    if (effectsLib.lightOf(label) && rest.length > 0 && rest.every((part) => /^light\s*:/i.test(part))) return "light";
+    if (effectsLib.conditionsOf(label).length && rest.every((part) => effectsLib.conditionsOf(part).length > 0)) return "condition";
+    return effectsLib.toneOf(label) === "bad" ? "debuff" : "buff";
+  }
   function mayTouch(where, seat, kind) {
     if (seat.role === "dm") return;
     if (!where.owner || where.owner !== seat.name) throw new Error("You can put effects only on your own character.");
@@ -105,7 +113,7 @@ function createEffects(table) {
       } else {
         const label = text(effect?.label);
         if (!label) throw new Error("An effect needs words: a name, then its parts (Bless; ATK: 1d4).");
-        item = { id: "", kind: effectsLib.lightOf(label) ? "light" : effectsLib.conditionsOf(label).length ? "condition" : effectsLib.toneOf(label) === "bad" ? "debuff" : "buff", label, icon: text(effect?.icon), duration: Number(effect?.duration) || 0, burn: Number(effect?.burn) || null, gmOnly: Boolean(effect?.gmOnly) };
+        item = { id: "", kind: kindOf(label), label, icon: text(effect?.icon), duration: Number(effect?.duration) || 0, burn: Number(effect?.burn) || null, gmOnly: Boolean(effect?.gmOnly) };
       }
       mayTouch(where, seat, item.kind);
       // A light lit from the pack (bookkeeping): a torch, or a flask of oil for a lantern; a player with none is refused.
@@ -126,7 +134,7 @@ function createEffects(table) {
       const where = resolve(to);
       const effect = effectsAt(where).find((item) => item.id === String(effectId));
       if (!effect) throw new Error("That effect is gone.");
-      mayTouch(where, seat, effectsLib.lightOf(effect.label) ? "light" : "condition");
+      mayTouch(where, seat, kindOf(effect.label));
       if (where.kind === "entry") table.combat.takeOff(where.entry.id, effect.id);
       else mapOf().setTokenEffects(where.token.id, mapOf().tokenEffects(where.token.id).filter((item) => item.id !== effect.id));
       say(`Effect ['${effect.label}'] -> [REMOVED] from ${where.name}`, where, effect.gmOnly);
@@ -139,7 +147,7 @@ function createEffects(table) {
       if (!effect) throw new Error("That effect is gone.");
       const keys = Object.keys(patch ?? {});
       if (seat.role !== "dm" && keys.some((key) => key !== "paused")) throw new Error("Only the GM changes an effect's words or time.");
-      mayTouch(where, seat, effectsLib.lightOf(effect.label) ? "light" : "condition");
+      mayTouch(where, seat, kindOf(effect.label));
       const clean = {};
       if (patch.label !== undefined) clean.label = text(patch.label, effect.label);
       if (patch.duration !== undefined) clean.duration = Math.max(0, Math.round(Number(patch.duration) || 0));

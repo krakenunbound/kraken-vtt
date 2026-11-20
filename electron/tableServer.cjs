@@ -3683,12 +3683,12 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     postRoll: (result, label, from = "Agent", secret = false, extra = null) =>
       addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: "", roll: { ...result, label: text(edgeTagged(result, label), "").slice(0, 160), ...(extra ?? {}) }, at: Date.now(), ...(secret ? { secret: true } : {}) }),
     // A chat line with a link (a record, a page, a picture), or the GM's Share of a record's text.
-    sayLink: (line, link, { from = "Agent", share = false, secret = false } = {}) => {
+    sayLink: (line, link, { from = "Agent", share = false, secret = false, extra = {} } = {}) => {
       const clean = cleanSlot(link);
       if (!clean) throw new Error("Give a link: { kind: record|sheet|note|book|picture|sound|dice|macro, ... }.");
       const shared = share ? sharedText(clean) : null;
       if (share && !shared) throw new Error("Only a record (an item, an NPC, a note...) can be shared.");
-      return addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500) || clean.label, at: Date.now(), link: clean, ...(shared ? { share: shared } : {}), ...(secret ? { secret: true } : {}) });
+      return addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500) || clean.label, at: Date.now(), link: clean, ...(shared ? { share: shared } : {}), ...(secret ? { secret: true } : {}), ...extra, ...(extra.lang ? { understood: understoodBy(extra.lang) } : {}) });
     },
     say: (line, from = "Agent", secret = false, extra = {}) =>
       addChat({ id: "agent", from: text(from, "Agent").slice(0, 24), text: text(line, "").slice(0, 500), at: Date.now(), ...(secret ? { secret: true } : {}), ...extra, ...(extra.lang ? { understood: understoodBy(extra.lang) } : {}) }),

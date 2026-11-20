@@ -123,10 +123,12 @@ export function tokenSquares(space, unitsPerSquare = 5) {
 // multiplier for a diagonal step (HRDD): 1 counts every square as one,
 // 1.5 is the 5-10-5 variant, "raw" is a straight-line measure.
 /** @param {any} scene @param {any} a @param {any} b @param {number | string} [diagonal] @param {any} [rest] */
-export function gridDistance(scene, a, b, diagonal = 1) {
+export function gridDistance(scene, a, b, diagonalIn = 1) {
   const size = gridSize(scene);
   const per = Number(scene?.grid?.distance) > 0 ? Number(scene.grid.distance) : 5;
   const kind = gridKind(scene);
+  // A gridless map measures a straight line.
+  const diagonal = kind === "none" ? "raw" : diagonalIn;
   if ((kind === "hexrow" || kind === "hexcol") && diagonal !== "raw") {
     const from = hexOf(scene, a.x, a.y);
     const to = hexOf(scene, b.x, b.y);
