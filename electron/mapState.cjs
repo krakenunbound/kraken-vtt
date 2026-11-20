@@ -1977,7 +1977,9 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         .map((wall) => {
           const old = oldWalls.get(wall.id);
           if (!old) return wall;
-          return { ...wall, ...(old.found ? { found: old.found } : {}), ...(old.group ? { group: old.group } : {}), ...(old.hidden ? { hidden: old.hidden } : {}) };
+          // (A terrain or pit wall Map Studio itself once sent switched off is not kept off: that was a fault, audit 065.)
+          const keepOff = old.hidden && wall.kind !== "terrain" && wall.kind !== "invisible";
+          return { ...wall, ...(old.found ? { found: old.found } : {}), ...(old.group ? { group: old.group } : {}), ...(keepOff ? { hidden: old.hidden } : {}) };
         });
       // Map Studio's traps and regions play at the table.
       // One the GM switched off at the table stays off (the same id, else the same kind and name).

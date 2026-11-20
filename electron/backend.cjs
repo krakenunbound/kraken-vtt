@@ -681,6 +681,8 @@ async function manageCampaign(input) {
   }
   // The campaign's own maps live in Documents/Kraken VTT/Campaigns/<its name>/Maps: they go with it.
   const before = campaigns.read(file).find((item) => item.id === id);
+  // Two campaigns named alike from before names were kept unique share that folder: it is then copied, never moved or trashed.
+  const sharesFolder = Boolean(before) && campaigns.read(file).some((item) => item.id !== id && campaigns.folderKey(item.name) === campaigns.folderKey(before.name));
   if (action === "rename") {
     const renamed = campaigns.rename(file, { id, name: input.name });
     const from = before ? campaignNamedFolder(before.name) : "";
@@ -688,7 +690,7 @@ async function manageCampaign(input) {
     if (from && to && from !== to && fs.existsSync(from)) {
       // Moved; copied instead when the new name's folder exists or something has the old one open.
       try {
-        if (fs.existsSync(to)) throw new Error("exists");
+        if (fs.existsSync(to) || sharesFolder) throw new Error("exists or shared");
         fs.renameSync(from, to);
       } catch {
         campaigns.copyFolder(from, to);
@@ -713,7 +715,7 @@ async function manageCampaign(input) {
     if (!campaigns.exists(file, id)) throw new Error("That campaign is missing.");
     // To the recycle bin first (the window's process does it), never gone for good; off the list only once it is there.
     // Its own maps' folder (Documents/Kraken VTT/Campaigns/<name>) goes too, so a new campaign of that name starts empty.
-    const folders = [campaigns.folder(file, id), campaigns.picturesFolder(file, id), before ? campaignNamedFolder(before.name) : ""].filter((dir) => dir && fs.existsSync(dir));
+    const folders = [campaigns.folder(file, id), campaigns.picturesFolder(file, id), before && !sharesFolder ? campaignNamedFolder(before.name) : ""].filter((dir) => dir && fs.existsSync(dir));
     await ask("shell", { action: "trash", paths: folders });
     const { removed } = campaigns.remove(file, { id });
     return { deleted: removed.name, trashed: folders.length };

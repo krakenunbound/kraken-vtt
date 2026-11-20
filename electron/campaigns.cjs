@@ -367,4 +367,4 @@ function restore(file, input) {
   return { restored: chosen, campaign: found.name };
 }
 
-module.exports = { read, create, touch, setRuleset, exists, readState, writeState, readBundle, writeBundle, removeBundle, folder, picturesFolder, copyFolder, rename, duplicate, remove, exportZip, backups, backup, restore };
+module.exports = { folderKey, read, create, touch, setRuleset, exists, readState, writeState, readBundle, writeBundle, removeBundle, folder, picturesFolder, copyFolder, rename, duplicate, remove, exportZip, backups, backup, restore };
