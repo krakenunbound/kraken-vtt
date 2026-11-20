@@ -393,7 +393,8 @@ export function BooksWindow({ session, onOpenAdventure, start = "books" }: { ses
           type="button"
           className={off ? "books-open inactive" : "books-open"}
           data-book={item.id}
-          title={off ? `${item.title}: make it active to open it (an inactive book's pages, pictures and maps are off limits)` : `${item.title}${item.author ? ` (${item.author})` : ""}${item.hasBook ? "" : ": no book to read, its pictures and tokens"}`}
+          data-pack={item.pack ? "1" : undefined}
+          title={off ? `${item.title}: make it active to open it (an inactive book's pages, pictures and maps are off limits)` : `${item.title}${item.author ? ` (${item.author})` : ""}${item.pack ? " · Maelstrom pack" : ""}${item.hasBook ? "" : ": no book to read, its pictures and tokens"}`}
           onClick={() => (!activation || item.active) && openBook(item.id, item.title)}
           {...(!activation || item.active ? slotDrag({ kind: "book", book: item.id, label: item.title }) : {})}
         >

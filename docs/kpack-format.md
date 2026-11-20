@@ -91,7 +91,7 @@ it, or by its file name without `.kpack`. Name the file after the book.
 | `version` | yes | `3`. A pack in `2` is still read (its filing is worked out); below `2` is made again. A newer number than Maelstrom knows is refused. |
 | `name` | yes | The book's name. Other books link to its records by this name (section 6), so never change it once others link to it. |
 | `title` | yes | What the lists show. |
-| `ruleset` | yes | The game it is for, exactly one of: `AD&D 2E`, `D&D 3.5E`, `D&D 5E`, `Castles & Crusades`, `Traveller`, `Descending Darkness`, `Apeira Astra`, `Cairn`, `Ironsworn`, `Starforged`, `Basic Fantasy`, `Fate Core`, `Fate Accelerated`, `Forged in the Dark`, or `Any` (every game). Anything else shows in no campaign. |
+| `ruleset` | yes | The game it is for, exactly one of: `AD&D 2E`, `D&D 3.5E`, `D&D 5E`, `Castles & Crusades`, `Traveller`, `Descending Darkness`, `Apeira Astra`, `Cairn`, `Ironsworn`, `Starforged`, `Basic Fantasy`, `Fate Core`, `Fate Accelerated`, `Fate` (both Fate games), `Forged in the Dark`, or `Any` (every game). Anything else shows in no campaign. |
 | `kind` | yes (3) | Where it is filed, one of the seven kinds below. |
 | `group` | no | The line or series inside its kind: `Core Rules`, `Handbooks`, `B series`, `Against the Slave Lords`, `Greyhawk`. Without it the pack sits under its kind's own name. |
 | `order` | no | How it sorts within the group (a string, compared with numbers in it: `B2` before `B10`). Without it: the adventure code in its title, else its title. |
@@ -100,7 +100,7 @@ it, or by its file name without `.kpack`. Name the file after the book.
 | `cover` | no | The book's cover, full size. |
 | `category` | no | A free word kept from the source (Fantasy Grounds' category). Not used for filing in format 3. |
 | `author` | no | Who wrote it. |
-| `hasBook` | yes | `true` when it has pages to read in **Books** (`refpage` records). |
+| `hasBook` | yes | `true` when it has pages to read in **Books** (`refpage` records, or pages kept inside the `refindex`). A pack that says `true` with no pages is not listed in Books. |
 | `hasStory` | yes | `true` when it has story entries (`encounter` or `story` records): an adventure. Adventures are the GM's alone. |
 | `records` | yes | How many records `records.json` holds. |
 | `contents` | no | How many records go to each sidebar list (section 4). |
@@ -146,7 +146,10 @@ Grounds' sidebar does:
 | Spells | `spell`, `spelldesc`, `spelllists` | `spells` |
 | Character options | `class`, `race`, `feat`, `skill`, `specialability`, C&C's `siegepackage`, `siegepower` | `classes`, `races`, `feats`, `skills` |
 | Characters | `pregencharsheet` | `characters` |
-| Other | `calendar`, `license`, anything else | `other` |
+| A game's own | Castles & Crusades `siegegame`; Ironsworn and Starforged `ironasset`, `ironmove`, `ironoracle`, `irondelve`; Fate `fateskill`, `fatestunt`; Forged in the Dark `playbook`, `crewtype`, `forgedtable`; Cairn `cairntable`; 5E `background`, `race_subrace`, `class_specialization`, `itemtemplate` | `other` |
+| Other | `calendar`, `license`, `hiddenstory`, `charsheet`, `effects`, `modifiers`, `lists`, anything else | `other` |
+
+A record of a type Maelstrom does not know is kept but shown nowhere; `kpack:check` names them.
 
 ## 5. records.json
 
@@ -184,7 +187,9 @@ Examples of each common type, as Maelstrom's own packs hold them:
   Frames: `text1`-`text5`, `blue`, `green`, `brown`, `pink`, `yellow`, `grey`,
   `sidebar`, `book`, `page`, `picture`, `noframe`. Boxed frames (`blue`,
   `green`, `brown`, `grey`, `text2`-`text5`) get the GM's read-aloud button.
-- **refindex** (the book's contents, one per book):
+- **refindex** (the book's contents, one per book). A page is either its own `refpage` record, named by the
+  entry's `listlink`, or (Fantasy Grounds' newer layout) kept inside the entry itself: the entry then has the
+  page's `blocks` (and `text`), and Maelstrom reads it from there. Prefer `refpage` records in a new pack:
   `{ "chapters": { "id-00000": { "name": "...", "order": 0, "subchapters": { "id-00001": { "name": "...", "order": 1, "refpages": { "id-00001": { "name": "...", "order": 1, "keywords": "...", "listlink": { "class": "reference_manualtextwide", "recordname": "reference.refmanualdata.<page>@Pack Name" } } } } } } } }`.
 - **encounter** (a story entry): `{ "name": "...", "text": "<p>...</p>" }`.
 - **battle** (a prepared encounter): `{ "name": "...", "npclist": { "id-00001": { "count": 2, "name": "...", "faction": "foe", "link": { "class": "npc", "recordname": "npc.x@Pack Name" }, "token": "tokens/x.png@Pack Name" } } }`.

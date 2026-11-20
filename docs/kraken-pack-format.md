@@ -1,5 +1,10 @@
 # The Maelstrom pack format (.kpack)
 
+> **The format itself is now described in [kpack-format.md](kpack-format.md)** (format 3: where a pack is
+> filed, its thumbnail, what it holds, the folder per game, making a pack from a PDF, `npm run kpack:make` and
+> `npm run kpack:check`). This page keeps the history of format 2 and how packs are made from Fantasy Grounds
+> modules; where the two differ, kpack-format.md is right.
+
 A pack is one book in one file: a rulebook, a bestiary, an adventure, a map
 or token pack. It is Maelstrom's equivalent of a Fantasy Grounds `.mod` or a
 Foundry compendium pack. Maelstrom was called Kraken VTT until alpha.92, so
@@ -21,8 +26,9 @@ Put `.kpack` files in the **packs folder**:
 | Linux | `~/Documents/Kraken VTT/Packs` |
 
 Set `KRAKEN_PACKS` to use another folder. Maelstrom creates the folder, with
-its `README.md`, when it starts. The folder is flat: one file per book, no
-subfolders (its `Wizards` folder holds character wizards, not books).
+its `README.md`, when it starts. It holds a folder per game (`AD&D 2E`, `D&D 5E`,
+`Any`...), each with that game's packs; Maelstrom reads packs up to two folders
+down (its `Wizards` folder holds character wizards, not books).
 **Modules > Packs > Open folder** opens it. Copy the folder to another
 computer and every book comes along; that computer needs no Fantasy Grounds.
 

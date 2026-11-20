@@ -8,10 +8,19 @@ import path from "node:path";
 import { unzipSync, strFromU8 } from "fflate";
 import { KIND_IDS, organize } from "../shared/packs/organize.mjs";
 
-const RULESETS = ["Any", "AD&D 2E", "D&D 3.5E", "D&D 5E", "Castles & Crusades", "Traveller", "Descending Darkness", "Apeira Astra", "Cairn", "Ironsworn", "Starforged", "Basic Fantasy", "Fate Core", "Fate Accelerated", "Forged in the Dark"];
+// Maelstrom's games (electron/books.cjs FG_RULESETS); "Fate" is a book for Fate Core and Fate Accelerated both.
+const RULESETS = ["Any", "AD&D 2E", "D&D 3.5E", "D&D 5E", "Castles & Crusades", "Traveller", "Descending Darkness", "Apeira Astra", "Cairn", "Ironsworn", "Starforged", "Basic Fantasy", "Fate Core", "Fate Accelerated", "Fate", "Forged in the Dark"];
 const CALENDARS = ["gregorian", "greyhawk", "harptos", "mystara", "golarion", "imperial", "waning", "astra"];
 const MEDIA = /\.(png|webp|jpe?g|gif|webm|mp4|ogg|mp3|wav|m4a)$/i;
-const TYPES = new Set(["refpage", "refindex", "encounter", "story", "storytemplate", "npc", "item", "spell", "spelldesc", "spelllists", "class", "race", "feat", "skill", "specialability", "siegepackage", "siegepower", "pregencharsheet", "battle", "battlerandom", "treasureparcels", "tables", "image", "calendar", "license", "quest", "vehicle", "location", "note", "card", "deck", "effect"]);
+// The record types Maelstrom reads (docs/kpack-format.md section 4), the games' own included.
+const TYPES = new Set([
+  "refpage", "refindex", "encounter", "story", "storytemplate", "hiddenstory", "npc", "item", "itemtemplate", "spell", "spelldesc", "spelllists",
+  "class", "class_specialization", "race", "race_subrace", "background", "feat", "skill", "specialability", "pregencharsheet", "charsheet",
+  "battle", "battlerandom", "treasureparcels", "tables", "table", "image", "calendar", "license", "quest", "vehicle", "location", "note", "card",
+  "deck", "effect", "effects", "modifiers", "lists",
+  // Castles & Crusades; Ironsworn and Starforged; Fate; Forged in the Dark; Cairn.
+  "siegegame", "siegepackage", "siegepower", "ironasset", "ironmove", "ironoracle", "irondelve", "fateskill", "fatestunt", "playbook", "crewtype", "forgedtable", "cairntable",
+]);
 
 function check(file) {
   const errors = [];
@@ -38,7 +47,6 @@ function check(file) {
   if (m.calendar !== undefined && !CALENDARS.includes(m.calendar)) errors.push(`calendar must be one of ${CALENDARS.join(", ")}`);
   if (Number(m.version) >= 3) {
     if (!KIND_IDS.includes(m.kind)) errors.push(`kind must be one of ${KIND_IDS.join(", ")}`);
-    if (!String(m.group ?? "").trim()) warnings.push("group is missing (it is filed under its kind's own name)");
     if (m.order !== undefined && typeof m.order !== "string") warnings.push("order should be a string (it sorts by number within it: B2 before B10)");
     if (m.parent !== undefined && typeof m.parent !== "string") errors.push("parent must be the name of the pack this is a part of");
     if (m.contents !== undefined && (typeof m.contents !== "object" || Array.isArray(m.contents))) errors.push("contents must be an object of counts");
@@ -60,6 +68,7 @@ function check(file) {
     }
   }
   const ids = new Set();
+  const unknown = new Map();
   const media = new Set(names.filter((name) => MEDIA.test(name)));
   let missingMedia = 0;
   for (const [index, record] of records.entries()) {
@@ -72,7 +81,7 @@ function check(file) {
     else if (ids.has(record.id)) errors.push(`${at}: id ${record.id} is used twice`);
     else ids.add(record.id);
     if (!record.type) errors.push(`${at}: no type`);
-    else if (!TYPES.has(record.type)) warnings.push(`${at}: type "${record.type}" is not one the lists know`);
+    else if (!TYPES.has(record.type)) unknown.set(record.type, (unknown.get(record.type) ?? 0) + 1);
     if (!["gm", "all", "owner"].includes(record.visibility ?? "gm")) warnings.push(`${at}: visibility is gm, all or owner`);
     if (record.source && record.source !== m.name) warnings.push(`${at}: source "${record.source}" differs from the pack's name`);
     if (record.data == null || typeof record.data !== "object") errors.push(`${at}: no data object`);
@@ -82,10 +91,17 @@ function check(file) {
       if (!media.has(name) && !name.includes("@")) missingMedia += 1;
     }
   }
+  for (const [type, count] of unknown) warnings.push(`${count} record(s) of type "${type}", not one Maelstrom's lists know (they are kept, but shown nowhere)`);
   if (missingMedia) warnings.push(`${missingMedia} picture reference(s) in records name files not in the zip`);
   if (m.records !== undefined && Number(m.records) !== records.length) warnings.push(`manifest says ${m.records} records, records.json has ${records.length}`);
-  const hasPages = records.some((record) => record.type === "refpage");
-  if (Boolean(m.hasBook) !== hasPages) warnings.push(`hasBook is ${Boolean(m.hasBook)} but the pack ${hasPages ? "has" : "has no"} book pages (refpage)`);
+  // Pages are refpage records, or (FG's newer layout) kept inside the refindex with their blocks.
+  const index = records.find((record) => record.type === "refindex");
+  const inline = Object.values(index?.data?.chapters && typeof index.data.chapters === "object" ? index.data.chapters : {}).some((chapter) =>
+    Object.values(chapter?.subchapters ?? {}).some((section) => Object.values(section?.refpages ?? {}).some((page) => page?.blocks || typeof page?.text === "string")),
+  );
+  const hasPages = records.some((record) => record.type === "refpage") || inline;
+  if (records.some((record) => record.type === "refpage") && !index) warnings.push("book pages but no refindex: Books has no contents to list them by");
+  if (Boolean(m.hasBook) !== hasPages) warnings.push(`hasBook is ${Boolean(m.hasBook)} but the pack ${hasPages ? "has" : "has no"} book pages${hasPages ? "" : ": Books will not list it"}`);
   const filed = organize({ ...m, hasStory: records.some((record) => record.type === "encounter") });
   return { errors, warnings, filed, records: records.length, media: media.size };
 }

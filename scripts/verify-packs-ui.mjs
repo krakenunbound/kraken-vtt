@@ -71,7 +71,8 @@ try {
   // One pack with its own button.
   await page.click('[data-pack-make="Test Keep"]');
   await page.waitForSelector('[data-packs] [data-pack-book="Test Keep"][data-pack-state="made"]', { timeout: 60000 });
-  assert(existsSync(path.join(packsFolder, "Test Keep.kpack")), "Test Keep.kpack is in the packs folder");
+  // (Each pack in its game's folder: docs/kpack-format.md.)
+  assert(existsSync(path.join(packsFolder, "Castles & Crusades", "Test Keep.kpack")), "Test Keep.kpack is in its game's folder");
 
   // The rest: "Make N packs", and the agent's make all for another game.
   const label = await page.textContent('[data-action="packs-make-all"]');
@@ -81,8 +82,9 @@ try {
   assert((await page.textContent('[data-action="packs-make-all"]'))?.includes("no packs"), "nothing left to make");
   const queued = await tool("kraken_packs", { action: "make", books: ["all"], ruleset: "" });
   assert(queued.queued.includes("Other Game"), `kraken_packs makes the other game's: ${JSON.stringify(queued)}`);
-  for (let tries = 0; tries < 60 && !existsSync(path.join(packsFolder, "Other Game.kpack")); tries++) await new Promise((resolve) => setTimeout(resolve, 500));
-  const packs = readdirSync(packsFolder).filter((name) => name.endsWith(".kpack")).sort();
+  for (let tries = 0; tries < 60 && !existsSync(path.join(packsFolder, "D&D 5E", "Other Game.kpack")); tries++) await new Promise((resolve) => setTimeout(resolve, 500));
+  // Each in its game's folder (Packs/<game>/<book>.kpack).
+  const packs = readdirSync(packsFolder, { recursive: true }).map((name) => path.basename(String(name))).filter((name) => name.endsWith(".kpack")).sort();
   assert(packs.includes("Other Game.kpack") && packs.includes("Test Handbook.kpack") && packs.includes("Test Keep.kpack"), `the packs: ${packs.join(", ")}`);
 
   // The shelf reads the packs: marked, and a page comes from one.
@@ -94,7 +96,7 @@ try {
   assert(JSON.stringify(read).includes("guards"), "a page read from the pack");
   await page.click('[data-books-tab="activation"]');
   await page.waitForSelector('.books-window [data-book="Test Keep"]');
-  assert((await page.textContent('.books-window [data-book="Test Keep"]'))?.includes("Kraken pack"), "the shelf says it is a Kraken pack");
+  assert((await page.getAttribute('.books-window [data-book="Test Keep"]', "data-pack")) === "1", "the shelf marks it as a Maelstrom pack");
   assert(failures.length === 0, `no page errors: ${failures.join("; ")}`);
   console.log(`ok packs-ui: the Packs tab lists this game's modules (every game on a tick), makes one pack and then the rest, kraken_packs lists and makes them; the shelf reads the books from the packs (${packs.length} packs)`);
 } finally {

@@ -150,15 +150,22 @@ const described = new Map(); // file -> { key, manifest }
 function packIndex(folder = packFolder()) {
   const byName = new Map();
   let entries = [];
-  try {
-    // A folder per game (Packs/AD&D 2E...): packs two levels down too; never a hidden folder or the wizards'.
-    entries = fs
-      .readdirSync(folder, { recursive: true })
-      .map(String)
-      .filter((name) => isPack(path.basename(name)) && name.split(/[\\/]/).length <= 3 && !name.split(/[\\/]/).some((part) => part.startsWith(".") || part === "Wizards"));
-  } catch {
-    return byName;
-  }
+  // A folder per game (Packs/AD&D 2E...): packs two levels down too; never a hidden folder or the wizards'.
+  // Read a level at a time (the shipped packs sit inside the app's archive, which lists one folder at a time).
+  const walk = (dir, prefix, depth) => {
+    let found;
+    try {
+      found = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of found) {
+      if (entry.isFile() && isPack(entry.name)) entries.push(prefix + entry.name);
+      else if (entry.isDirectory() && depth < 2 && !entry.name.startsWith(".") && entry.name !== "Wizards") walk(path.join(dir, entry.name), `${prefix}${entry.name}${path.sep}`, depth + 1);
+    }
+  };
+  walk(folder, "", 0);
+  if (!entries.length && !fs.existsSync(folder)) return byName;
   for (const entry of entries) {
     const file = path.join(folder, entry);
     try {
@@ -346,7 +353,7 @@ function filing(info, about, records) {
   try {
     const { organize } = require("../shared/packs/organize.mjs");
     const placed = organize({ title: info.displayName || about.title || info.name, name: info.name, category: about.category || "", hasBook: Boolean(about.hasBook), hasStory: records.some((record) => record.type === "encounter") });
-    return { kind: placed.kind, group: placed.group, order: placed.order };
+    return { kind: placed.kind, ...(placed.group ? { group: placed.group } : {}), order: placed.order };
   } catch {
     return {};
   }

@@ -98,6 +98,24 @@ function parse(text) {
   return doc?.documentElement ?? null;
 }
 
+// Whether a pack has a page to read: a page record, or a page kept inside its contents (read once: the shelf
+// keeps the answer with the rest of its description).
+function packHasPages(file) {
+  try {
+    const records = JSON.parse(Buffer.from(packs.readEntries(file, (name) => name === "records.json")["records.json"]).toString("utf8"));
+    if (records.some((record) => record.type === "refpage")) return true;
+    const index = records.find((record) => record.type === "refindex");
+    return Object.values(index?.data?.chapters && typeof index.data.chapters === "object" ? index.data.chapters : {}).some((chapter) =>
+      Object.values(chapter?.subchapters ?? {}).some((section) => Object.values(section?.refpages ?? {}).some((page) => page?.blocks || typeof page?.text === "string" || page?.listlink)),
+    );
+  } catch {
+    return true;
+  }
+}
+
+// A book's contents record (its chapters, sections and pages).
+const indexOf = (book) => [...book.records.values()].find((record) => record.type === "refindex" && String(record.data?.fgPath ?? record.id ?? "").includes("reference.refmanualindex"));
+
 // A pack with no cover of its own: the picture whose name says cover, title or front, else its first picture.
 function coverAmong(pictures) {
   const list = (Array.isArray(pictures) ? pictures : []).map(String).filter((name) => /\.(png|webp|jpe?g)$/i.test(name));
@@ -106,7 +124,7 @@ function coverAmong(pictures) {
 
 // What a module is, from its definition.xml (and whether it has a book); a
 // Kraken pack, from its own description.
-const DESCRIBED = 4;
+const DESCRIBED = 5;
 function describe(file) {
   if (packs.isPack(file)) {
     const manifest = packs.readManifest(file);
@@ -118,7 +136,8 @@ function describe(file) {
       ruleset: String(manifest.from?.ruleset ?? ""),
       kraken: String(manifest.ruleset || "Any"),
       author: String(manifest.author ?? ""),
-      hasBook: Boolean(manifest.hasBook),
+      // A book only when it has pages to read (a module that says it has a book, with empty contents, has none).
+      hasBook: Boolean(manifest.hasBook) && (manifest.contents ? Number(manifest.contents.pages) > 0 || packHasPages(file) : packHasPages(file)),
       hasStory: manifest.hasStory !== undefined ? Boolean(manifest.hasStory) : packHasStory(file),
       // Its picture in the lists: the pack's thumbnail, else its cover, else the picture most like a cover.
       cover: String(manifest.thumbnail || manifest.cover || coverAmong(manifest.pictures) || ""),
@@ -302,8 +321,9 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
         /* a folder not there */
       }
     }
-    // The packs folder keeps a folder per game (Packs/AD&D 2E, Packs/Any...): their packs too, two levels down.
-    if (packsFolder) {
+    // Packs are kept in a folder per game (Packs/AD&D 2E, Packs/Any..., and the packs Maelstrom ships the same way):
+    // their packs too, two levels down.
+    for (const packsRoot of [...also, ...(packsFolder ? [packsFolder] : [])]) {
       const walk = (dir, depth) => {
         let found = [];
         try {
@@ -318,7 +338,7 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
           if (depth < 2) walk(sub, depth + 1);
         }
       };
-      walk(packsFolder, 1);
+      walk(packsRoot, 1);
     }
     for (const { entry, dir } of entries) {
       const file = path.join(dir, entry.name);
@@ -528,13 +548,20 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
     // The book's contents: chapters, their sections, and the pages in each.
     contents(id) {
       const book = read(id);
-      const index = [...book.records.values()].find((record) => record.type === "refindex" && record.data.fgPath.startsWith("reference.refmanualindex@"));
-      const chapters = byOrder(index?.data?.chapters).map((chapter) => ({
+      const index = indexOf(book);
+      // A page is its own record (reference.refmanualdata.<id>), or (FG's newer layout) kept inside the contents
+      // itself, with its blocks: then it is named by where it sits, "~chapter.section.page".
+      const chapters = byOrder(index?.data?.chapters).map((chapter, c) => ({
         name: String(chapter.name ?? ""),
-        sections: byOrder(chapter.subchapters).map((section) => ({
+        sections: byOrder(chapter.subchapters).map((section, s) => ({
           name: String(section.name ?? ""),
           pages: byOrder(section.refpages)
-            .map((page) => ({ id: /refmanualdata\.([^.@]+)/.exec(page.listlink?.recordname ?? "")?.[1] ?? "", name: String(page.name ?? ""), keywords: String(page.keywords ?? "") }))
+            .map((page, p) => {
+              const own = /refmanualdata\.([^.@]+)/.exec(page.listlink?.recordname ?? "")?.[1] ?? "";
+              const inline = page.blocks || typeof page.text === "string";
+              const id = own && (book.records.has(`reference.refmanualdata.${own}@${book.info.name}`) || !inline) ? own : inline ? `~${c}.${s}.${p}` : "";
+              return { id, name: String(page.name ?? ""), keywords: String(page.keywords ?? "") };
+            })
             .filter((page) => page.id),
         })),
       }));
@@ -549,7 +576,22 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "" }) {
     // One page: its blocks, text as safe HTML, pictures by file.
     page(id, pageId) {
       const book = read(id);
-      const record = book.records.get(`reference.refmanualdata.${pageId}@${book.info.name}`);
+      // Its own record, or a page kept inside the contents (contents() names those "~chapter.section.page").
+      let record = book.records.get(`reference.refmanualdata.${pageId}@${book.info.name}`);
+      const at = /^~(\d+)\.(\d+)\.(\d+)$/.exec(String(pageId));
+      if (!record && at) {
+        const chapter = byOrder(indexOf(book)?.data?.chapters)[Number(at[1])];
+        const section = byOrder(chapter?.subchapters)[Number(at[2])];
+        const entry = byOrder(section?.refpages)[Number(at[3])];
+        if (entry) record = { name: String(entry.name ?? ""), data: entry };
+      }
+      // A link to a page by its own name whose words are kept inside the contents: found there.
+      if (!record && !at) {
+        for (const chapter of byOrder(indexOf(book)?.data?.chapters))
+          for (const section of byOrder(chapter.subchapters))
+            for (const entry of byOrder(section.refpages))
+              if (!record && /refmanualdata\.([^.@]+)/.exec(entry.listlink?.recordname ?? "")?.[1] === String(pageId) && (entry.blocks || typeof entry.text === "string")) record = { name: String(entry.name ?? ""), data: entry };
+      }
       if (!record) throw new Error(`No page "${pageId}" in ${book.info.title}.`);
       const resolve = resolver(book);
       const blocks = [];
