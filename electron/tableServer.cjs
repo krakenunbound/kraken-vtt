@@ -494,8 +494,13 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   let imageVersion = 0;
   let scene = null;
   // The table map the GM stopped sharing (FG's Share off): the players are sent no map while it is.
-  let hiddenSceneId = typeof saved.hiddenSceneId === "string" ? saved.hiddenSceneId.slice(0, 80) : null;
-  const sceneHiddenNow = () => Boolean(scene && hiddenSceneId === scene.id);
+  // The maps held back from the players (Share off), each by its scene id (an older save kept one).
+  const heldBack = new Set([...(Array.isArray(saved.heldBack) ? saved.heldBack : []), ...(typeof saved.hiddenSceneId === "string" ? [saved.hiddenSceneId] : [])].filter((id) => typeof id === "string").map((id) => id.slice(0, 80)).slice(0, 500));
+  const holdBack = (id, on) => {
+    if (on) heldBack.add(id);
+    else heldBack.delete(id);
+  };
+  const sceneHiddenNow = () => Boolean(scene && heldBack.has(scene.id));
   const emptyView = () => ({ sceneId: null, tokens: [], doors: [], vision: null, sight: false, locked: false, darkness: 0, lights: [], seeing: [], sceneLights: [], drawings: [], labels: [], tiles: [], fx: [], groups: [] });
   const clients = new Map();
   // Players whose connection dropped, their seats kept for a reconnect (linger below), by name.
@@ -1568,7 +1573,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       const token = url.searchParams.get("token") || "";
       const asker = token.length > 0 ? [...clients.values()].find((client) => client.assetToken === token) : null;
       // A player is never sent the picture of a map the GM has not shared.
-      const allowed = Boolean(asker) && (asker.role === "dm" || !scene || hiddenSceneId !== scene.id);
+      const allowed = Boolean(asker) && (asker.role === "dm" || !scene || !heldBack.has(scene.id));
       if (!allowed || !image) {
         res.writeHead(404, { "Access-Control-Allow-Origin": "*", "Cache-Control": "no-store" });
         res.end();
@@ -3050,7 +3055,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       // FG's Share: the table map shown to the players, or not (they are sent no map).
       if (msg.type === "scene-share") {
         if (client.role !== "dm" || !scene) return;
-        hiddenSceneId = msg.on ? null : scene.id;
+        holdBack(scene.id, !msg.on);
         onChange("table");
         broadcastScene();
         sendMaps();
@@ -3492,7 +3497,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       if (msg.type === "map-share") {
         if (client.role !== "dm" || !scene) return;
         // Shared: no longer held back, and open on every player's screen.
-        hiddenSceneId = null;
+        holdBack(scene.id, false);
         onChange("table");
         broadcastScene();
         sendMaps();
@@ -3504,7 +3509,10 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
         const x = num(msg.x, NaN);
         const y = num(msg.y, NaN);
         if (!Number.isFinite(x) || !Number.isFinite(y)) return;
-        broadcast({ type: "ping", x, y, from: client.name, color: playerColorOf(client) });
+        // As the ruler: not to the players while the GM is on a private image or the map is held back.
+        const privateToGm = client.role === "dm" && gmMap() === prep;
+        const out = { type: "ping", x, y, from: client.name, color: playerColorOf(client), sceneId: scene?.id ?? null };
+        for (const [ws, other] of clients) if (other.role === "dm" || !(privateToGm || sceneHiddenNow())) send(ws, out);
         return;
       }
 
@@ -3814,7 +3822,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     // The map shared: open on every player's screen (the GM's Share with players).
     shareMap(on = true) {
       if (!scene) throw new Error("No scene is on the table.");
-      hiddenSceneId = on ? null : scene.id;
+      holdBack(scene.id, !on);
       onChange("table");
       broadcastScene();
       sendMaps();
@@ -4150,7 +4158,9 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
         chat: chat.slice(),
         options,
         map: map.persisted(),
-        hiddenSceneId,
+        heldBack: [...heldBack],
+        // (The one-map form an older save kept, cleared: the save merges over what was there.)
+        hiddenSceneId: null,
         combat: combat.persisted(),
         calendar: calendar.persisted(),
         clocks: clocks.persisted(),
