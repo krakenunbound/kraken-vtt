@@ -280,6 +280,17 @@ function fgModuleBundle(moduleName, { only, all = false, file = "", picture = ()
   const scenes = [];
   const extras = {};
   const slug = (text) => String(text).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
+  // A map's scene id from the book and its name; a second map of the same name in the book gets a short hash of its
+  // record's path too, so the two never share walls, tokens and paint (the first keeps the id it always had).
+  const baseIdOf = (record) => `fg-${slug(label).slice(0, 16)}-${slug(record.name)}`.slice(0, 70);
+  const everyImage = module.records.filter((item) => item.type === "image");
+  const sceneIdOf = (record) => {
+    const base = baseIdOf(record);
+    const first = everyImage.find((item) => baseIdOf(item) === base);
+    if (!first || first === record) return base;
+    const hash = require("crypto").createHash("sha1").update(String(record.data?.fgPath ?? record.id ?? record.name)).digest("hex").slice(0, 8);
+    return `${base.slice(0, 61)}-${hash}`;
+  };
   // A picture asked for by its file (a book page's picture): the image record that draws it.
   const images = module.records.filter((item) => item.type === "image" && (!file || JSON.stringify(item.data).includes(file)));
   // A name asked for: that map exactly, when there is one by that name; else those whose names hold it.
@@ -287,7 +298,7 @@ function fgModuleBundle(moduleName, { only, all = false, file = "", picture = ()
   for (const record of exact.length ? exact : images) {
     if (only && !exact.length && !only.some((name) => String(record.name).toLowerCase().includes(String(name).toLowerCase()))) continue;
     if (!only && !all && !isMap(record)) continue;
-    const id = `fg-${slug(label).slice(0, 16)}-${slug(record.name)}`.slice(0, 70);
+    const id = sceneIdOf(record);
     const made = imageScene(record, moduleName, id, label);
     if (!made) continue;
     const painted = picture(id);
