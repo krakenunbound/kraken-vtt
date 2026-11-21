@@ -1,15 +1,15 @@
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { shelfTree } from "../../shared/packs/organize.mjs";
-import { markInlineRolls } from "../ui/InlineRolls";
 import { createPortal } from "react-dom";
-import type { BookContents, BookInfo, BookPage, BookSoundRef, Session, ShownImage, SoundLibrary } from "../session/useSession";
+import type { BookContents, BookInfo, BookSoundRef, Session, ShownImage, SoundLibrary } from "../session/useSession";
 import { Icon } from "../ui/icons";
 import { useWindows } from "../ui/Windows";
 import { sound } from "../sound/soundEngine";
 import { slotDrag } from "../ui/QuickSlots";
 import { PacksPanel } from "./Packs";
 import { imageWindow } from "../table/imageWindow";
-import { READ_FRAMES, ReadAloudButton, useReadAloudFrames } from "./readAloud";
+import { useReadAloudFrames } from "./readAloud";
+import { BookPages } from "./BookPages";
 
 // Books, as FG's Library: the Books window lists the campaign's active books
 // (by category, with their covers), and Activation every module for its game;
@@ -438,7 +438,14 @@ export function BookWindow({ session, book }: { session: Session; book: string }
   const [contents, setContents] = useState<BookContents | null>(null);
   const [error, setError] = useState("");
   const [pageId, setPageId] = useState(startAt.get(book) ?? "");
-  const [page, setPage] = useState<BookPage | null>(null);
+  // The page being read now (the section's pages scroll as one; the contents follow it), and a jump asked for.
+  const [reading, setReading] = useState("");
+  const [jump, setJump] = useState(0);
+  const goTo = (id: string) => {
+    setPageId(id);
+    setReading(id);
+    setJump((n) => n + 1);
+  };
   const [view, setView] = useState<"book" | "pictures">("book");
   const [search, setSearch] = useState("");
   const body = useRef<HTMLDivElement>(null);
@@ -447,11 +454,13 @@ export function BookWindow({ session, book }: { session: Session; book: string }
   useEffect(() => {
     if (gm) session.soundList().then(setLibrary).catch(() => setLibrary(null));
   }, [gm]);
-  const pageSounds = session.bookSounds[`${book}|${pageId}`] ?? NO_SOUNDS;
+  // The page an element is in (the section's pages are on one scroll).
+  const pageOfElement = (element: Element | null) => (element?.closest("[data-book-page]") as HTMLElement | null)?.dataset.bookPage ?? pageId;
+  const soundsOf = (id: string) => session.bookSounds[`${book}|${id}`] ?? NO_SOUNDS;
   // A sound link's sound: the one the GM dropped on it, else Kraken's of that kind and name.
   const linkSound = (link: HTMLElement): BookSoundRef | null => {
     const key = link.dataset.soundKey ?? "";
-    const bound = pageSounds.links[key];
+    const bound = soundsOf(pageOfElement(link)).links[key];
     if (bound) return bound;
     const kind = link.dataset.soundKind ?? "sfx";
     const found = library ? matchSound(link.dataset.soundName ?? link.textContent ?? "", kind, library.groups) : "";
@@ -465,11 +474,13 @@ export function BookWindow({ session, book }: { session: Session; book: string }
       link.classList.toggle("none", gm && !ref);
       link.title = !gm ? "" : ref ? `Plays ${ref.sound} for the table (drop a sound here to change it)` : "No sound yet: drop one here from the Sound window";
     }
-    // Only when the page, its sounds or the library change (not on every change at the table).
+    // Only when the pages, their sounds or the library change (not on every change at the table).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, library, pageSounds, gm]);
+  }, [pageId, reading, library, session.bookSounds, session.bookPageStamps, gm]);
   const dropSound = (event: React.DragEvent) => {
     if (!gm || !pageId) return;
+    // Dropped on a page's links block (unlocked): that block takes it.
+    if ((event.target as HTMLElement).closest("[data-book-links]")) return;
     let ref: BookSoundRef;
     try {
       ref = JSON.parse(event.dataTransfer.getData(SOUND_DRAG)) as BookSoundRef;
@@ -479,19 +490,20 @@ export function BookWindow({ session, book }: { session: Session; book: string }
     event.preventDefault();
     setSoundDrop(false);
     const target = event.target as HTMLElement;
+    const onPage = pageOfElement(target);
     const link = target.closest<HTMLElement>("a.book-link.sound");
     if (link?.dataset.soundKey) {
-      session.setBookSound({ book, page: pageId, action: "bind", key: link.dataset.soundKey, ...ref });
+      session.setBookSound({ book, page: onPage, action: "bind", key: link.dataset.soundKey, ...ref });
       return;
     }
     const block = target.closest<HTMLElement>("[data-block]");
-    session.setBookSound({ book, page: pageId, action: "add", block: block ? Number(block.dataset.block) : -1, ...ref });
+    session.setBookSound({ book, page: onPage, action: "add", block: block ? Number(block.dataset.block) : -1, ...ref });
   };
-  const inlineSounds = (block: number) =>
+  const inlineSounds = (onPage: string, block: number) =>
     gm
-      ? pageSounds.blocks
-          .filter((item) => item.block === block)
-          .map((item) => <BookSound key={item.id} session={session} item={item} onRemove={() => session.setBookSound({ book, page: pageId, action: "remove", id: item.id })} />)
+      ? soundsOf(onPage)
+          .blocks.filter((item) => item.block === block)
+          .map((item) => <BookSound key={item.id} session={session} item={item} onRemove={() => session.setBookSound({ book, page: onPage, action: "remove", id: item.id })} />)
       : null;
   // A slower answer for a book or page no longer wanted is dropped (quick clicks).
   useEffect(() => {
@@ -514,29 +526,20 @@ export function BookWindow({ session, book }: { session: Session; book: string }
     const wanted = startAt.get(book);
     if (wanted) {
       startAt.delete(book);
-      setPageId(wanted);
+      goTo(wanted);
       setView("book");
     }
   });
-  useEffect(() => {
-    if (!pageId) return;
-    let wantedStill = true;
-    session
-      .bookFetch<BookPage>("page", { book, page: pageId })
-      .then((found) => {
-        if (!wantedStill) return;
-        setPage(found);
-        body.current?.scrollTo({ top: 0 });
-      })
-      .catch((reason: Error) => wantedStill && setError(reason.message));
-    return () => {
-      wantedStill = false;
-    };
-  }, [book, pageId, session.bookFetch]);
   const pages = useMemo(() => contents?.chapters.flatMap((chapter) => chapter.sections.flatMap((section) => section.pages)) ?? [], [contents]);
-  const at = pages.findIndex((item) => item.id === pageId);
-  // The page's boxed text (FG's <frame>), read aloud by the GM.
-  useReadAloudFrames(body, [page], page?.name);
+  const here = reading || pageId;
+  const at = pages.findIndex((item) => item.id === here);
+  // The section of the page asked for: its pages are read as one scroll.
+  const sectionPages = useMemo(() => {
+    for (const chapter of contents?.chapters ?? []) for (const section of chapter.sections) if (section.pages.some((item) => item.id === pageId)) return section.pages;
+    return [];
+  }, [contents, pageId]);
+  // The pages' boxed text (FG's <frame>), read aloud by the GM.
+  useReadAloudFrames(body, [sectionPages, session.bookPageStamps], contents?.name);
   const wanted = search.toLowerCase();
   const fits = (item: { name: string; keywords: string }) => !wanted || `${item.name} ${item.keywords}`.toLowerCase().includes(wanted);
   const shownPicture = (file: string) => session.bookShelf.images.find((item) => item.book === book && item.file === file);
@@ -565,7 +568,7 @@ export function BookWindow({ session, book }: { session: Session; book: string }
     }
     const target = link.dataset;
     if (target.page && target.book === book) {
-      setPageId(target.page);
+      goTo(target.page);
       setView("book");
     } else if (target.page && target.book) openBook(target.book, target.book, target.page);
     else if (target.file && target.book) openPicture({ book: target.book, file: target.file, name: target.name || link.textContent || "Picture" });
@@ -598,7 +601,7 @@ export function BookWindow({ session, book }: { session: Session; book: string }
                       <div key={`${section.name}-${inner}`} className="book-section">
                         {section.name && section.name !== chapter.name ? <h4>{section.name}</h4> : null}
                         {section.pages.map((item) => (
-                          <button key={item.id} type="button" className={item.id === pageId ? "book-page-link on" : "book-page-link"} data-page={item.id} onClick={() => setPageId(item.id)} {...slotDrag({ kind: "book", book, page: item.id, label: item.name })}>
+                          <button key={item.id} type="button" className={item.id === here ? "book-page-link on" : "book-page-link"} aria-current={item.id === here ? "page" : undefined} data-page={item.id} onClick={() => goTo(item.id)} {...slotDrag({ kind: "book", book, page: item.id, label: item.name })}>
                             {item.name}
                           </button>
                         ))}
@@ -645,36 +648,30 @@ export function BookWindow({ session, book }: { session: Session; book: string }
       >
         {view === "pictures" ? (
           <p className="hint">Open a picture or map to see it{gm ? "; the share symbol shows it to the players, as a tab on their screens" : ""}.</p>
-        ) : page ? (
+        ) : sectionPages.length ? (
           <>
-            <h2>{page.name}</h2>
-            {inlineSounds(-1)}
-            {page.blocks.map((block, index) => (
-              <div key={index} className="book-block" data-block={index}>
-                {
-              block.kind === "picture" ? (
-                <figure className={`book-figure ${block.align}`} onContextMenu={(event) => menu.show(event, actions.items({ book, file: block.file, name: block.name || block.caption || page.name }, "book"))}>
-                  <button type="button" className="book-figure-open" data-figure={block.file} title="Open this image: share it, edit it (walls, doors, lights), play test it" onClick={() => openPicture({ book, file: block.file, name: block.name || block.caption || page.name })} {...slotDrag({ kind: "picture", book, file: block.file, label: block.name || block.caption || page.name })}>
-                    <img src={session.bookUrl("picture", book, block.file)} alt={block.caption} loading="lazy" style={{ maxWidth: `${Math.min(100, block.scale)}%` }} />
-                  </button>
-                  {block.caption ? <figcaption>{block.caption}</figcaption> : null}
-                  {gm ? <ShareButton shared={Boolean(shownPicture(block.file))} what={block.name || block.caption || "this picture"} onClick={() => toggleShown(block.file, block.name || block.caption || page.name)} /> : null}
-                </figure>
-              ) : (
-                <div className={block.frame ? `book-text framed ${block.frame}${READ_FRAMES.has(block.frame) ? " read-aloud-frame" : ""}` : "book-text"}>
-                  {block.frame && READ_FRAMES.has(block.frame) ? <ReadAloudButton text={() => new DOMParser().parseFromString(block.html, "text/html").body.innerText || (new DOMParser().parseFromString(block.html, "text/html").body.textContent ?? "")} title={page.name} /> : null}
-                  {/* The page's dice as roll chips (marked once, after React wrote the words). */}
-                  <div ref={(element) => markInlineRolls(element)} dangerouslySetInnerHTML={{ __html: block.html }} />
-                </div>
-              )}
-                {inlineSounds(index)}
-              </div>
-            ))}
+            <BookPages
+              key={sectionPages[0]?.id}
+              tick={jump}
+              shared={{
+                session,
+                book,
+                gm,
+                pictures: contents.pictures,
+                openPicture,
+                pictureMenu: (event, picture) => menu.show(event, actions.items(picture, "book")),
+                shareButton: (picture) => <ShareButton shared={Boolean(shownPicture(picture.file))} what={picture.name || "this picture"} onClick={() => toggleShown(picture.file, picture.name)} />,
+                inlineSounds,
+              }}
+              pages={sectionPages}
+              focus={pageId}
+              onVisible={setReading}
+            />
             <nav className="book-turn">
-              <button type="button" disabled={at <= 0} aria-label="Previous page" onClick={() => setPageId(pages[at - 1].id)}>
+              <button type="button" disabled={at <= 0} aria-label="Previous page" onClick={() => goTo(pages[at - 1].id)}>
                 ‹ {at > 0 ? pages[at - 1].name : ""}
               </button>
-              <button type="button" disabled={at < 0 || at >= pages.length - 1} aria-label="Next page" onClick={() => setPageId(pages[at + 1].id)}>
+              <button type="button" disabled={at < 0 || at >= pages.length - 1} aria-label="Next page" onClick={() => goTo(pages[at + 1].id)}>
                 {at >= 0 && at < pages.length - 1 ? pages[at + 1].name : ""} ›
               </button>
             </nav>

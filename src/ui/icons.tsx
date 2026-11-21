@@ -13,6 +13,18 @@ const PATHS: Record<string, string> = {
   "package": "M12 3 20 7.5v9L12 21l-8-4.5v-9ZM4 7.5l8 4.5 8-4.5M12 12v9",
   "encounter": "M5 19 15 9M9 5l10 10M5 5l4 4M15 15l4 4M14.5 4.5h5v5",
   "chevron-down": "M6 9l6 6 6-6",
+  "chevron-up": "M6 15l6-6 6 6",
+  "undo": "M9 7 4.5 11.5 9 16M5 11.5h9a5 5 0 0 1 0 10h-2",
+  // A book page's link (dragged anywhere a link goes): a page with its corner turned and a ribbon.
+  "bookmark": "M6 3.5h8.5L18 7v13.5H6ZM14.5 3.5V7H18M9 3.5v7l2-1.4 2 1.4v-7",
+  // The blocks of a book page (the reader's Add here bar), drawn as little pages.
+  "block-text": "M5.5 3.5h13v17h-13ZM8.5 8h7M8.5 11h7M8.5 14h7M8.5 17h4.5",
+  "block-twocol": "M4 3.5h16v17H4ZM12 6v12.5M6.5 8h3.5M6.5 11h3.5M6.5 14h3.5M6.5 17h2.5M14 8h3.5M14 11h3.5M14 14h3.5M14 17h2.5",
+  "block-header": "M5.5 3.5h13v17h-13ZM5.5 9h13M8.5 6.3h7M8.5 12.5h7M8.5 15.5h7M8.5 18h4",
+  "block-image": "M5.5 3.5h13v17h-13ZM5.5 16l4-4 3 3 2-2 4 4M14.5 8h.01",
+  "block-image-right": "M4 3.5h16v17H4ZM12.5 6.5h5v6.5h-5ZM6.5 7.5h4M6.5 10.5h4M6.5 13.5h4M6.5 16.5h11",
+  "block-image-left": "M4 3.5h16v17H4ZM6.5 6.5h5v6.5h-5ZM13.5 7.5h4M13.5 10.5h4M13.5 13.5h4M6.5 16.5h11",
+  "block-links": "M5.5 3.5h13v17h-13ZM8 8h.01M8 12h.01M8 16h.01M10.5 8h5M10.5 12h5M10.5 16h5",
   "chevron-right": "M9 6l6 6-6 6",
   "sidebar-collapse": "M13 6l6 6-6 6M5 6l6 6-6 6",
   "sidebar-expand": "M11 6l-6 6 6 6M19 6l-6 6 6 6",

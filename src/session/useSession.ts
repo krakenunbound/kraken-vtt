@@ -239,8 +239,19 @@ export type BookShelf = { active: string[]; shared: string[]; images: ShownImage
 export type BookInfo = { id: string; name: string; title: string; category: string; ruleset: string; author: string; hasBook: boolean; cover: string; adventure: boolean; forPlayers: boolean; active: boolean; shared: boolean; pack?: boolean; kind?: string; group?: string; order?: string; parent?: string; hasStory?: boolean };
 export type BookPageRef = { id: string; name: string; keywords: string };
 export type BookContents = BookInfo & { chapters: { name: string; sections: { name: string; pages: BookPageRef[] }[] }[]; pictures: { name: string; category: string; file: string }[]; assets?: string[]; media?: { file: string; kind: string }[] };
-export type BookBlock = { kind: "text"; html: string; frame?: string } | { kind: "picture"; file: string; caption: string; align: string; scale: number; name: string };
-export type BookPage = { book: string; id: string; name: string; blocks: BookBlock[] };
+// A book page's blocks, as FG's reference page has them: text (frame: a boxed style), two columns, a header, an
+// image, an image with text beside it (side: where the image is), and the GM's links (sounds play on a click).
+// text/text2: the words as formatted text (to edit); html/html2: as the page shows them.
+type PictureFields = { file: string; caption: string; scale: number; name: string };
+export type BookBlock = { id?: string } & (
+  | { kind: "text"; html: string; text?: string; frame?: string }
+  | { kind: "twocol"; html: string; html2: string; text?: string; text2?: string }
+  | { kind: "header"; text: string }
+  | ({ kind: "picture"; align: string } & PictureFields)
+  | ({ kind: "textpic"; side: "left" | "right"; html: string; text?: string } & PictureFields)
+  | { kind: "links"; links: QuickSlot[] }
+);
+export type BookPage = { book: string; id: string; name: string; blocks: BookBlock[]; edited?: boolean };
 // A quick slot: something kept at hand, opened with a click.
 // The sounds the GM keeps in a book page: bound to its sound links (by the
 // link's key), and dropped in between its paragraphs (after block; -1 the top).
@@ -498,6 +509,8 @@ export function useSession() {
   // The GM's: the open scene's own sound, if it has one.
   const [sceneSound, setSceneSound] = useState<{ sceneId: string | null; kept: Soundscape | null }>({ sceneId: null, kept: null });
   const [bookSounds, setBookSounds] = useState<Record<string, PageSounds>>({});
+  // "book|page" -> when it was last changed (a page the GM edited: open copies read it again).
+  const [bookPageStamps, setBookPageStamps] = useState<Record<string, number>>({});
   const [quickSlots, setQuickSlotsState] = useState<(QuickSlot | null)[]>(Array(12).fill(null));
   const [modifiers, setModifiers] = useState<ModifierStack>({ slots: [], keys: [], total: 0 });
   const [bookShelf, setBookShelf] = useState<BookShelf>({ active: [], shared: [], images: [] });
@@ -773,6 +786,7 @@ export function useSession() {
           if (msg.type === "books") setBookShelf({ active: (msg.active as string[]) ?? [], shared: (msg.shared as string[]) ?? [], images: (msg.images as ShownImage[]) ?? [] });
           if (msg.type === "image-shown" && typeof msg.id === "string") setImageShown({ id: msg.id, at: Date.now() });
           if (msg.type === "book-sounds" && msg.sounds && typeof msg.sounds === "object") setBookSounds(msg.sounds as Record<string, PageSounds>);
+          if (msg.type === "book-page-edited" && typeof msg.book === "string" && typeof msg.page === "string") setBookPageStamps((current) => ({ ...current, [`${msg.book}|${msg.page}`]: Date.now() }));
           if (msg.type === "prefs") {
             diceStore.adopt(msg.prefs);
             accountUiChanged((msg.prefs as { ui?: unknown } | undefined)?.ui);
@@ -1658,6 +1672,17 @@ export function useSession() {
     imageShown,
     bookSounds,
     // The GM's: a sound on one of a page's sound links, or in its story.
+    bookPageStamps,
+    // The GM's change to a book page (set: its name and blocks; revert: the book's own page again).
+    editBookPage: (change: { book: string; page: string; action: "set" | "revert"; name?: string; blocks?: BookBlock[] }) => {
+      const socket = socketRef.current;
+      if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+      const req = ++opCounter.current;
+      return new Promise<void>((resolve, reject) => {
+        opWaits.current.set(req, { resolve: () => resolve(), reject });
+        socket.send(JSON.stringify({ type: "book-page", req, ...change }));
+      });
+    },
     setBookSound: (change: { book: string; page: string; action: "bind" | "unbind" | "add" | "remove"; key?: string; block?: number; id?: string; sound?: string; kind?: string; label?: string }) => send({ type: "book-sound", ...change }),
     // The modifier box beside the tray (the host keeps it, every roll this seat starts reads it).
     modifiers,

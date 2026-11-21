@@ -734,10 +734,12 @@ const TOOLS = [
   {
     name: "kraken_books",
     description:
-      "The GM's books, as FG's Library: the Fantasy Grounds modules on this computer that fit the campaign's ruleset (rulebooks, adventures), read inside Kraken. action list (every module that fits: id, title, category, hasBook, adventure, active, shared, forPlayers); activate / deactivate (book: active for this campaign, as FG's Activation; a player's book starts shared, the GM's books (monsters, the GM's guide, adventures) do not); contents (book: its chapters, sections and pages, and its pictures and maps); page (book, page: a page's text as HTML and its pictures); share / unshare (book: the players may read it, or not; never an adventure, whose pictures and maps the GM shows one at a time with show); show (book, file, name, to: show the players (or only those named in to) a picture or map from it; it opens as a tab on their screens); hide (id, or \"all\"); shared (what the players have now); sound (book, page, soundAction bind: a sound for one of the page's sound links, key = the link's data-sound-key; unbind (key); add: a sound in the story after a paragraph, block = its index (-1 at the top); remove (id); sound = a sound or folder id, as kraken_sound list); sounds (every sound kept in the books).",
+      "The GM's books, as FG's Library: the Fantasy Grounds modules on this computer that fit the campaign's ruleset (rulebooks, adventures), read inside Kraken. action list (every module that fits: id, title, category, hasBook, adventure, active, shared, forPlayers); activate / deactivate (book: active for this campaign, as FG's Activation; a player's book starts shared, the GM's books (monsters, the GM's guide, adventures) do not); contents (book: its chapters, sections and pages, and its pictures and maps); page (book, page: a page as its blocks, each with its words as formatted text and HTML; edited: true when the GM changed it); page-set (book, page, blocks, title: change a page as the GM does with its lock open (FG's reference page): kept with the campaign, the book's file untouched, every seat reading the book sees it); page-revert (book, page: the book's own page again); share / unshare (book: the players may read it, or not; never an adventure, whose pictures and maps the GM shows one at a time with show); show (book, file, name, to: show the players (or only those named in to) a picture or map from it; it opens as a tab on their screens); hide (id, or \"all\"); shared (what the players have now); sound (book, page, soundAction bind: a sound for one of the page's sound links, key = the link's data-sound-key; unbind (key); add: a sound in the story after a paragraph, block = its index (-1 at the top); remove (id); sound = a sound or folder id, as kraken_sound list); sounds (every sound kept in the books).",
     inputSchema: object(
       {
-        action: { type: "string", enum: ["list", "activate", "deactivate", "contents", "page", "share", "unshare", "show", "hide", "shared", "sound", "sounds"] },
+        action: { type: "string", enum: ["list", "activate", "deactivate", "contents", "page", "share", "unshare", "show", "hide", "shared", "sound", "sounds", "page-set", "page-revert"] },
+        blocks: { type: "array", items: { type: "object" }, description: "page-set: the page's blocks in order: { kind: text, text (FG formatted text), frame? } | { kind: twocol, text, text2 } | { kind: header, text } | { kind: picture, file (a picture of this book), caption, scale 10-100, align } | { kind: textpic, side left|right, file, caption, scale, text } | { kind: links, links: [quick-slot links: a book page, a picture, a record, a sound...] }" },
+        title: string("page-set: the page's title (else as it was)"),
         soundAction: { type: "string", enum: ["bind", "unbind", "add", "remove"] },
         key: string("A sound link's key (bind, unbind)"),
         block: number("The paragraph a sound goes after (add); -1 for the top"),
@@ -763,6 +765,12 @@ const TOOLS = [
       if (action === "activate" || action === "deactivate") return out(await table.activateBook(args.book, action === "activate"));
       if (action === "contents") return out(await table.bookContents(args.book));
       if (action === "page") return out(await table.bookPage(args.book, args.page));
+      // FG's reference page unlocked and changed: kept with the campaign, the book's own file untouched.
+      if (action === "page-set") {
+        const before = await table.bookPage(args.book, args.page);
+        return out(table.editBookPage({ book: args.book, page: args.page, action: "set", name: args.title ?? before.name, blocks: Array.isArray(args.blocks) ? args.blocks : before.blocks }));
+      }
+      if (action === "page-revert") return out(table.editBookPage({ book: args.book, page: args.page, action: "revert" }));
       if (action === "share" || action === "unshare") return out(await table.shareBook(args.book, action === "share"));
       if (action === "show") return out(table.showImage(args.book, args.file, args.name, args.to));
       if (action === "sound") return out(table.setBookSound({ ...args, action: args.soundAction, id: args.id }));

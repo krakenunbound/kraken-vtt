@@ -34,6 +34,19 @@ The categories fold away, and the arrow at the bottom collapses the sidebar to i
 - **Assets** shows what each active book, ruleset or art pack supplies: Maps, Images, Handouts, Portraits, Tokens, Covers, Music, Sounds and Video. Sounds, music and video play in the preview; a map or picture can be made a map, shared, or set as the background.
 - **Folders** (the GM's, along the top) shows Maelstrom's folders and what each holds. Drop files on one to add them; **Refresh** reads everything again while the table keeps running, so no player is disconnected.
 
+### Changing a book's pages (the GM's)
+
+A book reads as a manual: a section's pages scroll as one, with a bar between pages, and the contents mark the page you are on. Each page's green mark beside its title is its link: drag it to a quick slot, a note, the story or a map pin.
+
+The lock at the top right of a page unlocks it. Then:
+
+- The **Add here** bar under each block adds a block: text, two columns, a header, an image, text with an image on the right, text with an image on the left, or links.
+- Beside each block: delete it, move it up or down, and for an image, make it bigger or smaller.
+- An image takes a picture of this book: drop one on it (from Images & Maps) or pick one from its list. Type its caption.
+- Type the title and the words in place. A links block takes anything dragged onto it, sounds from the Sound window included (a click plays it for the table).
+
+Lock the page again to read it. Your changes are kept with the campaign, never in the book itself; players reading the book see the changed page. **Back to the book's own page** (the arrow beside the lock) undoes them.
+
 ### Links in a book
 
 Links work as in Fantasy Grounds: a page, a picture, or a record the book holds (a creature, spell, item, class, race, feat, table, encounter) opens in its own window. A table shows as a table, an equipment list as its sections, and a web link opens in your browser. Dice a page names are chips you click to roll.

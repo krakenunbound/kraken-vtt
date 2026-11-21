@@ -1037,8 +1037,65 @@ span.ct-init { display: inline-block; }
    them in view as it scrolls, so they never jump about from page to page. */
 .book-page, .story-window { display: flex; flex-direction: column; }
 .book-page > *, .story-window > * { flex: none; }
-.book-page > .book-turn, .story-window > .book-turn { position: sticky; bottom: -18px; margin-top: auto; padding: 10px 0 12px; background: #15181d; z-index: 1; }
+.book-page { padding-bottom: 0; }
+.book-page > .book-turn, .story-window > .book-turn { position: sticky; bottom: 0; margin-top: auto; padding: 10px 0 12px; background: #15181d; z-index: 1; }
 .story-window > .book-turn { bottom: -12px; }
+/* A book's pages, one after another (FG's reference manual): each page a sheet with its heading bar, a bar
+   between them, and, unlocked, the GM's tools beside each block and an Add here bar under it. */
+.book-pages { display: flex; flex-direction: column; }
+.book-page-sheet { position: relative; padding: 2px 4px 8px; scroll-margin-top: 8px; }
+.book-page-sheet.loading h2 { opacity: 0.5; }
+.book-page-sheet.unlocked { padding-left: 34px; border-radius: 6px; background: linear-gradient(90deg, rgba(214, 170, 92, 0.07), transparent 34px); }
+.book-page-head { display: flex; align-items: center; gap: 10px; margin: 2px 0 10px; padding: 6px 4px 8px; border-bottom: 1px solid color-mix(in srgb, var(--brass) 35%, transparent); }
+.book-page-head h2 { margin: 0; flex: 1; font-size: 1.3rem; letter-spacing: 0.01em; }
+.book-page-anchor { flex: none; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; color: #e8f6ee; background: radial-gradient(circle at 35% 30%, #3fa576, #165338 70%); box-shadow: 0 0 0 1px rgba(232, 246, 238, 0.35), 0 2px 6px rgba(0, 0, 0, 0.5); cursor: grab; }
+.book-page-anchor:active { cursor: grabbing; }
+.book-page-title { flex: 1; font-size: 1.2rem; font-weight: 600; padding: 3px 8px; }
+.book-page-tools { display: inline-flex; gap: 6px; margin-left: auto; }
+.book-tool { width: 26px; height: 26px; padding: 0; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--brass-dim); background: rgba(10, 12, 16, 0.6); color: var(--brass); }
+.book-tool:hover:not(:disabled) { background: var(--brass-soft); }
+.book-tool.on { background: var(--brass); color: #16120a; border-color: var(--brass); }
+.book-tool.danger { color: #e08a7a; border-color: rgba(224, 138, 122, 0.55); }
+.book-tool:disabled { opacity: 0.35; }
+.book-divider { display: flex; align-items: center; gap: 0; margin: 22px 12% 18px; color: var(--brass-dim); }
+.book-divider i { flex: 1; height: 1px; background: currentColor; position: relative; }
+.book-divider i:first-child::before, .book-divider i:last-child::after { content: ""; position: absolute; top: -3px; width: 6px; height: 6px; border: 1px solid currentColor; transform: rotate(45deg); background: var(--bg, #121418); }
+.book-divider i:first-child::before { left: -3px; }
+.book-divider i:last-child::after { right: -3px; }
+.book-divider b { width: 26px; height: 13px; border: 1px solid currentColor; border-top: none; border-radius: 0 0 13px 13px; position: relative; }
+.book-divider b::after { content: ""; position: absolute; left: 50%; top: 1px; margin-left: -5px; border: 5px solid transparent; border-top-color: var(--brass); }
+.book-block { position: relative; }
+.book-block-tools { position: absolute; left: -32px; top: 2px; display: flex; flex-direction: column; gap: 3px; z-index: 2; }
+.book-block-tools .book-tool { width: 22px; height: 22px; }
+.unlocked .book-block { outline: 1px dashed color-mix(in srgb, var(--brass) 28%, transparent); outline-offset: 3px; border-radius: 3px; margin: 6px 0; min-height: 52px; }
+.book-inserter { display: flex; justify-content: center; gap: 6px; margin: 10px 0 12px; padding: 6px 0 0; border-top: 1px solid color-mix(in srgb, var(--brass) 22%, transparent); }
+.book-inserter.first { margin-top: 0; }
+.book-insert { width: 30px; height: 34px; padding: 0; display: grid; place-items: center; border-radius: 4px; border: 1px solid color-mix(in srgb, var(--brass) 45%, transparent); background: linear-gradient(#e9dcbc, #cdb98d); color: #3b2f17; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45); }
+.book-insert:hover { background: linear-gradient(#f7ecd0, #dcc79a); transform: translateY(-1px); }
+.book-header { margin: 18px 0 8px; font-size: 1.15rem; color: var(--brass); letter-spacing: 0.02em; border-bottom: 1px solid color-mix(in srgb, var(--brass) 25%, transparent); padding-bottom: 3px; }
+.book-header-edit { width: 100%; font-size: 1.1rem; color: var(--brass); padding: 4px 8px; }
+.book-twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@container (max-width: 560px) { .book-twocol { grid-template-columns: 1fr; } }
+.book-textpic { display: flow-root; }
+.book-textpic .book-figure { margin: 4px 0 10px; }
+.book-textpic.right .book-figure { float: right; margin-left: 16px; }
+.book-textpic.left .book-figure { float: left; margin-right: 16px; }
+.book-figure-row { display: flex; justify-content: center; }
+.book-figure-row.left { justify-content: flex-start; }
+.book-figure-row.right { justify-content: flex-end; }
+.book-figure.dropping { outline: 2px dashed var(--brass); outline-offset: 4px; }
+.book-figure-empty { display: grid; justify-items: center; gap: 6px; padding: 16px; border: 1px dashed var(--brass-dim); border-radius: 6px; color: var(--muted); font-size: 0.85rem; }
+.book-caption-edit { width: 100%; margin-top: 4px; font-size: 0.85rem; text-align: center; }
+.book-links { display: flex; flex-direction: column; gap: 3px; margin: 6px 0 10px; padding: 2px 0; min-height: 22px; border-radius: 4px; }
+.book-links.dropping { outline: 2px dashed var(--brass); outline-offset: 2px; }
+.book-link-row { display: flex; align-items: center; gap: 4px; }
+.book-link-row > button:first-child { display: inline-flex; align-items: center; gap: 6px; padding: 2px 6px 2px 2px; border: none; background: transparent; color: inherit; text-align: left; font-size: 0.9rem; }
+.book-link-row > button:first-child:hover { color: var(--brass); }
+.book-link-icon { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; color: #f3ead2; background: radial-gradient(circle at 35% 30%, #c98a2e, #6e4410 75%); box-shadow: 0 0 0 1px rgba(243, 234, 210, 0.35); }
+.book-link-row.kind-sound .book-link-icon { background: radial-gradient(circle at 35% 30%, #4aa3c8, #154c66 75%); }
+.book-link-row.kind-book .book-link-icon, .book-link-row.kind-note .book-link-icon { background: radial-gradient(circle at 35% 30%, #3fa576, #165338 75%); }
+.book-link-row.kind-picture .book-link-icon { background: radial-gradient(circle at 35% 30%, #8c6cc9, #3b2466 75%); }
+.book-edit-text { min-height: 2.4em; }
 .images-window { display: flex; flex-direction: column; height: 100%; min-height: 0; gap: 6px; }
 .images-tabs { display: flex; gap: 4px; overflow-x: auto; flex: none; }
 .images-tab { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 6px 6px 0 0; background: rgba(255, 255, 255, 0.03); }

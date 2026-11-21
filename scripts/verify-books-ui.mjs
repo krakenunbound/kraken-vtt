@@ -50,7 +50,8 @@ async function tool(name, args = {}) {
   if (result.isError) throw new Error(`${name}: ${text}`);
   return JSON.parse(text);
 }
-const heading = (where) => where.evaluate(() => document.querySelector(".book-page h2")?.textContent ?? "");
+// The page being read: the one the contents mark (a section's pages are one scroll).
+const heading = (where) => where.evaluate(() => document.querySelector('.book-page-link[aria-current="page"]')?.textContent?.trim() ?? document.querySelector(".book-page h2")?.textContent ?? "");
 const failures = [];
 page.on("pageerror", (error) => failures.push(error.message));
 let browser = null;
@@ -112,11 +113,11 @@ try {
   assert((await page.textContent(".book-text")).includes("Two guards stand at the gate."), "its text");
   assert((await page.$$(".book-text script")).length === 0, "no script in a page");
   await page.click('.book-text a[data-page="inn"]');
-  await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Inn");
+  await page.waitForFunction(() => (document.querySelector('.book-page-link[aria-current="page"]')?.textContent?.trim() ?? document.querySelector(".book-page h2")?.textContent) === "The Inn");
   await page.click('[aria-label="Previous page"]');
-  await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Gate");
+  await page.waitForFunction(() => (document.querySelector('.book-page-link[aria-current="page"]')?.textContent?.trim() ?? document.querySelector(".book-page h2")?.textContent) === "The Gate");
   await page.click('[aria-label="Next page"]');
-  await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Inn");
+  await page.waitForFunction(() => (document.querySelector('.book-page-link[aria-current="page"]')?.textContent?.trim() ?? document.querySelector(".book-page h2")?.textContent) === "The Inn");
   // A link to a creature the book holds opens it in a window (FG's link window); one to nothing is plain text.
   await page.click('.book-text a.book-link.record[data-record="npc.guard@Test Keep"]');
   await page.waitForFunction(() => [...document.querySelectorAll('[data-window="bookrecord"] .record-window h3')].some((h) => h.textContent === "Gate Guard"), null, { timeout: 10000 });
@@ -162,9 +163,9 @@ try {
   await page.dragAndDrop('.book-toc [data-page="inn"]', '[data-quick-slot="0"]');
   await page.waitForSelector('[data-quick-slot="0"].full');
   await page.click('.book-toc [data-page="gate"]');
-  await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Gate");
+  await page.waitForFunction(() => (document.querySelector('.book-page-link[aria-current="page"]')?.textContent?.trim() ?? document.querySelector(".book-page h2")?.textContent) === "The Gate");
   await page.click('[data-quick-slot="0"]');
-  await page.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "The Inn", null, { timeout: 8000 });
+  await page.waitForFunction(() => (document.querySelector('.book-page-link[aria-current="page"]')?.textContent?.trim() ?? document.querySelector(".book-page h2")?.textContent) === "The Inn", null, { timeout: 8000 });
   await page.click('[data-book-view="pictures"]');
   await page.dragAndDrop('[data-picture="images/keep.png"]', '[data-quick-slot="1"]');
   await page.waitForSelector('[data-quick-slot="1"].full');
@@ -222,7 +223,7 @@ try {
   assert((await seat.$('.books-window [data-book="Test Keep"]')) === null, "the player never has the adventure");
   assert((await seat.$(".books-window [data-share]")) === null && (await seat.$('.books-window [data-launch="adventure"]')) === null, "a player cannot share or open maps");
   await seat.click('.books-window [data-book="Test Handbook"]');
-  await seat.waitForFunction(() => document.querySelector(".book-page h2")?.textContent === "First");
+  await seat.waitForFunction(() => (document.querySelector('.book-page-link[aria-current="page"]')?.textContent?.trim() ?? document.querySelector(".book-page h2")?.textContent) === "First");
 
   // The GM shows the map: it opens as a tab on the player's screen.
   await page.click(".images-share .share-button");

@@ -658,16 +658,38 @@ function createBookShelf({ folder, cache = "", also = [], packsFolder = "", modu
       const resolve = resolver(book);
       const blocks = [];
       const data = record.data;
-      if (typeof data.text === "string") blocks.push({ kind: "text", html: toHtml(data.text, resolve) });
+      // Each block as FG's reference page has it (CoreRPG's six: text, two columns, header, image, image with
+      // text beside it on the left or right), its words both as formatted text (to edit) and as HTML (to read).
+      let n = 0;
+      const blockId = () => `b${++n}`;
+      const words = (value) => (typeof value === "string" ? value : "");
+      const textBlock = (formatted, frame = "") => ({ id: blockId(), kind: "text", text: formatted, html: toHtml(formatted, resolve), frame });
+      if (typeof data.text === "string") blocks.push(textBlock(data.text));
       for (const block of byOrder(data.blocks)) {
+        const type = String(block.blocktype ?? "");
+        const align = String(block.align ?? "").split(",").map((part) => part.trim());
         const file = bitmapIn(block.image) || (typeof block.picture === "string" ? block.picture : "");
-        if (file) {
-          const link = block.imagelink?.recordname ? resolve("imagewindow", block.imagelink.recordname) : null;
-          blocks.push({ kind: "picture", file, caption: String(block.caption ?? ""), align: String(block.align ?? "center"), scale: Number(block.scale) || 100, name: link?.name ?? String(block.caption ?? "") });
+        const link = block.imagelink?.recordname ? resolve("imagewindow", block.imagelink.recordname) : null;
+        const picture = { file, caption: String(block.caption ?? ""), scale: Math.min(100, Math.max(10, Number(block.scale) || 100)), name: link?.name ?? String(block.caption ?? "") };
+        const side = /left$/.test(type) || align[1] === "left" ? "left" : /right$/.test(type) || align[1] === "right" ? "right" : "";
+        if (type === "header") blocks.push({ id: blockId(), kind: "header", text: words(block.text).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() });
+        else if (["dualtext", "dualsidebar", "sidebarleft", "sidebarright"].includes(type) && (words(block.text).trim() || words(block.text2).trim())) blocks.push({ id: blockId(), kind: "twocol", text: words(block.text), html: toHtml(words(block.text), resolve), text2: words(block.text2), html2: toHtml(words(block.text2), resolve) });
+        else if (file && side && words(block.text).trim()) blocks.push({ id: blockId(), kind: "textpic", side, ...picture, text: words(block.text), html: toHtml(words(block.text), resolve) });
+        else {
+          if (file) blocks.push({ id: blockId(), kind: "picture", ...picture, align: align[0] || "center" });
+          for (const key of ["text", "text2"]) if (words(block[key]).trim()) blocks.push(textBlock(block[key], String(block.frame ?? "")));
         }
-        for (const key of ["text", "text2"]) if (typeof block[key] === "string" && block[key].trim()) blocks.push({ kind: "text", html: toHtml(block[key], resolve), frame: String(block.frame ?? "") });
       }
       return { book: book.info.id, id: pageId, name: record.name, blocks };
+    },
+    // A page the GM changed (kept with the campaign): its formatted words as HTML, resolved in this book.
+    render(id, blocks) {
+      const resolve = resolver(read(id));
+      return blocks.map((block) => ({
+        ...block,
+        ...(typeof block.text === "string" && block.kind !== "header" ? { html: toHtml(block.text, resolve) } : {}),
+        ...(typeof block.text2 === "string" ? { html2: toHtml(block.text2, resolve) } : {}),
+      }));
     },
     record: bookRecord,
     // A picture from a book (a page's, or one of its maps).

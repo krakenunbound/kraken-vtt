@@ -630,6 +630,58 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
   const cleanSlots = (list) => Array.from({ length: SLOTS }, (_, index) => (Array.isArray(list) ? cleanSlot(list[index]) : null));
   const quickSlots = new Map(Object.entries(saved.quickSlots && typeof saved.quickSlots === "object" ? saved.quickSlots : {}).map(([key, list]) => [key, cleanSlots(list)]));
   const slotsFor = (client) => quickSlots.get(clearKey(client)) ?? cleanSlots([]);
+  // Book pages the GM changed (FG's reference page unlocked and edited), kept with the campaign, never in the
+  // book's own file: "book|page" -> { name, blocks }. Every seat that may read the book reads the changed page.
+  const BLOCK_KINDS = ["text", "twocol", "header", "picture", "textpic", "links"];
+  const { sanitizeFormatted } = require("../shared/text/formatted.mjs");
+  const cleanPageBlock = (raw, index) => {
+    if (!raw || typeof raw !== "object" || !BLOCK_KINDS.includes(raw.kind)) return null;
+    const id = /^[\w-]{1,24}$/.test(String(raw.id ?? "")) ? String(raw.id) : `e${index}${crypto.randomBytes(3).toString("hex")}`;
+    const words = (value) => sanitizeFormatted(typeof value === "string" ? value : "", 100000);
+    const picture = () => ({ file: text(raw.file, "").slice(0, 300), caption: text(raw.caption, "").slice(0, 200), name: text(raw.name, "").slice(0, 200), scale: Math.min(100, Math.max(10, Math.round(num(raw.scale, 100) / 10) * 10)) });
+    if (raw.kind === "text") return { id, kind: "text", text: words(raw.text), frame: /^[a-z0-9]{0,20}$/.test(String(raw.frame ?? "")) ? String(raw.frame ?? "") : "" };
+    if (raw.kind === "twocol") return { id, kind: "twocol", text: words(raw.text), text2: words(raw.text2) };
+    if (raw.kind === "header") return { id, kind: "header", text: text(raw.text, "").slice(0, 200) };
+    if (raw.kind === "picture") return { id, kind: "picture", ...picture(), align: ["left", "right", "center"].includes(raw.align) ? raw.align : "center" };
+    if (raw.kind === "textpic") return { id, kind: "textpic", ...picture(), side: raw.side === "left" ? "left" : "right", text: words(raw.text) };
+    return { id, kind: "links", links: (Array.isArray(raw.links) ? raw.links : []).map((link) => cleanSlot(link)).filter(Boolean).slice(0, 60) };
+  };
+  const bookEdits = new Map(
+    Object.entries(saved.bookEdits && typeof saved.bookEdits === "object" ? saved.bookEdits : {})
+      .slice(0, 2000)
+      .map(([key, page]) => [key, { name: text(page?.name, "").slice(0, 200), blocks: (Array.isArray(page?.blocks) ? page.blocks : []).map(cleanPageBlock).filter(Boolean).slice(0, 300) }]),
+  );
+  // set: the page as the GM made it (its name and blocks); revert: back to the book's own page.
+  function setBookPage(change) {
+    const book = text(change?.book, "").slice(0, 200);
+    const page = text(change?.page, "").slice(0, 120);
+    if (!book || !page) throw new Error("Which book and page?");
+    const key = `${book}|${page}`;
+    if (change?.action === "revert") bookEdits.delete(key);
+    else if (change?.action === "set") {
+      const blocks = (Array.isArray(change.blocks) ? change.blocks : []).slice(0, 300).map(cleanPageBlock).filter(Boolean);
+      const size = JSON.stringify(blocks).length;
+      if (size > 900000) throw new Error("That page is too long to keep.");
+      bookEdits.set(key, { name: text(change.name, "").slice(0, 200), blocks });
+    } else throw new Error("set or revert.");
+    for (const [ws, client] of clients) if (client.joined && canRead(client, book)) send(ws, { type: "book-page-edited", book, page });
+    onChange("table");
+    return { book, page, edited: bookEdits.has(key) };
+  }
+  // A changed page as a seat reads it: its words as HTML in its book, links to what the seat may not see left out.
+  const editedPageFor = (client, book, page) => {
+    const kept = bookEdits.get(`${book}|${page}`);
+    if (!kept) return null;
+    const seat = seatOf(client);
+    const visibleLink = (link) => {
+      if (client.role === "dm") return true;
+      if (!["sheet", "note", "record"].includes(link.kind) || link.record.includes("|")) return true;
+      const record = records.get(link.record);
+      return Boolean(record) && records.seenBy(record, seat);
+    };
+    const blocks = kept.blocks.map((block) => (block.kind === "links" ? { ...block, links: block.links.filter(visibleLink) } : block));
+    return { book, id: page, name: kept.name, edited: true, blocks: books.render ? books.render(book, blocks) : blocks };
+  };
   // A table always opens unpaused.
   let options = savedOptions({ ...(saved.options && typeof saved.options === "object" ? saved.options : {}), paused: false });
   // Who may not sit here (the GM's Ban, kept with the campaign): a name, and the address it came from (never this computer's).
@@ -1798,7 +1850,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
           // A book's module converted first, off this thread (once), so the table never waits on it.
           const file = books.file?.(book);
           (file ? prepareModule(file) : Promise.resolve())
-            .then(() => json(url.pathname === "/book/contents" ? books.contents(book) : books.page(book, url.searchParams.get("page") || "")))
+            .then(() => json(url.pathname === "/book/contents" ? books.contents(book) : editedPageFor(client, book, url.searchParams.get("page") || "") ?? books.page(book, url.searchParams.get("page") || "")))
             .catch(() => nothing());
           return;
         }
@@ -2392,6 +2444,21 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
 
       // The GM shares a book with the players, or stops; shows them a picture
       // (it opens as a tab on their screens), or takes it back.
+      // The GM's change to a book page (unlocked and edited), or back to the book's own.
+      if (msg.type === "book-page") {
+        if (client.role !== "dm") {
+          send(ws, { type: "error", reason: "Only the GM changes the books." });
+          return;
+        }
+        try {
+          const done = setBookPage(msg);
+          if (typeof msg.req === "number") send(ws, { type: "op-result", req: msg.req, ok: true, ...done });
+        } catch (error) {
+          send(ws, { type: "error", reason: error instanceof Error ? error.message : "Could not change that page." });
+          if (typeof msg.req === "number") send(ws, { type: "op-result", req: msg.req, ok: false, error: error instanceof Error ? error.message : "Could not change that page." });
+        }
+        return;
+      }
       if (msg.type === "book-sound") {
         if (client.role !== "dm") {
           send(ws, { type: "error", reason: "Only the GM keeps sounds in the books." });
@@ -3958,8 +4025,10 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       if (!books) throw new Error("There are no books here.");
       const file = books.file?.(book);
       if (file) await prepareModule(file);
-      return books.page(book, page);
+      return editedPageFor({ role: "dm" }, book, page) ?? books.page(book, page);
     },
+    // The GM's change to a book page (set: name and blocks; revert: the book's own page again).
+    editBookPage: (change) => setBookPage(change),
     shelf: shelfView,
     bookSounds: () => Object.fromEntries(bookSounds),
     setBookSound,
@@ -4326,6 +4395,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
         modifiers: modifiers.toJSON(),
         sessions,
         bookSounds: Object.fromEntries(bookSounds),
+        bookEdits: Object.fromEntries(bookEdits),
         sceneSounds: Object.fromEntries(sceneSounds),
         bans,
       };

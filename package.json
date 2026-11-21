@@ -119,6 +119,7 @@
     "grid-draw-ui": "node scripts/verify-grid-draw-ui.mjs",
     "grid-cells": "node scripts/check-grid-cells.mjs",
     "studio-grid-ui": "node scripts/verify-studio-grid-ui.mjs",
+    "book-edit-ui": "node scripts/verify-book-edit-ui.mjs",
     "picture-map-ui": "node scripts/verify-picture-map-ui.mjs",
     "uvtt-map-ui": "node scripts/verify-uvtt-map-ui.mjs",
     "ui-scale-ui": "node scripts/verify-ui-scale-ui.mjs",
