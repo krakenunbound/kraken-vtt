@@ -1,40 +1,104 @@
-/* Grid & map size: line the grid up with the squares drawn in the map picture. */
+/* Grid & map size: draw the grid over the squares printed in the map picture, and its look.
+   The project keeps: grid (a cell's width, px), gridY (its height when width and height are
+   unlinked; null: square), gridOffset, gridDistance and gridUnits (a square's measure),
+   gridColor, gridAlpha (0-1), gridShow, gridStyle (solid, dashed, dotted). */
 window.KrakenGrid = (() => {
   'use strict';
   const S = () => window.KrakenStudio, $ = s => document.querySelector(s);
-  let setting = false, drag = null;
+  // Drawing is on whenever Grid & map size is open: a drag over one square sets the grid.
+  let setting = false, drag = null, unlinked = null;
   const active = () => S().mode === 'grid';
+  const cellY = p => (Number(p.gridY) > 0 ? Number(p.gridY) : p.grid);
+  const linkedNow = p => (unlinked === null ? !(Number(p.gridY) > 0) : !unlinked);
 
-  function apply(size, ox, oy) {
+  // The grid's look, for the canvas and Save to Kraken.
+  function look(p) {
+    return {
+      color: /^#[0-9a-f]{6}$/i.test(p.gridColor || '') ? p.gridColor : '#ffffff',
+      alpha: p.gridAlpha !== null && p.gridAlpha !== undefined && Number.isFinite(Number(p.gridAlpha)) ? Math.min(1, Math.max(0, Number(p.gridAlpha))) : 0.4,
+      show: p.gridShow !== false,
+      style: ['dashed', 'dotted'].includes(p.gridStyle) ? p.gridStyle : 'solid',
+    };
+  }
+  function change(patch) {
+    const p = S().project;
+    S().snapshot();
+    Object.assign(p, patch);
+    S().save(); S().draw(); render();
+  }
+  function apply(size, ox, oy, sizeY = null) {
     const p = S().project, g = Math.min(1000, Math.max(5, Math.round(size * 100) / 100));
+    const gy = sizeY ? Math.min(1000, Math.max(5, Math.round(sizeY * 100) / 100)) : null;
     S().snapshot();
     p.grid = g;
-    p.gridOffset = {x: Math.round((((ox % g) + g) % g) * 100) / 100, y: Math.round((((oy % g) + g) % g) * 100) / 100};
+    p.gridY = gy;
+    p.gridOffset = {x: Math.round((((ox % g) + g) % g) * 100) / 100, y: Math.round((((oy % (gy || g)) + (gy || g)) % (gy || g)) * 100) / 100};
     p.wallGridSnap = true;  // the grid now matches the picture, so snapping helps
     S().save(); S().draw(); render();
   }
 
   function render() {
     const box = $('#gridPanel'); if (!box) return;
-    const p = S().project, off = p.gridOffset || {x: 0, y: 0};
+    const p = S().project, off = p.gridOffset || {x: 0, y: 0}, l = look(p), linked = linkedNow(p);
+    const squaresAcross = (p.width / p.grid).toFixed(1).replace('.0', ''), squaresDown = (p.height / cellY(p)).toFixed(1).replace('.0', '');
     box.innerHTML = `
-      <div class="los-title">Line the grid up with the picture</div>
-      <button class="gold grid-set ${setting ? 'on' : ''}" title="Then drag a box over exactly one square of the map picture.">${setting ? 'Drawing: drag over one square of the picture' : 'Draw the grid from the picture'}</button>
-      <p class="los-help">Zoom in, then drag from one corner of a square in the picture to the opposite corner. Map Studio sets the square size and lines the grid up with it. Drag again to redo it; the button turns drawing off.</p>
-      <div class="grid-fields">
-        <label>Square size <span><input type="number" id="gridSize" min="5" max="1000" step="0.1" value="${p.grid}"> px</span></label>
-        <label>Offset across <span><input type="number" id="gridOx" step="0.1" value="${off.x || 0}"> px</span></label>
-        <label>Offset down <span><input type="number" id="gridOy" step="0.1" value="${off.y || 0}"> px</span></label>
+      <div class="los-title">Grid</div>
+      <div class="grid-tools">
+        <button class="gold grid-set ${setting ? 'on' : ''}" aria-pressed="${setting}" title="Drag from one corner of a square in the picture to the opposite corner">⌖ ${setting ? 'Drawing: drag over one square' : 'Draw the grid'}</button>
+        <button class="grid-eye ${l.show ? 'on' : ''}" aria-pressed="${l.show}" aria-label="${l.show ? 'Hide the grid' : 'Show the grid'}" title="${l.show ? 'Shown: click to hide the grid (it still snaps and measures)' : 'Hidden: click to show the grid'}">${l.show ? '👁' : '◌'}</button>
       </div>
-      <p class="los-help">One square is 5 ft. This map is ${(p.width / p.grid).toFixed(1).replace('.0', '')} × ${(p.height / p.grid).toFixed(1).replace('.0', '')} squares.<br>
-        Arrow keys nudge the grid 1 px (Alt 0.1, Shift 10); Ctrl+arrows change the square size.</p>`;
-    box.querySelector('.grid-set').onclick = () => { setting = !setting; render(); hint(); };
-    const read = () => apply(Number($('#gridSize').value) || p.grid, Number($('#gridOx').value) || 0, Number($('#gridOy').value) || 0);
-    ['#gridSize', '#gridOx', '#gridOy'].forEach(id => { $(id).onchange = read; });
+      <p class="los-help">Zoom in, then drag from one corner of a square printed in the picture to the opposite corner: the grid takes that square's size and lines up with it. Drag again to redo it.</p>
+      <div class="grid-fields grid-cell">
+        <label>Width <span><input type="number" id="gridSize" min="5" max="1000" step="0.1" value="${p.grid}"></span></label>
+        <button class="grid-link ${linked ? 'on' : ''}" aria-pressed="${linked}" aria-label="${linked ? 'Width and height linked: click to unlink' : 'Width and height unlinked: click to link'}" title="${linked ? 'Linked: square cells. Click to set width and height apart.' : 'Unlinked: each cell its own width and height. Click to make them square.'}">${linked ? '🔗' : '⛓️‍💥'}</button>
+        <label>Height <span><input type="number" id="gridSizeY" min="5" max="1000" step="0.1" value="${cellY(p)}"></span></label>
+      </div>
+      <div class="grid-fields">
+        <label>Tint <span><input type="color" id="gridColor" value="${l.color}"></span></label>
+        <label title="0 hides the lines; the grid still snaps and measures">Alpha ${Math.round(l.alpha * 255)} <span><input type="range" id="gridAlpha" min="0" max="255" step="1" value="${Math.round(l.alpha * 255)}"></span></label>
+        <label>Line <span><select id="gridStyle"><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select></span></label>
+        <label>Distance a square <span><input type="number" id="gridDistance" min="0.1" step="0.5" value="${Number(p.gridDistance) > 0 ? p.gridDistance : 5}"></span></label>
+        <label>Suffix <span><input id="gridUnits" maxlength="12" value="${String(p.gridUnits || 'ft').replace(/"/g, '&quot;')}"></span></label>
+      </div>
+      <div class="grid-nudge">
+        <span>Adjust position</span>
+        <div class="grid-cross" role="group" aria-label="Adjust position">
+          <button data-nudge="0,-1" class="up" aria-label="Move the grid up" title="1 px; Shift: 10 px">↑</button>
+          <button data-nudge="-1,0" class="left" aria-label="Move the grid left" title="1 px; Shift: 10 px">←</button>
+          <button data-nudge="1,0" class="right" aria-label="Move the grid right" title="1 px; Shift: 10 px">→</button>
+          <button data-nudge="0,1" class="down" aria-label="Move the grid down" title="1 px; Shift: 10 px">↓</button>
+        </div>
+        <label>Across <input type="number" id="gridOx" step="0.1" value="${off.x || 0}"></label>
+        <label>Down <input type="number" id="gridOy" step="0.1" value="${off.y || 0}"></label>
+      </div>
+      <p class="los-help">This map is ${squaresAcross} × ${squaresDown} squares. Arrow keys nudge the grid 1 px (Alt 0.1, Shift 10); Ctrl+arrows change the square size.</p>`;
+    box.querySelector('#gridStyle').value = l.style;
+    box.querySelector('.grid-set').onclick = () => { setting = true; render(); hint(); };
+    box.querySelector('.grid-eye').onclick = () => change({gridShow: !l.show});
+    box.querySelector('.grid-link').onclick = () => {
+      if (linked) { unlinked = true; render(); return; }
+      unlinked = false;
+      apply(p.grid, off.x || 0, off.y || 0, null);
+    };
+    $('#gridSize').onchange = e => { const v = Number(e.target.value) || p.grid; apply(v, off.x || 0, off.y || 0, linked ? null : cellY(p)); };
+    $('#gridSizeY').onchange = e => { const v = Number(e.target.value) || cellY(p); linked ? apply(v, off.x || 0, off.y || 0, null) : apply(p.grid, off.x || 0, off.y || 0, v); };
+    $('#gridColor').oninput = e => change({gridColor: e.target.value});
+    $('#gridAlpha').onchange = e => change({gridAlpha: Number(e.target.value) / 255});
+    $('#gridStyle').onchange = e => change({gridStyle: e.target.value});
+    $('#gridDistance').onchange = e => change({gridDistance: Math.min(1000, Math.max(0.1, Number(e.target.value) || 5))});
+    $('#gridUnits').onchange = e => change({gridUnits: String(e.target.value || 'ft').slice(0, 12)});
+    const read = () => apply(p.grid, Number($('#gridOx').value) || 0, Number($('#gridOy').value) || 0, Number(p.gridY) > 0 ? p.gridY : null);
+    ['#gridOx', '#gridOy'].forEach(id => { $(id).onchange = read; });
+    box.querySelectorAll('[data-nudge]').forEach(b => {
+      b.onclick = e => {
+        const [dx, dy] = b.dataset.nudge.split(',').map(Number), step = e.shiftKey ? 10 : 1;
+        apply(p.grid, (off.x || 0) + dx * step, (off.y || 0) + dy * step, Number(p.gridY) > 0 ? p.gridY : null);
+      };
+    });
   }
   function hint() {
     if (!active()) return;
-    $('#canvasHint').textContent = setting ? 'Drag from one corner of a square in the picture to the opposite corner' : 'Line the grid up with the picture (Set grid from the picture)';
+    $('#canvasHint').textContent = setting ? 'Drag from one corner of a square in the picture to the opposite corner' : 'Press Draw the grid, then drag over one square of the picture';
   }
 
   function pointerDown(e) {
@@ -48,54 +112,23 @@ window.KrakenGrid = (() => {
     if (!drag) return false;
     drag.b = S().point(e); S().draw(); return true;
   }
-  // Look for the grid lines drawn in the map picture near the dragged size, so a
-  // rough drag still gives an exact grid. Returns null when the picture has no clear grid.
-  function detect(estimate, ox, oy) {
-    const p = S().project, base = p.objects.find(o => o.layer === 'map') ||
-      p.objects.slice().sort((a, b) => b.width * b.height - a.width * a.height)[0];
-    if (!base) return null;
-    const img = S().image(base.assetId);
-    if (!img.complete || !img.naturalWidth) return null;
-    const scale = base.width / img.naturalWidth, W = Math.min(img.naturalWidth, 4096), H = Math.min(img.naturalHeight, 4096);
-    const c = document.createElement('canvas'); c.width = W; c.height = H;
-    const g = c.getContext('2d', {willReadFrequently: true}); g.drawImage(img, 0, 0, W, H);
-    const k = img.naturalWidth / W * scale, data = g.getImageData(0, 0, W, H).data;
-    const lum = i => data[i] * .3 + data[i + 1] * .59 + data[i + 2] * .11;
-    const colP = new Float32Array(W), rowP = new Float32Array(H);
-    for (let y = 0; y < H; y += 2) for (let x = 1; x < W; x++) colP[x] += Math.abs(lum((y * W + x) * 4) - lum((y * W + x - 1) * 4));
-    for (let x = 0; x < W; x += 2) for (let y = 1; y < H; y++) rowP[y] += Math.abs(lum((y * W + x) * 4) - lum(((y - 1) * W + x) * 4));
-    function best(P, est, guess) {
-      const n = P.length, mean = P.reduce((s, v) => s + v, 0) / n || 1, at = x => { const i = Math.round(x); return i > 0 && i < n - 1 ? P[i - 1] + P[i] + P[i + 1] : 0; };
-      let top = {score: 0};
-      for (let T = est * 0.88; T <= est * 1.12; T += 0.05) {
-        for (let ph = 0; ph < T; ph += 0.5) {
-          let s = 0, m = 0; for (let x = ph; x < n; x += T) { s += at(x); m++; }
-          s /= m * 3 * mean;
-          if (s > top.score) top = {score: s, T, ph};
-        }
-      }
-      return top.score > 1.6 ? top : null;  // lines must stand out clearly from the picture
-    }
-    const cx = best(colP, estimate / k, ox / k), cy = best(rowP, estimate / k, oy / k);
-    if (!cx || !cy || Math.abs(cx.T - cy.T) / cx.T > 0.02) return null;
-    const T = (cx.T + cy.T) / 2 * k;
-    return {size: T, x: base.x + cx.ph * k, y: base.y + cy.ph * k};
-  }
   function pointerUp() {
     if (!drag) return false;
     const {a, b} = drag; drag = null;
     const w = Math.abs(b.x - a.x), h = Math.abs(b.y - a.y);
     if (w < 5 || h < 5) { S().draw(); return true; }
-    const size = Math.abs(w - h) / Math.max(w, h) < 0.15 ? (w + h) / 2 : Math.max(w, h);
-    let found = null;
-    try { found = detect(size, Math.min(a.x, b.x), Math.min(a.y, b.y)); } catch { found = null; }
-    if (found) {
-      apply(found.size, found.x, found.y);
-      S().toast(`Grid set to ${Math.round(found.size * 100) / 100} px squares, locked onto the grid lines in the picture.`);
-    } else {
-      apply(size, Math.min(a.x, b.x), Math.min(a.y, b.y));
-      S().toast(`Grid set to ${Math.round(size * 10) / 10} px squares from your box. Nudge it with the arrow keys if it drifts.`);
+    const p = S().project, left = Math.min(a.x, b.x), top = Math.min(a.y, b.y);
+    if (!linkedNow(p)) {
+      // Unlinked: the box is the cell.
+      apply(w, left, top, h);
+      S().toast(`Grid set to ${Math.round(w * 10) / 10} × ${Math.round(h * 10) / 10} px cells from your box.`);
+      hint();
+      return true;
     }
+    // Linked: square cells, exactly where the box was drawn (a near-square box averages its sides).
+    const size = Math.abs(w - h) / Math.max(w, h) < 0.15 ? (w + h) / 2 : Math.max(w, h);
+    apply(size, left, top);
+    S().toast(`Grid set to ${Math.round(size * 10) / 10} px squares from your box. Nudge it with the arrows if it drifts.`);
     hint();
     return true;
   }
@@ -104,27 +137,47 @@ window.KrakenGrid = (() => {
     const d = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]}[e.key];
     if (!d) return false;
     e.preventDefault();
-    const p = S().project, off = p.gridOffset || {x: 0, y: 0};
+    const p = S().project, off = p.gridOffset || {x: 0, y: 0}, gy = Number(p.gridY) > 0 ? p.gridY : null;
     if (e.ctrlKey || e.metaKey) {
       const step = e.altKey ? 0.1 : 1, change = d[0] || -d[1];
-      apply(p.grid + change * step, off.x, off.y);
+      apply(p.grid + change * step, off.x, off.y, gy ? gy + change * step : null);
     } else {
       const step = e.shiftKey ? 10 : e.altKey ? 0.1 : 1;
-      apply(p.grid, (off.x || 0) + d[0] * step, (off.y || 0) + d[1] * step);
+      apply(p.grid, (off.x || 0) + d[0] * step, (off.y || 0) + d[1] * step, gy);
     }
     return true;
   }
+  // The grid's lines over the map, in its own tint and alpha (a line a screen pixel or more wide at any zoom).
+  function paint(ctx, p, zoom) {
+    const l = look(p);
+    if (!l.show || l.alpha <= 0) return;
+    const gx = p.grid, gy = cellY(p), ox = Number(p.gridOffset?.x) || 0, oy = Number(p.gridOffset?.y) || 0, z = zoom || 1;
+    const r = parseInt(l.color.slice(1, 3), 16), g = parseInt(l.color.slice(3, 5), 16), b = parseInt(l.color.slice(5, 7), 16);
+    ctx.save();
+    ctx.strokeStyle = `rgba(${r},${g},${b},${l.alpha})`;
+    ctx.lineWidth = Math.max(1, 1.2 / z);
+    ctx.setLineDash(l.style === 'dashed' ? [6 / z, 4 / z] : l.style === 'dotted' ? [1.2 / z, 4 / z] : []);
+    ctx.beginPath();
+    for (let a = ((ox % gx) + gx) % gx; a <= p.width; a += gx) { ctx.moveTo(a, 0); ctx.lineTo(a, p.height); }
+    for (let a = ((oy % gy) + gy) % gy; a <= p.height; a += gy) { ctx.moveTo(0, a); ctx.lineTo(p.width, a); }
+    ctx.stroke();
+    ctx.restore();
+  }
   function draw(ctx, zoom) {
     if (!drag) return;
-    ctx.save(); ctx.strokeStyle = '#f0dfab'; ctx.lineWidth = 2 / zoom; ctx.setLineDash([6 / zoom, 4 / zoom]);
-    ctx.strokeRect(drag.a.x, drag.a.y, drag.b.x - drag.a.x, drag.b.y - drag.a.y); ctx.restore();
+    ctx.save(); ctx.strokeStyle = '#ffb02e'; ctx.fillStyle = 'rgba(255, 210, 120, 0.15)'; ctx.lineWidth = 2 / zoom; ctx.setLineDash([6 / zoom, 4 / zoom]);
+    ctx.fillRect(drag.a.x, drag.a.y, drag.b.x - drag.a.x, drag.b.y - drag.a.y);
+    ctx.strokeRect(drag.a.x, drag.a.y, drag.b.x - drag.a.x, drag.b.y - drag.a.y);
+    ctx.setLineDash([]); ctx.font = `${14 / zoom}px sans-serif`; ctx.fillStyle = '#ffb02e';
+    ctx.fillText(`${Math.round(Math.abs(drag.b.x - drag.a.x))} × ${Math.round(Math.abs(drag.b.y - drag.a.y))}`, Math.max(drag.a.x, drag.b.x) + 6 / zoom, Math.min(drag.a.y, drag.b.y) + 14 / zoom);
+    ctx.restore();
   }
-  function modeChanged(mode) { setting = mode === 'grid'; drag = null; if (mode === 'grid') { render(); hint(); } }
+  function modeChanged(mode) { setting = mode === 'grid'; drag = null; unlinked = null; if (mode === 'grid') { render(); hint(); } }
   let lastSig = '';
   function refresh() {
     if (!active()) return;
-    const p = S().project, sig = JSON.stringify([p.grid, p.gridOffset, p.width, p.height, setting]);
+    const p = S().project, sig = JSON.stringify([p.grid, p.gridY, p.gridOffset, p.width, p.height, p.gridColor, p.gridAlpha, p.gridShow, p.gridStyle, p.gridDistance, p.gridUnits, setting, unlinked]);
     if (sig !== lastSig) { lastSig = sig; render(); }
   }
-  return {pointerDown, pointerMove, pointerUp, keyDown, draw, modeChanged, refresh};
+  return {pointerDown, pointerMove, pointerUp, keyDown, draw, paint, look, cellY, modeChanged, refresh};
 })();

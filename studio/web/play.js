@@ -52,8 +52,8 @@ window.KrakenPlay = (() => {
   const feetPerSquare = p => Number(p.gridDistance) > 0 ? Number(p.gridDistance) : 5;
   const px = (p, feet) => feet / feetPerSquare(p) * p.grid;
   function snapCentre(p, q) {
-    const g = p.grid, ox = Number(p.gridOffset?.x) || 0, oy = Number(p.gridOffset?.y) || 0;
-    return {x: Math.floor((q.x - ox) / g) * g + ox + g / 2, y: Math.floor((q.y - oy) / g) * g + oy + g / 2};
+    const g = p.grid, gy = Number(p.gridY) > 0 ? Number(p.gridY) : p.grid, ox = Number(p.gridOffset?.x) || 0, oy = Number(p.gridOffset?.y) || 0;
+    return {x: Math.floor((q.x - ox) / g) * g + ox + g / 2, y: Math.floor((q.y - oy) / gy) * gy + oy + gy / 2};
   }
 
   // --- walls as the test sees them (doors opened in the test count as open) --
@@ -420,7 +420,7 @@ window.KrakenPlay = (() => {
   function keyDown(e) {
     if (!active() || e.ctrlKey || e.metaKey || e.altKey || ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return false;
     const p = S().project, step = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1], a: [-1, 0], d: [1, 0], w: [0, -1], s: [0, 1]}[e.key];
-    if (step && st.token) { e.preventDefault(); moveTo({x: st.token.x + step[0] * p.grid, y: st.token.y + step[1] * p.grid}); S().draw(); return true; }
+    if (step && st.token) { e.preventDefault(); moveTo({x: st.token.x + step[0] * p.grid, y: st.token.y + step[1] * (Number(p.gridY) > 0 ? Number(p.gridY) : p.grid)}); S().draw(); return true; }
     if (e.key === 'q' || e.key === 'e') { st.facing += (e.key === 'q' ? -1 : 1) * Math.PI / 8; S().draw(); return true; }
     return false;
   }

@@ -189,7 +189,19 @@ function projectFor({ view, pictureId, size, name }) {
     effects: [],
     regions: [],
   };
-  // The master is the truth for what Kraken plays with.
+  // The master is the truth for what Kraken plays with: its grid as the GM set it too.
+  const tableGrid = view.grid;
+  if (tableGrid) {
+    project.grid = Number(tableGrid.size) || project.grid;
+    project.gridY = Number(tableGrid.sizeY) >= 10 ? Number(tableGrid.sizeY) : null;
+    project.gridOffset = { x: Number(tableGrid.offsetX) || 0, y: Number(tableGrid.offsetY) || 0 };
+    project.gridDistance = Number(tableGrid.distance) || 5;
+    project.gridUnits = String(tableGrid.units || "ft").slice(0, 12);
+    if (/^#[0-9a-f]{6}/i.test(String(tableGrid.color ?? ""))) project.gridColor = String(tableGrid.color).slice(0, 7);
+    if (tableGrid.alpha != null && Number.isFinite(Number(tableGrid.alpha))) project.gridAlpha = Number(tableGrid.alpha);
+    project.gridShow = tableGrid.show !== false;
+    project.gridStyle = tableGrid.style || "solid";
+  }
   project.walls = studioWalls(walls, origin);
   project.lights = studioLights(lights, origin);
   // The table's regions are the truth too (the GM may have changed one there);

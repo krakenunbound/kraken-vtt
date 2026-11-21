@@ -649,6 +649,23 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     state.walls[scene.id] = state.walls[scene.id] ?? [];
     return state.walls[scene.id];
   }
+  // A map's whole grid: the GM's Grid tab over the scene's own (size, height, offset, measure, look).
+  function fullGrid(target) {
+    const set = state.settings[target?.id]?.grid ?? {};
+    const base = target?.baseGrid ?? target?.grid ?? {};
+    return {
+      size: set.size ?? base.size ?? 100,
+      sizeY: set.sizeY ?? null,
+      offsetX: set.offsetX ?? base.offsetX ?? 0,
+      offsetY: set.offsetY ?? base.offsetY ?? 0,
+      distance: set.distance ?? base.distance ?? 5,
+      units: set.units ?? base.units ?? "ft",
+      color: set.color ?? base.color ?? null,
+      alpha: set.alpha ?? base.alpha ?? null,
+      show: set.show !== false,
+      style: set.style ?? "solid",
+    };
+  }
   // The scene the rules see: its walls are the table's own, its grid the GM's.
   function liveScene() {
     if (!scene) return;
@@ -1989,10 +2006,11 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     // walls, lights and weather replace the image's own; tokens, labels, paint
     // and image layers made in Kraken stay.
     studioView(of = null) {
-      // A map's master by its scene (one of the campaign's own maps), open anywhere or not.
-      if (of && of.id !== scene?.id) return { scene: of, walls: state.walls[of.id] ?? [], lights: state.lights[of.id] ?? [], fx: state.fx[of.id] ?? [], regions: state.regions[of.id] ?? [], studio: state.studio[of.id] ?? null };
+      // A map's master by its scene (one of the campaign's own maps), open anywhere or not; grid: the whole
+      // grid as the GM set it (Map Studio opens with it: the table's grid is the truth).
+      if (of && of.id !== scene?.id) return { scene: of, grid: fullGrid(of), walls: state.walls[of.id] ?? [], lights: state.lights[of.id] ?? [], fx: state.fx[of.id] ?? [], regions: state.regions[of.id] ?? [], studio: state.studio[of.id] ?? null };
       if (!scene) return null;
-      return { scene, walls: wallsHere(), lights: lightsHere(), fx: fxHere(), regions: regionsHere(), studio: state.studio[scene.id] ?? null };
+      return { scene, grid: fullGrid(scene), walls: wallsHere(), lights: lightsHere(), fx: fxHere(), regions: regionsHere(), studio: state.studio[scene.id] ?? null };
     },
     // picture: the painted picture; false: Map Studio paints nothing now (the base picture again); null: unchanged.
     // grid: the square size and offset Map Studio lined up with the picture.
@@ -2046,14 +2064,23 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
         .slice(0, 20);
       const before = state.studio[target.id] ?? {};
       state.studio[target.id] = { project, picture: picture === false ? null : picture ?? before.picture ?? null, saved: Date.now() };
-      // Only when Map Studio's grid differs from the map's (a project always carries one).
+      // Map Studio's grid (Grid & map size: size, height, offset, measure and look), where it differs from the map's.
       const size = Number(grid?.size);
-      const now = target.grid ?? {};
-      const moved = size !== Number(now.size) || (Number(grid?.offsetX) || 0) !== (Number(now.offsetX) || 0) || (Number(grid?.offsetY) || 0) !== (Number(now.offsetY) || 0);
-      if (Number.isFinite(size) && size >= 10 && size <= 1000 && moved) {
-        const old = state.settings[target.id] ?? {};
-        // Map Studio's squares are square: its grid, when it moves, links width and height again.
-        state.settings[target.id] = cleanSettings({ ...old, grid: { ...(old.grid ?? {}), size, sizeY: null, offsetX: Number(grid.offsetX) || 0, offsetY: Number(grid.offsetY) || 0 } });
+      if (grid && Number.isFinite(size) && size >= 10 && size <= 1000) {
+        const now = fullGrid(target);
+        const next = { ...now, size, sizeY: Number(grid.sizeY) >= 10 ? Number(grid.sizeY) : null, offsetX: Number(grid.offsetX) || 0, offsetY: Number(grid.offsetY) || 0 };
+        if (Number(grid.distance) > 0) next.distance = Number(grid.distance);
+        if (grid.units) next.units = String(grid.units);
+        if (/^#[0-9a-f]{6}$/i.test(String(grid.color ?? ""))) next.color = String(grid.color);
+        if (grid.alpha != null && Number.isFinite(Number(grid.alpha))) next.alpha = Number(grid.alpha);
+        if (typeof grid.show === "boolean") next.show = grid.show;
+        if (["solid", "dashed", "dotted"].includes(grid.style)) next.style = grid.style;
+        const keys = ["size", "sizeY", "offsetX", "offsetY", "distance", "units", "color", "alpha", "show", "style"];
+        if (keys.some((key) => String(next[key] ?? "") !== String(now[key] ?? ""))) {
+          const old = state.settings[target.id] ?? {};
+          const changed = Object.fromEntries(keys.filter((key) => String(next[key] ?? "") !== String(now[key] ?? "")).map((key) => [key, next[key]]));
+          state.settings[target.id] = cleanSettings({ ...old, grid: { ...(old.grid ?? {}), ...changed } });
+        }
       }
       if (open && open.id === target.id) liveScene();
       changed();
@@ -2062,7 +2089,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     // A map's grid as the GM set it in the Grid tab (for one not open now: Map Studio working on its master).
     gridOf(sceneId) {
       const grid = state.settings[sceneId]?.grid ?? {};
-      return { size: grid.size ?? 100, ...(grid.sizeY ? { sizeY: grid.sizeY } : {}), type: 1, distance: grid.distance ?? 5, units: "ft", offsetX: grid.offsetX ?? 0, offsetY: grid.offsetY ?? 0 };
+      return { size: grid.size ?? 100, ...(grid.sizeY ? { sizeY: grid.sizeY } : {}), type: 1, distance: grid.distance ?? 5, units: grid.units ?? "ft", offsetX: grid.offsetX ?? 0, offsetY: grid.offsetY ?? 0, ...(grid.color ? { color: grid.color } : {}), ...(grid.alpha != null ? { alpha: grid.alpha } : {}) };
     },
     // The picture Map Studio painted for a scene (its file name and version), if any.
     studioPicture: (sceneId) => state.studio[sceneId]?.picture ?? null,

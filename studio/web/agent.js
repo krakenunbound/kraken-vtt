@@ -435,11 +435,21 @@ window.KrakenStudioAgent = (() => {
     },
     // Grid & map size (and the Map settings fields): width and height in squares, the grid's size in pixels,
     // its offset, feet per square, the background, the name. Art, walls and lights stay where they are.
-    grid({width, height, size, offsetX, offsetY, distance, background, name}) {
-      const p = S().project, next = JSON.parse(JSON.stringify(p)), G = size ? Math.round(num(size, 'size')) : p.grid;
+    // sizeY: a cell's height (width and height unlinked); linked true: square again. color, alpha (0-1),
+    // show, style, units: the grid's look and measure.
+    grid({width, height, size, sizeY, linked, offsetX, offsetY, distance, units, color, alpha, show, style, background, name}) {
+      const p = S().project, next = JSON.parse(JSON.stringify(p)), G = size ? Math.round(num(size, 'size') * 100) / 100 : p.grid;
       if (size) next.grid = G;
+      if (sizeY) next.gridY = Math.round(num(sizeY, 'sizeY') * 100) / 100;
+      if (linked === true) next.gridY = null;
+      const GY = Number(next.gridY) > 0 ? Number(next.gridY) : G;
       if (width) next.width = Math.round(num(width, 'width') * G);
-      if (height) next.height = Math.round(num(height, 'height') * G);
+      if (height) next.height = Math.round(num(height, 'height') * GY);
+      if (units) next.gridUnits = String(units).slice(0, 12);
+      if (color) next.gridColor = String(color);
+      if (alpha !== undefined) next.gridAlpha = Math.min(1, Math.max(0, num(alpha, 'alpha')));
+      if (show !== undefined) next.gridShow = show !== false;
+      if (style) next.gridStyle = ['solid', 'dashed', 'dotted'].includes(style) ? style : 'solid';
       if (offsetX !== undefined || offsetY !== undefined) next.gridOffset = {x: Number(offsetX ?? p.gridOffset?.x ?? 0), y: Number(offsetY ?? p.gridOffset?.y ?? 0)};
       if (distance) next.gridDistance = num(distance, 'distance');
       if (background) next.background = String(background);

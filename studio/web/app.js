@@ -81,7 +81,9 @@
   function grid(v, axis) {
     // axis "x"/"y": snap to the grid lines (which may be offset); no axis: a whole number of squares
     const off = axis ? Number(p.gridOffset?.[axis]) || 0 : 0;
-    return $("#snapToggle").checked ? Math.round((v - off) / p.grid) * p.grid + off : v;
+    // A cell's height when width and height are unlinked (Grid & map size).
+    const cell = axis === "y" && Number(p.gridY) > 0 ? Number(p.gridY) : p.grid;
+    return $("#snapToggle").checked ? Math.round((v - off) / cell) * cell + off : v;
   }
   function im(a) {
     if (imgs.has(a)) return imgs.get(a);
@@ -127,22 +129,9 @@
     }
     c.style.transform = `translate(${pan.x}px,${pan.y}px) scale(${z})`;
     $("#zoomReadout").textContent = Math.round(z * 100) + "%";
-    $("#mapReadout").textContent = `${p.width} x ${p.height} | Grid ${p.grid}`;
+    $("#mapReadout").textContent = `${p.width} x ${p.height} | Grid ${Number(p.gridY) > 0 ? `${p.grid} x ${p.gridY}` : p.grid}`;
     x.fillStyle = p.background;
     x.fillRect(0, 0, c.width, c.height);
-    x.strokeStyle = "rgba(220,210,170,.12)";
-    for (let a = ((Number(p.gridOffset?.x) || 0) % p.grid + p.grid) % p.grid; look?.grid !== false && a <= c.width; a += p.grid) {
-      x.beginPath();
-      x.moveTo(a, 0);
-      x.lineTo(a, c.height);
-      x.stroke();
-    }
-    for (let a = ((Number(p.gridOffset?.y) || 0) % p.grid + p.grid) % p.grid; look?.grid !== false && a <= c.height; a += p.grid) {
-      x.beginPath();
-      x.moveTo(0, a);
-      x.lineTo(c.width, a);
-      x.stroke();
-    }
     p.objects
       .filter((o) => o.visible !== false && !window.KrakenLayers?.hidden(o))
       .forEach((o) => {
@@ -157,22 +146,8 @@
             x.fillRect(-o.width / 2, -o.height / 2, o.width, o.height));
         x.restore();
       });
-    x.save();
-    x.strokeStyle = "rgba(220,210,170,.16)";
-    x.lineWidth = 1;
-    for (let a = ((Number(p.gridOffset?.x) || 0) % p.grid + p.grid) % p.grid; look?.grid !== false && a <= p.width; a += p.grid) {
-      x.beginPath();
-      x.moveTo(a, 0);
-      x.lineTo(a, p.height);
-      x.stroke();
-    }
-    for (let a = ((Number(p.gridOffset?.y) || 0) % p.grid + p.grid) % p.grid; look?.grid !== false && a <= p.height; a += p.grid) {
-      x.beginPath();
-      x.moveTo(0, a);
-      x.lineTo(p.width, a);
-      x.stroke();
-    }
-    x.restore();
+    // The grid in its own tint, alpha and line (Grid & map size); a capture can leave it out.
+    if (look?.grid !== false) window.KrakenGrid?.paint(x, p, z);
     window.KrakenWeather?.draw(x, z, !!look);
     window.KrakenLighting?.drawAmbient(x);
     [...p.lights].sort((a, b) => !!a.inverse - !!b.inverse) // darkness last: it takes light away

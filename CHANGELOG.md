@@ -8,6 +8,8 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release.
 
+- **Map Studio's grid, fixed and complete:** pressing Draw the grid turned drawing off (it was already on), so a drag drew nothing; it now only turns drawing on. The grid is drawn over the map in its own tint and alpha, a line you can see at any zoom (it was a faint pale line, easy to miss on a big map). Grid & map size has the map editor's grid tools: the eye, Width × Height with the link, Tint, Alpha (0 to 255), Line, Distance a square, Suffix and a nudge cross. A drag uses exactly the square you drew (it used to guess the picture's lines, and could pick the wrong ones). The table's map and Map Studio share one grid: saved from Map Studio, the map has it (size, height, offset, tint, alpha, line, measure); opened in Map Studio, the map's grid as set at the table. `kraken_map_studio` grid takes sizeY, linked, color, alpha, show, style and units.
+
 ## 0.1.0-beta.1: The beta
 
 Maelstrom VTT leaves alpha. This release is a full audit of the table (93 problems found and fixed, from backups and saving to what players can see, combat rules and Map Studio), a library you can find your way around (Modules as icons, then covers by series), a Folders button that adds new material while players stay connected, and a documented book format (.kpack) that people and AI agents can convert books into.

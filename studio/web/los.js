@@ -115,8 +115,8 @@ window.KrakenLOS = (() => {
     }
     if (!grid) return q;
     // corners, edge midpoints and centres of the squares (half-square steps), on the picture's grid
-    const h = p.grid / 2, ox = Number(p.gridOffset?.x) || 0, oy = Number(p.gridOffset?.y) || 0;
-    return {x: Math.round((q.x - ox) / h) * h + ox, y: Math.round((q.y - oy) / h) * h + oy};
+    const h = p.grid / 2, hy = (Number(p.gridY) > 0 ? Number(p.gridY) : p.grid) / 2, ox = Number(p.gridOffset?.x) || 0, oy = Number(p.gridOffset?.y) || 0;
+    return {x: Math.round((q.x - ox) / h) * h + ox, y: Math.round((q.y - oy) / hy) * hy + oy};
   }
   function angle45(from, q) {
     const dx = q.x - from.x, dy = q.y - from.y, a = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * Math.PI / 4, r = Math.hypot(dx, dy);

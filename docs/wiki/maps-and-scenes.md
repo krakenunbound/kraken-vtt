@@ -80,7 +80,7 @@ Then, if you like:
 - **Diagonals** sets how a diagonal measures on this map: every square one, 5-10-5, or a straight line (the raw distance).
 - ↺ puts the map's own grid back.
 
-Map Studio does the same for maps you paint: open **Grid & map size** and drag over one square of the picture.
+Map Studio has the same tools in **Grid & map size**: drag over one square of the picture (drawing is on as soon as the panel is open), then the eye, Width × Height and the link, Tint, Alpha, Line, Distance a square, Suffix and the nudge arrows. What you set there is the map's grid at the table too, and a map opened in Map Studio shows the grid as it is set at the table.
 
 ## Scene settings
 
