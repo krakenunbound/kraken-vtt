@@ -9,7 +9,7 @@
 // Settings > Open logs, and kraken_logs reads a page error from the window's log.
 import "./loopback.mjs";
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import readline from "node:readline";
@@ -24,7 +24,9 @@ const SHOTS = process.env.SHOTS ?? "";
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 const AT = (process.env.KRAKEN_WINDOW_AT ?? "-2500,40").split(",").map(Number);
 const profile = mkdtempSync(path.join(tmpdir(), "kraken-campaigns-ui-"));
-const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0", KRAKEN_WINDOW_AT: AT.join(","), KRAKEN_BIND: "127.0.0.1", KRAKEN_BACKUP_EVERY_MS: "2500", KRAKEN_NO_OPEN: "1" };
+// The GM's Documents, apart from the app's own data (a campaign's maps live there).
+const home = mkdtempSync(path.join(tmpdir(), "kraken-campaigns-home-"));
+const env = { ...process.env, KRAKEN_AGENT_FILE: path.join(profile, "agent.json"), KRAKEN_AGENT_PORT: "0", KRAKEN_WINDOW_AT: AT.join(","), KRAKEN_BIND: "127.0.0.1", KRAKEN_BACKUP_EVERY_MS: "2500", KRAKEN_NO_OPEN: "1", KRAKEN_HOME: path.join(home, "Kraken VTT") };
 const app = await electron.launch({ args: [".", "--mute-audio", `--user-data-dir=${profile}`], cwd: process.cwd(), env });
 const page = await app.firstWindow();
 await app.evaluate(({ BrowserWindow }, at) => { const win = BrowserWindow.getAllWindows()[0]; win?.setBounds({ x: at[0], y: at[1], width: 2560, height: 1440 }); win?.setFullScreen(true); }, AT);
@@ -192,7 +194,10 @@ try {
   assert((await tool("kraken_campaigns", { action: "rename", id: copy.id, name: "The copy" })).name === "The copy", "the agent renames");
   results.push("kraken_campaigns export, backup, folder, rename");
 
-  // Delete the copy, to the recycle bin, after the confirm.
+  // Delete the copy, to the recycle bin, after the confirm: its own maps' folder in Documents/Kraken VTT/Campaigns too.
+  const copyMaps = path.join(home, "Kraken VTT", "Campaigns", "The copy");
+  mkdirSync(copyMaps, { recursive: true });
+  writeFileSync(path.join(copyMaps, "Cellar.webp"), "not really a picture");
   await page.reload();
   await page.click('[data-action="campaigns-mode"]');
   await page.click('[data-campaign="The copy"]', { button: "right" });
@@ -202,6 +207,7 @@ try {
   await page.click('[data-action="delete-confirm"]');
   await page.waitForSelector('[data-campaign="The copy"]', { state: "detached" });
   assert(!existsSync(path.join(profile, "campaigns", copy.id)), "the copy's folder went to the recycle bin");
+  assert(!existsSync(copyMaps), "its maps' folder in Documents/Kraken VTT/Campaigns went to the recycle bin too");
   assert(!(await tool("kraken_campaigns")).some((item) => item.id === copy.id), "and off the list");
   results.push("delete to the recycle bin");
 

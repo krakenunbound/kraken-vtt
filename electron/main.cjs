@@ -34,10 +34,11 @@ windowLog.capture();
 // The backend's requests for the desktop's shell: a deleted campaign's folders to the recycle bin
 // (never gone for good, and only inside Kraken's own data folder), a folder opened.
 async function shellOp({ action, paths, path: target }) {
+  // Kraken's data folder, or a campaign's own maps folder (Documents/Kraken VTT/Campaigns/<name>).
   const inside = (file) => {
     const resolved = path.resolve(String(file ?? ""));
-    const base = path.resolve(app.getPath("userData"));
-    return resolved.startsWith(base + path.sep);
+    const bases = [path.resolve(app.getPath("userData")), path.resolve(require("./kfolders.cjs").root(), "Campaigns")];
+    return bases.some((base) => resolved.startsWith(base + path.sep));
   };
   if (action === "trash") {
     const list = (Array.isArray(paths) ? paths : []).map(String);
