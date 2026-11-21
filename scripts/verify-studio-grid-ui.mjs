@@ -204,6 +204,49 @@ try {
     assert(!state.top && state.walls === false && state.kept === false && !state.snapped, `line ${line + 1}: grid snap stays off and the wall lands where clicked: ${JSON.stringify(state)}`);
   }
   report.push("Use Grid Snap unticked: three walls drawn land where clicked, and snap stays off (the Walls panel's Grid snap too: one switch)");
+
+  // Select & move picks walls, doors and lights too (and art still): drag a wall by its line, a wall's point,
+  // a light; Delete takes the light away.
+  await tool("kraken_map_studio", { action: "light", at: [(SQUARE.x1 + 150) / 70, (SQUARE.y1 - 150) / 70], preset: "torch" });
+  await tool("kraken_map_studio", { action: "place", items: [{ art: "Barrel", at: [(SQUARE.x1 + 420) / 70, (SQUARE.y1 + 200) / 70] }] });
+  await studio.click('[data-mode="view"]');
+  await settle(400);
+  const dragMap = async (from, by) => {
+    const a = await screenOf(from.x, from.y);
+    const scale = (await studio.locator("#mapCanvas").boundingBox()).width / size.w;
+    await page.mouse.move(a.x, a.y);
+    await page.mouse.down();
+    await page.mouse.move(a.x + by.x * scale, a.y + by.y * scale, { steps: 8 });
+    await page.mouse.up();
+    await settle(500);
+  };
+  const project = () => studio.evaluate(() => JSON.parse(JSON.stringify({ walls: window.KrakenStudio.project.walls.map((w) => ({ id: w.id, points: w.points })), lights: window.KrakenStudio.project.lights.map((l) => ({ id: l.id, x: l.x, y: l.y })), objects: window.KrakenStudio.project.objects.filter((o) => o.layer !== "map").map((o) => ({ id: o.id, x: o.x, y: o.y })) })));
+  let before = await project();
+  const wall = before.walls.at(-1);
+  const middle = { x: (wall.points[0] + wall.points[2]) / 2, y: (wall.points[1] + wall.points[3]) / 2 };
+  await dragMap(middle, { x: 40, y: 30 });
+  let after = await project();
+  const moved = after.walls.find((w) => w.id === wall.id);
+  assert(Math.abs(moved.points[0] - wall.points[0] - 40) < 3 && Math.abs(moved.points[3] - wall.points[3] - 30) < 3, `Select & move drags a whole wall by its line: ${JSON.stringify({ was: wall.points, now: moved.points })}`);
+  await dragMap({ x: moved.points[2], y: moved.points[3] }, { x: -25, y: 15 });
+  after = await project();
+  const point = after.walls.find((w) => w.id === wall.id);
+  assert(Math.abs(point.points[2] - moved.points[2] + 25) < 3 && Math.abs(point.points[0] - moved.points[0]) < 0.5, `and one of its points: ${JSON.stringify({ was: moved.points, now: point.points })}`);
+  const light = after.lights.at(-1);
+  await dragMap(light, { x: 50, y: -20 });
+  after = await project();
+  const lightNow = after.lights.find((l) => l.id === light.id);
+  assert(Math.abs(lightNow.x - light.x - 50) < 3 && Math.abs(lightNow.y - light.y + 20) < 3, `and a light: ${JSON.stringify({ was: light, now: lightNow })}`);
+  await page.keyboard.press("Delete");
+  await settle(400);
+  assert(!(await project()).lights.some((l) => l.id === light.id), "Delete takes the selected light away");
+  const art = after.objects.at(-1);
+  const artBox = await studio.evaluate((id) => { const o = window.KrakenStudio.project.objects.find((v) => v.id === id); return { x: o.x + o.width / 2, y: o.y + o.height / 2 }; }, art.id);
+  await dragMap(artBox, { x: 70, y: 0 });
+  const artNow = (await project()).objects.find((o) => o.id === art.id);
+  assert(Math.abs(artNow.x - art.x - 70) < 3, `and art still moves: ${JSON.stringify({ was: art, now: artNow })}`);
+  report.push("Select & move drags a wall by its line, a wall's point and a light (Delete removes the light), and art as before");
+  await studio.click('[data-mode="grid"]');
   await studio.click('[data-mode="grid"]');
 
   // Saved into the campaign's map (by itself): the table's map has that grid.

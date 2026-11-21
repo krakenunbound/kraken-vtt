@@ -43,6 +43,8 @@ window.KrakenLighting = (() => {
   const FALLOFF = 25, DIM_FALLOFF = 50;
   let tool = 'place', preset = 'torch', drag = null;
   const active = () => S().mode === 'lighting';
+  // Select & move picks lights too: a click on one selects it, a drag moves it.
+  const picking = () => S().mode === 'view';
   const uid = () => 'light-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v).toLowerCase() : d;
   const num = (v, lo, hi, d) => { const n = Number(v); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; };
@@ -178,7 +180,10 @@ window.KrakenLighting = (() => {
     return [...S().project.lights].reverse().find(l => Math.hypot(l.x - q.x, l.y - q.y) <= r);
   }
   function pointerDown(e) {
-    if (!active() || e.button !== 0 || S().tool === 'pan') return false;
+    if (picking() && e.button === 0 && S().tool !== 'pan') {
+      const hit = lightAt(S().point(e));
+      if (!hit) { if (selectedLight()) { S().selected = null; S().draw(); } return false; }
+    } else if (!active() || e.button !== 0 || S().tool === 'pan') return false;
     const q = S().point(e), hit = lightAt(q);
     if (hit) {
       S().selected = hit.id; S().snapshot();
@@ -202,7 +207,7 @@ window.KrakenLighting = (() => {
     drag = null; render(); return true;
   }
   function keyDown(e) {
-    if (!active() || ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return false;
+    if (!(active() || picking()) || ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return false;
     if ((e.key === 'Delete' || e.key === 'Backspace') && selectedLight()) { remove(S().selected); return true; }
     return false;
   }
@@ -266,7 +271,7 @@ window.KrakenLighting = (() => {
   // The selected light gets a ring, so it is clear which one the panel is changing.
   function draw(ctx, zoom) {
     schedule();
-    const l = active() && selectedLight();
+    const l = (active() || picking()) && selectedLight();
     if (!l) return;
     ctx.save(); ctx.strokeStyle = '#ffd25e'; ctx.lineWidth = 2 / zoom; ctx.setLineDash([5 / zoom, 3 / zoom]);
     ctx.beginPath(); ctx.arc(l.x, l.y, 11 / zoom, 0, 7); ctx.stroke(); ctx.restore();

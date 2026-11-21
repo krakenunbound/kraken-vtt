@@ -8,6 +8,8 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release.
 
+- **Map Studio's Select & move picks walls, doors and lights:** it only picked art, so on a map with no art nothing could be selected. Now a wall or door's line picks the whole wall, one of its points picks that point, and a light picks the light; drag to move, Delete to remove, Escape to let go. Art works as before.
+
 ## 0.1.0-beta.1: The beta
 
 Maelstrom VTT leaves alpha. This release is a full audit of the table (93 problems found and fixed, from backups and saving to what players can see, combat rules and Map Studio), a library you can find your way around (Modules as icons, then covers by series), a Folders button that adds new material while players stay connected, and a documented book format (.kpack) that people and AI agents can convert books into.

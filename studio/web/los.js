@@ -31,6 +31,8 @@ window.KrakenLOS = (() => {
   let artSel = new Set();  // ids of wall art pieces selected with the Select tool
   const uid = () => 'wall-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const active = () => S().mode === 'los';
+  // Select & move picks walls and doors too: a point, or a whole wall by its line, then a drag moves it.
+  const picking = () => S().mode === 'view';
 
   function typeFromFlags(f) {
     const s = new Set(f);
@@ -316,6 +318,16 @@ window.KrakenLOS = (() => {
 
   // --- pointer and keys ------------------------------------------------------------
   function pointerDown(e) {
+    if (picking() && e.button === 0 && S().tool !== 'pan') {
+      const raw = S().point(e), hit = pointAt(raw), w = hit ? null : wallAt(raw);
+      if (!hit && !w) { if (sel.size) { sel.clear(); artSel.clear(); S().draw(); } return false; }
+      // A point grabbed moves that point (Shift adds it to those picked); a wall's line moves the whole wall.
+      if (hit) selectPoint(hit.w, hit.i, e.shiftKey, false);
+      else selectWall(w, e.shiftKey);
+      S().snapshot();
+      gesture = {kind: 'move', start: raw, before: S().project.walls.map(v => [v.id, [...v.points]]), moved: false};
+      $('#mapCanvas').setPointerCapture(e.pointerId); S().draw(); return true;
+    }
     if (!active() || e.button !== 0 || S().tool === 'pan') return false;
     const raw = S().point(e), canvas = $('#mapCanvas');
     if (tool === 'select') {
@@ -356,7 +368,7 @@ window.KrakenLOS = (() => {
     canvas.setPointerCapture(e.pointerId); S().draw(); return true;
   }
   function pointerMove(e) {
-    if (!active()) return false;
+    if (!active() && !(picking() && gesture)) return false;
     const raw = S().point(e);
     if (drawing) {
       let q = snapPoint(raw, e);
@@ -385,7 +397,7 @@ window.KrakenLOS = (() => {
     S().draw(); return true;
   }
   function pointerUp(e) {
-    if (!active()) return false;
+    if (!active() && !(picking() && gesture)) return false;
     if (drawing) {
       drawing.pressed = false;
       if (drawing.freehand) { drawing.freehand = false; }
@@ -418,14 +430,15 @@ window.KrakenLOS = (() => {
     if (tool === 'select') { const hit = pointAt(S().point(e)) || null, w = hit ? hit.w : wallAt(S().point(e)); if (w) { selectWall(w, e.shiftKey); renderPanel(); S().draw(); } }
   }
   function keyDown(e) {
-    if (!active()) return false;
+    if (!active() && !(picking() && (sel.size || artSel.size))) return false;
     if (drawing) {
       if (e.key === 'Enter') { drawing.points.push(drawing.cursor); finishLine(e.altKey); return true; }
       if (e.key === ' ') { e.preventDefault(); drawing.points.push(drawing.cursor); S().draw(); return true; }
       if (e.key === 'Escape') { finishLine(false); return true; }
       return false;
     }
-    if (tool === 'select' && (sel.size || artSel.size)) {
+    if ((tool === 'select' || picking()) && (sel.size || artSel.size)) {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return false;
       if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelection(); return true; }
       if (e.key === 'Escape') { sel.clear(); artSel.clear(); renderPanel(); S().draw(); return true; }
       if (!sel.size) return false;
@@ -455,7 +468,7 @@ window.KrakenLOS = (() => {
         const t = TYPES[w.type] || TYPES.wall, list = pts(w), open = w.flags.includes('open') && w.flags.includes('toggleable');
         if (isClosed(w) && (w.type === 'terrain' || w.type === 'pit')) { ctx.save(); ctx.globalAlpha = .12; ctx.fillStyle = t[2]; ctx.beginPath(); list.forEach((v, i) => i ? ctx.lineTo(v.x, v.y) : ctx.moveTo(v.x, v.y)); ctx.fill(); ctx.restore(); }
         strokeShape(ctx, list, isClosed(w), open ? t[2] + '88' : t[2], open ? [2, 6] : t[3], sel.has(w.id) ? 6 : 4.5, editing ? zoom : Math.max(zoom, .5));
-        if (editing) {
+        if (editing || (picking() && sel.has(w.id))) {
           const set = sel.get(w.id), r = 4 / zoom;
           list.forEach((v, i) => {
             const on = set && set.has(i);

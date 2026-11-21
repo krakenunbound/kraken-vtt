@@ -13,6 +13,7 @@ Map Studio is Maelstrom's own map maker, built into the GM's app. You paint a ma
 - **Weather**, painted into areas with masks.
 - **Traps and regions:** traps, pits, difficult terrain and teleports, which then play at the table (see [Maps and scenes](maps-and-scenes.md#traps-and-regions)).
 - **Play test** the map from a token's view.
+- **Select & move** picks anything on the map: art, a wall or door by its line (the whole wall moves), one of a wall's points, or a light. Drag to move it; Delete removes it, Escape lets go. Shift adds to what is picked. The map's own picture sits on a locked layer, so it is never picked by accident (unlock it under Layers to move it).
 
 ## The art it uses
 
