@@ -8,6 +8,8 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release.
 
+- **Fixed, a picture of the window anchor opening on the table:** dragging a window's anchor (the mark at the top left of its title bar) carried the anchor's picture too, so letting go over the table made a map of the Maelstrom mark and opened it. A drag now carries only the link, and the table never opens a dropped link as a map.
+
 - **Every window is a link:** Cards, Notes, the party sheet, the combat tracker, Dice and every other window now has the anchor at the top left of its title bar (a record's window already had it). Drag it to a quick slot (or a note) and a click opens that window again. The agent's `kraken_quickslots` takes a window link.
 - **Notes: Private or Public, at the top.** The Notes window has a Private / Public switch for the notes you make next (kept with your account), and each note has its own at the top; the list says which each is.
 - **Backpacks carry what is in them:** an item put in a container (dragged onto it, or the new **Put in…** beside it) is dropped with the container and picked up with it again, from the sheet's Drop and Pick up or the Carried list. For any game whose items go in containers.

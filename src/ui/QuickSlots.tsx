@@ -29,6 +29,9 @@ export function slotDrag(slot: QuickSlot) {
     draggable: true,
     onDragStart: (event: React.DragEvent) => {
       event.stopPropagation();
+      // Only the link: a window's anchor is a picture, and the browser would carry its file too (dropped on the
+      // table, that file became a map of the anchor, shared to the players).
+      event.dataTransfer.clearData();
       event.dataTransfer.setData(SLOT_DRAG, JSON.stringify(slot));
       // A sound goes into a book's story as well.
       if (slot.kind === "sound") event.dataTransfer.setData("text/kraken-sound", JSON.stringify({ sound: slot.sound, kind: slot.soundKind, label: slot.label }));

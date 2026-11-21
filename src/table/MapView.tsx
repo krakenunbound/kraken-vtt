@@ -1902,7 +1902,7 @@ function MapViewInner({
         }
       }}
       onDrop={(event) => {
-        if (gm && editorOpen && editTab === "images" && event.dataTransfer.files.length && window.kraken) {
+        if (gm && editorOpen && editTab === "images" && event.dataTransfer.files.length && !event.dataTransfer.types.includes("text/kraken-slot") && window.kraken) {
           // A picture file dropped on the map: into the tile library, then onto the map where it fell (not a new map).
           event.preventDefault();
           event.stopPropagation();

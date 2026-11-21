@@ -15,6 +15,7 @@ import type { DiceSettingsPatch } from "./kraken";
 import { agentCommands } from "./ui/agentCommands";
 import { Desktop } from "./ui/Desktop";
 import { WindowProvider } from "./ui/Windows";
+import { hasLink } from "./ui/QuickSlots";
 
 const COLOUR = /^#[0-9a-f]{6}$/i;
 
@@ -533,6 +534,8 @@ export function App() {
   function onDrop(event: React.DragEvent) {
     event.preventDefault();
     if (!dm) return;
+    // A Maelstrom link (a window's anchor, a record, a quick slot) is never a picture to open as a map.
+    if (hasLink(event)) return;
     const file = event.dataTransfer.files[0];
     if (file) void openFile(file);
   }

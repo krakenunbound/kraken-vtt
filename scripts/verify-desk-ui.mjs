@@ -74,6 +74,27 @@ try {
   await page.click('[data-quick-slot="0"]');
   await page.waitForSelector('[data-window-anchor="notes"]');
   report.push("Notes' anchor dragged to a quick slot, the window closed, the slot opens it again; every open window has an anchor");
+  // An anchor let go over the table is a link, not a picture: no map of the anchor, nothing shown to the players.
+  const imagesBefore = (await tool("kraken_records_list", { type: "image" })).records.length;
+  const anchor = await page.locator('[data-window-anchor="notes"]').boundingBox();
+  await page.mouse.move(anchor.x + anchor.width / 2, anchor.y + anchor.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(760, 520, { steps: 15 });
+  await page.mouse.up();
+  // As the app delivers a real drag of the anchor picture: the link and the picture's file together.
+  await page.evaluate(async () => {
+    const bytes = await (await fetch(document.querySelector('[data-window-anchor="notes"]').src)).arrayBuffer();
+    const data = new DataTransfer();
+    data.setData("text/kraken-slot", JSON.stringify({ kind: "window", window: "notes", title: "Notes", label: "Notes" }));
+    data.items.add(new File([bytes], "maelstrom-mark-9Qw4frcc.webp", { type: "image/webp" }));
+    const target = document.elementFromPoint(760, 520);
+    for (const type of ["dragenter", "dragover", "drop"]) target.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: data, clientX: 760, clientY: 520 }));
+  });
+  await settle(2500);
+  const imagesAfter = (await tool("kraken_records_list", { type: "image" })).records;
+  const mapOpened = await page.$('.window[data-window="map"]');
+  assert(imagesAfter.length === imagesBefore && !mapOpened && !imagesAfter.some((record) => /maelstrom|mark/i.test(record.name)), `an anchor dropped on the table makes no map: ${imagesAfter.map((record) => record.name).join(", ")} ${mapOpened ? "(a map window opened)" : ""}`);
+  report.push("a window's anchor let go over the table makes no map of the anchor (nothing shared)");
 
   // 2. Notes: Private/Public at the top; new notes start as chosen; a note's own toggle.
   await page.click('[data-note-mode="new"] [data-mode="public"]');
