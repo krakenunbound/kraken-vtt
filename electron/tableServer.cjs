@@ -646,6 +646,25 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     if (raw.kind === "textpic") return { id, kind: "textpic", ...picture(), side: raw.side === "left" ? "left" : "right", text: words(raw.text) };
     return { id, kind: "links", links: (Array.isArray(raw.links) ? raw.links : []).map((link) => cleanSlot(link)).filter(Boolean).slice(0, 60) };
   };
+  const PAGE_ID = /^[~\w.-]{1,120}$/;
+  const NEW_PAGE = /^new-[a-z0-9]{4,16}$/;
+  const cleanChapters = (value, mint = false) =>
+    (Array.isArray(value) ? value : []).slice(0, 200).map((chapter) => ({
+      name: text(chapter?.name, "").slice(0, 200),
+      sections: (Array.isArray(chapter?.sections) ? chapter.sections : []).slice(0, 300).map((section) => ({
+        name: text(section?.name, "").slice(0, 200),
+        pages: (Array.isArray(section?.pages) ? section.pages : [])
+          .slice(0, 1000)
+          .map((page) => ({ id: mint && !page?.id ? `new-${crypto.randomBytes(4).toString("hex")}` : String(page?.id ?? ""), name: text(page?.name, "").slice(0, 200) }))
+          .filter((page) => PAGE_ID.test(page.id)),
+      })),
+    }));
+  const bookContents = new Map(
+    Object.entries(saved.bookContents && typeof saved.bookContents === "object" ? saved.bookContents : {})
+      .slice(0, 500)
+      .map(([book, chapters]) => [book, cleanChapters(chapters)]),
+  );
+  const pagesIn = (chapters) => chapters.flatMap((chapter) => chapter.sections.flatMap((section) => section.pages));
   const bookEdits = new Map(
     Object.entries(saved.bookEdits && typeof saved.bookEdits === "object" ? saved.bookEdits : {})
       .slice(0, 2000)
@@ -657,12 +676,21 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     const page = text(change?.page, "").slice(0, 120);
     if (!book || !page) throw new Error("Which book and page?");
     const key = `${book}|${page}`;
-    if (change?.action === "revert") bookEdits.delete(key);
+    const listed = pagesIn(bookContents.get(book) ?? []).find((item) => item.id === page);
+    // A page the GM added has no book's own page to go back to: it goes back to empty.
+    if (change?.action === "revert" && NEW_PAGE.test(page)) bookEdits.set(key, { name: listed?.name ?? bookEdits.get(key)?.name ?? "", blocks: [] });
+    else if (change?.action === "revert") bookEdits.delete(key);
     else if (change?.action === "set") {
       const blocks = (Array.isArray(change.blocks) ? change.blocks : []).slice(0, 300).map(cleanPageBlock).filter(Boolean);
       const size = JSON.stringify(blocks).length;
       if (size > 900000) throw new Error("That page is too long to keep.");
-      bookEdits.set(key, { name: text(change.name, "").slice(0, 200), blocks });
+      const name = text(change.name, "").slice(0, 200);
+      bookEdits.set(key, { name, blocks });
+      // Its new name in the contents too, when the GM changed those.
+      if (listed && name && listed.name !== name) {
+        listed.name = name;
+        for (const [ws, client] of clients) if (client.joined && canRead(client, book)) send(ws, { type: "book-contents-edited", book });
+      }
     } else throw new Error("set or revert.");
     for (const [ws, client] of clients) if (client.joined && canRead(client, book)) send(ws, { type: "book-page-edited", book, page });
     onChange("table");
@@ -682,6 +710,67 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     const blocks = kept.blocks.map((block) => (block.kind === "links" ? { ...block, links: block.links.filter(visibleLink) } : block));
     return { book, id: page, name: kept.name, edited: true, blocks: books.render ? books.render(book, blocks) : blocks };
   };
+  // A page as a seat reads it: the GM's change, else the book's own; named as the contents name it.
+  const pageFor = (client, book, page) => {
+    const found = editedPageFor(client, book, page) ?? books.page(book, page);
+    const listed = pagesIn(bookContents.get(book) ?? []).find((item) => item.id === page);
+    return listed?.name ? { ...found, name: listed.name } : found;
+  };
+  // A book's contents as the GM changed them (FG's contents unlocked: pages added, renamed, moved and taken out,
+  // chapters and sections too), kept with the campaign: book -> [{ name, sections: [{ name, pages: [{ id, name }] }] }].
+  // A page added here is "new-..." (a page with no id is given one) and starts empty.
+  const contentsFor = (book) => {
+    const own = books.contents(book);
+    const chapters = bookContents.get(book);
+    if (!chapters) return own;
+    const keywords = new Map(own.chapters.flatMap((chapter) => chapter.sections.flatMap((section) => section.pages)).map((page) => [page.id, page.keywords]));
+    return {
+      ...own,
+      edited: true,
+      chapters: chapters.map((chapter) => ({ ...chapter, sections: chapter.sections.map((section) => ({ ...section, pages: section.pages.map((page) => ({ ...page, keywords: keywords.get(page.id) ?? "" })) })) })),
+    };
+  };
+  function setBookContents(change) {
+    const book = text(change?.book, "").slice(0, 200);
+    if (!book) throw new Error("Which book?");
+    const before = pagesIn(bookContents.get(book) ?? []);
+    const own = () => {
+      try {
+        return pagesIn(books.contents(book).chapters);
+      } catch {
+        return [];
+      }
+    };
+    const namesBefore = new Map((before.length ? before : own()).map((page) => [page.id, page.name]));
+    let after = [];
+    if (change?.action === "revert") bookContents.delete(book);
+    else if (change?.action === "set") {
+      const chapters = cleanChapters(change.chapters, true);
+      const seen = new Set();
+      for (const chapter of chapters) for (const section of chapter.sections) section.pages = section.pages.filter((page) => !seen.has(page.id) && seen.add(page.id));
+      if (JSON.stringify(chapters).length > 900000) throw new Error("Those contents are too long to keep.");
+      bookContents.set(book, chapters);
+      after = pagesIn(chapters);
+      // A page added here starts empty; one renamed here has its new name on the page too.
+      for (const page of after) {
+        const kept = bookEdits.get(`${book}|${page.id}`);
+        if (kept) kept.name = page.name;
+        else if (NEW_PAGE.test(page.id)) bookEdits.set(`${book}|${page.id}`, { name: page.name, blocks: [] });
+      }
+    } else throw new Error("set or revert.");
+    // A page the GM added and took out again is gone.
+    const still = new Set(after.map((page) => page.id));
+    for (const page of before) if (NEW_PAGE.test(page.id) && !still.has(page.id)) bookEdits.delete(`${book}|${page.id}`);
+    // A page whose name changed is read again where it is open.
+    const renamed = (bookContents.has(book) ? after : own()).filter((page) => namesBefore.has(page.id) && namesBefore.get(page.id) !== page.name);
+    for (const [ws, client] of clients)
+      if (client.joined && canRead(client, book)) {
+        send(ws, { type: "book-contents-edited", book });
+        for (const page of renamed) send(ws, { type: "book-page-edited", book, page: page.id });
+      }
+    onChange("table");
+    return { book, edited: bookContents.has(book), pages: after.map((page) => ({ id: page.id, name: page.name })) };
+  }
   // A table always opens unpaused.
   let options = savedOptions({ ...(saved.options && typeof saved.options === "object" ? saved.options : {}), paused: false });
   // Who may not sit here (the GM's Ban, kept with the campaign): a name, and the address it came from (never this computer's).
@@ -1850,7 +1939,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
           // A book's module converted first, off this thread (once), so the table never waits on it.
           const file = books.file?.(book);
           (file ? prepareModule(file) : Promise.resolve())
-            .then(() => json(url.pathname === "/book/contents" ? books.contents(book) : editedPageFor(client, book, url.searchParams.get("page") || "") ?? books.page(book, url.searchParams.get("page") || "")))
+            .then(() => json(url.pathname === "/book/contents" ? contentsFor(book) : pageFor(client, book, url.searchParams.get("page") || "")))
             .catch(() => nothing());
           return;
         }
@@ -2445,6 +2534,22 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       // The GM shares a book with the players, or stops; shows them a picture
       // (it opens as a tab on their screens), or takes it back.
       // The GM's change to a book page (unlocked and edited), or back to the book's own.
+      // The GM's change to a book's contents (pages added, renamed, moved, taken out), or back to the book's own.
+      if (msg.type === "book-contents") {
+        if (client.role !== "dm") {
+          send(ws, { type: "error", reason: "Only the GM changes the books." });
+          return;
+        }
+        try {
+          const done = setBookContents(msg);
+          if (typeof msg.req === "number") send(ws, { type: "op-result", req: msg.req, ok: true, ...done });
+        } catch (error) {
+          const reason = error instanceof Error ? error.message : "Could not change those contents.";
+          send(ws, { type: "error", reason });
+          if (typeof msg.req === "number") send(ws, { type: "op-result", req: msg.req, ok: false, error: reason });
+        }
+        return;
+      }
       if (msg.type === "book-page") {
         if (client.role !== "dm") {
           send(ws, { type: "error", reason: "Only the GM changes the books." });
@@ -4019,14 +4124,16 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       if (!books) throw new Error("There are no books here.");
       const file = books.file?.(book);
       if (file) await prepareModule(file);
-      return books.contents(book);
+      return contentsFor(book);
     },
     bookPage: async (book, page) => {
       if (!books) throw new Error("There are no books here.");
       const file = books.file?.(book);
       if (file) await prepareModule(file);
-      return editedPageFor({ role: "dm" }, book, page) ?? books.page(book, page);
+      return pageFor({ role: "dm" }, book, page);
     },
+    // The GM's change to a book's contents (set: its chapters, sections and pages; revert: the book's own).
+    editBookContents: (change) => setBookContents(change),
     // The GM's change to a book page (set: name and blocks; revert: the book's own page again).
     editBookPage: (change) => setBookPage(change),
     shelf: shelfView,
@@ -4396,6 +4503,7 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
         sessions,
         bookSounds: Object.fromEntries(bookSounds),
         bookEdits: Object.fromEntries(bookEdits),
+        bookContents: Object.fromEntries(bookContents),
         sceneSounds: Object.fromEntries(sceneSounds),
         bans,
       };

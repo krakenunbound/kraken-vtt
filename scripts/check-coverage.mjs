@@ -19,6 +19,7 @@ const MESSAGES = {
   "book-activate": "kraken_books",
   "book-sound": "kraken_books",
   "book-page": "kraken_books",
+  "book-contents": "kraken_books",
   "book-share": "kraken_books",
   "image-share": "kraken_books",
   "image-unshare": "kraken_books",

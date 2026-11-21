@@ -47,6 +47,15 @@ The lock at the top right of a page unlocks it. Then:
 
 Lock the page again to read it. Your changes are kept with the campaign, never in the book itself; players reading the book see the changed page. **Back to the book's own page** (the arrow beside the lock) undoes them.
 
+The lock above the contents, beside Images & Maps, unlocks the contents. Then:
+
+- Type a chapter's, section's or page's name in place (Enter keeps it). A page's title follows its name.
+- The arrows move a page, section or chapter up or down; a page moves on into the next section at the end of its own. Or drag a page onto another page (it goes before it) or onto a section's name (it goes to the end).
+- **+ Page**, **+ Section** and **+ Chapter** add one. A new page opens, empty: unlock it to write on it.
+- The bin takes one out. A page you added is deleted with what you wrote on it; a book's own page comes back with **Back to the book's own contents**.
+
+Contents changes are kept with the campaign too, and players reading the book see them.
+
 ### Links in a book
 
 Links work as in Fantasy Grounds: a page, a picture, or a record the book holds (a creature, spell, item, class, race, feat, table, encounter) opens in its own window. A table shows as a table, an equipment list as its sections, and a web link opens in your browser. Dice a page names are chips you click to roll.

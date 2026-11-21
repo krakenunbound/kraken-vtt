@@ -238,7 +238,7 @@ export type ShownImage = { id: string; book: string; file: string; name: string;
 export type BookShelf = { active: string[]; shared: string[]; images: ShownImage[] };
 export type BookInfo = { id: string; name: string; title: string; category: string; ruleset: string; author: string; hasBook: boolean; cover: string; adventure: boolean; forPlayers: boolean; active: boolean; shared: boolean; pack?: boolean; kind?: string; group?: string; order?: string; parent?: string; hasStory?: boolean };
 export type BookPageRef = { id: string; name: string; keywords: string };
-export type BookContents = BookInfo & { chapters: { name: string; sections: { name: string; pages: BookPageRef[] }[] }[]; pictures: { name: string; category: string; file: string }[]; assets?: string[]; media?: { file: string; kind: string }[] };
+export type BookContents = BookInfo & { edited?: boolean; chapters: { name: string; sections: { name: string; pages: BookPageRef[] }[] }[]; pictures: { name: string; category: string; file: string }[]; assets?: string[]; media?: { file: string; kind: string }[] };
 // A book page's blocks, as FG's reference page has them: text (frame: a boxed style), two columns, a header, an
 // image, an image with text beside it (side: where the image is), and the GM's links (sounds play on a click).
 // text/text2: the words as formatted text (to edit); html/html2: as the page shows them.
@@ -511,6 +511,7 @@ export function useSession() {
   const [bookSounds, setBookSounds] = useState<Record<string, PageSounds>>({});
   // "book|page" -> when it was last changed (a page the GM edited: open copies read it again).
   const [bookPageStamps, setBookPageStamps] = useState<Record<string, number>>({});
+  const [bookContentsStamps, setBookContentsStamps] = useState<Record<string, number>>({});
   const [quickSlots, setQuickSlotsState] = useState<(QuickSlot | null)[]>(Array(12).fill(null));
   const [modifiers, setModifiers] = useState<ModifierStack>({ slots: [], keys: [], total: 0 });
   const [bookShelf, setBookShelf] = useState<BookShelf>({ active: [], shared: [], images: [] });
@@ -786,6 +787,7 @@ export function useSession() {
           if (msg.type === "books") setBookShelf({ active: (msg.active as string[]) ?? [], shared: (msg.shared as string[]) ?? [], images: (msg.images as ShownImage[]) ?? [] });
           if (msg.type === "image-shown" && typeof msg.id === "string") setImageShown({ id: msg.id, at: Date.now() });
           if (msg.type === "book-sounds" && msg.sounds && typeof msg.sounds === "object") setBookSounds(msg.sounds as Record<string, PageSounds>);
+          if (msg.type === "book-contents-edited" && typeof msg.book === "string") setBookContentsStamps((current) => ({ ...current, [msg.book as string]: Date.now() }));
           if (msg.type === "book-page-edited" && typeof msg.book === "string" && typeof msg.page === "string") setBookPageStamps((current) => ({ ...current, [`${msg.book}|${msg.page}`]: Date.now() }));
           if (msg.type === "prefs") {
             diceStore.adopt(msg.prefs);
@@ -1673,6 +1675,17 @@ export function useSession() {
     bookSounds,
     // The GM's: a sound on one of a page's sound links, or in its story.
     bookPageStamps,
+    bookContentsStamps,
+    // The GM's change to a book's contents (set: its chapters, sections and pages; revert: the book's own).
+    editBookContents: (change: { book: string; action: "set" | "revert"; chapters?: BookContents["chapters"] }) => {
+      const socket = socketRef.current;
+      if (!socket || socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Not connected."));
+      const req = ++opCounter.current;
+      return new Promise<void>((resolve, reject) => {
+        opWaits.current.set(req, { resolve: () => resolve(), reject });
+        socket.send(JSON.stringify({ type: "book-contents", req, ...change }));
+      });
+    },
     // The GM's change to a book page (set: its name and blocks; revert: the book's own page again).
     editBookPage: (change: { book: string; page: string; action: "set" | "revert"; name?: string; blocks?: BookBlock[] }) => {
       const socket = socketRef.current;

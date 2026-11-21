@@ -10,6 +10,7 @@ import { PacksPanel } from "./Packs";
 import { imageWindow } from "../table/imageWindow";
 import { useReadAloudFrames } from "./readAloud";
 import { BookPages } from "./BookPages";
+import { BookContentsEditor } from "./BookContents";
 
 // Books, as FG's Library: the Books window lists the campaign's active books
 // (by category, with their covers), and Activation every module for its game;
@@ -447,6 +448,8 @@ export function BookWindow({ session, book }: { session: Session; book: string }
     setJump((n) => n + 1);
   };
   const [view, setView] = useState<"book" | "pictures">("book");
+  // The contents' lock (the GM's): open, its chapters, sections and pages are changed in place.
+  const [tocOpen, setTocOpen] = useState(false);
   const [search, setSearch] = useState("");
   const body = useRef<HTMLDivElement>(null);
   const [library, setLibrary] = useState<SoundLibrary | null>(null);
@@ -513,14 +516,21 @@ export function BookWindow({ session, book }: { session: Session; book: string }
       .then((found) => {
         if (!wantedStill) return;
         setContents(found);
-        if (!found.chapters.length) setView("pictures");
-        setPageId((current) => current || found.chapters[0]?.sections[0]?.pages[0]?.id || "");
+        const all = found.chapters.flatMap((chapter) => chapter.sections.flatMap((section) => section.pages));
+        if (!all.length && !found.edited) setView("pictures");
+        // The page open stays open, unless the GM took it out of the contents.
+        setPageId((current) => (current && all.some((item) => item.id === current) ? current : all[0]?.id || ""));
       })
       .catch((reason: Error) => wantedStill && setError(reason.message));
     return () => {
       wantedStill = false;
     };
-  }, [book, session.bookFetch]);
+  }, [book, session.bookFetch, session.bookContentsStamps[book]]);
+  const changeContents = (chapters: BookContents["chapters"]) => {
+    // Shown at once; the host's answer (a fresh fetch) follows.
+    setContents((current) => (current ? { ...current, chapters, edited: true } : current));
+    return session.editBookContents({ book, action: "set", chapters }).catch((reason: Error) => setError(reason.message));
+  };
   // A link from another book asks for a page here.
   useEffect(() => {
     const wanted = startAt.get(book);
@@ -580,7 +590,7 @@ export function BookWindow({ session, book }: { session: Session; book: string }
     <div className="book-window">
       <aside className="book-index">
         <div className="sound-tabs" role="tablist">
-          {contents.chapters.length ? (
+          {contents.chapters.length || contents.edited || gm ? (
             <button type="button" role="tab" aria-selected={view === "book"} className={view === "book" ? "dice-chip on" : "dice-chip"} data-book-view="book" onClick={() => setView("book")}>
               Book
             </button>
@@ -588,9 +598,34 @@ export function BookWindow({ session, book }: { session: Session; book: string }
           <button type="button" role="tab" aria-selected={view === "pictures"} className={view === "pictures" ? "dice-chip on" : "dice-chip"} data-book-view="pictures" onClick={() => setView("pictures")}>
             Images &amp; Maps <small>{contents.pictures.length}</small>
           </button>
+          {gm && view === "book" ? (
+            <button
+              type="button"
+              className={tocOpen ? "book-tool on book-toc-lock" : "book-tool book-toc-lock"}
+              data-action="contents-lock"
+              aria-pressed={tocOpen}
+              title={tocOpen ? "Unlocked: add, rename, move and take out pages, sections and chapters. Click to lock the contents." : "Locked. Click to unlock the contents and change them."}
+              aria-label={tocOpen ? "Lock the contents" : "Unlock the contents"}
+              onClick={() => setTocOpen(!tocOpen)}
+            >
+              <Icon name={tocOpen ? "unlock" : "lock"} size={14} />
+            </button>
+          ) : null}
         </div>
         <div className="book-toc">
-          {view === "book"
+          {view === "book" && gm && tocOpen ? (
+            <BookContentsEditor
+              chapters={contents.chapters}
+              here={here}
+              edited={Boolean(contents.edited)}
+              onChange={changeContents}
+              onRevert={() => void session.editBookContents({ book, action: "revert" }).catch((reason: Error) => setError(reason.message))}
+              onOpen={(id) => {
+                goTo(id);
+                setView("book");
+              }}
+            />
+          ) : view === "book"
             ? contents.chapters.map((chapter, index) => {
                 const sections = chapter.sections.map((section) => ({ ...section, pages: section.pages.filter(fits) })).filter((section) => section.pages.length);
                 if (!sections.length) return null;
