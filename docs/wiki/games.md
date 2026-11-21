@@ -39,7 +39,7 @@ Its own 2d6 engine.
 
 The System Reference Document 5.2.1 as three books, ready to play with nothing else installed:
 
-- **SRD 5.2.1 Player's Rules** (a players' book): every rules chapter as pages, and what the wizard, sheet and tracker use: 12 classes with a subclass each and their features to level 20, 9 species, 4 backgrounds, the feats, every weapon, armor, tool and piece of gear, and 339 spells. Spells that roll (attacks, saves for half, damage and healing that grow with the slot or level) play on the combat tracker.
+- **SRD 5.2.1 Player's Rules** (a players' book): every rules chapter as pages, and what the wizard, sheet and tracker use: 12 classes with a subclass each and their features to level 20, 9 races, 4 backgrounds, the feats, every weapon, armor, tool and piece of gear, and 339 spells. Spells that roll (attacks, saves for half, damage and healing that grow with the slot or level) play on the combat tracker.
 - **SRD 5.2.1 Creatures** (the GM's): all 330 monster and animal stat blocks, as NPCs whose attacks roll on the tracker.
 - **SRD 5.2.1 Magic Items** (the GM's): the Magic Items chapter and its 258 items.
 

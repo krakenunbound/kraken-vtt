@@ -26,6 +26,10 @@ const SKILL_MORE = "[; trained only{?trained}][; armor check {acp}]";
 /** @type {import("../rulesets/types").RulesetManifest} */
 export default {
   id: "dnd35",
+  // Where a character keeps its classes (FG's classes list), for the roster, Character Selection and spells.
+  classes: { rows: "classes", name: "name", level: "level" },
+  // Spells give each class's level in level ("Sor/Wiz 2, Clr 3").
+  spells: { casters: { field: "level", levels: true, abbreviations: { sor: "Sorcerer", wiz: "Wizard", clr: "Cleric", drd: "Druid", brd: "Bard", pal: "Paladin", rgr: "Ranger", adp: "Adept", blk: "Blackguard", asn: "Assassin" } } },
   names: ["D&D 3.5E"],
   blurb: "Played from your 3.5E books (the Player's Handbook, Dungeon Master's Guide and Monster Manual): 3.5E sheets and character building, base attack and iterative attacks, criticals by threat and confirmation, Fortitude, Reflex and Will, skills by ranks.",
   engine: "shared/dnd35/rules.mjs",

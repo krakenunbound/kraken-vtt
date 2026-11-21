@@ -11,6 +11,12 @@
   --canvas: #0c0e11;
   font-family: "Segoe UI", sans-serif;
 }
+/* A select's open list takes its colours from its options: a transparent select (the sheets') would
+   otherwise open as a white list with pale text. Dark, readable, everywhere. */
+select option,
+select optgroup { background-color: #1a1e24; color: #ece7dc; }
+select option:disabled { color: #7d786f; }
+select option:checked { background-color: #6b4f24; color: #fff4dc; }
 
 * { box-sizing: border-box; }
 

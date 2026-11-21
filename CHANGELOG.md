@@ -8,6 +8,13 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release.
 
+- **Every window is a link:** Cards, Notes, the party sheet, the combat tracker, Dice and every other window now has the anchor at the top left of its title bar (a record's window already had it). Drag it to a quick slot (or a note) and a click opens that window again. The agent's `kraken_quickslots` takes a window link.
+- **Notes: Private or Public, at the top.** The Notes window has a Private / Public switch for the notes you make next (kept with your account), and each note has its own at the top; the list says which each is.
+- **Backpacks carry what is in them:** an item put in a container (dragged onto it, or the new **Put in…** beside it) is dropped with the container and picked up with it again, from the sheet's Drop and Pick up or the Carried list. For any game whose items go in containers.
+- **Spells by school and class:** the Spells list has School and Class filters. A player sees only the spells their own characters' classes cast; a character that casts none sees none, and is told so. Each game says in its rules (its manifest) how its spells name their casters and where its characters keep their classes, so the list and the roster read any game formatted for Maelstrom.
+- **Races, never Species:** every list, wizard tab, sheet label and box says Race (the SRD's own text is left as written).
+- **Fixed:** a dropdown's open list (the sheet's Carried / Equipped) was white with pale words; it is dark and readable. A book's or story's page turners stay at the bottom of the window instead of jumping with each page's length. Character Selection opened over the sidebar's buttons on screens under about 1800 px; a window's first opening now stays left of the sidebar. A player who held a character could be shown Character Selection on joining anyway. A player's settings went back and forth to the host twice a second; they now go only when one changes. The roster showed no class for 5E, 3.5E and 2E characters.
+
 ## 0.1.0-beta.1: The beta
 
 Maelstrom VTT leaves alpha. This release is a full audit of the table (93 problems found and fixed, from backups and saving to what players can see, combat rules and Map Studio), a library you can find your way around (Modules as icons, then covers by series), a Folders button that adds new material while players stay connected, and a documented book format (.kpack) that people and AI agents can convert books into.

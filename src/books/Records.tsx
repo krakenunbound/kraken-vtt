@@ -1,4 +1,6 @@
 import { categoryOf, categoryOrder } from "../../shared/records/categorize.mjs";
+import { rulesetFor } from "../../shared/rulesets/registry.mjs";
+import { castsSpell as castsBy, spellCasters } from "../../shared/rulesets/summary.mjs";
 import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import { inlineRollNodes } from "../ui/InlineRolls";
 import type { QuickSlot, Session, TableRecord } from "../session/useSession";
@@ -29,8 +31,8 @@ const LISTS: { id: string; label: string; group: string }[] = [
   { id: "class_specialization", label: "Subclasses", group: "Character" },
   { id: "feat", label: "Feats", group: "Character" },
   { id: "skill", label: "Skills", group: "Character" },
-  { id: "race", label: "Species", group: "Character" },
-  { id: "race_subrace", label: "Subspecies", group: "Character" },
+  { id: "race", label: "Races", group: "Character" },
+  { id: "race_subrace", label: "Subraces", group: "Character" },
   { id: "spell", label: "Spells", group: "Character" },
   // Forged in the Dark: the playbooks and the crew types.
   { id: "playbook", label: "Playbooks", group: "Character" },
@@ -182,15 +184,34 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
   const [groupChoice, setGroupBy] = useState<"type" | "book" | null>(null);
   const [typeWanted, setTypeWanted] = useState("");
   const [bookWanted, setBookWanted] = useState("");
+  // Spells: by school, and by the class that casts them.
+  const [schoolWanted, setSchoolWanted] = useState("");
+  const [classWanted, setClassWanted] = useState("");
   // Another list: its own types and books, so the filters start again.
   useEffect(() => {
     setTypeWanted("");
     setBookWanted("");
+    setSchoolWanted("");
+    setClassWanted("");
     setGroupBy(null);
   }, [list]);
   const inList = useMemo(() => all.filter((record) => listOf(record) === list).map((record) => ({ record, ...categoryOf(record), book: record.source || "Campaign" })), [all, list]);
   // Lists with types of their own (items, creatures, spells) start by type; the rest by book.
   const typed = inList.some((row) => ["item", "npc", "spell", "spelldesc"].includes(row.record.type));
+  const spells = inList.some((row) => row.record.type === "spell" || row.record.type === "spelldesc");
+  // Which classes cast a spell: as the campaign's game declares it (its manifest's spells.casters).
+  const game = rulesetFor(session.ruleset ?? "");
+  const spellClasses = (record: TableRecord) => spellCasters(game, record);
+  const castsSpell = (name: string, record: TableRecord) => castsBy(game, name, record);
+  // A player sees the spells their own characters' classes cast, and none if they cast none.
+  const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
+  const myClasses = useMemo(
+    () => (gm ? [] : session.roster.filter((entry) => entry.owner === me).flatMap((entry) => entry.classes.split(/\s*\/\s*/).map((name) => name.replace(/\d+/g, "").trim()).filter(Boolean))),
+    [gm, session.roster, me],
+  );
+  const mine = (record: TableRecord) => gm || myClasses.some((name) => castsSpell(name, record));
+  const schoolNames = useMemo(() => (spells ? [...new Set(inList.map((row) => row.sub).filter(Boolean))].sort() : []), [inList, spells]);
+  const classNames = useMemo(() => (spells ? [...new Set(inList.filter((row) => mine(row.record)).flatMap((row) => spellClasses(row.record)))].sort() : []), [inList, spells, myClasses]);
   const groupBy = groupChoice ?? (typed ? "type" : "book");
   const typeCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -200,6 +221,7 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
   const bookNames = useMemo(() => [...new Set(inList.map((row) => row.book))].sort((a, b) => (a === "Campaign" ? -1 : b === "Campaign" ? 1 : a.localeCompare(b))), [inList]);
   const picked = inList
     .filter((row) => (!wanted || row.record.name.toLowerCase().includes(wanted)) && (!sharedOnly || shared(row.record)) && (!typeWanted || row.category === typeWanted) && (!bookWanted || row.book === bookWanted))
+    .filter((row) => !spells || ((!schoolWanted || row.sub === schoolWanted) && (!classWanted || castsSpell(classWanted, row.record) || spellClasses(row.record).includes(classWanted)) && mine(row.record)))
     .sort((a, b) => a.record.name.localeCompare(b.record.name));
   const rows = picked.map((row) => row.record);
   // By type: the type, then its kind within (Martial Melee, Magic; Human; Evocation). By book: the book, then the type.
@@ -234,6 +256,26 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
               {typeCounts.map(([name, count]) => (
                 <option key={name} value={name}>
                   {name} ({count})
+                </option>
+              ))}
+            </select>
+          ) : null}
+          {schoolNames.length > 1 ? (
+            <select aria-label="School" data-filter="school" value={schoolWanted} onChange={(event) => setSchoolWanted(event.target.value)} title="Show one school of magic">
+              <option value="">All schools</option>
+              {schoolNames.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          ) : null}
+          {classNames.length > 1 ? (
+            <select aria-label="Class" data-filter="class" value={classWanted} onChange={(event) => setClassWanted(event.target.value)} title="Show the spells one class casts">
+              <option value="">All classes</option>
+              {classNames.map((name) => (
+                <option key={name} value={name}>
+                  {name}
                 </option>
               ))}
             </select>
@@ -307,7 +349,7 @@ export function RecordsWindow({ session, onOpen, only }: { session: Session; onO
             </section>
           ))}
           {rows.length > LIMIT ? <p className="hint">{rows.length - LIMIT} more: search to narrow the list.</p> : null}
-          {list && rows.length === 0 ? <p className="hint">{sharedOnly ? "Nothing in this list is shared." : wanted ? "Nothing by that name." : gm ? "Nothing here yet: make a book active (Modules)." : "The GM has shared nothing here yet."}</p> : null}
+          {list && rows.length === 0 ? <p className="hint" data-records-empty>{sharedOnly ? "Nothing in this list is shared." : wanted ? "Nothing by that name." : spells && !gm && inList.length > 0 ? (myClasses.length ? "Your character's class casts none of these spells." : "Take a character first: you see the spells its class casts.") : gm ? "Nothing here yet: make a book active (Modules)." : "The GM has shared nothing here yet."}</p> : null}
           {recordMenu.element}
         </div>
       </section>

@@ -444,6 +444,8 @@ export interface RulesetManifest {
   engine: string;                                 // "shared/cairn/rules.mjs"
   host: { module: string; message?: string; tool?: string };  // "electron/cairn.cjs", "cairn", "kraken_cairn"
   labels?: Record<string, string>;                // PROFILES.labels generalised: ac, hp, species, xp...
+  classes?: { rows: Path; name?: string; level?: string; where?: Record<string, string> } | { field: Path; level?: Path }; // where a character keeps its classes (roster, Character Selection, party, spells)
+  spells?: { casters?: { field: Path; split?: string; levels?: boolean; abbreviations?: Record<string, string>; traditions?: Record<string, string> } }; // how a spell names its casters (Spells' Class filter; what a player sees)
   records: Record<string, { sheet?: Ref | "core"; statblock?: Ref; filters?: string[] }>;  // FG's aRecordOverrides
   sheet: SheetSpec;
   wizard?: WizardSpec;

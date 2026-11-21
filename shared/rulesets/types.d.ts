@@ -395,6 +395,13 @@ export interface RulesetManifest {
   blurb: string; // the campaign screen's text
   engine: string | null; // "shared/cairn/rules.mjs"; null for no rules (Worldbuilding)
   host: { module: string | null; message?: string; tool?: string };
+  // Where a character keeps its classes (read by the roster, Character Selection, the party sheet, spells):
+  // a list of rows (where: only rows whose fields say so, as C&C's class packages), or one class in a field.
+  classes?: { rows: Path; name?: string; level?: string; where?: Record<string, string> } | { field: Path; level?: Path };
+  // How a spell names the classes that cast it (the Spells list's Class filter, and what a player sees):
+  // a list of class names in a field; class names with levels ("Sor/Wiz 2", abbreviations spelled out); or a
+  // tradition (Arcane, Divine) whose casters a pattern matches.
+  spells?: { casters?: { field: Path; split?: string; levels?: boolean; abbreviations?: Record<string, string>; traditions?: Record<string, string> } };
   labels?: Record<string, string>;
   // fields: what the record window's editor offers for that kind (unlocked), in order; none, the fields its records carry.
   records?: Record<string, { label?: string; sheet?: Ref | "core"; statblock?: Ref; filters?: string[]; fields?: FieldSpec[] }>;

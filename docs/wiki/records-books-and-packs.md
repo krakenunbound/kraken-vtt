@@ -29,6 +29,7 @@ The categories fold away, and the arrow at the bottom collapses the sidebar to i
 - **Books** lists only the active books, to read. A player sees only the ones you open to them; a players' book can be shared with the players.
 - Every list (Items, NPCs, Spells and the rest) shows every active book's records under the book's name.
 - **Modules and Books are filed** by kind (Rulesets, Adventures, Settings, Maps & Tiles, Tokens & Art, Tables & Tools, Other), then by series or line, with each book's cover.
+- **Spells** also filter by **School** and by **Class**. A player sees only the spells their own characters' classes can cast (none for a class that casts none).
 - **By type or by book:** Items by type (Weapons, Armor & Shields, Magic Items, Potions & Oils, Treasure...), NPCs by creature type, Spells by level and Images by kind, each with a Type filter and a Book filter.
 - **Assets** shows what each active book, ruleset or art pack supplies: Maps, Images, Handouts, Portraits, Tokens, Covers, Music, Sounds and Video. Sounds, music and video play in the preview; a map or picture can be made a map, shared, or set as the background.
 - **Folders** (the GM's, along the top) shows Maelstrom's folders and what each holds. Drop files on one to add them; **Refresh** reads everything again while the table keeps running, so no player is disconnected.

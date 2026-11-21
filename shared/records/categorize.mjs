@@ -101,3 +101,4 @@ export function categoryOrder(a, b) {
   if (ia >= 0 || ib >= 0) return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
   return a.localeCompare(b, undefined, { numeric: true });
 }
+

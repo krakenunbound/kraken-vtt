@@ -26,6 +26,10 @@ const SKILL_LIST = SKILLS;
 /** @type {import("../rulesets/types").RulesetManifest} */
 export default {
   id: "dnd5e",
+  // Where a character keeps its classes (FG's classes list), for the roster, Character Selection and spells.
+  classes: { rows: "classes", name: "name", level: "level" },
+  // Spells list the classes that cast them in source ("Wizard, Sorcerer").
+  spells: { casters: { field: "source" } },
   names: ["D&D 5E", "Descending Darkness"],
   blurb: "Played from your 5E books (the rulebooks you own, or the free SRD): 5E sheets and character building, d20 combat with criticals, saves, spells and death saves.",
   engine: "shared/dnd5e/rules.mjs",
@@ -33,7 +37,7 @@ export default {
   // The modifier box's keys beside the chat (shared/rulesets/modifiers.mjs).
   dice: { modifiers: { presets: ["adv", "dis", "plus2", "minus2", "opp", "cover", "scover", "crit", "max", "half"] } },
   // The sheet's words ({@word}) and its highest level.
-  labels: { species: "Species", speciesLower: "species", ac: "AC", acLong: "Armor Class", hp: "Hit Points", hpLower: "hit points", maxLevel: "20" },
+  labels: { species: "Race", speciesLower: "race", ac: "AC", acLong: "Armor Class", hp: "Hit Points", hpLower: "hit points", maxLevel: "20" },
   sheet: {
     level: "arrange",
     className: "sheet-5e",

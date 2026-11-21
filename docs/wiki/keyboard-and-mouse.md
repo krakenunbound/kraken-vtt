@@ -41,7 +41,7 @@ Maelstrom is mostly driven by the mouse: click to use, drag to move or share, ri
 The twelve quick slots along the bottom keep things at hand: a book or a page, a map, a character, a sound, a note, dice, or a chat line.
 
 - **Use one:** click it, or press its key, F1 to F12. A key whose slot is empty does what the browser does (F5 reloads, F11 is full screen).
-- **Fill one:** drag anything onto it. Dice in your hand go on a slot with a click; a chat macro goes on by dragging the hand beside the chat's entry.
+- **Fill one:** drag anything onto it: a link, or any window by the anchor at the top left of its title bar (Cards, Notes, the party sheet...). Dice in your hand go on a slot with a click; a chat macro goes on by dragging the hand beside the chat's entry.
 - **Its menu:** right-click a slot to use it, rename it, or **Clear this slot**. A slot is never emptied any other way.
 
 ## Dice

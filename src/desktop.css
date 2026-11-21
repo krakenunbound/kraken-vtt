@@ -1033,6 +1033,12 @@ span.ct-init { display: inline-block; }
 .book-link.dead { color: inherit; cursor: default; }
 .book-turn { display: flex; justify-content: space-between; gap: 8px; margin-top: 18px; padding-top: 10px; border-top: 1px solid var(--line); }
 .book-turn button { max-width: 48%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The page turners stay at the bottom of the window: a short page pushes them down, a long one keeps
+   them in view as it scrolls, so they never jump about from page to page. */
+.book-page, .story-window { display: flex; flex-direction: column; }
+.book-page > *, .story-window > * { flex: none; }
+.book-page > .book-turn, .story-window > .book-turn { position: sticky; bottom: -18px; margin-top: auto; padding: 10px 0 12px; background: #15181d; z-index: 1; }
+.story-window > .book-turn { bottom: -12px; }
 .images-window { display: flex; flex-direction: column; height: 100%; min-height: 0; gap: 6px; }
 .images-tabs { display: flex; gap: 4px; overflow-x: auto; flex: none; }
 .images-tab { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 6px 6px 0 0; background: rgba(255, 255, 255, 0.03); }
@@ -1136,6 +1142,11 @@ span.ct-init { display: inline-block; }
 .notes-row b { display: block; font-size: 0.88rem; }
 .notes-row small { color: var(--muted); font-size: 0.74rem; }
 .notes-bar { display: flex; gap: 6px; align-items: center; }
+.notes-top, .note-owner { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.notes-top > span { color: var(--muted); font-size: 0.85rem; }
+.note-mode { display: inline-flex; border: 1px solid var(--brass-dim); border-radius: 999px; overflow: hidden; }
+.note-mode button { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border: none; border-radius: 0; background: transparent; color: var(--muted); font-size: 0.8rem; }
+.note-mode button.on { background: var(--brass); color: #16120a; }
 .notes-bar input { flex: 1; }
 .notes-new { width: 32px; height: 32px; padding: 0; border-radius: 50%; display: grid; place-items: center; color: #8fdc8f; }
 .note-window { display: flex; flex-direction: column; gap: 6px; height: 100%; min-height: 0; }
@@ -1180,6 +1191,7 @@ span.ct-init { display: inline-block; }
 .cc-field[readonly] { border-bottom-color: transparent; }
 .cc-field.number { width: 44px; text-align: center; border: 1px solid rgba(214, 170, 92, 0.45); border-radius: 3px; background: rgba(0, 0, 0, 0.3); }
 .cc-field.wide { flex: 1; }
+.cc-field.put-in { width: auto; max-width: 8rem; font-size: 0.78rem; color: var(--muted); border-bottom-color: transparent; }
 .cc-name { width: 100%; font-family: Cinzel, serif; font-size: 1.15rem; font-weight: 700; }
 textarea.cc-field { width: 100%; min-height: 70px; resize: vertical; border: 1px solid var(--line); border-radius: 4px; line-height: 1.45; }
 textarea.cc-field.tall { min-height: 220px; }

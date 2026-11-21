@@ -554,6 +554,8 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
   const packs = spec.path === "inventorylist" && (rulesetFor(sheet.session.ruleset ?? "").edit?.string ?? []).includes("inventorylist.*.location");
   const [over, setOver] = useState("");
   const modifier = spec.modifier ? <ModifierView spec={spec.modifier} /> : null;
+  // The containers on this list (backpacks, sacks...), for an item's Put in.
+  const bagNames = packs ? items.filter(([, item]) => containerOf(item)).map(([, item]) => String(item.name ?? "").trim()).filter(Boolean) : [];
   return (
     <>
       {spec.label ? <h4>{spec.label}</h4> : null}
@@ -693,8 +695,19 @@ function List({ spec, formats }: { spec: Extract<Part, { part: "list" }>; format
                   ) : null}
                 </span>
               ) : null}
+              {packs && editable && !inside && !container && bagNames.length ? (
+                // Put in a container (as dragging it onto one): it goes where the container goes.
+                <select className="cc-field put-in" aria-label={`Put ${name} in a container`} title="Put it in a container: dropped and picked up with it" value="" data-action="put-in" onChange={(event) => event.target.value && sheet.change(`${spec.path}.${key}.location`, event.target.value)}>
+                  <option value="">Put in…</option>
+                  {bagNames.map((bag) => (
+                    <option key={bag} value={bag}>
+                      {bag}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
               {container && editable ? (
-                <button type="button" className="ghost bag-toggle" data-action={held > 0 ? "container-drop" : "container-pickup"} title={held > 0 ? `Drop the ${name} (what is in it stays in it, and its weight comes off)` : `Pick the ${name} up again`} onClick={() => sheet.change(`${spec.path}.${key}.carried`, held > 0 ? 0 : 1)}>
+                <button type="button" className="ghost bag-toggle" data-action={held > 0 ? "container-drop" : "container-pickup"} title={held > 0 ? `Drop the ${name}: what is packed in it is dropped with it` : `Pick the ${name} up again, and what is packed in it`} onClick={() => sheet.change(`${spec.path}.${key}.carried`, held > 0 ? 0 : 1)}>
                   <Icon name={held > 0 ? "leave" : "hand"} size={13} /> {held > 0 ? "Drop" : "Pick up"}
                 </button>
               ) : null}

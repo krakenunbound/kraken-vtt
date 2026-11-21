@@ -17,7 +17,7 @@ const titled = (word) => String(word ?? "").replace(/\b\w/g, (letter) => letter.
 
 // The tabs, in FG's order (a level up shows only Class and Commit).
 export const TABS = ["species", "class", "abilities", "background", "equipment", "commit"];
-export const TAB_LABEL = { species: "Species", class: "Class", abilities: "Abilities", background: "Background", equipment: "Equipment", commit: "Commit" };
+export const TAB_LABEL = { species: "Race", class: "Class", abilities: "Abilities", background: "Background", equipment: "Equipment", commit: "Commit" };
 
 export const is2024 = (record) => String(record?.data?.version ?? "") === "2024";
 

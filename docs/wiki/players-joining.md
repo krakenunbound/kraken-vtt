@@ -21,6 +21,7 @@ If you lose your connection, Maelstrom shows *Reconnecting…* and puts you back
 - Drag items, spells and other links from the books the GM shares onto your sheet.
 - Your **portrait**: click it on your sheet, then **From my computer…** for a picture or a WebM video of your own.
 - Trade through the **party sheet**: drag an item onto its stash, and another player takes it.
+- **Notes** are Private (yours and the GM's) or Public (the whole table): the switch at the top of the Notes window sets new notes, and each note has its own.
 
 More in [Character sheets and wizards](character-sheets-and-wizards.md).
 

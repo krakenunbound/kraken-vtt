@@ -155,7 +155,7 @@ Six start screens, fantasy, science fiction and horror, one at random each time.
   - **Apeira Astra** (Maelstrom's own): science fiction on 2d6 and skills, with
     crews made in minutes and armour that soaks. Adventure: *Salvage Rights*.
   - **D&D 5E** from the **SRD 5.2.1** (Wizards of the Coast, CC BY 4.0): the
-    12 classes to level 20, species, backgrounds, feats, equipment, 339
+    12 classes to level 20, races, backgrounds, feats, equipment, 339
     spells, 330 creatures and 258 magic items.
   - **Basic Fantasy RPG**, 4th Edition (Chris Gonnerman, CC BY-SA 4.0):
     old-school play with ascending Armor Class, 3d6 in order, the five saving

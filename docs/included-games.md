@@ -26,7 +26,7 @@ made from the SRD's own PDF:
   and spell lists, Character Origins, Feats, Equipment, Spells, Rules
   Glossary, Gameplay Toolbox), and what the character wizard, the sheet and
   the tracker use: 12 classes with a subclass each and their features to
-  level 20, 9 species (the Elf's lineages, the Tiefling's legacies, the
+  level 20, 9 races (the Elf's lineages, the Tiefling's legacies, the
   Dragonborn's ancestors), 4 backgrounds, the feats, every weapon, armor,
   tool and piece of gear, and 339 spells. Spells that roll (attacks, saves
   with half damage, damage and healing that grow with the slot or the

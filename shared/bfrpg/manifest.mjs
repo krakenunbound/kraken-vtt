@@ -23,6 +23,8 @@ const DETAILS = ["playername", "deity", "languages", "gender", "age", "height", 
 /** @type {import("../rulesets/types").RulesetManifest} */
 export default {
   id: "bfrpg",
+  // Where a character keeps its class: one class, its level beside it.
+  classes: { field: "className", level: "level" },
   names: ["Basic Fantasy"],
   blurb: "The Basic Fantasy Role-Playing Game, 4th Edition (free, CC BY-SA): old-school play with ascending Armor Class and an attack bonus, 3d6 in order, four races and four classes, the five saving throws, d6 initiative, thief abilities, turning the undead. Its Player's Handbook, Game Master's Guide and a first adventure come with Kraken.",
   engine: "shared/bfrpg/rules.mjs",

@@ -41,7 +41,7 @@ On the start screen choose **My Campaigns**.
   folder of Kraken's logs (the table server's and the window's), for a bug
   report.
   - *D&D 5E* comes with the SRD 5.2.1 as three books (*SRD 5.2.1 Player's
-    Rules*, *Creatures*, *Magic Items*): classes and subclasses, species,
+    Rules*, *Creatures*, *Magic Items*): classes and subclasses, races,
     backgrounds, feats, gear, spells, every monster and magic item, ready to
     play with nothing else installed ([included-games.md](included-games.md)).
     Your own 5E modules or packs sit beside them.

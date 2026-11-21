@@ -51,7 +51,7 @@ type Life = {
   appearance: string;
   why: string;
 };
-const TITLES: Record<string, string> = { characteristics: "Characteristics", species: "Species", background: "Background", careers: "Careers", benefits: "Benefits", skills: "Skills", finish: "Finish" };
+const TITLES: Record<string, string> = { characteristics: "Characteristics", species: "Race", background: "Background", careers: "Careers", benefits: "Benefits", skills: "Skills", finish: "Finish" };
 // The extension's own instructions for a page (its strings), as FG's Instructions panel.
 const EXT = "KrakenCharWizardMGT2";
 function Instructions({ session, tab }: { session: Session; tab: string }) {
@@ -131,7 +131,7 @@ export function WizardMgt2({ session, onDone }: { session: Session; onDone: (id:
     return (
       <section className="wizard-5e cc-panel wizard-mgt2" aria-label="Traveller wizard" data-wizard="mgt2">
         {head}
-        <p className="hint">The Traveller Character Wizard: characteristics, species, background, then careers a term at a time (qualification, training, survival, events, promotions, ageing), mustering out, and your benefits. Every roll goes to chat.</p>
+        <p className="hint">The Traveller Character Wizard: characteristics, race, background, then careers a term at a time (qualification, training, survival, events, promotions, ageing), mustering out, and your benefits. Every roll goes to chat.</p>
         <p className="cc-inline">
           Name <input value={name} aria-label="Character name" onChange={(event) => setName(event.target.value)} />
           <button type="button" data-action="life-start" disabled={busy} onClick={() => void act({ action: "start", name })}>

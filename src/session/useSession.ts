@@ -260,7 +260,9 @@ export type QuickSlot =
   // Dice held in the hand (3d6, 1d20+2): rolled with a click.
   | { kind: "dice"; formula: string; label: string }
   // A chat line run again with a click (/roll 4d6k3, /emote ..., or words said).
-  | { kind: "macro"; text: string; label: string };
+  | { kind: "macro"; text: string; label: string }
+  // A window of the desktop (Cards, Notes, the party sheet, the combat tracker...): opened with a click.
+  | { kind: "window"; window: string; title: string; payload?: string; label: string };
 export type KrakenLink = QuickSlot;
 export type SoundItem = { id: string; kind: string; group: string; name: string };
 export type SoundLibrary = { sounds: SoundItem[]; groups: { id: string; count: number }[]; folder: string; triggers?: SoundTrigger[] };

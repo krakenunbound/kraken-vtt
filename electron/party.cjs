@@ -47,10 +47,9 @@ function abilitiesOf(data) {
 }
 function summary(record) {
   const data = record.data ?? {};
-  const classes = rows(data.packages)
-    .map(([, pkg]) => pkg)
-    .filter((pkg) => String(pkg.packagetype).toLowerCase() === "class")
-    .map((pkg) => `${pkg.name} ${Number(pkg.level) || 1}`);
+  // Its classes where its game's manifest says it keeps them (no game known here).
+  const { rulesetOfRecord } = require("../shared/rulesets/registry.mjs");
+  const classes = require("../shared/rulesets/summary.mjs").characterClasses(rulesetOfRecord(data.ruleset), data).map((row) => `${row.name} ${row.level}`);
   return {
     id: record.id,
     name: record.name,

@@ -33,13 +33,19 @@ function install() {
   const proto = Storage.prototype;
   const setItem = proto.setItem;
   const removeItem = proto.removeItem;
+  // Only a real change goes up: a setting written again with the value it has (a window saving its place on
+  // every redraw) sends nothing, so the account's echo back can never set off another send.
   proto.setItem = function (key: string, value: string) {
+    const local = this === window.localStorage;
+    const before = local ? this.getItem(key) : null;
     setItem.call(this, key, value);
-    if (this === window.localStorage) queue(String(key), String(value));
+    if (local && before !== String(value)) queue(String(key), String(value));
   };
   proto.removeItem = function (key: string) {
+    const local = this === window.localStorage;
+    const had = local && this.getItem(key) !== null;
     removeItem.call(this, key);
-    if (this === window.localStorage) queue(String(key), null);
+    if (had) queue(String(key), null);
   };
 }
 

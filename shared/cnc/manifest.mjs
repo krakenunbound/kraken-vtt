@@ -221,6 +221,8 @@ const sheet = {
 /** @type {import("../rulesets/types").RulesetManifest} */
 export default {
   id: "cnc",
+  // Where a character keeps its classes: its class packages (SiegeCore's).
+  classes: { rows: "packages", where: { packagetype: "class" }, name: "name", level: "level" },
   names: ["Castles & Crusades"],
   blurb: "SiegeCore rules: character sheets, the SIEGE engine, combat and spells.",
   engine: "shared/siege/engine.mjs",

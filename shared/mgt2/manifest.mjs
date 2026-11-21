@@ -24,7 +24,7 @@ const sheet = {
   header: {
     identity: [
       { path: "upp", label: "UPP", className: "mgt2-upp", hook: "upp", title: STATS.map((stat) => `${stat.short} {characteristics.${stat.key}.score|0}`).join(", ") },
-      { path: "species", label: "Species", kind: "text", default: "Human" },
+      { path: "species", label: "Race", kind: "text", default: "Human" },
       { path: "homeworld", label: "Homeworld", kind: "text" },
       { path: "age", label: "Age", kind: "number" },
       { path: "careers", label: "Careers (terms)", hook: "careers", format: "mgt2.careers" },

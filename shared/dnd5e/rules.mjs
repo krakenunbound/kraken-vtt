@@ -33,7 +33,7 @@ export const PROFILES = {
     standardArray: [15, 14, 13, 12, 10, 8],
     xp: [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000],
     maxLevel: 20,
-    labels: { ac: "AC", acLong: "Armor Class", hp: "Hit Points", hpShort: "HP", species: "Species", game: "5E", hitDice: "Hit Dice" },
+    labels: { ac: "AC", acLong: "Armor Class", hp: "Hit Points", hpShort: "HP", species: "Race", game: "5E", hitDice: "Hit Dice" },
     dying: "saves",
     dread: false,
     dcs: [5, 10, 15, 20, 25, 30],

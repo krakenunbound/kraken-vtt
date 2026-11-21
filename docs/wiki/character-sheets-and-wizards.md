@@ -44,7 +44,7 @@ Players make their own characters in the wizard, or the GM makes one for them. E
 |---|---|
 | Descending Darkness | Kin, class, background and abilities (standard array 17, 14, 14, 13, 12, 8). |
 | Apeira Astra | Origin, a major and a minor Path, skills and gear. |
-| D&D 5E | Species, class, background, scores, skills, gear (class and background kits, as Fantasy Grounds does) and spells. Follows FG's 5E wizard. |
+| D&D 5E | Race, class, background, scores, skills, gear (class and background kits, as Fantasy Grounds does) and spells. Follows FG's 5E wizard. |
 | D&D 3.5E | Race, class, level and scores. |
 | AD&D 2E | Race, class or multi-class, level, scores and 18/xx, or one of your books' pregenerated characters as it is. |
 | Castles & Crusades | Follows your Fantasy Grounds C&C wizard extension. |
@@ -89,6 +89,7 @@ The party sheet (sidebar, **Player > Party**) holds the party's members, coin an
 - **The group roll:** a check, save or skill for everyone, rolled for them or asked of the players.
 - **Rest the party:** a short or long rest for everyone.
 - **The party's name and token:** name the party and press **Change token**: banners and flags, fantasy groups, a caravan, investigators and monster hunters, a sci-fi crew, a squad, or any token. Drag the token onto a big map (a city, a region) to mark where the party is. There is one a map, and dropping it again moves it.
+- **Containers:** drag an item onto a backpack (or a sack, a bag of holding...), or pick it from **Put in…** beside the item. Drop the backpack and everything in it is dropped with it; Pick it up and it all comes back.
 - **The stash (Inventory tab), for trading:** drag an item from your inventory onto the stash to put it in; another player drags it onto their inventory, or presses **Take**. Chat says who put and took what.
 - **Party from who's here** fills the party with the characters at the table, the GM's own included.
 - Some games add a tab: Cairn's **Growth**, Fate's **Milestones**, Forged in the Dark's **Crew**.

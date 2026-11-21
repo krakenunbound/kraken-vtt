@@ -80,7 +80,14 @@ function firstPlace(kind: WindowKind): Placement {
     const surface = cssRect(document.querySelector(".desktop-surface"));
     if (surface && surface.width > 200 && surface.height > 200) return { x: Math.round(surface.left + 6), y: Math.round(surface.top + 6), w: Math.round(surface.width - 12), h: Math.round(surface.height - 12) };
   }
-  return DEFAULTS[kind];
+  // A first opening stays left of the sidebar (Character Selection at its usual spot covered the sidebar's
+  // buttons on a screen under ~1800 px); where the person moves it later is theirs.
+  const place = DEFAULTS[kind];
+  if (typeof document !== "undefined" && place) {
+    const surface = cssRect(document.querySelector(".desktop-surface"));
+    if (surface && surface.width > 400 && place.x + place.w > surface.right - 6) return { ...place, x: Math.max(Math.round(surface.left), Math.round(surface.right - place.w - 10)) };
+  }
+  return place;
 }
 
 // Whether the map fills the table behind the windows (kept per screen).

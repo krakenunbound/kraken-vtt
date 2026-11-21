@@ -623,6 +623,8 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
     if (raw.kind === "dice" && typeof raw.formula === "string" && /^[\dd%f+\-khl!xrocs<>= ]{1,60}$/i.test(raw.formula.trim())) return { kind: "dice", formula: raw.formula.trim(), label: label || raw.formula.trim() };
     // A chat line kept to run again (FG's macro: /roll 4d6k3 dragged from the chat's entry).
     if (raw.kind === "macro" && typeof raw.text === "string" && raw.text.trim()) return { kind: "macro", text: raw.text.trim().slice(0, 300), label: label || raw.text.trim().slice(0, 80) };
+    // A window of the desktop (Cards, Notes, the party sheet...), opened again with a click.
+    if (raw.kind === "window" && typeof raw.window === "string" && /^[a-z0-9:_-]{1,40}$/i.test(raw.window)) return { kind: "window", window: raw.window, title: text(raw.title, "").slice(0, 80) || label || raw.window, ...(typeof raw.payload === "string" && raw.payload ? { payload: raw.payload.slice(0, 160) } : {}), label: label || text(raw.title, "").slice(0, 80) || raw.window };
     return null;
   };
   const cleanSlots = (list) => Array.from({ length: SLOTS }, (_, index) => (Array.isArray(list) ? cleanSlot(list[index]) : null));
@@ -2014,11 +2016,9 @@ function createTableServer({ saved = {}, archive = null, onChange = () => undefi
       .list({ type: "character" })
       .map((record) => {
         const data = record.data ?? {};
-        const packages = data.packages && typeof data.packages === "object" ? Object.values(data.packages) : [];
-        const classes = packages
-          .filter((pkg) => pkg && String(pkg.packagetype).toLowerCase() === "class")
-          .map((pkg) => `${pkg.name} ${Number(pkg.level) || 1}`)
-          .join(" / ");
+        // Its classes where its game's manifest says it keeps them (no game known here).
+        const { rulesetOfRecord } = require("../shared/rulesets/registry.mjs");
+        const classes = require("../shared/rulesets/summary.mjs").classLine(rulesetOfRecord(data.ruleset), data);
         return {
           id: record.id,
           name: record.name,

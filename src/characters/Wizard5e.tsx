@@ -67,7 +67,7 @@ const sourceOf = (record: TableRecord) => /@(.+)$/.exec(String(record.data.fgPat
 
 // FG's instructions, a page at a time.
 const STEPS: Record<Tab, string[]> = {
-  species: ["Review the available Species and Ancestry options by clicking on their names.", "Click the Add button next to the Species option you want.", "If the Species has Ancestry options, then click the Add button next to the Ancestry option you want.", "Review available Species Proficiencies and Traits; and resolve any outstanding choices using drop-down selection boxes."],
+  species: ["Review the available Race and Ancestry options by clicking on their names.", "Click the Add button next to the Race option you want.", "If the Race has Ancestry options, then click the Add button next to the Ancestry option you want.", "Review available Race Proficiencies and Traits; and resolve any outstanding choices using drop-down selection boxes."],
   class: ["Review the available Class options by clicking on their names.", "Click the Add button next to the Class option you want.", "Review available Class Proficiencies and Features; and resolve any outstanding choices using drop-down selection boxes.", "If you want to make a character higher than level 1, use the arrows next to the Class level."],
   abilities: ["Choose an Ability Score generation method from the Method drop-down.", "For Dice Roll, click the roll button: the host rolls 4d6, dropping the lowest, for each ability.", "For Point Buy, click the up/down buttons in the Base column to spend the points.", "For Standard Array, use the arrows to swap Base scores between abilities."],
   background: ["Review the available Background options by clicking on their names.", "Click the Add button next to the Background option you want.", "Review available Background Proficiencies and Features; and resolve any outstanding choices using drop-down selection boxes."],
@@ -304,15 +304,15 @@ export function Wizard5e({ session, onDone }: { session: Session; onDone: (id: s
 
   // The badges (updateAlerts) and the warnings Commit lists (and the sheet's notes keep).
   const alerts: Record<Tab, string[]> = {
-    species: !kin ? ["Select Species"] : [...(ancestries.length && !ancestryRecord ? ["Select Ancestry"] : []), ...decisions.species.filter((item) => !choices[item.id]).map((item) => item.label)],
+    species: !kin ? ["Select Race"] : [...(ancestries.length && !ancestryRecord ? ["Select Ancestry"] : []), ...decisions.species.filter((item) => !choices[item.id]).map((item) => item.label)],
     class: !klass ? ["Select Class"] : decisions.class.filter((item) => !choices[item.id]).map((item) => `Select ${item.feature ?? "Proficiencies"} Choice`),
     abilities: !method ? ["Select Ability Scores"] : method === "Point Buy" && spent !== POINT_BUY_MAX ? ["Select Ability Scores - Not all points used"] : method === "Dice Roll" && STATS.every((stat) => !base[stat]) ? ["Select Ability Scores"] : [],
     background: !bg
       ? ["Select Background"]
       : [
           ...decisions.background.filter((item) => !choices[item.id]).map((item) => item.label),
-          ...(kin && kin.is2024 && !bg.is2024 ? ["You chose a 2024 Species and a Legacy Background: adjust the MISC ability scores by increasing one score by 2 and a different one by 1, or three scores by 1; and if the background doesn't include a feat, choose an Origin feat."] : []),
-          ...(kin && !kin.is2024 && bg.is2024 && !speciesRecord?.data.classes ? ["You chose a Legacy Species and a 2024 Background: the ASI for the Species will be ignored."] : []),
+          ...(kin && kin.is2024 && !bg.is2024 ? ["You chose a 2024 Race and a Legacy Background: adjust the MISC ability scores by increasing one score by 2 and a different one by 1, or three scores by 1; and if the background doesn't include a feat, choose an Origin feat."] : []),
+          ...(kin && !kin.is2024 && bg.is2024 && !speciesRecord?.data.classes ? ["You chose a Legacy Race and a 2024 Background: the ASI for the Race will be ignored."] : []),
         ],
     // FG's equipment badge shows without a warning line.
     equipment: [],

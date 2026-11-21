@@ -438,10 +438,18 @@ export function Desktop({
   const launchers = [...tools, ...groups.flatMap((group) => group.entries)];
   const entryOpen = (entry: SidebarEntry) => windows.windows.some((item) => item.key === (entry.payload ? `${entry.kind}:${entry.payload}` : entry.kind));
   // The link a record's window carries (its anchor, top left): what it shows, to drag anywhere.
+  // Every window is a link (its anchor top left): a record's to that record, any other to the window itself.
   const linkOf = (item: OpenWindow): QuickSlot | null => {
     const id = item.payload ?? "";
-    if (!id) return null;
     const label = item.title;
+    const own = recordLinkOf(item, id, label);
+    if (own) return own;
+    // A Character Wizard is made new each time: no link to one in progress.
+    if (item.kind === "characters" && id.startsWith("new")) return null;
+    return { kind: "window", window: item.kind, title: item.title, ...(id ? { payload: id } : {}), label };
+  };
+  const recordLinkOf = (item: OpenWindow, id: string, label: string): QuickSlot | null => {
+    if (!id) return null;
     if (item.kind === "sheet") return { kind: "sheet", record: id, label };
     if (item.kind === "note") return { kind: "note", record: id, label };
     if (item.kind === "record") {
@@ -525,12 +533,14 @@ export function Desktop({
   }, [session.mapShared]);
   // A player who holds no character is shown Character Selection on joining, as in FG.
   const offered = useRef(false);
+  // Decided from the roster, which comes in the join reply with the seat and its name (the records may come
+  // later: a player who holds a character must not be told they hold none).
   useEffect(() => {
-    if (gm || offered.current || !session.selfId) return;
+    if (gm || offered.current || !session.selfId || !me) return;
     offered.current = true;
     // Theirs only: a released character they can read is not one they hold.
-    if (!characters.some((record) => record.owner && record.owner.toLowerCase() === me.toLowerCase())) windows.open("charselect", "Character Selection");
-  }, [gm, session.selfId, characters.length]);
+    if (!session.roster.some((entry) => entry.owner && entry.owner.toLowerCase() === me.toLowerCase())) windows.open("charselect", "Character Selection");
+  }, [gm, session.selfId, me, session.roster]);
   // The GM shows the players a picture: it opens on their screens, as FG's.
   useEffect(() => {
     if (session.imageShown && !gm) windows.open("images", "Pictures");

@@ -183,7 +183,39 @@ function setPath(data, path, value) {
   for (const key of keys.slice(0, -1)) node = node[key] = node[key] && typeof node[key] === "object" ? node[key] : {};
   node[keys.at(-1)] = value;
 }
-async function editCharacter(table, record, changes, seat) {
+// A container's contents go with it: a backpack dropped drops what is packed in it (FG's location),
+// picked up again picks them up (carried). Changes the caller made to the contents themselves stand.
+function withBagContents(record, changes) {
+  if (!Array.isArray(changes)) return changes;
+  // Only a game whose manifest keeps items in containers (FG's location).
+  const manifest = require("../shared/rulesets/registry.mjs").rulesetOfRecord(record?.data?.ruleset);
+  if (!(manifest?.edit?.string ?? []).includes("inventorylist.*.location")) return changes;
+  const list = record?.data?.inventorylist;
+  if (!list || typeof list !== "object") return changes;
+  const named = new Set(changes.map((change) => String(change?.path ?? "")));
+  const extra = [];
+  for (const change of changes) {
+    const match = /^inventorylist\.([^.]+)\.carried$/.exec(String(change?.path ?? ""));
+    const box = match ? list[match[1]] : null;
+    if (!box) continue;
+    const name = String(box.name ?? "").trim().toLowerCase();
+    const now = box.carried === undefined || box.carried === "" ? 1 : Number(box.carried);
+    const next = Number(change.value);
+    if (!name || !Number.isFinite(next)) continue;
+    for (const [key, row] of Object.entries(list)) {
+      if (key === match[1] || !row || String(row.location ?? "").trim().toLowerCase() !== name) continue;
+      const path = `inventorylist.${key}.carried`;
+      if (named.has(path)) continue;
+      const held = row.carried === undefined || row.carried === "" ? 1 : Number(row.carried);
+      if (next === 0 && now > 0 && held !== 0) extra.push({ path, value: 0 });
+      else if (next > 0 && now === 0 && held === 0) extra.push({ path, value: 1 });
+    }
+  }
+  return extra.length ? [...changes, ...extra].slice(0, 50) : changes;
+}
+
+async function editCharacter(table, record, changesIn, seat) {
+  const changes = withBagContents(record, changesIn);
   if (dnd5e.is5e(record)) return dnd5e.edit5e(table, record, changes, seat);
   if (dnd35.is35(record)) return dnd35.edit35(table, record, changes, seat);
   if (adnd2e.is2e(record)) return adnd2e.edit2e(table, record, changes, seat);
@@ -388,7 +420,7 @@ async function dropOnCharacter(table, record, source, from) {
       table.say(`${record.name} gets ${source.name}.`, who, record.visibility === "gm");
       return { record: updated, added: source.type };
     }
-    if (source.type !== "item") throw new Error("A 5E sheet takes items, feats and spells; class, species and background come with the Character Wizard and level up.");
+    if (source.type !== "item") throw new Error("A 5E sheet takes items, feats and spells; class, race and background come with the Character Wizard and level up.");
     const data = structuredClone(record.data);
     const list = (data.inventorylist = data.inventorylist ?? {});
     const { engine } = await siege();

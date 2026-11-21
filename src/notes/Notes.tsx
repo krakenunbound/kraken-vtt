@@ -15,11 +15,48 @@ import { ShareMenu } from "../books/RecordEditor";
 type NoteData = { text?: string; links?: QuickSlot[] };
 const noteOf = (record: TableRecord) => record.data as NoteData;
 
+// Private (yours, and the GM's) or Public (the whole table): a note's mode, and the mode new notes start in.
+function ModeToggle({ value, onChange, label, testId }: { value: "private" | "public"; onChange: (mode: "private" | "public") => void; label: string; testId: string }) {
+  return (
+    <div className="note-mode" role="radiogroup" aria-label={label} data-note-mode={testId}>
+      {(
+        [
+          ["private", "lock", "Private", "Only you (and the GM) read it"],
+          ["public", "share", "Public", "The whole table reads it"],
+        ] as const
+      ).map(([mode, icon, text, tip]) => (
+        <button key={mode} type="button" role="radio" aria-checked={value === mode} className={value === mode ? "on" : ""} title={tip} data-mode={mode} onClick={() => onChange(mode)}>
+          <Icon name={icon} size={13} /> {text}
+        </button>
+      ))}
+    </div>
+  );
+}
+const MODE_KEY = "kraken-notes-new-mode";
+const readMode = (): "private" | "public" => {
+  try {
+    return window.localStorage.getItem(MODE_KEY) === "public" ? "public" : "private";
+  } catch {
+    return "private";
+  }
+};
+
 export function NotesWindow({ session }: { session: Session }) {
   const gm = session.role === "dm";
   const windows = useWindows();
   const [search, setSearch] = useState("");
   const [mine, setMine] = useState(false);
+  // The mode new notes start in, kept with this seat's account (kraken-* settings follow the account).
+  const [newMode, setNewModeState] = useState(readMode);
+  const setNewMode = (mode: "private" | "public") => {
+    setNewModeState(mode);
+    try {
+      window.localStorage.setItem(MODE_KEY, mode);
+    } catch {
+      /* this screen only */
+    }
+  };
+  const newVisibility = newMode === "public" ? "all" : gm ? "gm" : "owner";
   const me = session.players.find((seat) => seat.id === session.selfId)?.name ?? "";
   const isMine = (record: TableRecord) => (gm ? record.owner === "" : record.owner === me);
   const notes = useMemo(
@@ -31,13 +68,13 @@ export function NotesWindow({ session }: { session: Session }) {
     [session.records, search, mine, me],
   );
   const create = async () => {
-    const id = await session.op({ op: "create", input: { type: "note", name: "New note", visibility: gm ? "gm" : "owner", data: { text: "", links: [] } } });
+    const id = await session.op({ op: "create", input: { type: "note", name: "New note", visibility: newVisibility, data: { text: "", links: [] } } });
     windows.open("note", "New note", id);
   };
   // A chat line (or any words) dropped on the list: a new note holding them.
   const fromWords = async (words: string) => {
     const name = words.replace(/\s+/g, " ").trim().slice(0, 40) || "New note";
-    const id = await session.op({ op: "create", input: { type: "note", name, visibility: gm ? "gm" : "owner", data: { text: words, links: [] } } });
+    const id = await session.op({ op: "create", input: { type: "note", name, visibility: newVisibility, data: { text: words, links: [] } } });
     windows.open("note", name, id);
   };
   return (
@@ -54,6 +91,10 @@ export function NotesWindow({ session }: { session: Session }) {
         void fromWords(words);
       }}
     >
+      <div className="notes-top">
+        <span>New notes</span>
+        <ModeToggle value={newMode} onChange={setNewMode} label="New notes are private or public" testId="new" />
+      </div>
       <div className="notes-list" role="list">
         {notes.length === 0 ? <p className="hint empty-state">{search ? "No note says that." : <><b>No notes yet</b>The + below makes one.</>}</p> : null}
         {notes.map((record) => (
@@ -63,7 +104,7 @@ export function NotesWindow({ session }: { session: Session }) {
               <b>{record.name || "Untitled"}</b>
               <small>
                 {record.owner || "GM"}
-                {record.visibility === "all" ? " · shared" : ""}
+                {record.visibility === "all" ? " · public" : " · private"}
               </small>
             </span>
           </button>
@@ -146,10 +187,16 @@ export function NoteWindow({ session, id }: { session: Session; id: string }) {
           </button>
         ) : null}
       </div>
-      <p className="note-owner">
-        <b>Owner:</b> {record.owner || "GM"}
-        {shared ? " · shared with the table" : ""}
-      </p>
+      <div className="note-owner">
+        <span>
+          <b>Owner:</b> {record.owner || "GM"}
+        </span>
+        {editable ? (
+          <ModeToggle value={shared ? "public" : "private"} onChange={(mode) => save({ visibility: mode === "public" ? "all" : gm && record.owner === "" ? "gm" : "owner" })} label="This note is private or public" testId="note" />
+        ) : (
+          <span>{shared ? "Public" : "Private"}</span>
+        )}
+      </div>
       {/* The core's editor: FG's formatted text; words dragged in (a chat line) and links go where they fall. */}
       <RichText
         className="note-text"
