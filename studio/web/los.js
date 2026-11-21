@@ -529,7 +529,8 @@ window.KrakenLOS = (() => {
     box.querySelector('[data-los-act="simplify"]').onclick = simplifyPoints;
     box.querySelector('[data-los-act="art"]').onclick = deleteSelection;
     $('#losSplit').onchange = e => { split = e.target.checked; };
-    $('#losGridSnap').onchange = e => { S().project.wallGridSnap = e.target.checked; S().save(); };
+    // The same switch as Use Grid Snap at the top: the map's one grid snap, kept as the GM leaves it.
+    $('#losGridSnap').onchange = e => { S().project.wallGridSnap = e.target.checked; S().project.gridSnapChosen = true; S().save(); S().draw(); };
     $('#losPointSnap').onchange = e => { pointSnap = e.target.checked; };
     $('#losPeek').onchange = e => { S().snapshot(); S().project.peek = Math.max(0, Math.min(10, Number(e.target.value) || 0)); S().save(); };
   }

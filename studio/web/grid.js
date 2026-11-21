@@ -33,7 +33,8 @@ window.KrakenGrid = (() => {
     p.grid = g;
     p.gridY = gy;
     p.gridOffset = {x: Math.round((((ox % g) + g) % g) * 100) / 100, y: Math.round((((oy % (gy || g)) + (gy || g)) % (gy || g)) * 100) / 100};
-    p.wallGridSnap = true;  // the grid now matches the picture, so snapping helps
+    // The grid now matches the picture, so snapping helps: on, unless the GM has turned it off.
+    if (!p.gridSnapChosen) p.wallGridSnap = true;
     S().save(); S().draw(); render();
   }
 

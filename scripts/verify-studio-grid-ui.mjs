@@ -182,6 +182,30 @@ try {
   assert(near(await studio.$eval("#gridSizeY", (input) => Number(input.value)), grid.gridY, 0.01), "the Height field shows it");
   report.push(`width and height unlinked, a box gives ${grid.grid} x ${grid.gridY} cells`);
 
+  // Grid snap off at the top (Use Grid Snap): walls drawn after it land where clicked, and it stays off,
+  // the Walls panel's Grid snap with it (one switch for the map).
+  await studio.click('[data-mode="los"]');
+  await studio.click('[data-los-tool="line"]');
+  if (await studio.isChecked("#snapToggle")) await studio.click("#snapToggle");
+  const offGrid = (n) => ({ x: SQUARE.x1 + 13 + n * 37, y: SQUARE.y1 + 21 + n * 11 });
+  for (let line = 0; line < 3; line++) {
+    const a = await screenOf(offGrid(line * 2).x, offGrid(line * 2).y);
+    const b = await screenOf(offGrid(line * 2 + 1).x + 60, offGrid(line * 2 + 1).y + 7);
+    await page.mouse.click(a.x, a.y);
+    await settle(150);
+    await page.mouse.dblclick(b.x, b.y);
+    await settle(500);
+    const state = await studio.evaluate(() => {
+      const p = window.KrakenStudio.project, wall = p.walls.at(-1), cell = p.grid, cellY = p.gridY || p.grid, off = p.gridOffset || { x: 0, y: 0 };
+      const onHalf = (v, o, c) => Math.abs(((v - o) / (c / 2)) - Math.round((v - o) / (c / 2))) < 0.02;
+      const snapped = wall.points.every((v, i) => (i % 2 ? onHalf(v, off.y, cellY) : onHalf(v, off.x, cell)));
+      return { top: document.querySelector("#snapToggle").checked, walls: document.querySelector("#losGridSnap")?.checked ?? null, kept: p.wallGridSnap, snapped, points: wall.points };
+    });
+    assert(!state.top && state.walls === false && state.kept === false && !state.snapped, `line ${line + 1}: grid snap stays off and the wall lands where clicked: ${JSON.stringify(state)}`);
+  }
+  report.push("Use Grid Snap unticked: three walls drawn land where clicked, and snap stays off (the Walls panel's Grid snap too: one switch)");
+  await studio.click('[data-mode="grid"]');
+
   // Saved into the campaign's map (by itself): the table's map has that grid.
   await studio.waitForFunction(() => Number(document.querySelector("#saveKrakenBtn")?.dataset.saved ?? 0) > 0, null, { timeout: 20000 });
   await settle(1500);

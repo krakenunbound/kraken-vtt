@@ -204,6 +204,8 @@ try {
   await page.click(`[data-image-record="${own.id}"]`);
   for (let wait = 0; wait < 40 && (await walls()) === 0; wait++) await settle(250);
   assert((await walls()) === 1, `opened from Images: the same map, with the wall drawn in Map Studio (${await walls()})`);
+  // The map window takes a moment to open.
+  for (let wait = 0; wait < 40 && (await mapViews()).own + (await mapViews()).docked === 0; wait++) await settle(250);
   const shown = await mapViews();
   assert(shown.own + shown.docked === 1, `it opens once (${JSON.stringify(shown)})`);
   await tool("kraken_image", { action: "close" });

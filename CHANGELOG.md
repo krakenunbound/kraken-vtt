@@ -8,6 +8,8 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release.
 
+- **Fixed, Map Studio's grid snap:** Use Grid Snap (at the top) and Walls & doors' Grid snap were two switches, so unticking the top one left walls snapping. They are one switch now, kept with the map: untick either and walls, doors and art land where you click until you tick it again. Drawing the grid no longer turns snapping back on once you have chosen.
+
 ## 0.1.0-beta.1: The beta
 
 Maelstrom VTT leaves alpha. This release is a full audit of the table (93 problems found and fixed, from backups and saving to what players can see, combat rules and Map Studio), a library you can find your way around (Modules as icons, then covers by series), a Folders button that adds new material while players stay connected, and a documented book format (.kpack) that people and AI agents can convert books into.

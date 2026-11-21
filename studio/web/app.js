@@ -83,7 +83,8 @@
     const off = axis ? Number(p.gridOffset?.[axis]) || 0 : 0;
     // A cell's height when width and height are unlinked (Grid & map size).
     const cell = axis === "y" && Number(p.gridY) > 0 ? Number(p.gridY) : p.grid;
-    return $("#snapToggle").checked ? Math.round((v - off) / cell) * cell + off : v;
+    // One switch for the map's grid snap (Use Grid Snap here, Grid snap under Walls & doors): the project's.
+    return p.wallGridSnap !== false ? Math.round((v - off) / cell) * cell + off : v;
   }
   function im(a) {
     if (imgs.has(a)) return imgs.get(a);
@@ -129,6 +130,8 @@
     }
     c.style.transform = `translate(${pan.x}px,${pan.y}px) scale(${z})`;
     $("#zoomReadout").textContent = Math.round(z * 100) + "%";
+    const snapBox = $("#snapToggle");
+    if (snapBox) snapBox.checked = p.wallGridSnap !== false;
     $("#mapReadout").textContent = `${p.width} x ${p.height} | Grid ${Number(p.gridY) > 0 ? `${p.grid} x ${p.gridY}` : p.grid}`;
     x.fillStyle = p.background;
     x.fillRect(0, 0, c.width, c.height);
@@ -826,7 +829,14 @@
     fit();
   };
   $("#previewLighting").onchange = draw;
-  $("#snapToggle").onchange = draw;
+  // Use Grid Snap: the map's one grid snap (walls, doors and art), kept with the map as the GM leaves it.
+  $("#snapToggle").onchange = (e) => {
+    p.wallGridSnap = e.target.checked;
+    p.gridSnapChosen = true;
+    store();
+    draw();
+    window.KrakenLOS?.refresh?.();
+  };
   $("#undoBtn").onclick = back;
   $("#redoBtn").onclick = forward;
   $("#newBtn").onclick = () => {
