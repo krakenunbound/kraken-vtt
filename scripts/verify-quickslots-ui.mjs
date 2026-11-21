@@ -119,6 +119,29 @@ try {
   await page.waitForSelector(`${slot(2)}:not(.full)`);
   report.push("right-click: a menu (use, rename, clear); emptied only by Clear");
 
+  // The menu as a person sees it, on the docked bar: in the top layer above the bar (not inside it,
+  // clipped, with scrollbars), and Clear clicked where it is on screen, five times in a row.
+  for (let round = 0; round < 5; round++) {
+    await page.dragAndDrop(`[data-window="books"] .books-open[data-book="${first}"]`, slot(2));
+    await page.waitForSelector(`${slot(2)}.full`);
+    const at = await page.locator(slot(2)).boundingBox();
+    await page.mouse.click(at.x + at.width / 2, at.y + at.height / 2, { button: "right" });
+    await page.waitForSelector(".quick-slot-menu:popover-open");
+    const pointerY = at.y + at.height / 2;
+    const seen = await page.evaluate((y) => {
+      const bar = document.querySelector(".quick-slots"), menu = document.querySelector(".quick-slot-menu"), clear = menu.querySelector('[data-slot-action="clear"]');
+      const box = clear.getBoundingClientRect(), menuBox = menu.getBoundingClientRect();
+      const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+      return { docked: bar.dataset.docked, onTop: hit === clear || clear.contains(hit), upward: menuBox.bottom <= y + 2 && menuBox.top >= 0, scrolls: bar.scrollHeight > bar.clientHeight + 1 || bar.scrollWidth > bar.clientWidth + 1 };
+    }, pointerY);
+    assert(seen.docked === "true" && seen.onTop && seen.upward && !seen.scrolls, `round ${round + 1}: the menu opens upward from the pointer on screen, Clear on top, no scrollbars on the bar: ${JSON.stringify(seen)}`);
+    const clearBox = await page.locator('[data-slot-action="clear"]').boundingBox();
+    await page.mouse.click(clearBox.x + clearBox.width / 2, clearBox.y + clearBox.height / 2);
+    await page.waitForSelector(`${slot(2)}:not(.full)`, { timeout: 3000 });
+    await page.waitForSelector(".quick-slot-menu", { state: "detached" });
+  }
+  report.push("on the docked bar the menu opens upward from the pointer in the top layer (no scrollbars on the bar) and Clear clicked where it shows empties the slot, five times running");
+
   // Modules popped out to a window of its own: its sidebar button closes it.
   const popped = app.waitForEvent("window");
   await page.click('[data-window="books"] [aria-label^="Pop out"]');

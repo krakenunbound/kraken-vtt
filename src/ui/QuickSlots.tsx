@@ -174,6 +174,14 @@ export function QuickSlots({ session }: { session: Session }) {
     };
   }, [menu]);
   const menuSlot = menu ? slots[menu.index] : null;
+  // The menu goes in the top layer (a popover): the docked bar is centred by a transform and
+  // scrolls sideways, which made a fixed menu inside it open inside the bar, clipped and hidden.
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuOpen = Boolean(menu && menuSlot);
+  useEffect(() => {
+    const element = menuRef.current;
+    if (menuOpen && element && !element.matches(":popover-open")) element.showPopover?.();
+  }, [menuOpen]);
   // Inside the table area, whatever the window's size.
   const clamp = (x: number, y: number) => {
     const parent = bar.current?.offsetParent as HTMLElement | null;
@@ -262,7 +270,7 @@ export function QuickSlots({ session }: { session: Session }) {
         </button>
       ))}
       {menu && menuSlot ? (
-        <div className="quick-slot-menu tray-menu" role="menu" aria-label={`Quick slot F${menu.index + 1}`} style={{ left: menu.x, top: menu.y }}>
+        <div ref={menuRef} {...({ popover: "manual" } as object)} className="quick-slot-menu tray-menu" role="menu" aria-label={`Quick slot F${menu.index + 1}`} style={{ left: menu.x, top: menu.y }}>
           <span className="quick-slot-menu-head">{menuSlot.label}</span>
           {menu.rename === undefined ? (
             <>

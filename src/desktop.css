@@ -2150,6 +2150,8 @@ textarea.cc-field.tall { min-height: 220px; }
 .library-module { margin: 10px 0 4px; color: var(--accent, #d6aa5c); }
 /* A quick slot's right-click menu: use it, rename it, or clear it (on purpose). */
 .quick-slot-menu { min-width: 170px; }
+/* A popover in the top layer: placed where the right-click was, not centred. */
+.quick-slot-menu[popover] { inset: auto; margin: 0; color: inherit; overflow: visible; }
 .quick-slot-menu-head { padding: 4px 10px 6px; color: var(--brass); font-weight: 700; font-size: 0.82rem; border-bottom: 1px solid var(--panel-edge); margin-bottom: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .quick-slot-menu button.danger { color: #e08a7a; }
 .quick-slot-rename { display: flex; gap: 6px; padding: 4px; }

@@ -8,6 +8,8 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release.
 
+- **Fixed, a quick slot's right-click menu:** on the docked bar it opened inside the bar, hidden, and gave the bar scrollbars, so Clear this slot (and Rename) mostly could not be reached. The menu now opens in front of everything, where you right-click.
+
 ## 0.1.0-beta.1: The beta
 
 Maelstrom VTT leaves alpha. This release is a full audit of the table (93 problems found and fixed, from backups and saving to what players can see, combat rules and Map Studio), a library you can find your way around (Modules as icons, then covers by series), a Folders button that adds new material while players stay connected, and a documented book format (.kpack) that people and AI agents can convert books into.
