@@ -3,8 +3,10 @@
 // the map, picks the Grid tab's draw tool and drags from one corner of a printed
 // square to the opposite corner. The grid takes the square's size and lines up
 // with the picture's lines. Then the tint's alpha goes to 0 and the eye hides the
-// grid: its lines are gone, and it still measures. The agent's
-// kraken_scene_settings grid.square does the same from a box.
+// grid: its lines are gone, and it still measures. Then width and height are
+// unlinked and a 66 x 50 cell drawn: the rows follow its height for the GM and a
+// player in Chrome, and a token placed with the grid hidden sits in a cell. The
+// agent's kraken_scene_settings grid.square does the same from a box.
 import "./loopback.mjs";
 import { spawn } from "node:child_process";
 import { mkdtempSync, writeFileSync } from "node:fs";
@@ -12,7 +14,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import zlib from "node:zlib";
-import { _electron as electron } from "playwright-core";
+import { _electron as electron, chromium } from "playwright-core";
+import { CHROME } from "./lib/chrome.mjs";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -103,6 +106,7 @@ const screenOf = (x, y) =>
     [x, y],
   );
 const report = [];
+let browser = null;
 try {
   for (let tries = 0; ; tries++) {
     try {
@@ -164,14 +168,71 @@ try {
   assert((await tool("kraken_scene_settings")).diagonal === "raw", "the Grid tab's Diagonals: straight line");
   report.push("the Grid tab's Diagonals sets this map's rule (straight line, the raw distance)");
 
+  // Width x Height unlinked: a cell 66 across and 50 down, drawn with the same tool.
+  await page.click("[data-grid-show]");
+  await page.fill("[data-grid-alpha]", "128");
+  await page.click("[data-grid-link]");
+  await page.waitForSelector('[data-grid-link][aria-pressed="false"]');
+  const cellFrom = await screenOf(pad.x + OX + SQUARE * 4, pad.y + OY + SQUARE * 3);
+  const cellTo = await screenOf(pad.x + OX + SQUARE * 5, pad.y + OY + SQUARE * 3 + 50);
+  await page.mouse.move(cellFrom.x, cellFrom.y);
+  await page.mouse.down();
+  await page.mouse.move(cellTo.x, cellTo.y, { steps: 8 });
+  await page.mouse.up();
+  await settle(800);
+  grid = (await tool("kraken_scene_settings")).grid;
+  assert(Math.abs(grid.size - SQUARE) <= slack && Math.abs(grid.sizeY - 50) <= slack, `unlinked, the box is the cell (66 x 50): ${JSON.stringify(grid)}`);
+  const rowGap = async (target) =>
+    target.evaluate(() => {
+      const ys = [...document.querySelectorAll("svg.grid line")].filter((line) => line.getAttribute("y1") === line.getAttribute("y2")).map((line) => Number(line.getAttribute("y1")));
+      return ys.length > 2 ? ys[2] - ys[1] : 0;
+    });
+  const gmGap = await rowGap(page);
+  assert(Math.abs(gmGap - grid.sizeY) < 0.01, `the GM's rows are the cell's height apart: ${gmGap}`);
+  assert(await page.$eval("[data-grid-size-y]", (input) => Number(input.value)) === grid.sizeY, "the Height field shows it");
+  await page.screenshot({ path: path.join(tmpdir(), "kraken-grid-unlinked.png") });
+  // Hidden, the grid still places tokens: one at column 3, row 5 sits in that cell.
+  await page.click("[data-grid-show]");
+  await settle(300);
+  const placed = await tool("kraken_token_place", { name: "Scout", col: 3, row: 5 });
+  const token = placed.token ?? placed;
+  const cellX = (token.x - pad.x - grid.offsetX) / grid.size - 0.5;
+  const cellY = (token.y - pad.y - grid.offsetY) / grid.sizeY - 0.5;
+  assert(Math.abs(cellX - 3) < 0.01 && Math.abs(cellY - 5) < 0.01, `with the grid hidden, a token sits in its 66 x 50 cell: ${JSON.stringify({ x: token.x, y: token.y, cellX, cellY })}`);
+  await page.click("[data-grid-show]");
+  await settle(300);
+  // A player in Chrome: the same rows.
+  browser = await chromium.launch({ args: ["--mute-audio"], executablePath: CHROME, headless: true });
+  const seat = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  await seat.goto("http://127.0.0.1:47514/");
+  await seat.fill('input[name="name"]', "A test player");
+  await seat.fill('input[name="account-password"]', "test-pass");
+  await seat.fill('input[name="password"]', "pw");
+  await seat.click('button[type="submit"]');
+  await seat.waitForSelector("svg.grid line", { state: "attached", timeout: 20000 });
+  const seatGap = await rowGap(seat);
+  assert(Math.abs(seatGap - grid.sizeY) < 0.01, `the player's rows are the cell's height apart too: ${seatGap}`);
+  report.push(`unlinked: a drag draws a ${grid.size} x ${grid.sizeY} cell; the rows are ${grid.sizeY} apart for the GM and for a player in Chrome; hidden, the grid still places a token in its cell`);
+  // Linked again: square cells.
+  await page.click("[data-grid-link]");
+  await settle(500);
+  grid = (await tool("kraken_scene_settings")).grid;
+  assert(grid.sizeY === null, `linked again, square: ${JSON.stringify(grid)}`);
+  report.push("the link makes the cells square again");
+
   // The agent: grid.square, a box over one square in the picture's pixels.
   await tool("kraken_scene_settings", { grid: { square: { x1: 50, y1: 40, x2: 100, y2: 90 } } });
   grid = (await tool("kraken_scene_settings")).grid;
   assert(grid.size === 50 && grid.offsetX === 0 && grid.offsetY === 40, `the agent's square: ${JSON.stringify(grid)}`);
   report.push("kraken_scene_settings grid.square sets 50 px from 0, 40");
+  await tool("kraken_scene_settings", { grid: { square: { x1: 0, y1: 0, x2: 70, y2: 40 }, linked: false } });
+  grid = (await tool("kraken_scene_settings")).grid;
+  assert(grid.size === 70 && grid.sizeY === 40, `the agent's unlinked cell: ${JSON.stringify(grid)}`);
+  report.push("grid.square with linked false sets a 70 x 40 cell");
   assert(failures.length === 0, `page errors: ${failures.join(" | ")}`);
   console.log(`ok grid draw ui:\n  ${report.join("\n  ")}\n  ${path.join(tmpdir(), "kraken-grid-draw.png")}`);
 } finally {
+  await browser?.close().catch(() => undefined);
   child.kill();
   await app.close().catch(() => undefined);
 }

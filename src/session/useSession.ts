@@ -83,7 +83,7 @@ export type MapSeeing = { x: number; y: number; radiusPx: number; polygon: numbe
 export type SceneLightRecord = { id: string; x: number; y: number; bright: number; dim: number; color: string; on: boolean; hidden: boolean; angle?: number; rotation?: number; animation?: string; speed?: number; darkness?: boolean };
 export type MapSettings = {
   darkness: number | null;
-  grid: { show: boolean; alpha: number | null; color: string | null; type?: "square" | "hexrow" | "hexcol" | "none" | null; size?: number | null; offsetX?: number | null; offsetY?: number | null; distance?: number | null; units?: string | null; style?: string; thickness?: number };
+  grid: { show: boolean; alpha: number | null; color: string | null; type?: "square" | "hexrow" | "hexcol" | "none" | null; size?: number | null; sizeY?: number | null; offsetX?: number | null; offsetY?: number | null; distance?: number | null; units?: string | null; style?: string; thickness?: number };
   weather: { type: import("../table/Weather").WeatherType; intensity: number; direction: number };
   // This scene's diagonal rule (null: the campaign's), and the rule in force ("1", "1.5", "raw").
   diagonal?: string | null;

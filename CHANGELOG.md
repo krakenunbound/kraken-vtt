@@ -8,6 +8,8 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release.
 
+- **Width × Height, unlinked:** the Grid tab's cell has a width and a height, linked (square) by default. Unlinked, each cell is as wide and as tall as the picture's printed squares, for scans that are a little stretched: the draw tool takes the box you drag as the cell, and tokens snap, distances count (every diagonal rule), the mask's cells, spell areas' squares and a big creature's squares all follow it, for the GM and the players. Lights, sight and a spell's reach stay round, at the width's scale. Map Studio's grid is square, so saving a moved grid from it links the cells again. The agent's `kraken_scene_settings` takes grid.sizeY, and grid.square with linked false.
+
 - **Fixed:** deleting a campaign that had maps of its own (in Documents/Kraken VTT/Campaigns) was refused with "Only Maelstrom's own folders go to the recycle bin"; its maps' folder now goes to the recycle bin with it.
 
 ## 0.1.0-beta.1: The beta

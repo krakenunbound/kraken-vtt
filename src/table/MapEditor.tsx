@@ -58,7 +58,10 @@ type Props = {
   selectedLight: string | null;
   lightPreset: string;
   setLightPreset: (preset: string) => void;
-  gridScene: { size: number; type: number; color: string; alpha: number; distance: number; units: string; offsetX?: number; offsetY?: number };
+  gridScene: { size: number; sizeY?: number; type: number; color: string; alpha: number; distance: number; units: string; offsetX?: number; offsetY?: number };
+  // The Grid tab's Width x Height link (square cells), which the draw tool follows too.
+  gridLinked: boolean;
+  setGridLinked: (linked: boolean) => void;
   paintStyle: PaintStyle;
   setPaintStyle: (style: PaintStyle) => void;
   selectedFx: string | null;
@@ -404,11 +407,41 @@ export function MapEditor(props: Props) {
                 <option value="none">None (gridless)</option>
               </select>
             </label>
-            <div className="me-grid2">
+            <div className="me-row me-cell-size" role="group" aria-label="Width x Height">
               <label>
-                Square (px)
-                <input type="number" min={10} max={1000} step={0.1} value={grid.size ?? props.gridScene.size} onChange={(event) => setGrid({ size: Number(event.target.value) || null })} aria-label="Grid size" data-grid-size />
+                Width
+                <input type="number" min={10} max={1000} step={0.1} value={grid.size ?? props.gridScene.size} onChange={(event) => setGrid(props.gridLinked ? { size: Number(event.target.value) || null, sizeY: null } : { size: Number(event.target.value) || null })} aria-label="Grid size" data-grid-size />
               </label>
+              <button
+                type="button"
+                className={props.gridLinked ? "me-tool on" : "me-tool"}
+                aria-pressed={props.gridLinked}
+                aria-label={props.gridLinked ? "Width and height linked: click to unlink" : "Width and height unlinked: click to link"}
+                title={props.gridLinked ? "Linked: square cells. Click to set width and height apart." : "Unlinked: each cell its own width and height. Click to make them square again."}
+                data-grid-link
+                onClick={() => {
+                  if (!props.gridLinked) setGrid({ sizeY: null });
+                  props.setGridLinked(!props.gridLinked);
+                }}
+              >
+                {props.gridLinked ? "🔗" : "⛓️‍💥"}
+              </button>
+              <label>
+                Height
+                <input
+                  type="number"
+                  min={10}
+                  max={1000}
+                  step={0.1}
+                  value={grid.sizeY ?? grid.size ?? props.gridScene.size}
+                  onChange={(event) => setGrid(props.gridLinked ? { size: Number(event.target.value) || null, sizeY: null } : { sizeY: Number(event.target.value) || null })}
+                  aria-label="Grid height"
+                  data-grid-size-y
+                />
+              </label>
+              <span className="hint">px</span>
+            </div>
+            <div className="me-grid2">
               <label>
                 Tint
                 <input type="color" value={(grid.color ?? props.gridScene.color).slice(0, 7)} onChange={(event) => setGrid({ color: event.target.value })} aria-label="Grid colour" />

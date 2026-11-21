@@ -75,7 +75,8 @@ Then, if you like:
 
 - **Tint** sets the grid's colour, and **Alpha** how much it shows (0 to 255). At 0 the lines are invisible, and the grid still places tokens and measures distance.
 - The **eye** hides or shows the grid; hidden, it still snaps and measures.
-- **Square (px)** takes an exact size, and **Adjust position** nudges the grid 1 px a press (Shift: 10 px).
+- **Width × Height** take an exact size. They are linked (🔗), so the cells stay square; unlink them for a picture whose squares were printed or scanned a little taller or wider than they are wide. Unlinked, the draw tool takes the box you drag as the cell, and tokens snap, distances count and spell areas fill by those cells (lights, sight and a spell's reach stay round, at the width's scale). Link them again for square cells.
+- **Adjust position** nudges the grid 1 px a press (Shift: 10 px).
 - **Diagonals** sets how a diagonal measures on this map: every square one, 5-10-5, or a straight line (the raw distance).
 - ↺ puts the map's own grid back.
 

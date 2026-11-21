@@ -1506,6 +1506,9 @@ textarea.cc-field.tall { min-height: 220px; }
 .me-foot { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .me-foot .hint { flex: 1; }
 .me-nudge-pad { align-items: center; gap: 10px; }
+.me-cell-size { align-items: end; gap: 6px; }
+.me-cell-size label { display: grid; gap: 2px; flex: 1; }
+.me-cell-size input { width: 100%; }
 .me-nudge-cross { display: grid; grid-template-columns: repeat(3, 28px); grid-template-rows: repeat(3, 24px); gap: 2px; }
 .me-nudge-cross button { padding: 0; }
 .me-nudge-up { grid-area: 1 / 2; }

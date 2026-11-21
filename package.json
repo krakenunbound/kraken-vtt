@@ -117,6 +117,7 @@
     "playtest": "node scripts/playtest-b2.mjs",
     "mapedit-ui": "node scripts/verify-mapedit-ui.mjs",
     "grid-draw-ui": "node scripts/verify-grid-draw-ui.mjs",
+    "grid-cells": "node scripts/check-grid-cells.mjs",
     "picture-map-ui": "node scripts/verify-picture-map-ui.mjs",
     "uvtt-map-ui": "node scripts/verify-uvtt-map-ui.mjs",
     "ui-scale-ui": "node scripts/verify-ui-scale-ui.mjs",

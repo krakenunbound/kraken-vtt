@@ -99,24 +99,26 @@ function walled(from, to, world) {
 
 // The square centres a token fills: one for a token of a square or less, else
 // each of its n x n squares (n rounded, a Large creature's four).
-/** @param {{ x: number, y: number, squares?: number }} token @param {number} gridPx */
-export function footprint(token, gridPx) {
+// gridPxY: a cell's height when it differs from its width (an unlinked grid).
+/** @param {{ x: number, y: number, squares?: number }} token @param {number} gridPx @param {number} [gridPxY] */
+export function footprint(token, gridPx, gridPxY = gridPx) {
   const n = Math.max(1, Math.round(Number(token.squares) || 1));
   if (n === 1) return [{ x: token.x, y: token.y }];
   const out = [];
   const start = -((n - 1) / 2) * gridPx;
-  for (let i = 0; i < n; i += 1) for (let j = 0; j < n; j += 1) out.push({ x: token.x + start + i * gridPx, y: token.y + start + j * gridPx });
+  const startY = -((n - 1) / 2) * gridPxY;
+  for (let i = 0; i < n; i += 1) for (let j = 0; j < n; j += 1) out.push({ x: token.x + start + i * gridPx, y: token.y + startY + j * gridPxY });
   return out;
 }
 
 // The tokens a template covers. world: { gridPx, gridless, walls, doors,
 // firstBlock } (geometry.firstBlock: walls stop the area). A cone or line is
 // measured from its point; a circle or square from its centre.
-/** @template {{ id: string, x: number, y: number, squares?: number }} T @param {Shape} shape @param {T[]} tokens @param {{ gridPx: number, gridless?: boolean, walls?: any[], doors?: any, firstBlock?: Function }} world @returns {T[]} */
+/** @template {{ id: string, x: number, y: number, squares?: number }} T @param {Shape} shape @param {T[]} tokens @param {{ gridPx: number, gridPxY?: number, gridless?: boolean, walls?: any[], doors?: any, firstBlock?: Function }} world @returns {T[]} */
 export function tokensIn(shape, tokens, world) {
   const origin = { x: shape.x, y: shape.y };
   return tokens.filter((token) => {
-    const points = world.gridless ? [{ x: token.x, y: token.y }] : footprint(token, world.gridPx);
+    const points = world.gridless ? [{ x: token.x, y: token.y }] : footprint(token, world.gridPx, world.gridPxY ?? world.gridPx);
     return points.some((point) => inside(shape, point.x, point.y) && !walled(origin, point, world));
   });
 }
@@ -124,19 +126,20 @@ export function tokensIn(shape, tokens, world) {
 // The grid squares a template covers (their centres), to shade them while it
 // is placed and once it is down. grid: { gridPx, originX, originY }. At most
 // `limit` squares (a 100-foot line is 20).
-/** @param {Shape} shape @param {{ gridPx: number, originX: number, originY: number }} grid @param {number} [limit] */
+/** @param {Shape} shape @param {{ gridPx: number, gridPxY?: number, originX: number, originY: number }} grid @param {number} [limit] */
 export function coveredSquares(shape, grid, limit = 2500) {
   const reach = shape.shape === "square" ? (shape.size / 2) * Math.SQRT2 : shape.size + (shape.width ?? 0);
   const size = grid.gridPx;
+  const sizeY = grid.gridPxY ?? size;
   const out = [];
   const col0 = Math.floor((shape.x - reach - grid.originX) / size);
   const col1 = Math.ceil((shape.x + reach - grid.originX) / size);
-  const row0 = Math.floor((shape.y - reach - grid.originY) / size);
-  const row1 = Math.ceil((shape.y + reach - grid.originY) / size);
+  const row0 = Math.floor((shape.y - reach - grid.originY) / sizeY);
+  const row1 = Math.ceil((shape.y + reach - grid.originY) / sizeY);
   for (let col = col0; col <= col1; col += 1) {
     for (let row = row0; row <= row1; row += 1) {
       const x = grid.originX + (col + 0.5) * size;
-      const y = grid.originY + (row + 0.5) * size;
+      const y = grid.originY + (row + 0.5) * sizeY;
       if (inside(shape, x, y)) out.push({ x, y });
       if (out.length >= limit) return out;
     }
@@ -155,18 +158,19 @@ export function coveredSquares(shape, grid, limit = 2500) {
 // - a cube at a point: lined up with the grid around the point.
 // area: { shape, size, width?, origin: "point"|"self", attach? } in feet.
 // caster: its token { x, y, squares } or null; grid: { gridPx, originX, originY, feetPerSquare, gridless }.
-/** @param {{ shape: Shape["shape"], size: number, width?: number, origin?: string, attach?: boolean, spread?: number }} area @param {{ x: number, y: number, squares?: number } | null} caster @param {number} atX @param {number} atY @param {{ gridPx: number, originX: number, originY: number, feetPerSquare: number, gridless?: boolean }} grid */
+/** @param {{ shape: Shape["shape"], size: number, width?: number, origin?: string, attach?: boolean, spread?: number }} area @param {{ x: number, y: number, squares?: number } | null} caster @param {number} atX @param {number} atY @param {{ gridPx: number, gridPxY?: number, originX: number, originY: number, feetPerSquare: number, gridless?: boolean }} grid */
 export function place(area, caster, atX, atY, grid) {
+  const cellY = grid.gridPxY ?? grid.gridPx;
   const per = grid.gridPx / (grid.feetPerSquare > 0 ? grid.feetPerSquare : 5);
   const span = caster ? Math.max(1, Number(caster.squares) || 1) * grid.gridPx : grid.gridPx;
   const fromSelf = area.origin === "self" && caster !== null;
   const angle = fromSelf ? (Math.atan2(atY - caster.y, atX - caster.x) * 180) / Math.PI : 0;
-  /** @param {number} v @param {number} o */
-  const snapCorner = (v, o) => (grid.gridless ? v : Math.round((v - o) / grid.gridPx) * grid.gridPx + o);
+  /** @param {number} v @param {number} o @param {number} [cell] */
+  const snapCorner = (v, o, cell = grid.gridPx) => (grid.gridless ? v : Math.round((v - o) / cell) * cell + o);
   if (area.shape === "circle") {
     if (area.attach && caster) return { shape: "circle", x: caster.x, y: caster.y, size: area.size + span / 2 / per, angle: 0 };
     if (fromSelf) return { shape: "circle", x: caster.x, y: caster.y, size: area.size, angle: 0 };
-    return { shape: "circle", x: snapCorner(atX, grid.originX), y: snapCorner(atY, grid.originY), size: area.size, angle: 0 };
+    return { shape: "circle", x: snapCorner(atX, grid.originX), y: snapCorner(atY, grid.originY, cellY), size: area.size, angle: 0 };
   }
   if (area.shape === "cone" || area.shape === "line") {
     if (!fromSelf) return { shape: area.shape, x: atX, y: atY, size: area.size, width: area.width ?? 5, angle: 0, ...(area.spread ? { spread: area.spread } : {}) };
@@ -177,13 +181,13 @@ export function place(area, caster, atX, atY, grid) {
   }
   // A cube (square).
   const side = area.size * per;
-  /** @param {number} v @param {number} o */
-  const align = (v, o) => {
+  /** @param {number} v @param {number} o @param {number} [cell] */
+  const align = (v, o, cell = grid.gridPx) => {
     if (grid.gridless) return v;
     const cells = Math.max(1, Math.round(side / grid.gridPx));
     // An odd number of squares centres on a square's centre, an even number on a corner.
-    const offset = cells % 2 === 1 ? grid.gridPx / 2 : 0;
-    return Math.round((v - o - offset) / grid.gridPx) * grid.gridPx + o + offset;
+    const offset = cells % 2 === 1 ? cell / 2 : 0;
+    return Math.round((v - o - offset) / cell) * cell + o + offset;
   };
   if (fromSelf) {
     // Beside the caster: the nearest of its four sides to the mouse (8 ways: corners too).
@@ -195,7 +199,7 @@ export function place(area, caster, atX, atY, grid) {
     const sy = step(dy);
     const wantX = sx === 0 ? caster.x : caster.x + sx * (span / 2 + side / 2);
     const wantY = sy === 0 && sx === 0 ? caster.y + Math.sign(dy || 1) * (span / 2 + side / 2) : sy === 0 ? caster.y : caster.y + sy * (span / 2 + side / 2);
-    return { shape: "square", x: align(wantX, grid.originX), y: align(wantY, grid.originY), size: area.size, angle };
+    return { shape: "square", x: align(wantX, grid.originX), y: align(wantY, grid.originY, cellY), size: area.size, angle };
   }
-  return { shape: "square", x: align(atX, grid.originX), y: align(atY, grid.originY), size: area.size, angle: 0 };
+  return { shape: "square", x: align(atX, grid.originX), y: align(atY, grid.originY, cellY), size: area.size, angle: 0 };
 }

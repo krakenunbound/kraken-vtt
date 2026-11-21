@@ -295,6 +295,8 @@ function cleanSettings(raw) {
       color: grid.color == null ? null : text(grid.color, "#000000").slice(0, 16),
       type: ["square", "hexrow", "hexcol", "none"].includes(grid.type) ? grid.type : null,
       size: nullable(grid.size, (size) => Math.min(1000, Math.max(10, num(size, 100)))),
+      // Width x Height unlinked: the cell's height (null: square, linked).
+      sizeY: nullable(grid.sizeY, (size) => Math.min(1000, Math.max(10, num(size, 100)))),
       offsetX: nullable(grid.offsetX, (offset) => Math.min(1000, Math.max(-1000, Math.round(num(offset, 0) * 10) / 10))),
       offsetY: nullable(grid.offsetY, (offset) => Math.min(1000, Math.max(-1000, Math.round(num(offset, 0) * 10) / 10))),
       distance: nullable(grid.distance, (distance) => Math.min(1000, Math.max(0.1, num(distance, 5)))),
@@ -992,28 +994,31 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   // The centre of a square (col, row) for a token that many squares wide.
   function squareCenter(col, row, squares) {
     const size = geometry.gridSize(scene);
+    const sizeY = geometry.gridSizeY(scene);
     const origin = geometry.gridOrigin(scene);
-    return { x: origin.x + (col + squares / 2) * size, y: origin.y + (row + squares / 2) * size };
+    return { x: origin.x + (col + squares / 2) * size, y: origin.y + (row + squares / 2) * sizeY };
   }
 
   function squareOf(token) {
     const size = geometry.gridSize(scene);
+    const sizeY = geometry.gridSizeY(scene);
     const origin = geometry.gridOrigin(scene);
-    return { col: Math.round((token.x - origin.x) / size - token.squares / 2), row: Math.round((token.y - origin.y) / size - token.squares / 2) };
+    return { col: Math.round((token.x - origin.x) / size - token.squares / 2), row: Math.round((token.y - origin.y) / sizeY - token.squares / 2) };
   }
 
   // A free square near x, y for a new token: the drop point, else the nearest
   // square no other token covers, spiralling out.
   function freeSpot(x, y, squares) {
     const size = geometry.gridSize(scene);
+    const sizeY = geometry.gridSizeY(scene);
     const start = geometry.snapCenter(scene, x, y, squares);
-    const taken = (point) => tokensHere().some((token) => Math.abs(token.x - point.x) < size / 2 && Math.abs(token.y - point.y) < size / 2);
+    const taken = (point) => tokensHere().some((token) => Math.abs(token.x - point.x) < size / 2 && Math.abs(token.y - point.y) < sizeY / 2);
     if (!taken(start)) return start;
     for (let ring = 1; ring < 12; ring += 1) {
       for (let dy = -ring; dy <= ring; dy += 1) {
         for (let dx = -ring; dx <= ring; dx += 1) {
           if (Math.max(Math.abs(dx), Math.abs(dy)) !== ring) continue;
-          const point = { x: start.x + dx * size, y: start.y + dy * size };
+          const point = { x: start.x + dx * size, y: start.y + dy * sizeY };
           if (!taken(point)) return point;
         }
       }
@@ -1336,7 +1341,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
   function tokensInTemplate(template) {
     if (!scene || !areas) return [];
     const shape = areas.toPixels(placed(template), geometry.gridSize(scene), units());
-    return areas.tokensIn(shape, tokensHere(), { gridPx: geometry.gridSize(scene), gridless: geometry.gridKind(scene) === "none", walls: wallsHere(), doors: doorsHere(), firstBlock: geometry.firstBlock });
+    return areas.tokensIn(shape, tokensHere(), { gridPx: geometry.gridSize(scene), gridPxY: geometry.gridSizeY(scene), gridless: geometry.gridKind(scene) === "none", walls: wallsHere(), doors: doorsHere(), firstBlock: geometry.firstBlock });
   }
 
   return {
@@ -1390,7 +1395,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     areaAt(area, token, x, y) {
       if (!scene || !areas) throw new Error("No scene is open.");
       const origin = geometry.gridOrigin(scene);
-      return areas.place(area, token, num(x, 0), num(y, 0), { gridPx: geometry.gridSize(scene), originX: origin.x, originY: origin.y, feetPerSquare: units(), gridless: geometry.gridKind(scene) === "none" });
+      return areas.place(area, token, num(x, 0), num(y, 0), { gridPx: geometry.gridSize(scene), gridPxY: geometry.gridSizeY(scene), originX: origin.x, originY: origin.y, feetPerSquare: units(), gridless: geometry.gridKind(scene) === "none" });
     },
     // A token's own effects (one not on the tracker): put on, changed, taken off, all taken (it joins the tracker).
     tokenEffects(id) {
@@ -2047,7 +2052,8 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
       const moved = size !== Number(now.size) || (Number(grid?.offsetX) || 0) !== (Number(now.offsetX) || 0) || (Number(grid?.offsetY) || 0) !== (Number(now.offsetY) || 0);
       if (Number.isFinite(size) && size >= 10 && size <= 1000 && moved) {
         const old = state.settings[target.id] ?? {};
-        state.settings[target.id] = cleanSettings({ ...old, grid: { ...(old.grid ?? {}), size, offsetX: Number(grid.offsetX) || 0, offsetY: Number(grid.offsetY) || 0 } });
+        // Map Studio's squares are square: its grid, when it moves, links width and height again.
+        state.settings[target.id] = cleanSettings({ ...old, grid: { ...(old.grid ?? {}), size, sizeY: null, offsetX: Number(grid.offsetX) || 0, offsetY: Number(grid.offsetY) || 0 } });
       }
       if (open && open.id === target.id) liveScene();
       changed();
@@ -2056,7 +2062,7 @@ function createMapState({ saved, records, onChange = () => undefined, hasArt = (
     // A map's grid as the GM set it in the Grid tab (for one not open now: Map Studio working on its master).
     gridOf(sceneId) {
       const grid = state.settings[sceneId]?.grid ?? {};
-      return { size: grid.size ?? 100, type: 1, distance: grid.distance ?? 5, units: "ft", offsetX: grid.offsetX ?? 0, offsetY: grid.offsetY ?? 0 };
+      return { size: grid.size ?? 100, ...(grid.sizeY ? { sizeY: grid.sizeY } : {}), type: 1, distance: grid.distance ?? 5, units: "ft", offsetX: grid.offsetX ?? 0, offsetY: grid.offsetY ?? 0 };
     },
     // The picture Map Studio painted for a scene (its file name and version), if any.
     studioPicture: (sceneId) => state.studio[sceneId]?.picture ?? null,

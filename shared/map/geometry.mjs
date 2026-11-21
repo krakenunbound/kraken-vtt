@@ -22,6 +22,14 @@ export function gridSize(scene) {
   return size > 0 ? size : 100;
 }
 
+// A square grid's cell height: grid.sizeY when the GM unlinked width and height
+// (the Grid tab's Width x Height), else the width (square cells). Lights, sight
+// and spell areas keep to the width's scale, so they stay round.
+export function gridSizeY(scene) {
+  const height = Number(scene?.grid?.sizeY);
+  return height > 0 && gridKind(scene) === "square" ? height : gridSize(scene);
+}
+
 // The grid's kind from Foundry's type: 0 none, 1 square, 2-3 hex rows
 // (pointy-topped), 4-5 hex columns (flat-topped).
 export function gridKind(scene) {
@@ -37,16 +45,19 @@ const KIND_TYPE = { none: 0, square: 1, hexrow: 2, hexcol: 4 };
 // tool, kraken_scene_settings grid.square): a box from one corner of a square to
 // the opposite corner gives the square's size and where the grid's lines start,
 // from the picture's top-left corner (`picture`, in the same pixels as the box).
-// Squares stay square: a box nearly square averages its sides, else its longer
-// side counts. Null when the box is too small to be a square (under 10 px).
-export function gridFromSquare(a, b, picture = { x: 0, y: 0 }) {
+// Linked (the default), squares stay square: a box nearly square averages its
+// sides, else its longer side counts, and sizeY is null. Unlinked, the box is
+// the cell: its width is size, its height sizeY. Null when the box is too small
+// to be a square (under 10 px).
+export function gridFromSquare(a, b, picture = { x: 0, y: 0 }, linked = true) {
   const width = Math.abs(b.x - a.x);
   const height = Math.abs(b.y - a.y);
   if (!(width >= 10 && height >= 10)) return null;
-  const raw = Math.abs(width - height) / Math.max(width, height) < 0.15 ? (width + height) / 2 : Math.max(width, height);
-  const size = Math.min(1000, Math.round(raw * 10) / 10);
-  const start = (value) => Math.round((((value % size) + size) % size) * 10) / 10;
-  return { size, offsetX: start(Math.min(a.x, b.x) - picture.x), offsetY: start(Math.min(a.y, b.y) - picture.y) };
+  const round = (value) => Math.min(1000, Math.round(value * 10) / 10);
+  const size = round(linked ? (Math.abs(width - height) / Math.max(width, height) < 0.15 ? (width + height) / 2 : Math.max(width, height)) : width);
+  const sizeY = linked ? null : round(height);
+  const start = (value, cell) => Math.round((((value % cell) + cell) % cell) * 10) / 10;
+  return { size, sizeY, offsetX: start(Math.min(a.x, b.x) - picture.x, size), offsetY: start(Math.min(a.y, b.y) - picture.y, sizeY ?? size) };
 }
 
 // The scene with the GM's grid settings over its own (FG's Grid tab: type,
@@ -56,6 +67,9 @@ export function withGrid(scene, settings) {
   const grid = { ...scene.grid };
   if (settings.type && KIND_TYPE[settings.type] !== undefined) grid.type = KIND_TYPE[settings.type];
   if (Number(settings.size) >= 10) grid.size = Number(settings.size);
+  // Width x Height unlinked: the cell's own height; linked, square again.
+  if (Number(settings.sizeY) >= 10) grid.sizeY = Number(settings.sizeY);
+  else delete grid.sizeY;
   if (settings.offsetX != null) grid.offsetX = Number(settings.offsetX) || 0;
   if (settings.offsetY != null) grid.offsetY = Number(settings.offsetY) || 0;
   if (settings.color) grid.color = settings.color;
@@ -120,11 +134,13 @@ export function snapCenter(scene, x, y, squares = 1) {
   }
   if (kind === "none") return { x, y };
   const size = gridSize(scene);
+  const sizeY = gridSizeY(scene);
   const origin = gridOrigin(scene);
   const span = Math.max(1, squares) * size;
+  const spanY = Math.max(1, squares) * sizeY;
   const left = Math.round((x - span / 2 - origin.x) / size) * size + origin.x;
-  const top = Math.round((y - span / 2 - origin.y) / size) * size + origin.y;
-  return { x: left + span / 2, y: top + span / 2 };
+  const top = Math.round((y - spanY / 2 - origin.y) / sizeY) * sizeY + origin.y;
+  return { x: left + span / 2, y: top + spanY / 2 };
 }
 
 // Squares a creature of a given space (feet) fills, FG's calcTokenSpace:
@@ -151,10 +167,11 @@ export function gridDistance(scene, a, b, diagonalIn = 1) {
     const steps = (Math.abs(from.q - to.q) + Math.abs(from.q + from.r - to.q - to.r) + Math.abs(from.r - to.r)) / 2;
     return Math.round(steps * per * 10) / 10;
   }
+  const sizeY = gridSizeY(scene);
   const dx = Math.abs(Math.round((b.x - a.x) / size));
-  const dy = Math.abs(Math.round((b.y - a.y) / size));
+  const dy = Math.abs(Math.round((b.y - a.y) / sizeY));
   let squares;
-  if (diagonal === "raw") squares = Math.hypot((b.x - a.x) / size, (b.y - a.y) / size);
+  if (diagonal === "raw") squares = Math.hypot((b.x - a.x) / size, (b.y - a.y) / sizeY);
   else if (diagonal === 1.5) squares = Math.max(dx, dy) + Math.floor(Math.min(dx, dy) / 2);
   else squares = Math.max(dx, dy);
   return Math.round(squares * per * 10) / 10;
@@ -176,6 +193,7 @@ export function diagonalRule(value) {
 export function pathDistance(scene, points, diagonal = 1, costAt = null) {
   const rule = diagonalRule(diagonal);
   const size = gridSize(scene);
+  const sizeY = gridSizeY(scene);
   const per = Number(scene?.grid?.distance) > 0 ? Number(scene.grid.distance) : 5;
   const kind = gridKind(scene);
   const hex = kind === "hexrow" || kind === "hexcol";
@@ -196,7 +214,7 @@ export function pathDistance(scene, points, diagonal = 1, costAt = null) {
       } else squares = flat;
     } else {
       const dx = Math.round((b.x - a.x) / size);
-      const dy = Math.round((b.y - a.y) / size);
+      const dy = Math.round((b.y - a.y) / sizeY);
       const n = Math.max(Math.abs(dx), Math.abs(dy));
       squares = 0;
       let last = { col: 0, row: 0 };
@@ -208,7 +226,7 @@ export function pathDistance(scene, points, diagonal = 1, costAt = null) {
           cost = parity === 1 ? 2 : 1;
           parity = 1 - parity;
         }
-        squares += cost * (costAt ? Number(costAt(a.x + at.col * size, a.y + at.row * size)) || 1 : 1);
+        squares += cost * (costAt ? Number(costAt(a.x + at.col * size, a.y + at.row * sizeY)) || 1 : 1);
         last = at;
       }
     }
@@ -359,7 +377,7 @@ export function settleMove(scene, walls, doors, from, to, squares = 1, { snap = 
   const target = place(to);
   if (!collide || firstBlock(walls, doors, from, target) === null) return { ...target, blocked: false };
   const length = Math.hypot(to.x - from.x, to.y - from.y);
-  const step = gridSize(scene) / 4;
+  const step = Math.min(gridSize(scene), gridSizeY(scene)) / 4;
   for (let along = length; along > 0; along -= step) {
     const f = along / length;
     const candidate = place({ x: from.x + (to.x - from.x) * f, y: from.y + (to.y - from.y) * f });

@@ -321,7 +321,8 @@ weather with masks, mark traps and regions, generate a dungeon, and play test.
   corner of a printed square to the opposite corner. Tint and Alpha set its
   colour and how much it shows (at 0 it is invisible but still places tokens
   and measures), the eye hides it, Adjust position nudges it, and Distance a
-  square sets its scale.
+  square sets its scale. Width × Height are linked for square cells; unlink
+  them for a scan whose squares are not quite square, and the drag sets both.
 - **Share with players** (the map window's share button, as Fantasy Grounds'
   Share) opens the map on every player's screen, even where a player closed
   it.

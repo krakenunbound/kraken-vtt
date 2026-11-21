@@ -8,7 +8,7 @@ import { MARKER_SETS, markerShapes } from "../../shared/map/deathMarkers.mjs";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
 import { rangeBand } from "../../shared/map/ranges.mjs";
-import { diagonalRule, gridDistance, gridDistance3, gridFromSquare, gridKind, pathDistance, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
+import { diagonalRule, gridDistance, gridDistance3, gridFromSquare, gridKind, gridSizeY, pathDistance, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
 import type { DecalItem, EditWall, MapDoor, MapTemplate, MapTile, MapToken, Ping, Float, Bubble, PictureKind, SceneLightRecord, TableMap, TableRecord, TemplateAsk, WallKind } from "../session/useSession";
 import { useBookWindows } from "../books/Books";
 import { createPortal } from "react-dom";
@@ -50,6 +50,8 @@ export type MapScene = {
     units: string;
     offsetX?: number;
     offsetY?: number;
+    // A cell's height when the GM unlinked width and height.
+    sizeY?: number;
   };
   // The scene's own grid, under the GM's settings.
   baseGrid?: MapScene["grid"];
@@ -477,6 +479,12 @@ function MapViewInner({
   const [box, setBox] = useState<{ pointerId: number; start: Point; at: Point; target?: boolean } | null>(null);
   // The Grid tab's draw tool: a square dragged over one square of the picture sets the grid's size and where it starts.
   const [gridDrag, setGridDrag] = useState<{ pointerId: number; start: Point; at: Point } | null>(null);
+  // The Grid tab's Width x Height link: linked unless this map's cells have a height of their own.
+  const [gridLinked, setGridLinked] = useState(true);
+  const unlinkedHere = map.sceneId === sceneIn.id && map.settings.grid.sizeY != null;
+  useEffect(() => {
+    setGridLinked(!unlinkedHere);
+  }, [sceneIn.id, unlinkedHere]);
   // The Area template tool: its shape, and the one being dragged out; where a spell's template is aimed.
   const [tplShape, setTplShape] = useState<MapTemplate["shape"]>("circle");
   const [tplDrag, setTplDrag] = useState<{ pointerId: number; start: Point; at: Point } | null>(null);
@@ -550,14 +558,18 @@ function MapViewInner({
     return out;
   }, [map.fx, frame.worldWidth, frame.worldHeight]);
   const size = scene.grid.size > 0 ? scene.grid.size : 100;
+  // A cell's height: the width unless the GM unlinked them (Grid tab, Width x Height).
+  const sizeY = gridSizeY(scene);
+  // Tokens fill the smaller side of a cell, so they stay round in an unlinked grid.
+  const tokenUnit = Math.min(size, sizeY);
   const gridSettings = map.sceneId === scene.id ? map.settings.grid : { show: true, alpha: null, color: null };
   const gridStroke = colorWithAlpha(gridSettings.color ?? scene.grid.color, gridSettings.alpha ?? scene.grid.alpha);
   const kindOfGrid = gridKind(scene);
   const drawSquare = kindOfGrid === "square" && scene.grid.size > 0 && gridSettings.show;
   const offX = ((Number(scene.grid.offsetX) || 0) % scene.grid.size + scene.grid.size) % scene.grid.size;
-  const offY = ((Number(scene.grid.offsetY) || 0) % scene.grid.size + scene.grid.size) % scene.grid.size;
+  const offY = ((Number(scene.grid.offsetY) || 0) % sizeY + sizeY) % sizeY;
   const vertical = drawSquare ? gridStops(scene.width, scene.grid.size).map((x) => x + offX).filter((x) => x <= scene.width) : [];
-  const horizontal = drawSquare ? gridStops(scene.height, scene.grid.size).map((y) => y + offY).filter((y) => y <= scene.height) : [];
+  const horizontal = drawSquare ? gridStops(scene.height, sizeY).map((y) => y + offY).filter((y) => y <= scene.height) : [];
   const gridDash = gridSettings.style === "dashed" ? `${6 / camera.scale} ${4 / camera.scale}` : gridSettings.style === "dotted" ? `${1 / camera.scale} ${4 / camera.scale}` : undefined;
   // Hex grids: one path of every hex over the scene (FG's hex rows and columns).
   const hexPath = useMemo(() => {
@@ -780,8 +792,8 @@ function MapViewInner({
       if (step) {
         event.preventDefault();
         const group = picked.includes(token.id) ? tokens.filter((item) => picked.includes(item.id) && (gm || item.mine)) : [];
-        if (group.length > 1 && actions.moveTokens) actions.moveTokens(group.map((item) => ({ id: item.id, x: item.x + step[0] * size, y: item.y + step[1] * size })), true);
-        else actions.moveToken(token.id, token.x + step[0] * size, token.y + step[1] * size, true);
+        if (group.length > 1 && actions.moveTokens) actions.moveTokens(group.map((item) => ({ id: item.id, x: item.x + step[0] * size, y: item.y + step[1] * sizeY })), true);
+        else actions.moveToken(token.id, token.x + step[0] * size, token.y + step[1] * sizeY, true);
       } else if (gm && (event.key === "Delete" || event.key === "Backspace")) {
         actions.removeToken(token.id);
         setSelected(null);
@@ -793,7 +805,7 @@ function MapViewInner({
     const view = viewport.current?.ownerDocument.defaultView ?? window;
     view.addEventListener("keydown", onKey);
     return () => view.removeEventListener("keydown", onKey);
-  }, [tokens, selected, picked, gm, size, actions, editorOpen]);
+  }, [tokens, selected, picked, gm, size, sizeY, actions, editorOpen]);
 
   useEffect(() => {
     const onFocus = (event: Event) => {
@@ -1100,8 +1112,9 @@ function MapViewInner({
       if (kindOfGrid === "square") {
         const origin = gridOrigin(scene);
         const half = size / 2;
+        const halfY = sizeY / 2;
         // Corners and the middle of each side (Foundry's half-square snap).
-        return { x: round(Math.round((point.x - origin.x) / half) * half + origin.x), y: round(Math.round((point.y - origin.y) / half) * half + origin.y) };
+        return { x: round(Math.round((point.x - origin.x) / half) * half + origin.x), y: round(Math.round((point.y - origin.y) / halfY) * halfY + origin.y) };
       }
       if (kindOfGrid === "hexrow" || kindOfGrid === "hexcol") {
         const { q, r } = hexOf(scene, point.x, point.y);
@@ -1286,7 +1299,7 @@ function MapViewInner({
     if (!at) return null;
     for (let index = tokens.length - 1; index >= 0; index -= 1) {
       const token = tokens[index];
-      if (Math.abs(at.x - token.x) <= (token.squares * size) / 2 && Math.abs(at.y - token.y) <= (token.squares * size) / 2) return token;
+      if (Math.abs(at.x - token.x) <= (token.squares * tokenUnit) / 2 && Math.abs(at.y - token.y) <= (token.squares * tokenUnit) / 2) return token;
     }
     return null;
   };
@@ -1307,7 +1320,7 @@ function MapViewInner({
     return entryFor(token)?.id;
   };
   // The grid in the terms the area module uses (feet a square, pixels a square, its corner).
-  const gridInfo = { gridPx: size, originX: gridOrigin(scene).x, originY: gridOrigin(scene).y, feetPerSquare: Number(scene.grid.distance) > 0 ? Number(scene.grid.distance) : 5, gridless: gridKind(scene) === "none" };
+  const gridInfo = { gridPx: size, gridPxY: sizeY, originX: gridOrigin(scene).x, originY: gridOrigin(scene).y, feetPerSquare: Number(scene.grid.distance) > 0 ? Number(scene.grid.distance) : 5, gridless: gridKind(scene) === "none" };
   // A spell's template asked for: shown at once beside its caster (then it follows the mouse), and
   // put away after a minute and a half if it is never placed, so a later click does not cast it.
   useEffect(() => {
@@ -1543,10 +1556,10 @@ function MapViewInner({
           if (editTool === "cell") {
             const corner = gridOrigin(scene);
             const col = Math.floor((raw.x - corner.x) / size);
-            const row = Math.floor((raw.y - corner.y) / size);
+            const row = Math.floor((raw.y - corner.y) / sizeY);
             const x = corner.x + col * size;
-            const y = corner.y + row * size;
-            actions.mask(maskMode, { points: [x, y, x + size, y, x + size, y + size, x, y + size] });
+            const y = corner.y + row * sizeY;
+            actions.mask(maskMode, { points: [x, y, x + size, y, x + size, y + sizeY, x, y + sizeY] });
           } else if (editTool === "rect") {
             if (pending.length >= 2) {
               const [x1, y1] = pending;
@@ -1654,7 +1667,7 @@ function MapViewInner({
             if (!event.shiftKey && gridSnap && size > 0) {
               const corner = gridOrigin(scene);
               x = corner.x + Math.round((x - corner.x) / (size / 2)) * (size / 2);
-              y = corner.y + Math.round((y - corner.y) / (size / 2)) * (size / 2);
+              y = corner.y + Math.round((y - corner.y) / (sizeY / 2)) * (sizeY / 2);
             }
             setTileDraft({ ...tile, x: Math.round(x), y: Math.round(y) });
           } else {
@@ -1664,7 +1677,7 @@ function MapViewInner({
             if (event.shiftKey) height = (width * tile.height) / tile.width;
             if (!event.shiftKey && gridSnap && size > 0) {
               width = Math.max(size / 2, Math.round(width / (size / 2)) * (size / 2));
-              height = Math.max(size / 2, Math.round(height / (size / 2)) * (size / 2));
+              height = Math.max(sizeY / 2, Math.round(height / (sizeY / 2)) * (sizeY / 2));
             }
             setTileDraft({ ...tile, width: Math.round(width), height: Math.round(height) });
           }
@@ -1739,13 +1752,13 @@ function MapViewInner({
       onPointerUp={(event) => {
         if (gridDrag && gridDrag.pointerId === event.pointerId) {
           setGridDrag(null);
-          const drawn = gridFromSquare(gridDrag.start, gridDrag.at, { x: frame.padX, y: frame.padY });
+          const drawn = gridFromSquare(gridDrag.start, gridDrag.at, { x: frame.padX, y: frame.padY }, gridLinked);
           if (!drawn) {
             setHint("Drag from one corner of a square in the picture to the opposite corner.");
             return;
           }
-          actions.updateSettings({ grid: { size: drawn.size, offsetX: drawn.offsetX, offsetY: drawn.offsetY } });
-          setHint(`Grid set: ${drawn.size} px squares.`);
+          actions.updateSettings({ grid: { size: drawn.size, sizeY: drawn.sizeY, offsetX: drawn.offsetX, offsetY: drawn.offsetY } });
+          setHint(drawn.sizeY ? `Grid set: ${drawn.size} × ${drawn.sizeY} px cells.` : `Grid set: ${drawn.size} px squares.`);
           return;
         }
         if (tplDrag && tplDrag.pointerId === event.pointerId) {
@@ -2294,7 +2307,7 @@ function MapViewInner({
                 <g key={template.key} className={template.live ? "area-template" : "area-template aiming"} data-template={template.live ? template.key : undefined} data-shape={template.shape} style={{ color: template.color }}>
                   {gridInfo.gridless
                     ? null
-                    : coveredSquares(shape, gridInfo, 900).map((cell, index) => <rect key={index} className="area-square" x={cell.x - size / 2} y={cell.y - size / 2} width={size} height={size} />)}
+                    : coveredSquares(shape, gridInfo, 900).map((cell, index) => <rect key={index} className="area-square" x={cell.x - size / 2} y={cell.y - sizeY / 2} width={size} height={sizeY} />)}
                   <path className="area-outline" d={outline(shape)} style={{ pointerEvents: template.live && mine ? "visiblePainted" : "none", strokeWidth: Math.max(2, 2.5 / camera.scale) }}>
                     {template.live ? <title>{`${template.label || "Template"}${mine ? " (right-click to remove)" : ""}`}</title> : null}
                   </path>
@@ -2340,7 +2353,7 @@ function MapViewInner({
         {tokens.map((token) => {
           // Locked, a player still drags: the move goes to the GM to approve.
           const canDrag = gm || token.mine;
-          const span = token.squares * size;
+          const span = token.squares * tokenUnit;
           const isDragged = drag?.id === token.id && drag.moved;
           return (
             <div
@@ -2428,7 +2441,7 @@ function MapViewInner({
         {tileLayer("above")}
         {drag && ghost && dragging && drag.group?.length
           ? drag.group.map((item) => (
-              <div key={`ghost-${item.id}`} className="token-ghost" data-group-ghost={item.id} style={{ left: item.x + ghost.x - drag.start.x - (item.squares * size) / 2, top: item.y + ghost.y - drag.start.y - (item.squares * size) / 2, width: item.squares * size, height: item.squares * size }} />
+              <div key={`ghost-${item.id}`} className="token-ghost" data-group-ghost={item.id} style={{ left: item.x + ghost.x - drag.start.x - (item.squares * tokenUnit) / 2, top: item.y + ghost.y - drag.start.y - (item.squares * tokenUnit) / 2, width: item.squares * tokenUnit, height: item.squares * tokenUnit }} />
             ))
           : null}
         {box ? (
@@ -2438,12 +2451,12 @@ function MapViewInner({
           <>
             <div
               className="token-ghost"
-              style={{ left: ghost.x - (drag.squares * size) / 2, top: ghost.y - (drag.squares * size) / 2, width: drag.squares * size, height: drag.squares * size }}
+              style={{ left: ghost.x - (drag.squares * tokenUnit) / 2, top: ghost.y - (drag.squares * tokenUnit) / 2, width: drag.squares * tokenUnit, height: drag.squares * tokenUnit }}
             />
             <svg className="overlay measure" width={frame.worldWidth} height={frame.worldHeight} viewBox={`0 0 ${frame.worldWidth} ${frame.worldHeight}`}>
               <line x1={drag.start.x} y1={drag.start.y} x2={ghost.x} y2={ghost.y} stroke="#ffd36b" strokeWidth={Math.max(3 / camera.scale, size * 0.05)} strokeLinecap="round" />
             </svg>
-            <span className="measure-label" data-speed={speedBand(pathDistance(scene, [drag.start.x, drag.start.y, ghost.x, ghost.y], diagonalRule(diagonal), terrainCostAt(map.terrain)).total, (records.find((record) => record.id === dragging.recordId)?.data as { speed?: unknown } | undefined)?.speed)} style={{ left: ghost.x, top: ghost.y - (drag.squares * size) / 2, fontSize: 15 / camera.scale }}>
+            <span className="measure-label" data-speed={speedBand(pathDistance(scene, [drag.start.x, drag.start.y, ghost.x, ghost.y], diagonalRule(diagonal), terrainCostAt(map.terrain)).total, (records.find((record) => record.id === dragging.recordId)?.data as { speed?: unknown } | undefined)?.speed)} style={{ left: ghost.x, top: ghost.y - (drag.squares * tokenUnit) / 2, fontSize: 15 / camera.scale }}>
               {pathDistance(scene, [drag.start.x, drag.start.y, ghost.x, ghost.y], diagonalRule(diagonal), terrainCostAt(map.terrain)).total} {units}
             </span>
           </>
@@ -2497,8 +2510,8 @@ function MapViewInner({
               if (length < 1) return null;
               const ux = (to.x - from.x) / length;
               const uy = (to.y - from.y) / length;
-              const startGap = (from.squares * size) / 2;
-              const endGap = (to.squares * size) / 2 + Math.max(2, 3 / camera.scale);
+              const startGap = (from.squares * tokenUnit) / 2;
+              const endGap = (to.squares * tokenUnit) / 2 + Math.max(2, 3 / camera.scale);
               if (length <= startGap + endGap) return null;
               const x1 = from.x + ux * startGap;
               const y1 = from.y + uy * startGap;
@@ -2532,7 +2545,7 @@ function MapViewInner({
         {bubbles.map((item) => {
           const token = tokens.find((candidate) => candidate.recordId === item.recordId);
           if (!token) return null;
-          const span = token.squares * size;
+          const span = token.squares * tokenUnit;
           return (
             <div key={item.id} className={`token-bubble ${item.kind}`} data-bubble={token.id} style={{ left: token.x, top: token.y - span / 2, fontSize: Math.max(13, 14 / camera.scale) }}>
               {item.kind === "emote" ? <em>{item.text}</em> : item.text}
@@ -2542,7 +2555,7 @@ function MapViewInner({
         {floats.map((item) => {
           const token = tokens.find((candidate) => candidate.id === item.tokenId);
           if (!token) return null;
-          const span = token.squares * size;
+          const span = token.squares * tokenUnit;
           return (
             <div key={item.id} className={item.amount < 0 ? "token-float hurt" : "token-float healed"} data-float={item.tokenId} style={{ left: token.x, top: token.y - span / 2, fontSize: Math.max(18, (size * 0.42)) }} aria-hidden="true">
               {item.amount > 0 ? `+${item.amount}` : `−${-item.amount}`}
@@ -3076,6 +3089,8 @@ function MapViewInner({
           setKind={setWallKind}
           snap={gridSnap}
           setSnap={setGridSnap}
+          gridLinked={gridLinked}
+          setGridLinked={setGridLinked}
           pointSnap={pointSnap}
           setPointSnap={setPointSnap}
           selected={selectedWalls}

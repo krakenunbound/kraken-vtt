@@ -91,7 +91,8 @@ export function gridStops(length: number, size: number): number[] {
 export function gridLabel(grid: SquareGrid): string {
   if (grid.type === 0) return "Gridless";
   const measure = grid.units ? `${grid.distance} ${grid.units}` : `${grid.distance}`;
-  if (grid.type === 1) return `Square · ${grid.size} px · ${measure}`;
+  const sizeY = (grid as { sizeY?: number }).sizeY;
+  if (grid.type === 1) return sizeY && sizeY !== grid.size ? `Square · ${grid.size} × ${sizeY} px · ${measure}` : `Square · ${grid.size} px · ${measure}`;
   return `${grid.type >= 4 ? "Hex columns" : "Hex rows"} · ${grid.size} px · ${measure}`;
 }
 
