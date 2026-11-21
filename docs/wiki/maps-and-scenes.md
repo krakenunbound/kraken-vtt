@@ -52,7 +52,7 @@ Unlock a map to edit it.
 ![The map editor: walls, doors and lights](../screenshots/map-editor.jpg)
 
 - **Walls, doors and windows:** drawn where your hand puts them, snapping to the grid and to wall ends. Maps from your Fantasy Grounds modules and Maelstrom's own adventures bring their walls and doors with them.
-- **Grid:** square or hex, its size and offset.
+- **Grid:** square or hex, its size and offset. See [Lining the grid up with the picture](#lining-the-grid-up-with-the-picture).
 - **Lights:** placed on the map, with colour and animation. A light's right-click menu can turn it into **magical darkness**.
 - **Masks:** hide parts of the map from players.
 - **Paint, text and pins:** pins can link to story and records.
@@ -60,6 +60,26 @@ Unlock a map to edit it.
 - **Image layers:** pictures placed on the map, below or above the tokens, ordered, hidden, locked or grouped.
 
 All of it applies to the same master image wherever it is opened. Lock it again to play.
+
+### Lining the grid up with the picture
+
+Most map pictures have their squares printed in them. To make Maelstrom's grid match:
+
+1. Open the map and unlock it (the padlock in the map's tools).
+2. Open the editor's **Grid** tab and pick the draw tool (⌖).
+3. Zoom in on a square printed in the picture.
+4. Drag from one corner of that square to the opposite corner, then let go. The grid takes the square's size and lines up with it; the box shows its size as you drag.
+5. Check **Distance a square** (5 ft by default; a plan that says "one square equals 2 feet" wants 2).
+
+Then, if you like:
+
+- **Tint** sets the grid's colour, and **Alpha** how much it shows (0 to 255). At 0 the lines are invisible, and the grid still places tokens and measures distance.
+- The **eye** hides or shows the grid; hidden, it still snaps and measures.
+- **Square (px)** takes an exact size, and **Adjust position** nudges the grid 1 px a press (Shift: 10 px).
+- **Diagonals** sets how a diagonal measures on this map: every square one, 5-10-5, or a straight line (the raw distance).
+- ↺ puts the map's own grid back.
+
+Map Studio does the same for maps you paint: open **Grid & map size** and drag over one square of the picture.
 
 ## Scene settings
 

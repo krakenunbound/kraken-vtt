@@ -316,6 +316,12 @@ weather with masks, mark traps and regions, generate a dungeon, and play test.
 - The **map editor** (the map window's tools) draws walls, doors and windows,
   sets the grid, places lights, paints, adds text and image layers, and masks
   what players see.
+- **Lining the grid up with a picture's squares:** unlock the map, open the
+  editor's **Grid** tab, pick the draw tool (⌖), zoom in and drag from one
+  corner of a printed square to the opposite corner. Tint and Alpha set its
+  colour and how much it shows (at 0 it is invisible but still places tokens
+  and measures), the eye hides it, Adjust position nudges it, and Distance a
+  square sets its scale.
 - **Share with players** (the map window's share button, as Fantasy Grounds'
   Share) opens the map on every player's screen, even where a player closed
   it.

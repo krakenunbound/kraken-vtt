@@ -19,8 +19,8 @@ window.KrakenGrid = (() => {
     const p = S().project, off = p.gridOffset || {x: 0, y: 0};
     box.innerHTML = `
       <div class="los-title">Line the grid up with the picture</div>
-      <button class="gold grid-set ${setting ? 'on' : ''}" title="Then drag a box over exactly one square of the map picture.">${setting ? 'Now drag over one square…' : 'Set grid from the picture'}</button>
-      <p class="los-help">Zoom in, click this, then drag from one corner of a square in the picture to the opposite corner. Map Studio sets the square size and lines the grid up with it.</p>
+      <button class="gold grid-set ${setting ? 'on' : ''}" title="Then drag a box over exactly one square of the map picture.">${setting ? 'Drawing: drag over one square of the picture' : 'Draw the grid from the picture'}</button>
+      <p class="los-help">Zoom in, then drag from one corner of a square in the picture to the opposite corner. Map Studio sets the square size and lines the grid up with it. Drag again to redo it; the button turns drawing off.</p>
       <div class="grid-fields">
         <label>Square size <span><input type="number" id="gridSize" min="5" max="1000" step="0.1" value="${p.grid}"> px</span></label>
         <label>Offset across <span><input type="number" id="gridOx" step="0.1" value="${off.x || 0}"> px</span></label>
@@ -87,7 +87,6 @@ window.KrakenGrid = (() => {
     const w = Math.abs(b.x - a.x), h = Math.abs(b.y - a.y);
     if (w < 5 || h < 5) { S().draw(); return true; }
     const size = Math.abs(w - h) / Math.max(w, h) < 0.15 ? (w + h) / 2 : Math.max(w, h);
-    setting = false;
     let found = null;
     try { found = detect(size, Math.min(a.x, b.x), Math.min(a.y, b.y)); } catch { found = null; }
     if (found) {
@@ -120,7 +119,7 @@ window.KrakenGrid = (() => {
     ctx.save(); ctx.strokeStyle = '#f0dfab'; ctx.lineWidth = 2 / zoom; ctx.setLineDash([6 / zoom, 4 / zoom]);
     ctx.strokeRect(drag.a.x, drag.a.y, drag.b.x - drag.a.x, drag.b.y - drag.a.y); ctx.restore();
   }
-  function modeChanged(mode) { setting = false; drag = null; if (mode === 'grid') { render(); hint(); } }
+  function modeChanged(mode) { setting = mode === 'grid'; drag = null; if (mode === 'grid') { render(); hint(); } }
   let lastSig = '';
   function refresh() {
     if (!active()) return;

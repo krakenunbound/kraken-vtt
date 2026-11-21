@@ -227,7 +227,7 @@ window.KrakenShell = (() => {
       d.close();
       openDocument(p);
       S.toast(p.wallGridSnap ? 'Map ready. The picture is locked on the "Map picture" layer; unlock it under Layers if you need to move it.'
-        : 'Map ready. The square size was not clear from the picture, so walls go exactly where you click. To use grid snapping, open Grid & map size and use Set grid from the picture.');
+        : 'Map ready. The square size was not clear from the picture, so walls go exactly where you click. To use grid snapping, open Grid & map size and drag over one square of the picture.');
     };
     d.showModal();
   }

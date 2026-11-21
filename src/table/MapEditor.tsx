@@ -10,7 +10,8 @@ import { LIGHT_PRESETS } from "../../shared/map/geometry.mjs";
 // kraken_map_undo).
 
 export type EditTab = "walls" | "lights" | "mask" | "text" | "grid" | "paint" | "fx" | "images";
-export type EditTool = "select" | "line" | "rect" | "poly" | "light" | "cell" | "text" | "number" | "free" | "ellipse" | null;
+export type EditTool = "select" | "line" | "rect" | "poly" | "light" | "cell" | "text" | "number" | "free" | "ellipse" | "grid" | null;
+
 // What the Paint tab draws next.
 export type PaintStyle = { color: string; width: number; alpha: number; fill: string | null; fillAlpha: number; group: string };
 export const LABEL_FONTS = ["Bebas Neue", "Cinzel", "Georgia", "Signika", "Arial", "Courier New"];
@@ -373,83 +374,108 @@ export function MapEditor(props: Props) {
       {tab === "images" ? <ImagesTab {...props} /> : null}
 
       {tab === "grid" ? (
-        <div className="me-box me-grid-tab">
-          <div className="me-row">
-            <label>
-              <input type="checkbox" checked={grid.show} onChange={(event) => setGrid({ show: event.target.checked })} data-grid-show /> Show the grid
-            </label>
-          </div>
-          <label className="me-row">
-            Grid type
-            <select value={grid.type ?? (props.gridScene.type === 0 ? "none" : props.gridScene.type >= 4 ? "hexcol" : props.gridScene.type >= 2 ? "hexrow" : "square")} onChange={(event) => setGrid({ type: event.target.value as "square" })} aria-label="Grid type">
-              <option value="square">▦ Square</option>
-              <option value="hexrow">⬡ Hex rows</option>
-              <option value="hexcol">⬢ Hex columns</option>
-              <option value="none">None (gridless)</option>
-            </select>
-          </label>
-          <div className="me-grid2">
-            <label>
-              Cell size (px)
-              <input type="number" min={10} max={1000} value={grid.size ?? props.gridScene.size} onChange={(event) => setGrid({ size: Number(event.target.value) || null })} aria-label="Grid size" />
-            </label>
-            <label>
-              Tint
-              <input type="color" value={(grid.color ?? props.gridScene.color).slice(0, 7)} onChange={(event) => setGrid({ color: event.target.value })} aria-label="Grid colour" />
-            </label>
-            <label>
-              Opacity
-              <input type="range" min={0} max={1} step={0.05} value={grid.alpha ?? props.gridScene.alpha} onChange={(event) => setGrid({ alpha: Number(event.target.value) })} aria-label="Grid opacity" />
-            </label>
-            <label>
-              Line
-              <select value={grid.style ?? "solid"} onChange={(event) => setGrid({ style: event.target.value })} aria-label="Grid line style">
-                <option value="solid">Solid</option>
-                <option value="dashed">Dashed</option>
-                <option value="dotted">Dotted</option>
-              </select>
-            </label>
-            <label>
-              Distance per cell
-              <input type="number" min={0.1} step={0.5} value={grid.distance ?? props.gridScene.distance} onChange={(event) => setGrid({ distance: Number(event.target.value) || null })} aria-label="Grid distance" />
-            </label>
-            <label>
-              Suffix
-              <input value={grid.units ?? props.gridScene.units} onChange={(event) => setGrid({ units: event.target.value })} aria-label="Grid units" />
-            </label>
-          </div>
-          <div className="me-row me-nudge" aria-label="Adjust position">
-            Adjust position
-            {(
-              [
-                ["←", -1, 0],
-                ["→", 1, 0],
-                ["↑", 0, -1],
-                ["↓", 0, 1],
-              ] as const
-            ).map(([label, dx, dy]) => (
-              <button
-                key={label}
-                type="button"
-                aria-label={`Move the grid ${label}`}
-                title="1 px; Shift: 10 px"
-                data-grid-nudge={label}
-                onClick={(event) => {
-                  const step = event.shiftKey ? 10 : 1;
-                  setGrid({ offsetX: (grid.offsetX ?? props.gridScene.offsetX ?? 0) + dx * step, offsetY: (grid.offsetY ?? props.gridScene.offsetY ?? 0) + dy * step });
-                }}
-              >
-                {label}
-              </button>
-            ))}
-            <span className="hint">
-              {grid.offsetX ?? 0}, {grid.offsetY ?? 0}
-            </span>
-            <button type="button" onClick={() => setGrid({ size: null, offsetX: null, offsetY: null, type: null, distance: null, units: null })} title="Back to the scene's own grid">
-              Reset
+        <>
+          <div className="me-tools">
+            {toolButton("grid", "⌖", "Draw the grid: drag from one corner of a square in the picture to the opposite corner")}
+            <button
+              type="button"
+              className={grid.show ? "me-tool on" : "me-tool"}
+              aria-pressed={grid.show}
+              aria-label={grid.show ? "Hide the grid" : "Show the grid"}
+              title={grid.show ? "Shown: click to hide the grid (it still snaps and measures)" : "Hidden: click to show the grid"}
+              data-grid-show
+              onClick={() => setGrid({ show: !grid.show })}
+            >
+              {grid.show ? "👁" : "◌"}
+            </button>
+            <span className="me-spacer" />
+            <button type="button" className="me-tool" onClick={() => setGrid({ size: null, offsetX: null, offsetY: null, type: null, distance: null, units: null, color: null, alpha: null })} title="Back to the map's own grid" aria-label="Back to the map's own grid" data-grid-reset>
+              ↺
             </button>
           </div>
-        </div>
+          <div className="me-box me-grid-tab">
+            <p className="me-caption">{tool === "grid" ? "Drag from one corner of a square in the picture to the opposite corner. Zoom in first for an exact fit." : "⌖ draws the grid over the squares in the picture."}</p>
+            <label className="me-row">
+              Grid type
+              <select value={grid.type ?? (props.gridScene.type === 0 ? "none" : props.gridScene.type >= 4 ? "hexcol" : props.gridScene.type >= 2 ? "hexrow" : "square")} onChange={(event) => setGrid({ type: event.target.value as "square" })} aria-label="Grid type">
+                <option value="square">▦ Square</option>
+                <option value="hexrow">⬡ Hex rows</option>
+                <option value="hexcol">⬢ Hex columns</option>
+                <option value="none">None (gridless)</option>
+              </select>
+            </label>
+            <div className="me-grid2">
+              <label>
+                Square (px)
+                <input type="number" min={10} max={1000} step={0.1} value={grid.size ?? props.gridScene.size} onChange={(event) => setGrid({ size: Number(event.target.value) || null })} aria-label="Grid size" data-grid-size />
+              </label>
+              <label>
+                Tint
+                <input type="color" value={(grid.color ?? props.gridScene.color).slice(0, 7)} onChange={(event) => setGrid({ color: event.target.value })} aria-label="Grid colour" />
+              </label>
+              <label title="The grid's alpha: 0 hides its lines, and it still snaps tokens and measures">
+                Alpha {Math.round((grid.alpha ?? props.gridScene.alpha) * 255)}
+                <input type="range" min={0} max={255} step={1} value={Math.round((grid.alpha ?? props.gridScene.alpha) * 255)} onChange={(event) => setGrid({ alpha: Number(event.target.value) / 255 })} aria-label="Grid opacity" data-grid-alpha />
+              </label>
+              <label>
+                Line
+                <select value={grid.style ?? "solid"} onChange={(event) => setGrid({ style: event.target.value })} aria-label="Grid line style">
+                  <option value="solid">Solid</option>
+                  <option value="dashed">Dashed</option>
+                  <option value="dotted">Dotted</option>
+                </select>
+              </label>
+              <label>
+                Distance a square
+                <input type="number" min={0.1} step={0.5} value={grid.distance ?? props.gridScene.distance} onChange={(event) => setGrid({ distance: Number(event.target.value) || null })} aria-label="Grid distance" />
+              </label>
+              <label>
+                Suffix
+                <input value={grid.units ?? props.gridScene.units} onChange={(event) => setGrid({ units: event.target.value })} aria-label="Grid units" />
+              </label>
+              <label title="How a diagonal measures on this map: Straight line is the raw distance">
+                Diagonals
+                <select aria-label="Diagonals on this map" data-grid-diagonal value={map.settings.diagonal ?? ""} onChange={(event) => actions.updateSettings({ diagonal: (event.target.value || null) as "1" | null })}>
+                  <option value="">The campaign's</option>
+                  <option value="1">Every square one</option>
+                  <option value="1.5">5-10-5</option>
+                  <option value="raw">Straight line (raw)</option>
+                </select>
+              </label>
+            </div>
+            <div className="me-row me-nudge-pad">
+              <span>Adjust position</span>
+              <div className="me-nudge-cross" role="group" aria-label="Adjust position">
+                {(
+                  [
+                    ["↑", 0, -1, "up"],
+                    ["←", -1, 0, "left"],
+                    ["→", 1, 0, "right"],
+                    ["↓", 0, 1, "down"],
+                  ] as const
+                ).map(([label, dx, dy, where]) => (
+                  <button
+                    key={label}
+                    type="button"
+                    className={`me-nudge-${where}`}
+                    aria-label={`Move the grid ${label}`}
+                    title="1 px; Shift: 10 px"
+                    data-grid-nudge={label}
+                    onClick={(event) => {
+                      const step = event.shiftKey ? 10 : 1;
+                      setGrid({ offsetX: (grid.offsetX ?? props.gridScene.offsetX ?? 0) + dx * step, offsetY: (grid.offsetY ?? props.gridScene.offsetY ?? 0) + dy * step });
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <span className="hint">
+                {grid.offsetX ?? props.gridScene.offsetX ?? 0}, {grid.offsetY ?? props.gridScene.offsetY ?? 0}
+              </span>
+            </div>
+          </div>
+        </>
       ) : null}
     </aside>
   );

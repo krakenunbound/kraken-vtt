@@ -183,6 +183,22 @@ try {
   const drawn = await bound.evaluate(() => window.KrakenStudio.project.walls.at(-1)?.points?.length ?? 0);
   assert(drawn === 6, `the wall goes on after the pan: three points, one wall (${drawn / 2} points)`);
   report.push("Map Studio zooms out past the old 20% stop (Fit map to window brings it back); mid-wall, the arrow keys and the middle button pan the map and the wall goes on");
+  // Grid & map size: a drag over one square sets the grid at once (no button to press first).
+  await bound.click('[data-mode="grid"]');
+  await bound.waitForSelector(".grid-set.on");
+  const gridBefore = await bound.evaluate(() => window.KrakenStudio.project.grid);
+  const zoomNow = await bound.evaluate(() => window.KrakenStudio.getDocument().view.z);
+  const box = Math.round(gridBefore * 1.4 * zoomNow);
+  await page.mouse.move(middle.x - 40, middle.y - 40);
+  await page.mouse.down();
+  await page.mouse.move(middle.x - 40 + box, middle.y - 40 + box, { steps: 6 });
+  await page.mouse.up();
+  const gridAfter = await bound.evaluate(() => window.KrakenStudio.project.grid);
+  assert(Math.abs(gridAfter - gridBefore * 1.4) / (gridBefore * 1.4) < 0.15 || gridAfter !== gridBefore, `the drag sets the grid (${gridBefore} -> ${gridAfter})`);
+  assert(await bound.$(".grid-set.on"), "still drawing, to redo it");
+  await bound.evaluate((size) => { const S = window.KrakenStudio; S.snapshot(); S.project.grid = size; S.project.gridOffset = { x: 0, y: 0 }; S.save(); S.draw(); }, gridBefore);
+  await bound.evaluate(() => window.KrakenStudio.switchMode("los"));
+  report.push(`Grid & map size: a drag over a square sets the grid straight away (${gridBefore} -> ${gridAfter} px)`);
   // Opened from Campaign > Images: once (in a window of its own, where the map window was left), the wall there.
   await page.click('.sidebar [data-launch="imagelist"]');
   await page.click(`[data-image-record="${own.id}"]`);

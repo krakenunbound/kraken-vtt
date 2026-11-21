@@ -33,6 +33,22 @@ export function gridKind(scene) {
 }
 const KIND_TYPE = { none: 0, square: 1, hexrow: 2, hexcol: 4 };
 
+// The grid drawn over one square of the picture (the map editor's Grid draw
+// tool, kraken_scene_settings grid.square): a box from one corner of a square to
+// the opposite corner gives the square's size and where the grid's lines start,
+// from the picture's top-left corner (`picture`, in the same pixels as the box).
+// Squares stay square: a box nearly square averages its sides, else its longer
+// side counts. Null when the box is too small to be a square (under 10 px).
+export function gridFromSquare(a, b, picture = { x: 0, y: 0 }) {
+  const width = Math.abs(b.x - a.x);
+  const height = Math.abs(b.y - a.y);
+  if (!(width >= 10 && height >= 10)) return null;
+  const raw = Math.abs(width - height) / Math.max(width, height) < 0.15 ? (width + height) / 2 : Math.max(width, height);
+  const size = Math.min(1000, Math.round(raw * 10) / 10);
+  const start = (value) => Math.round((((value % size) + size) % size) * 10) / 10;
+  return { size, offsetX: start(Math.min(a.x, b.x) - picture.x), offsetY: start(Math.min(a.y, b.y) - picture.y) };
+}
+
 // The scene with the GM's grid settings over its own (FG's Grid tab: type,
 // cell size, offset, colour, opacity, distance): what the rules and the map use.
 export function withGrid(scene, settings) {

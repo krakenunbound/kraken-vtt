@@ -8,7 +8,7 @@ import { MARKER_SETS, markerShapes } from "../../shared/map/deathMarkers.mjs";
 import { backgroundRect, colorWithAlpha, gridStops, sceneFrame, type BackgroundFit, type SceneFrame } from "../foundry/geometry";
 import { type SceneLight, type SceneMarker, type SceneRegion, type SceneWall } from "../foundry/sceneObjects";
 import { rangeBand } from "../../shared/map/ranges.mjs";
-import { diagonalRule, gridDistance, gridDistance3, gridKind, pathDistance, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
+import { diagonalRule, gridDistance, gridDistance3, gridFromSquare, gridKind, pathDistance, gridOrigin, hexCorners, hexOf, LIGHT_PRESETS, snapCenter, withGrid } from "../../shared/map/geometry.mjs";
 import type { DecalItem, EditWall, MapDoor, MapTemplate, MapTile, MapToken, Ping, Float, Bubble, PictureKind, SceneLightRecord, TableMap, TableRecord, TemplateAsk, WallKind } from "../session/useSession";
 import { useBookWindows } from "../books/Books";
 import { createPortal } from "react-dom";
@@ -475,6 +475,8 @@ function MapViewInner({
   // Several tokens picked at once (Shift+click, or Shift+drag a box): dragged together.
   const [picked, setPicked] = useState<string[]>([]);
   const [box, setBox] = useState<{ pointerId: number; start: Point; at: Point; target?: boolean } | null>(null);
+  // The Grid tab's draw tool: a square dragged over one square of the picture sets the grid's size and where it starts.
+  const [gridDrag, setGridDrag] = useState<{ pointerId: number; start: Point; at: Point } | null>(null);
   // The Area template tool: its shape, and the one being dragged out; where a spell's template is aimed.
   const [tplShape, setTplShape] = useState<MapTemplate["shape"]>("circle");
   const [tplDrag, setTplDrag] = useState<{ pointerId: number; start: Point; at: Point } | null>(null);
@@ -1267,6 +1269,7 @@ function MapViewInner({
     setMeasure(null);
     setPicked([]);
     setBox(null);
+    setGridDrag(null);
   }, [scene.id]);
 
   // The ruler measured now (square centres), shown to everyone on the map as it moves.
@@ -1472,6 +1475,14 @@ function MapViewInner({
           return;
         }
         setPicked([]);
+        if (gm && editorOpen && editTool === "grid" && editTab === "grid") {
+          // Draw the grid: from one corner of a square in the picture to the opposite corner.
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
+          if (!point) return;
+          capture(event.currentTarget, event.pointerId);
+          setGridDrag({ pointerId: event.pointerId, start: point, at: point });
+          return;
+        }
         if (gm && editorOpen && editTool && editTab === "fx" && actions.fx && selectedFx) {
           // The FX layer's mask: the GM paints its areas, as many as wanted:
           // a rectangle (two clicks), a shape (its corners, double-click to
@@ -1625,6 +1636,11 @@ function MapViewInner({
           if (point) setBox({ ...box, at: point });
           return;
         }
+        if (gridDrag && gridDrag.pointerId === event.pointerId) {
+          const point = worldAt(cssX(event.clientX), cssY(event.clientY));
+          if (point) setGridDrag({ ...gridDrag, at: point });
+          return;
+        }
         if (tileDrag.current && tileDrag.current.pointerId === event.pointerId) {
           const point = worldAt(cssX(event.clientX), cssY(event.clientY));
           if (!point) return;
@@ -1721,6 +1737,17 @@ function MapViewInner({
         setCamera((camera) => ({ ...camera, x: camera.x + dx, y: camera.y + dy }));
       }}
       onPointerUp={(event) => {
+        if (gridDrag && gridDrag.pointerId === event.pointerId) {
+          setGridDrag(null);
+          const drawn = gridFromSquare(gridDrag.start, gridDrag.at, { x: frame.padX, y: frame.padY });
+          if (!drawn) {
+            setHint("Drag from one corner of a square in the picture to the opposite corner.");
+            return;
+          }
+          actions.updateSettings({ grid: { size: drawn.size, offsetX: drawn.offsetX, offsetY: drawn.offsetY } });
+          setHint(`Grid set: ${drawn.size} px squares.`);
+          return;
+        }
         if (tplDrag && tplDrag.pointerId === event.pointerId) {
           const shape = draggedShape;
           setTplDrag(null);
@@ -2158,6 +2185,15 @@ function MapViewInner({
                     });
                 })()
               : null}
+            {gridDrag ? (
+              // The square being drawn, and its size.
+              <g className="grid-draw" data-grid-draw>
+                <rect x={Math.min(gridDrag.start.x, gridDrag.at.x)} y={Math.min(gridDrag.start.y, gridDrag.at.y)} width={Math.abs(gridDrag.at.x - gridDrag.start.x)} height={Math.abs(gridDrag.at.y - gridDrag.start.y)} fill="rgba(255, 210, 120, 0.15)" stroke="#ffb02e" strokeWidth={2 / camera.scale} strokeDasharray={`${6 / camera.scale} ${4 / camera.scale}`} />
+                <text x={Math.max(gridDrag.start.x, gridDrag.at.x) + 6 / camera.scale} y={Math.min(gridDrag.start.y, gridDrag.at.y) + 14 / camera.scale} fontSize={14 / camera.scale} fill="#ffb02e" stroke="#000" strokeWidth={3 / camera.scale} paintOrder="stroke">
+                  {Math.round(Math.abs(gridDrag.at.x - gridDrag.start.x))} × {Math.round(Math.abs(gridDrag.at.y - gridDrag.start.y))}
+                </text>
+              </g>
+            ) : null}
             {editTab === "walls" && hover && (editTool === "line" || editTool === "rect" || editTool === "poly") ? (
               // Where the next point goes, before it is placed.
               <g className="wall-aim" data-aim={`${hover.x},${hover.y}`}>

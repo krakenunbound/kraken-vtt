@@ -1512,7 +1512,7 @@ const TOOLS = [
   {
     name: "kraken_scene_settings",
     description:
-      "The scene's map settings: darkness (0 day .. 1 pitch black; from 0.5 players see only lit places and their darkvision; null returns to the adventure's own), the grid (the map editor's Grid tab: show, alpha, color, type square/hexrow/hexcol/none, size in pixels, offsetX and offsetY in pixels, distance per square and units, style solid/dashed/dotted, thickness; null for a field goes back to the scene's own), and weather (type: none, rain, storm, snow, blizzard, fog, clouds, sandstorm, embers, ash, leaves, water; intensity 0..1; direction in degrees the wind blows toward), and diagonal: how a diagonal square counts when measuring on this scene (1, 1.5 the 5-10-5 count, raw a straight line; null: the campaign's, kraken_table_options diagonal). Call with nothing to read them.",
+      "The scene's map settings: darkness (0 day .. 1 pitch black; from 0.5 players see only lit places and their darkvision; null returns to the adventure's own), the grid (the map editor's Grid tab: show, alpha, color, type square/hexrow/hexcol/none, size in pixels, offsetX and offsetY in pixels, square: {x1, y1, x2, y2} a box from one corner of a square drawn in the picture to the opposite corner, in the picture's pixels from its top-left (the Grid tab's draw tool: it sets size, offsetX and offsetY), distance per square and units, style solid/dashed/dotted, thickness; null for a field goes back to the scene's own), and weather (type: none, rain, storm, snow, blizzard, fog, clouds, sandstorm, embers, ash, leaves, water; intensity 0..1; direction in degrees the wind blows toward), and diagonal: how a diagonal square counts when measuring on this scene (1, 1.5 the 5-10-5 count, raw a straight line; null: the campaign's, kraken_table_options diagonal). Call with nothing to read them.",
     inputSchema: object({
       darkness: { type: ["number", "null"] },
       grid: {
@@ -1525,6 +1525,7 @@ const TOOLS = [
           size: { type: ["number", "null"] },
           offsetX: { type: ["number", "null"] },
           offsetY: { type: ["number", "null"] },
+          square: { type: "object", properties: { x1: { type: "number" }, y1: { type: "number" }, x2: { type: "number" }, y2: { type: "number" } }, required: ["x1", "y1", "x2", "y2"], additionalProperties: false },
           distance: { type: ["number", "null"] },
           units: { type: ["string", "null"] },
           style: { type: "string", enum: ["solid", "dashed", "dotted"] },
@@ -1537,6 +1538,12 @@ const TOOLS = [
     }),
     run(args, ctx) {
       const { map, seat } = needTable(ctx);
+      if (args.grid?.square) {
+        const { square, ...grid } = args.grid;
+        const drawn = require("../../shared/map/geometry.mjs").gridFromSquare({ x: square.x1, y: square.y1 }, { x: square.x2, y: square.y2 });
+        if (!drawn) throw new Error("grid.square: the box must be at least 10 pixels each way");
+        args = { ...args, grid: { ...grid, ...drawn } };
+      }
       const settings = Object.keys(args).length > 0 ? map.updateSettings(args, seat) : map.settings();
       return out({ ...settings, darknessNow: map.darkness(), lightProfiles: map.lightProfiles().map((row) => ({ name: row.name, radius: row.radius })) });
     },

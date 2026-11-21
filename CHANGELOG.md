@@ -8,6 +8,9 @@ full log of the work is in [PLAN.md](PLAN.md).
 
 Collected here until the next major release.
 
+- **Draw the grid over a map's printed squares:** unlock a map, open the editor's Grid tab, pick the draw tool (⌖), and drag from one corner of a square in the picture to the opposite corner: the grid takes that square's size and lines up with it, shown as you drag. The Grid tab is laid out anew: an eye to hide or show the grid, Tint and Alpha (0 to 255; at 0 the grid is invisible and still places tokens and measures), the square's size, Distance a square and its suffix, a cross of arrows to nudge it, and Diagonals for this map (a straight line is the raw distance). The agent's `kraken_scene_settings` grid.square does the same from a box.
+- **Map Studio's Grid & map size:** a drag over one square sets the grid at once (the button no longer has to be pressed first), and a second drag redoes it.
+
 ## 0.1.0-beta.1: The beta
 
 Maelstrom VTT leaves alpha. This release is a full audit of the table (93 problems found and fixed, from backups and saving to what players can see, combat rules and Map Studio), a library you can find your way around (Modules as icons, then covers by series), a Folders button that adds new material while players stay connected, and a documented book format (.kpack) that people and AI agents can convert books into.
